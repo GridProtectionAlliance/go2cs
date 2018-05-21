@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DCB4FA2F-9CA3-4535-B9AE-082D076DFB97}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>go2cs</RootNamespace>
+    <AssemblyName>go2cs</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;DOTNETCORE;NET35PLUS;NET40PLUS;NET45PLUS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>7.2</LangVersion>
+    <Prefer32Bit>false</Prefer32Bit>
+    <NoWarn>CS1591;CS1574;CS1580;CS0436</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;DOTNETCORE;NET35PLUS;NET40PLUS;NET45PLUS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>7.2</LangVersion>
+    <NoWarn>CS1591;CS1574;CS1580;CS0436</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Arguments.cs" />
+    <Compile Include="Common.cs" />
+    <Compile Include="Options.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Converter.cs" />
+    <Compile Include="Converter_Comments.cs" />
+    <Compile Include="Converter_ConstDecl.cs" />
+    <Compile Include="Converter_Declaration.cs" />
+    <Compile Include="Converter_ErrorHandler.cs" />
+    <Compile Include="Converter_Expression.cs" />
+    <Compile Include="Converter_ExpressionList.cs" />
+    <Compile Include="Converter_FunctionDecl.cs" />
+    <Compile Include="Converter_GoStmt.cs" />
+    <Compile Include="Converter_IdentifierList.cs" />
+    <Compile Include="Converter_ImportDecl.cs" />
+    <Compile Include="Converter_MethodDecl.cs" />
+    <Compile Include="Converter_PackageClause.cs" />
+    <Compile Include="Converter_Parameters.cs" />
+    <Compile Include="Converter_Signature.cs" />
+    <Compile Include="Converter_StringLiteral.cs" />
+    <Compile Include="Converter_TopLevelDecl.cs" />
+    <Compile Include="Converter_Type.cs" />
+    <Compile Include="Parser\GolangBaseListener.cs" />
+    <Compile Include="Parser\GolangLexer.cs" />
+    <Compile Include="Parser\GolangListener.cs" />
+    <Compile Include="Parser\GolangParser.cs" />
+    <Compile Include="ParseTreeValues.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Templates\MainProjectSharedFileItemTemplate.txt" />
+    <None Include="App.config" />
+    <None Include="Parser\CompileGrammar.bat" />
+    <None Include="Parser\Golang.g4" />
+    <Content Include="Parser\ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\goutil\BuiltInFunctions.cs">
+      <Link>goutil\BuiltInFunctions.cs</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\GoFunc.cs">
+      <Link>goutil\GoFunc.cs</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\NilType.cs">
+      <Link>goutil\NilType.cs</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\PanicException.cs">
+      <Link>goutil\PanicException.cs</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\Slice.cs">
+      <Link>goutil\Slice.cs</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\TypeExtensions.cs">
+      <Link>goutil\TypeExtensions.cs</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Templates\MainProjectPrimaryFileItemTemplate.txt" />
+    <EmbeddedResource Include="Templates\MainProjectTemplate.txt" />
+    <EmbeddedResource Include="Templates\SharedProjectFileItemTemplate.txt" />
+    <EmbeddedResource Include="Templates\SharedProjectFileItemsTemplate.txt" />
+    <EmbeddedResource Include="Templates\SharedProjectFileTemplate.txt" />
+    <EmbeddedResource Include="Templates\InterfaceActionDeclTemplate.txt" />
+    <EmbeddedResource Include="Templates\InterfaceActionInitTemplate.txt" />
+    <EmbeddedResource Include="Templates\InterfaceFuncDeclTemplate.txt" />
+    <EmbeddedResource Include="Templates\InterfaceFuncInitTemplate.txt" />
+    <EmbeddedResource Include="Templates\InterfaceTypeTemplate.txt" />
+  </ItemGroup>
+  <Import Project="..\Utilities\CommandLine\CommandLine.projitems" Label="Shared" />
+  <Import Project="..\Utilities\Antlr4.Runtime\Antlr4.Runtime.projitems" Label="Shared" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

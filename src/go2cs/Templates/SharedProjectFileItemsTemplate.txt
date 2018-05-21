@@ -1,0 +1,22 @@
+﻿This template creates a <PackageName>.projitems file (as referenced by the <PackageName>.shproj)
+{0} = Unique Project File Guid (as specified in SharedProjectFileTemplate.txt)
+{1} = Root Namespace (as converted from import path)
+{2} = Shared Package Files (see SharedProjectFileItemTemplate.txt)
+>>START
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>{0}</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>{1}</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+{2}
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" />
+  </ItemGroup>
+</Project>

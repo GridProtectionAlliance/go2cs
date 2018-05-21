@@ -1,0 +1,31 @@
+=========================================================================================================
+==                                NOTICE file for the go2cs distribution                               ==
+=========================================================================================================
+
+go2cs (https://github.com/GridProtectionAlliance/go2cs)
+Copyright © 2018, Grid Protection Alliance, Inc.
+
+This product includes software developed at the Grid Protection Alliance, Inc.
+(http://www.gridprotectionalliance.org/)
+
+=========================================================================================================
+
+Portions of this software implemented using source code that was licensed using the
+BSD 3-clause license: https://opensource.org/licenses/BSD-3-Clause. This includes, but may
+not be limited to, the following:
+
+* ANTLR Project (https://github.com/antlr/antlr4):
+        Copyright (c) 2012-2017 The ANTLR Project. All rights reserved.
+
+* Golang.g4 ANTLR Grammar (https://github.com/antlr/grammars-v4/tree/master/golang):
+        Copyright (c) 2017 Sasa Coh, Michał Błotniak
+        All rights reserved.
+
+=========================================================================================================
+
+Portions of this software implemented using source code that was licensed using the
+MIT License: https://opensource.org/licenses/mit-license.php. This includes, but may not
+be limited to, the following:
+
+* C# Command Line Parser Project (https://github.com/commandlineparser/commandline):
+        Copyright (c) 2005 - 2015 Giacomo Stelluti Scala & Contributors

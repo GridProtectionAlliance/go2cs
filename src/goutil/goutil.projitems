@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>948613fc-fd76-4c34-97af-5cc7f5697952</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>goutil</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BuiltInFunctions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GoFunc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NilType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PanicException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Slice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TypeExtensions.cs" />
+  </ItemGroup>
+</Project>

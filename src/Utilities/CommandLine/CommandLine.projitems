@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>a058f6ab-a3a4-423c-922f-b7ec7816fe3e</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>CommandLine</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BaseAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\ArgumentsExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\InstanceBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\InstanceChooser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\KeyValuePairHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\NameExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\NameLookup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\OptionMapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\OptionSpecification.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\PreprocessorGuards.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\ReflectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Scalar.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Sequence.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Specification.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\SpecificationExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\SpecificationGuards.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\SpecificationProperty.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\SpecificationPropertyExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\SpecificationPropertyRules.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Switch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Token.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Tokenizer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\TokenPartitioner.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\TypeConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\TypeDescriptor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\TypeLookup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\ValueMapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\ValueSpecification.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\Verb.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EnumerableExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Error.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ErrorExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ErrorHandling.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\EnumerableExtensions`1.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\ExceptionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\PopsicleSetter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\ReferenceEqualityComparer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\ReflectionHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\ResultExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\StringBuilderExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\StringExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Maybe.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NameInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NullInstance.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OptionAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ParserExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ParserResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ParserResultExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ParserSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\AssemblyLicenseAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\AssemblyUsageAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\CopyrightInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\Example.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\HeadingInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\HelpText.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\MultiLineTextAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\SentenceBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\UsageAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UnParserExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ValueAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VerbAttribute.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)License.md" />
+  </ItemGroup>
+</Project>

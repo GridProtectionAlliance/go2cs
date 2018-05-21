@@ -1,0 +1,254 @@
+﻿//******************************************************************************************************
+//  BuiltInFunctions.cs - Gbtc
+//
+//  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
+//
+//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+//  file except in compliance with the License. You may obtain a copy of the License at:
+//
+//      http://opensource.org/licenses/MIT
+//
+//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+//  License for the specific language governing permissions and limitations.
+//
+//  Code Modification History:
+//  ----------------------------------------------------------------------------------------------------
+//  05/05/2018 - J. Ritchie Carroll
+//       Generated original version of source code.
+//
+//******************************************************************************************************
+
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Text;
+using static System.Math;
+
+namespace goutil
+{
+    public static class BuiltInFunctions
+    {
+        /// <summary>
+        /// Predeclared identifier representing the untyped integer ordinal number of the current
+        /// const specification in a (usually parenthesized) const declaration.
+        /// It is zero-indexed.
+        /// </summary>
+        public const int iota = 0;
+
+        /// <summary>
+        /// nil is a predeclared identifier representing the zero value for a pointer, channel,
+        /// func, interface, map, or slice type.
+        /// </summary>
+        public static readonly NilType nil = NilType.Default;
+
+        /// <summary>
+        /// Appends elements to the end of a slice. If it has sufficient capacity, the destination is
+        /// resliced to accommodate the new elements. If it does not, a new underlying array will be
+        /// allocated.
+        /// </summary>
+        /// <param name="slice">Destination slice.</param>
+        /// <param name="elems">Elements to append.</param>
+        /// <returns>New slice with specified values appended.</returns>
+        /// <remarks>
+        /// Append returns the updated slice. It is therefore necessary to store the result of append,
+        /// often in the variable holding the slice itself:
+        /// <code>
+        /// slice = append(slice, elem1, elem2)
+        /// slice = append(slice, anotherSlice...)
+        /// </code>
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Slice<T> append<T>(Slice<T> slice, params object[] elems) => Slice<T>.Append(slice, elems);
+
+        /// <summary>
+        /// Gets the length of the <paramref name="array"/> (same as <see cref="len{T}(T[])"/>).
+        /// </summary>
+        /// <param name="array">Target array.</param>
+        /// <returns>The length of the <paramref name="array"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int cap<T>(T[] array) => array?.Length ?? 0;
+
+        /// <summary>
+        /// Gets the maximum length the <paramref name="slice"/> can reach when resliced.
+        /// </summary>
+        /// <param name="slice">Target slice.</param>
+        /// <returns>The capacity of the <paramref name="slice"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int cap<T>(Slice<T> slice) => slice.Capacity;
+
+        //public static void close<T>(Channel<T> c) = c.Close();
+
+        /// <summary>
+        /// Constructs a complex value from two floating-point values.
+        /// </summary>
+        /// <param name="realPart">Real-part of complex value.</param>
+        /// <param name="imaginaryPart">Imaginary-part of complex value.</param>
+        /// <returns>New complex value from specified <paramref name="realPart"/> and <paramref name="imaginaryPart"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Complex complex(double realPart, double imaginaryPart) => new Complex(realPart, imaginaryPart);
+
+        /// <summary>
+        /// Copies elements from a source slice into a destination slice.
+        /// The source and destination may overlap.
+        /// </summary>
+        /// <param name="dst">Destination slice.</param>
+        /// <param name="src">Source slice.</param>
+        /// <returns>
+        /// The number of elements copied, which will be the minimum of len(src) and len(dst).
+        /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int copy<T1, T2>(Slice<T1> dst, Slice<T2> src)
+        {
+            if (dst.Array == null)
+                throw new InvalidOperationException("Destination slice array reference is null.");
+
+            if (src.Array == null)
+                throw new InvalidOperationException("Source slice array reference is null.");
+
+            int min = Min(dst.Length, src.Length);
+
+            if (min > 0)
+                Array.Copy(src.Array, dst.Array, min);
+
+            return min;
+        }
+
+        /// <summary>
+        /// Copies elements from a source slice into a destination slice.
+        /// The source and destination may overlap.
+        /// </summary>
+        /// <param name="dst">Destination slice.</param>
+        /// <param name="src">Source slice.</param>
+        /// <returns>
+        /// The number of elements copied, which will be the minimum of len(src) and len(dst).
+        /// </returns>
+        /// <remarks>
+        /// As a special case, it also will copy bytes from a string to a slice of bytes.
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int copy(Slice<byte> dst, string src)
+        {
+            Slice<byte> bytes = new Slice<byte>(Encoding.UTF8.GetBytes(src));
+            return copy(dst, bytes);
+        }
+
+        //public static void delete<TKey, TValue>(Map<TKey, TValue> m, TKey key) => m.Delete(key);
+
+        /// <summary>
+        /// Executes a Go function with no return value.
+        /// </summary>
+        /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static void func(Action<Action<Action> /*defer*/, Action<object> /*panic*/, Func<object> /*recover*/> action) => new GoFunc<object>(action).Execute();
+
+        /// <summary>
+        /// Executes a Go function with a return value.
+        /// </summary>
+        /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static T func<T>(Func<Action<Action> /*defer*/, Action<object> /*panic*/, Func<object> /*recover*/, T /*result*/> function) => new GoFunc<T>(function).Execute();
+
+        /// <summary>
+        /// Gets the imaginary part of the complex number <paramref name="c"/>.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns>Imaginary part of the complex number <paramref name="c"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double imag(Complex c) => c.Imaginary;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int len<T>(T[] array) => array?.Length ?? 0;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="slice"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int len<T>(Slice<T> slice) => slice?.Length ?? 0;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int len(string s) => s?.Length ?? 0;
+
+        //public static int len<T>(Map<T> map) => map?.Length ?? 0;
+
+        //public static int len<T>(Channel<T> channel) => channel?.Length ?? 0;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="_"></param>
+        /// <param name="length"></param>
+        /// <param name="capacity"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Slice<T> make<T>(Slice<T> _, int length, int capacity = -1) => new Slice<T>(length, capacity);
+
+        //public static Map<TKey, TValue> make<TKey, TValue>(Map<TKey, TValue> _, int initialCapacity = -1) => new Map<TKey, TValue>(initialCapacity);
+
+        //public static Channel<T> make<T>(Channel<T> _, capacity = 0) => new Channel<T>(capacity);
+
+        /// <summary>
+        /// Creates a new type instance.
+        /// </summary>
+        /// <returns>Reference to newly allocated zero value of provided type.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T @new<T>() where T: new() => new T();
+
+        /// <summary>
+        /// Formats arguments in an implementation-specific way and writes the result to standard-error.
+        /// </summary>
+        /// <param name="args">Arguments to display.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void print(params object[] args) => Console.Error.Write(string.Join(" ", args.Select(arg => arg.ToString())));
+
+        /// <summary>
+        /// Formats arguments in an implementation-specific way and writes the result to standard-error along with a new line.
+        /// </summary>
+        /// <param name="args">Arguments to display.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void println(params object[] args) => Console.Error.WriteLine(string.Join(" ", args.Select(arg => arg.ToString())));
+
+        // ** Helper Functions **
+
+        /// <summary>
+        /// Converts imaginary literal value to a <see cref="Complex"/> imaginary number.
+        /// </summary>
+        /// <param name="literal">Literal imaginary value with "i" suffix.</param>
+        /// <returns>New complex number with parsed <paramref name="literal"/> as imaginary part and a zero value real part.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Complex i(string literal)
+        {
+            if (!literal.EndsWith("i"))
+                throw new InvalidCastException($"Token \"{literal}\" is not an imaginary literal.");
+
+            if (double.TryParse(literal.Substring(0, literal.Length - 1), out double imaginary))
+                return i(imaginary);
+
+            throw new InvalidCastException($"Could not parse \"{literal}\" as an imaginary value.");
+        }
+
+        /// <summary>
+        /// Converts value to a <see cref="Complex"/> imaginary number.
+        /// </summary>
+        /// <param name="imaginary">Value to convert to imaginary.</param>
+        /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Complex i(double imaginary) => new Complex(0.0D, imaginary);
+    }
+}

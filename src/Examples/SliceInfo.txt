@@ -1,0 +1,17 @@
+public int Low => m_low;
+public int High => m_length + m_low;
+public int Length => m_length;
+public int Capacity => (m_array?.Length ?? 0) - m_low;
+
+A B C D E F G  [Low = 1, High = 3]
+0 1 2 3 4 5 6  [Array Length = 7]
+  ^   ^        [Capacity = 6]
+  Low High     [Length = 2]
+  
+             0 1 2 3 4 5
+len=6 cap=6 [2 3 5 7 1 1]  slice  (low = 0, high = 7)           A = 0
+len=0 cap=6 []            reslice (low = 0, high = 0) s = s[:0] A = 6
+len=4 cap=6 [2 3 5 7]     reslice (low = 0, high = 4) s = s[:4] A = 2 (Cap - Hi)
+len=2 cap=4     [5 7]     reslize (low = 2, high = 4) s = s[2:] A = 2
+                 ^   ^
+                 Lo  Hi
