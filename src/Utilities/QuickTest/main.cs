@@ -68,10 +68,10 @@ public static unsafe partial class main_package
         public fixed byte intbuf[68];
     }
 
-    private static void clearFlags(ref this fmt f)
+    private static void clearFlags(ref this fmt _this) => func(ref _this, (ref fmt f, Defer defer, Panic panic, Recover recover) =>
     {
         f.fmtFlags = new fmtFlags();
-    }
+    });
 
     private static string Error(this MyError myError)
     {

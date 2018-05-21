@@ -138,21 +138,6 @@ namespace goutil
         }
 
         //public static void delete<TKey, TValue>(Map<TKey, TValue> m, TKey key) => m.Delete(key);
-
-        /// <summary>
-        /// Executes a Go function with no return value.
-        /// </summary>
-        /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static void func(Action<Action<Action> /*defer*/, Action<object> /*panic*/, Func<object> /*recover*/> action) => new GoFunc<object>(action).Execute();
-
-        /// <summary>
-        /// Executes a Go function with a return value.
-        /// </summary>
-        /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static T func<T>(Func<Action<Action> /*defer*/, Action<object> /*panic*/, Func<object> /*recover*/, T /*result*/> function) => new GoFunc<T>(function).Execute();
-
         /// <summary>
         /// Gets the imaginary part of the complex number <paramref name="c"/>.
         /// </summary>
@@ -250,5 +235,75 @@ namespace goutil
         /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Complex i(double imaginary) => new Complex(0.0D, imaginary);
+
+        // ** Go Function Context Handlers **/
+
+        /// <summary>
+        /// Executes a Go function with no return value.
+        /// </summary>
+        /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static void func(GoFunc<object>.GoAction action) => new GoFunc<object>(action).Execute();
+
+        /// <summary>
+        /// Executes a Go function with 1 reference parameter and no return value.
+        /// </summary>
+        /// <param name="ref1">Reference parameter 1.</param>
+        /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static void func<TRef1>(ref TRef1 ref1, GoFunc<TRef1, object>.RefActionSignature action) => new GoFunc<TRef1, object>(action).Execute(ref ref1);
+
+        /// <summary>
+        /// Executes a Go function with 2 reference parameters and no return value.
+        /// </summary>
+        /// <param name="ref1">Reference parameter 1.</param>
+        /// <param name="ref2">Reference parameter 2.</param>
+        /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static void func<TRef1, TRef2>(ref TRef1 ref1, ref TRef2 ref2, GoFunc<TRef1, TRef2, object>.RefActionSignature action) => new GoFunc<TRef1, TRef2, object>(action).Execute(ref ref1, ref ref2);
+
+        /// <summary>
+        /// Executes a Go function with 3 reference parameters and no return value.
+        /// </summary>
+        /// <param name="ref1">Reference parameter 1.</param>
+        /// <param name="ref2">Reference parameter 2.</param>
+        /// <param name="ref3">Reference parameter 3.</param>
+        /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static void func<TRef1, TRef2, TRef3>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, GoFunc<TRef1, TRef2, TRef3, object>.RefActionSignature action) => new GoFunc<TRef1, TRef2, TRef3, object>(action).Execute(ref ref1, ref ref2, ref ref3);
+
+        /// <summary>
+        /// Executes a Go function with a return value.
+        /// </summary>
+        /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static T func<T>(GoFunc<T>.GoFunction function) => new GoFunc<T>(function).Execute();
+
+        /// <summary>
+        /// Executes a Go function with 1 reference parameter and a return value.
+        /// </summary>
+        /// <param name="ref1">Reference parameter 1.</param>
+        /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static T func<TRef1, T>(ref TRef1 ref1, GoFunc<TRef1, T>.RefFuncSignature function) => new GoFunc<TRef1, T>(function).Execute(ref ref1);
+
+        /// <summary>
+        /// Executes a Go function with 2 reference parameters and a return value.
+        /// </summary>
+        /// <param name="ref1">Reference parameter 1.</param>
+        /// <param name="ref2">Reference parameter 2.</param>
+        /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static T func<TRef1, TRef2, T>(ref TRef1 ref1, ref TRef2 ref2, GoFunc<TRef1, TRef2, T>.RefFuncSignature function) => new GoFunc<TRef1, TRef2, T>(function).Execute(ref ref1, ref ref2);
+
+        /// <summary>
+        /// Executes a Go function with 3 reference parameters and a return value.
+        /// </summary>
+        /// <param name="ref1">Reference parameter 1.</param>
+        /// <param name="ref2">Reference parameter 2.</param>
+        /// <param name="ref3">Reference parameter 3.</param>
+        /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static T func<TRef1, TRef2, TRef3, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, GoFunc<TRef1, TRef2, TRef3, T>.RefFuncSignature function) => new GoFunc<TRef1, TRef2, TRef3, T>(function).Execute(ref ref1, ref ref2, ref ref3);
     }
 }

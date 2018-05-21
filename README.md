@@ -1,36 +1,33 @@
 ![go2cs](docs/images/go2cs-small.png)
-# Golang to C# Converter (`go2cs`)
+# Golang to C# Converter
 
 Converts source code developed using the Go programming language (see [Go Language Specification](https://golang.org/ref/spec)) to the C# programming language (see [C# Language Specification](https://github.com/dotnet/csharplang/blob/master/spec/README.md)).
 
-### _Help Wanted!_ This is a work-in-progress -- see [project status](#project-status)
-
-* [Installation](#installation)
-  * [Prerequisites](#prerequisites)
-* [Usage](#usage)
-* [Conversion Strategies](#conversion-strategies)
+#### _Help Wanted!_ This is a work-in-progress -- see [project status](#project-status)
 
 ## Why?
 
-Yeah, I'm pretty sure that for many of you this was the first question you asked when you discovered this project. Avoiding the cliché response of "[because I could](https://www.youtube.com/watch?v=mRNX6XJOeGU)", the real answer is more innocuous. I've been programming in C# for years and wanted to be able to use some of the cool Go developed tech from within my C# applications -- I also figured I might learn something about building apps in Go in the process. Hopefully for those of you that code in Go all the time and have an occasion where you need to build a C# app, this conversion tool will provide you with a head start. You can pull in some of your existing code and even use the Go Standard Library functions that you are used to.
+I'm pretty sure for many this was the first question asked when this project was discovered. Avoiding the cliché response of "[because I could](https://www.youtube.com/watch?v=mRNX6XJOeGU)", the real answer is more innocuous. I've been programming in C# for many years, even so, I try to keep an eye on new / cool tech being developed, regardless of language -- a common choice for new applications these days is Go. Often the easiest way for me to experiment with new technology is to integrate it with some of my existing C# code, hence the desire for this project. Besides, I figured I might learn something about building apps in Go in the process.
+
+Hopefully for those of you that code in Go all the time and have an occasion where you need to build a C# app, this conversion tool will provide you with a head start. You can pull in some of your existing code and even use the Go Standard Library functions that you are used to.
 
 ### Elephant in the room
 
 TL;DR: Do not expect converted C# code to run as fast as the original Go code.
 
-The .NET runtime environment is very different from Go -- a compiled .NET application actually consists of human-readable byte-code called [Common Intermediate Language](https://en.wikipedia.org/wiki/Common_Intermediate_Language) (CIL). At runtime the CIL code is compiled to native machine code using a [just-in-time compilation](https://en.wikipedia.org/wiki/Just-in-time_compilation) process. Compared to Go, which is compiled directly to native machine code, .NET incurs some compile based processing delays at startup. However, you can remove the just-in-time start delays for a .NET application by pre-compiling the application to native machine code using the [Native Image Generation](https://docs.microsoft.com/en-us/dotnet/framework/tools/ngen-exe-native-image-generator) tool in .NET (`ngen.exe`).
+The .NET runtime environment is very different from Go -- a compiled .NET application actually consists of human-readable byte-code called [Common Intermediate Language](https://en.wikipedia.org/wiki/Common_Intermediate_Language) (CIL). At runtime the CIL code is compiled to native machine code using a [just-in-time compilation](https://en.wikipedia.org/wiki/Just-in-time_compilation) process. Compared to Go, which is compiled directly to native machine code, .NET incurs some compile based processing delays at startup. However, you can remove the just-in-time compilation startup delays for a .NET application by pre-compiling the application to native machine code using the [Native Image Generation](https://docs.microsoft.com/en-us/dotnet/framework/tools/ngen-exe-native-image-generator) tool in .NET (`ngen.exe`).
 
-The philosophy taken for converted code was to produce code that was very visually similar to the original Go code as well as being as behaviorally close as possible to Go at a purely code level -- more bluntly, the focus was to make converted code more usable and understandable to a Go programmer inside of a C# environment without being hyper-focused on optimizations. That doesn't mean your code is going to be super slow, as it should run as fast as any other comparable .NET application. However, because of the simplicity of [Go's design philosophy](https://talks.golang.org/2012/splash.slide), your code may have a natural performance advantage over more traditionally developed C# applications just because of its static design.
+For this project, the philosophy taken for converted code is to produce code that is very visually similar to the original Go code as well as being as behaviorally close as possible to Go at a purely "source code" level. The focus is to make converted code more usable and understandable to a Go programmer inside of a C# environment without being hyper-focused on optimizations. That doesn't mean your converted code is going to be super slow -- it should run as fast as any other comparable .NET application. However, because of the simplicity of [Go's design](https://talks.golang.org/2012/splash.slide), converted code may have a natural performance advantage over more traditionally developed C# applications just because of its static design.
 
-If you want to use native compiled Go code directly within your .NET application, you can try [exporting Go functions](https://golang.org/cmd/cgo/#hdr-C_references_to_Go) as C code, including the C code exports in a DLL and then [importing the functions](https://msdn.microsoft.com/en-us/library/system.runtime.interopservices.dllimportattribute%28v=vs.110%29.aspx) in your C# code.
+If you are looking for a more _binary_ integration, you might consider using native compiled Go code directly within your .NET application. One option would be would be [exporting Go functions](https://golang.org/cmd/cgo/#hdr-C_references_to_Go) as C code, including the C code exports in a DLL and then [importing the functions](https://msdn.microsoft.com/en-us/library/system.runtime.interopservices.dllimportattribute%28v=vs.110%29.aspx) in C#.
 
 ### I was looking for C# to Go?
 
-If you are looking to "go" in the other direction, a full code based conversion from C# to Go would be a herculean task with so many "restrictions" that it might not be possible and/or worth the effort. However, with Go you have other options.
+If you are looking to "go" in the other direction, a full _code based_ conversion from C# to Go is currently not an option. Even for the most simple projects this would end up being a herculean task with so many restrictions that it would likely not be worth the effort. However, for using compiled .NET code from within your Go applications you have options.
 
 For newer [.NET Core](https://docs.microsoft.com/en-us/dotnet/core/) applications, I would suggest trying the following project from Matias Insaurralde: https://github.com/matiasinsaurralde/go-dotnet -- this codes uses the [CLR Hosting API](https://blogs.msdn.microsoft.com/msdnforum/2010/07/09/use-clr4-hosting-api-to-invoke-net-assembly-from-native-c/) which allows you to directly use .NET based functions from within your Go applications.
 
-For traditional .NET applications, a similar option would be to use [cgo](https://golang.org/cmd/cgo/) to fully self-host [Mono](https://www.mono-project.com/) in your Go application: http://www.mono-project.com/docs/advanced/embedding/.
+For traditional .NET applications, a similar option would be to use [cgo](https://golang.org/cmd/cgo/) to fully self-host [Mono](https://www.mono-project.com/) in your Go application, see: http://www.mono-project.com/docs/advanced/embedding/.
 
 ## Project Status
 
@@ -40,28 +37,30 @@ Work is currently moving through all the basic code conversions using the ANTLR 
 
 A "big" upcoming task will be to get the Go Standard Library operational by filling in behind code that normally compiles with [Go's Assembler](https://golang.org/doc/asm) (all those platform specific `.s` files) with equivalent .NET implementations. Please note that the strategy is to keep the code managed if at all possible, this way there are no external dependencies introduced, see [conversion strategies](#conversion-strategies) for more information.
 
-Ideally as releases are made for an updated `go2cs` executable, this can also include an update to the converted Go Standard Library for download so that users don't have to spend time converting this themselves.
+The other item that is needed is a unit testing infrastructure. It is desired to be able to create Go based behavioral tests then convert the tests to C# - this way the Go code can be ran along with the C# code to validate that the results are the same.
+
+Ideally as releases are made for an updated `go2cs` executable, this can also include an update to a pre-converted Go Standard Library for download so that users don't have to spend time converting this themselves.
 
 ## Installation
 
 1. Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. The only dependency is .NET (see [prerequisites](#prerequisites) below).
 
-2. Extract the pre-converted C# Go Standard Library source code into the desired target path, by default `%GOPATH\src\go2cs\`
+2. Optionally extract the pre-converted C# Go Standard Library source code into the desired target path, by default `%GOPATH\src\go2cs\`
 
 ### Prerequisites
 
-The `go2cs` program is a command line tool that requires .NET 4.7.1. You will need to make sure that .NET 4.7.1 or comparable version of [Mono](https://www.mono-project.com/) is already installed before executing application.
+The `go2cs` program is a command line utility that requires .NET 4.7.1. You will need to make sure that .NET 4.7.1 or comparable version of [Mono](https://www.mono-project.com/) is already installed before executing the conversion utility.
 
 * For Windows, use the [.NET 4.7.1](https://www.microsoft.com/en-us/download/confirmation.aspx?id=56115) installer
 * For other platforms, install the [latest version of Mono](https://www.mono-project.com/download/stable/#download-lin-ubuntu)
 
-Converted code will also target .NET 4.7.1 and compile using C# 7.2. [Visual Studio 2017](https://www.visualstudio.com/downloads/) is recommended in order to compile converted code, the free Community Edition is should be fine. For non-Windows platforms, you can try [Visual Studio Code](https://code.visualstudio.com/).
+Note that code converted from Go to C# will also target .NET 4.7.1 and compile using C# 7.2. [Visual Studio 2017](https://www.visualstudio.com/downloads/) is recommended in order to compile converted code, the free Community Edition is should be fine. For non-Windows platforms, you can try [Visual Studio Code](https://code.visualstudio.com/).
 
 ## Usage
 
 1. Make sure source application already compiles with Go (e.g., `go build`) before starting conversion. That means any needed dependencies should already be downloaded and available, e.g., with `go get`.
 
-2. Execute `go2cs` specifying the Go source path and file name to convert. For example:
+2. Execute `go2cs` specifying the Go source path or specific file name to convert. For example:
  * Convert a single Go file: `go2cs -l Main.go`
  * Convert a Go project: `go2cs MyProject`
 
@@ -91,9 +90,9 @@ Converted code will also target .NET 4.7.1 and compile using C# 7.2. [Visual Stu
 
 * Conversion of pointer types will use the C# `ref` keyword where possible. When this strategy does not work, a regular pointer will be required -- in these contexts imported packages will be marked as `unsafe` to allow pointers.
 
-* Conversion always tries to target managed code, this way code is more portable. If there is no possible way for managed code to accomplish a specific task, an option always exists to create a [native interop library](http://www.mono-project.com/docs/advanced/pinvoke/) that works on multiple platforms, i.e., `.dll`/`.so`/`.dylib`. Even so, the philosophy is to always attempt to use managed code, i.e., not to lean towards native code libraries, regardless of possible performance implications. Simple first.
+* Conversion always tries to target managed code, this way code is more portable. If there is no possible way for managed code to accomplish a specific task, an option always exists to create a [native interop library](http://www.mono-project.com/docs/advanced/pinvoke/) that works on multiple platforms, i.e., importing code from a `.dll`/`.so`/`.dylib`. Even so, the philosophy is to always attempt to use managed code, i.e., not to lean towards native code libraries, regardless of possible performance implications. Simple first.
 
-Excerpt of converted code from the Go [`fmt`](https://github.com/golang/go/blob/master/src/fmt/format.go#L41) package:
+Example excerpt of converted code from the Go [`fmt`](https://github.com/golang/go/blob/master/src/fmt/format.go#L41) package:
 ```
 using strconv = go.strconv_package;
 using utf8 = go.unicode.utf8_package;
@@ -119,10 +118,10 @@ namespace go
             public fixed byte intbuf[68];
         }
 
-        private static void clearFlags(ref this fmt f)
+        private static void clearFlags(ref this fmt _this) => func(ref _this, (ref fmt f, Defer defer, Panic panic, Recover recover) =>
         {
             f.fmtFlags = new fmtFlags();
-        }
+        });
     }
 }
 ```
