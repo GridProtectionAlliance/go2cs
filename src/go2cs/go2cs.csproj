@@ -37,6 +37,9 @@
     <LangVersion>7.2</LangVersion>
     <NoWarn>CS1591;CS1574;CS1580;CS0436</NoWarn>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>go2cs.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
@@ -71,6 +74,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="go2cs.ico" />
+    <EmbeddedResource Include="Templates\MainProjectAssemblyInfoTemplate.txt" />
     <Content Include="Templates\MainProjectSharedFileItemTemplate.txt" />
     <None Include="App.config" />
     <None Include="Parser\CompileGrammar.bat" />

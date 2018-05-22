@@ -27,12 +27,12 @@ using System.Resources;
 using System.Runtime.InteropServices;
 
 // Assembly identity attributes.
-[assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("0.1.1")]
 
 // Informational attributes.
 [assembly: AssemblyCompany("Grid Protection Alliance")]
 [assembly: AssemblyCopyright("Copyright (c) Grid Protection Alliance, 2018. All Rights Reserved.")]
-[assembly: AssemblyProduct("Grid Solutions Framework")]
+[assembly: AssemblyProduct("go2cs")]
 
 // Assembly manifest attributes.
 #if DEBUG

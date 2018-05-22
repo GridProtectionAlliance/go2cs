@@ -1,10 +1,14 @@
+using fmt = go.fmt_package;
+using strings = go.strings_package;
+
+using static goutil.BuiltInFunctions;
 using goutil;
-using System;
 
 public static partial class main_package
 {
-    private static void Main()
+    private static void Main() => func((defer, panic, recover) => {
     {
+		// Create a tic-tac-toe board.
         Slice<Slice<string>> board = new Slice<Slice<string>>(new[]
         {
             new Slice<string>(new[] {"_", "_", "_"}),
@@ -19,11 +23,8 @@ public static partial class main_package
         board[1][0] = "O";
         board[0][2] = "X";
 
-        for (var i = 0; i < len(board); i++)
-        {
-            Console.WriteLine("{0}", string.Join(" ", board[i]));
+        for (var i = 0; i < len(board); i++) {
+            fmt.Printf("%s\n", strings.Join(board[i], " "));
         }
-    }
-
-    public static int len<T>(Slice<T> slice) => slice.Length;
+    });
 }

@@ -1,20 +1,13 @@
-﻿This template creates a <FileName>.csproj file
-{0} = File Name (not package, package is always "main")
-{1} = Unique Project File Guid
-{2} = Additional Primary Project Files
-{3} = Shared Reference Project Files
-      Minimally: <Import Project="$(GOPATH)\src\go2cs\goutil\goutil.projitems" Label="Shared" />
->>START
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{{{1}}}</ProjectGuid>
+    <ProjectGuid>{DD935F3A-701E-4C74-97A4-AEB8DA914E57}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>go</RootNamespace>
-    <AssemblyName>{0}</AssemblyName>
+    <RootNamespace>GenGoFuncRefInstances</RootNamespace>
+    <AssemblyName>GenGoFuncRefInstances</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -28,8 +21,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -39,22 +30,23 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Numerics" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="{0}.cs" />
-    <Compile Include="Properties\{0}_AssemblyInfo.cs" />
-{2}
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="README.md" />
+    <None Include="App.config" />
   </ItemGroup>
-  <Import Project="{2}goutil\goutil.projitems" Label="Shared" />
-{3}
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

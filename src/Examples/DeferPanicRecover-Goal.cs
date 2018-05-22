@@ -31,8 +31,6 @@ public static partial class main_package
 
     private static void g(int i) => func((defer, panic, recover) =>
     {
-        //int err;
-
         if (i > 3)
         {
             Console.WriteLine("Panicking!");

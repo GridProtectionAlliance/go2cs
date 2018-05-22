@@ -26,6 +26,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using static goutil.BuiltInFunctions;
 
 namespace goutil
@@ -47,16 +48,15 @@ namespace goutil
         object this[int index] { get; set; }
     }
 
+    // Span<T> considered for slices but may be too restrictive, see here:
+    // https://github.com/dotnet/corefxlab/blob/master/docs/specs/span.md#relationship-to-array-slicing
+
     [Serializable]
-    public class Slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEquatable<Slice<T>>
+    public struct Slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEquatable<Slice<T>>, IEquatable<ISlice>
     {
         private readonly T[] m_array;
         private readonly int m_low;
         private readonly int m_length;
-
-        public Slice()
-        {
-        }
 
         public Slice(T[] array)
         {
@@ -114,8 +114,10 @@ namespace goutil
 
         public int Available => (object)m_array == null ? 0 : m_array.Length - m_length;
 
-        public T this[int index]
+        // Returning by-ref value allows slice to be a struct instead of a class and still allow get and set
+        public ref T this[int index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 if ((object)m_array == null)
@@ -124,18 +126,7 @@ namespace goutil
                 if (index < 0 || index >= m_length)
                     throw new ArgumentOutOfRangeException(nameof(index));
 
-                return m_array[m_low + index];
-            }
-
-            set
-            {
-                if ((object)m_array == null)
-                    throw new InvalidOperationException("Slice array reference is null.");
-
-                if (index < 0 || index >= m_length)
-                    throw new ArgumentOutOfRangeException(nameof(index));
-
-                m_array[m_low + index] = value;
+                return ref m_array[m_low + index];
             }
         }
 
@@ -169,13 +160,23 @@ namespace goutil
 
         public override int GetHashCode() => (object)m_array == null ? 0 : m_array.GetHashCode() ^ m_low ^ m_length;
 
-        public override bool Equals(object obj) => Equals(obj as Slice<T>);
+        public override bool Equals(object obj) => Equals(obj as ISlice);
 
-        public bool Equals(Slice<T> obj) => (object)obj != null && obj.m_array == m_array && obj.m_low == m_low && obj.m_length == m_length;
+        public bool Equals(ISlice other) => other?.Array == m_array && other?.Low == m_low && other.Length == m_length;
 
-        public static bool operator ==(Slice<T> a, Slice<T> b) => ((object)a == null && (object)b == null) || (a?.Equals(b) ?? false);
+        public bool Equals(Slice<T> other) => other.m_array == m_array && other.m_low == m_low && other.m_length == m_length;
+
+        public static bool operator ==(Slice<T> a, Slice<T> b) => a.Equals(b);
 
         public static bool operator !=(Slice<T> a, Slice<T> b) => !(a == b);
+
+        public static bool operator ==(ISlice a, Slice<T> b) => a?.Equals(b) ?? false;
+
+        public static bool operator !=(ISlice a, Slice<T> b) => !(a == b);
+
+        public static bool operator ==(Slice<T> a, ISlice b) => a.Equals(b);
+
+        public static bool operator !=(Slice<T> a, ISlice b) => !(a == b);
 
         public override string ToString() => $"[{string.Join(" ", this)}]";
 
@@ -187,6 +188,24 @@ namespace goutil
         {
             get => this[index];
             set => this[index] = (T)value;
+        }
+
+        T IList<T>.this[int index]
+        {
+            get
+            {
+                return this[index];
+            }
+            set
+            {
+                if ((object)m_array == null)
+                    throw new InvalidOperationException("Slice array reference is null.");
+
+                if (index < 0 || index >= m_length)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+
+                m_array[m_low + index] = value;
+            }
         }
 
         void IList<T>.Insert(int index, T item) => throw new NotSupportedException();
@@ -207,9 +226,9 @@ namespace goutil
 
         bool ICollection<T>.Remove(T item) => throw new NotSupportedException();
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => new SliceEnumerator(this);
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => new SliceEnumerator(ref this);
 
-        IEnumerator IEnumerable.GetEnumerator() => new SliceEnumerator(this);
+        IEnumerator IEnumerable.GetEnumerator() => new SliceEnumerator(ref this);
 
         [Serializable]
         private sealed class SliceEnumerator : IEnumerator<T>
@@ -219,7 +238,7 @@ namespace goutil
             private readonly int m_end;
             private int m_current;
 
-            internal SliceEnumerator(Slice<T> slice)
+            internal SliceEnumerator(ref Slice<T> slice)
             {
                 if (slice != nil && (object)slice.m_array == null)
                     throw new InvalidOperationException("Slice array reference is null.");
@@ -264,9 +283,9 @@ namespace goutil
 
         #endregion
 
-        public static readonly Slice<T> Nil = null;
+        public static readonly Slice<T> Nil = default;
 
-        public static Slice<T> Append(Slice<T> slice, params object[] elems)
+        public static Slice<T> Append(ref Slice<T> slice, params object[] elems)
         {
             T[] newArray;
 
@@ -283,7 +302,7 @@ namespace goutil
                 return slice.Slice(high: slice.High + elems.Length);
             }
 
-            int newCapacity = CalculateNewCapacity(slice, slice.Array.Length + elems.Length);
+            int newCapacity = CalculateNewCapacity(ref slice, slice.Array.Length + elems.Length);
             newArray = new T[newCapacity];
 
             System.Array.Copy(slice.Array, newArray, slice.Length);
@@ -292,7 +311,7 @@ namespace goutil
             return new Slice<T>(newArray, slice.Low, slice.High + elems.Length);
         }
 
-        private static int CalculateNewCapacity(Slice<T> slice, int neededCapacity)
+        private static int CalculateNewCapacity(ref Slice<T> slice, int neededCapacity)
         {
             int capacity = slice.Capacity;
 
@@ -331,7 +350,7 @@ namespace goutil
         //      s = s[2:]  => s = s.Slice(2)
         //      s = s[3:5] => s = s.Slice(3, 5);
         //      s = s[:4]  => s = s.Slice(high:4)
-        public static Slice<T> Slice<T>(this Slice<T> slice, int low = -1, int high = -1)
+        public static Slice<T> Slice<T>(this ref Slice<T> slice, int low = -1, int high = -1)
         {
             if (low == -1)
                 low = slice.Low;
