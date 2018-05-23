@@ -3,7 +3,7 @@
 
 Converts source code developed using the Go programming language (see [Go Language Specification](https://golang.org/ref/spec)) to the C# programming language (see [C# Language Specification](https://github.com/dotnet/csharplang/blob/master/spec/README.md)).
 
-###### · · · · · · _Help Wanted!_ This is a work-in-progress -- see [project status](#project-status) · · · · · ·
+##### · · · · · · _Help Wanted!_ This is a work-in-progress -- see [project status](#project-status) · · · · · ·
 
 ## Why?
 

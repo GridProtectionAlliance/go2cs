@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 May 21 03:52:53 UTC
-// Original source: C:\Projects\go2cs\src\Examples\DeferPanicRecover.go
+// package main -- go2cs converted at 2018 May 23 21:06:31 UTC
+// Original source: D:\Projects\go2cs\src\Examples\DeferPanicRecover.go
 
 using fmt = go.fmt_package;
 

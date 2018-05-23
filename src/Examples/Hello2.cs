@@ -5,8 +5,8 @@
 // Package utf8 implements functions and constants to support text encoded in
 // UTF-8. It includes functions to translate between runes and UTF-8 byte sequences.
 
-// package main -- go2cs converted at 2018 May 21 03:52:55 UTC
-// Original source: C:\Projects\go2cs\src\Examples\Hello2.go
+// package main -- go2cs converted at 2018 May 23 21:06:31 UTC
+// Original source: D:\Projects\go2cs\src\Examples\Hello2.go
 
 // Package comments
 

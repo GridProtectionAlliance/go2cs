@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 May 21 03:52:57 UTC
-// Original source: C:\Projects\go2cs\src\Examples\Variadic.go
+// package main -- go2cs converted at 2018 May 23 21:06:32 UTC
+// Original source: D:\Projects\go2cs\src\Examples\Variadic.go
 
 using fmt = go.fmt_package;// Here's a function that will take an arbitrary number
 // of `int`s as arguments.

@@ -21,12 +21,31 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+using System.Xml;
 
 namespace go2cs
 {
     public static class Common
     {
+        public const string RootNamespace = "go2cs";
+
+        public const string TemplateStartMarker = ">>START\n";
+
+        public static readonly Assembly EntryAssembly;
+
+        public static string GoUtilSharedProject { get; private set; }
+
+        static Common()
+        {
+            EntryAssembly = Assembly.GetEntryAssembly();
+        }
+
         public static string AddPathSuffix(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
@@ -42,6 +61,107 @@ namespace go2cs
             }
 
             return filePath;
+        }
+
+        public static void RestoreGoUtilSources(string targetPath)
+        {
+            const string prefix = RootNamespace + ".goutil.";
+
+            if (!targetPath.EndsWith("goutil"))
+                targetPath = Path.Combine(targetPath, "goutil");
+
+            targetPath = AddPathSuffix(targetPath);
+
+            foreach (string name in EntryAssembly.GetManifestResourceNames().Where(name => name.StartsWith(prefix)))
+            {
+                using (Stream resourceStream = EntryAssembly.GetManifestResourceStream(name))
+                {
+                    if ((object)resourceStream != null)
+                    {
+                        string targetFileName = Path.Combine(targetPath, name.Substring(prefix.Length));
+                        bool restoreFile = true;
+
+                        if (File.Exists(targetFileName))
+                        {
+                            string resourceMD5 = GetMD5HashFromStream(resourceStream);
+                            resourceStream.Seek(0, SeekOrigin.Begin);
+                            restoreFile = !resourceMD5.Equals(GetMD5HashFromFile(targetFileName));
+                        }
+
+                        if (restoreFile)
+                        {
+                            byte[] buffer = new byte[resourceStream.Length];
+                            resourceStream.Read(buffer, 0, (int)resourceStream.Length);
+
+                            string directory = Path.GetDirectoryName(targetFileName);
+
+                            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                                Directory.CreateDirectory(directory);
+
+                            using (StreamWriter writer = File.CreateText(targetFileName))
+                                writer.Write(Encoding.UTF8.GetString(buffer, 0, buffer.Length));
+                        }
+
+                        if (targetFileName.EndsWith(".projitems"))
+                            GoUtilSharedProject = targetFileName;
+                    }
+                }
+            }
+        }
+
+        public static string GetTemplate(string templateName, params object[] args)
+        {
+            const string prefix = RootNamespace + ".Templates.";
+            string template = null;
+
+            using (Stream resourceStream = EntryAssembly.GetManifestResourceStream($"{prefix}{templateName}"))
+            {
+                if ((object)resourceStream != null)
+                {
+                    byte[] buffer = new byte[resourceStream.Length];
+                    resourceStream.Read(buffer, 0, (int)resourceStream.Length);
+                    template = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                }
+            }
+
+            if (string.IsNullOrEmpty(template))
+                throw new FileNotFoundException("Embedded resource file not found.", templateName);
+
+            int startIndex = template.IndexOf(TemplateStartMarker, StringComparison.Ordinal);
+
+            if (startIndex > 0)
+            {
+                startIndex += TemplateStartMarker.Length;
+                template = template.Substring(startIndex);
+            }
+
+            return string.Format(template, args);
+        }
+
+        // Use this function to preserve existing shared project Guid when overwriting
+        public static string GetSharedProjectGuid(string sharedProjectFileName)
+        {
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(sharedProjectFileName);
+
+            XmlNodeList sharedGuidList = xmlDoc.GetElementsByTagName("SharedGUID");
+
+            if (sharedGuidList.Count > 0)
+                return sharedGuidList[0].InnerText;
+
+            throw new InvalidOperationException($"Failed to find <SharedGUID> tag in shared project items file: {sharedProjectFileName}");
+        }
+
+        private static string GetMD5HashFromFile(string fileName)
+        {
+            using (FileStream stream = File.OpenRead(fileName))
+                return GetMD5HashFromStream(stream);
+        }
+
+        private static string GetMD5HashFromStream(Stream stream)
+        {
+            using (MD5 md5 = MD5.Create())
+                return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty);
         }
     }
 }

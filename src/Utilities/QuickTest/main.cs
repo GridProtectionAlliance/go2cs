@@ -14,6 +14,7 @@ public static unsafe partial class main_package
         Main4();
         Main5();
         Main6();
+        Main7();
 
         Console.ReadLine();
     }
@@ -285,4 +286,18 @@ public static unsafe partial class main_package
 
     //    return (message, err);
     //});
+
+    private unsafe static void Main7()
+    {
+        int i = 42, j = 2701;
+
+        int* p = &i;
+        Console.WriteLine(*p);
+        *p = 21;
+        Console.WriteLine(i);
+
+        p = &j;
+        *p = *p / 37;
+        Console.WriteLine(j);
+    }
 }

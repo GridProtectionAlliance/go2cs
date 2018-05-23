@@ -42,6 +42,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Arguments.cs" />
@@ -76,13 +77,20 @@
   <ItemGroup>
     <Content Include="go2cs.ico" />
     <EmbeddedResource Include="Templates\MainProjectAssemblyInfoTemplate.txt" />
+    <Content Include="goutil\README.txt" />
     <Content Include="Templates\MainProjectSharedFileItemTemplate.txt" />
     <None Include="App.config" />
     <None Include="Parser\CompileGrammar.bat" />
     <None Include="Parser\Golang.g4" />
-    <Content Include="Parser\ReadMe.txt" />
+    <Content Include="Parser\README.txt" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\goutil\goutil.shproj">
+      <Link>goutil\goutil.shproj</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\goutil.projitems">
+      <Link>goutil\goutil.projitems</Link>
+    </EmbeddedResource>
     <EmbeddedResource Include="..\goutil\BuiltInFunctions.cs">
       <Link>goutil\BuiltInFunctions.cs</Link>
     </EmbeddedResource>

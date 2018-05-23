@@ -57,6 +57,7 @@ namespace go2cs
         private static int RunConversion(Options options)
         {
 #if DEBUG
+            Common.RestoreGoUtilSources(options.TargetGoSrcPath);
             Converter.Convert(options);
             return 0;
 #else
@@ -64,6 +65,7 @@ namespace go2cs
 
             try
             {
+                Common.RestoreGoUtilSources(options.TargetGoSrcPath);
                 Converter.Convert(options);
             }
             catch (TypeInitializationException ex)

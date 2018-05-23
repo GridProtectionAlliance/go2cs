@@ -14,6 +14,9 @@ Portions of this software implemented using source code that was licensed using 
 BSD 3-clause license: https://opensource.org/licenses/BSD-3-Clause. This includes, but may
 not be limited to, the following:
 
+* Go Standard Library Source Files (converted to C#) (https://github.com/golang/go):
+        Copyright (c) 2009 The Go Authors. All rights reserved.
+
 * ANTLR Project (https://github.com/antlr/antlr4):
         Copyright (c) 2012-2017 The ANTLR Project. All rights reserved.
 
@@ -29,3 +32,15 @@ be limited to, the following:
 
 * C# Command Line Parser Project (https://github.com/commandlineparser/commandline):
         Copyright (c) 2005 - 2015 Giacomo Stelluti Scala & Contributors
+
+=========================================================================================================
+
+This software includes design resources that were licensed using the Creative Commons 3.0
+Attributions license: https://creativecommons.org/licenses/by/3.0/us/. This includes, but
+may not be limited to, the following:
+
+* The go2cs icon includes a version of the "Go gopher" image designed by Renee French:
+       see: https://blog.golang.org/gopher
+
+* The go2cs icon was designed by William N. Carroll:
+       see: https://github.com/GridProtectionAlliance/go2cs/blob/master/docs/images/

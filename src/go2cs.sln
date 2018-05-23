@@ -26,6 +26,15 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "goutil", "goutil\goutil.shp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenGoFuncRefInstances", "Utilities\GenGoFuncRefInstances\GenGoFuncRefInstances.csproj", "{DD935F3A-701E-4C74-97A4-AEB8DA914E57}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{7062EA78-E676-46F7-B555-C43641A2698F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{4D5DA663-96C4-4BC0-822F-DBFC029296AD}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\images\go2cs-large.png = ..\docs\images\go2cs-large.png
+		..\docs\images\go2cs-small.png = ..\docs\images\go2cs-small.png
+		..\docs\images\README = ..\docs\images\README
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Utilities\Antlr4.Runtime\Antlr4.Runtime.projitems*{263e377f-d039-41aa-b6c7-e4d92845d1c5}*SharedItemsImports = 13
@@ -63,6 +72,7 @@ Global
 		{263E377F-D039-41AA-B6C7-E4D92845D1C5} = {BC53B46E-B2FA-4174-A0A2-326DD554B237}
 		{948613FC-FD76-4C34-97AF-5CC7F5697952} = {78E6A8DC-83D6-4536-BE17-211B1B1D0D97}
 		{DD935F3A-701E-4C74-97A4-AEB8DA914E57} = {BC53B46E-B2FA-4174-A0A2-326DD554B237}
+		{4D5DA663-96C4-4BC0-822F-DBFC029296AD} = {7062EA78-E676-46F7-B555-C43641A2698F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

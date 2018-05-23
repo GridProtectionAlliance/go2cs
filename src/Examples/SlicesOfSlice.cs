@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 May 21 03:52:57 UTC
-// Original source: C:\Projects\go2cs\src\Examples\SlicesOfSlice.go
+// package main -- go2cs converted at 2018 May 23 21:06:32 UTC
+// Original source: D:\Projects\go2cs\src\Examples\SlicesOfSlice.go
 
 using fmt = go.fmt_package;
 using strings = go.strings_package;

@@ -216,6 +216,7 @@ namespace goutil
         }
 
         //public static void delete<TKey, TValue>(Map<TKey, TValue> m, TKey key) => m.Delete(key);
+
         /// <summary>
         /// Gets the imaginary part of the complex number <paramref name="c"/>.
         /// </summary>

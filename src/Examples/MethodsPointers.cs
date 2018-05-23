@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 May 21 03:52:56 UTC
-// Original source: C:\Projects\go2cs\src\Examples\MethodsPointers.go
+// package main -- go2cs converted at 2018 May 23 21:06:31 UTC
+// Original source: D:\Projects\go2cs\src\Examples\MethodsPointers.go
 
 using fmt = go.fmt_package;
 using math = go.math_package;
