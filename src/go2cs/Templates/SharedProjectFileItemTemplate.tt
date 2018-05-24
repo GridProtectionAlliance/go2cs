@@ -1,0 +1,7 @@
+﻿<# // This template creates the source file items a <PackageName>.projitems file #>
+<#@ template language="C#" #>
+    <Compile Include="$(MSBuildThisFileDirectory)<#=FileName#>" />
+<#+
+// Template Parameters
+public string FileName;
+#>

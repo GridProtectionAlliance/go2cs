@@ -73,12 +73,55 @@
     <Compile Include="Parser\GolangParser.cs" />
     <Compile Include="ParseTreeValues.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Templates\SharedProjectFileItemsTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SharedProjectFileItemsTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\SharedProjectFileItemTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SharedProjectFileItemTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\SharedProjectFileTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SharedProjectFileTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\StructTypeTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StructTypeTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\TemplateBase.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TemplateBase.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="go2cs.ico" />
-    <EmbeddedResource Include="Templates\MainProjectAssemblyInfoTemplate.txt" />
+    <Content Include="Templates\SharedProjectFileItemsTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>SharedProjectFileItemsTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Templates\SharedProjectFileItemTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>SharedProjectFileItemTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Templates\SharedProjectFileTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>SharedProjectFileTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Templates\StructTypeTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>StructTypeTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Templates\TemplateBase.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>TemplateBase.cs</LastGenOutput>
+    </Content>
     <Content Include="goutil\README.txt" />
-    <Content Include="Templates\MainProjectSharedFileItemTemplate.txt" />
     <None Include="App.config" />
     <None Include="Parser\CompileGrammar.bat" />
     <None Include="Parser\Golang.g4" />
@@ -109,16 +152,9 @@
     <EmbeddedResource Include="..\goutil\TypeExtensions.cs">
       <Link>goutil\TypeExtensions.cs</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="Templates\MainProjectPrimaryFileItemTemplate.txt" />
-    <EmbeddedResource Include="Templates\MainProjectTemplate.txt" />
-    <EmbeddedResource Include="Templates\SharedProjectFileItemTemplate.txt" />
-    <EmbeddedResource Include="Templates\SharedProjectFileItemsTemplate.txt" />
-    <EmbeddedResource Include="Templates\SharedProjectFileTemplate.txt" />
-    <EmbeddedResource Include="Templates\InterfaceActionDeclTemplate.txt" />
-    <EmbeddedResource Include="Templates\InterfaceActionInitTemplate.txt" />
-    <EmbeddedResource Include="Templates\InterfaceFuncDeclTemplate.txt" />
-    <EmbeddedResource Include="Templates\InterfaceFuncInitTemplate.txt" />
-    <EmbeddedResource Include="Templates\InterfaceTypeTemplate.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="..\Utilities\CommandLine\CommandLine.projitems" Label="Shared" />
   <Import Project="..\Utilities\Antlr4.Runtime\Antlr4.Runtime.projitems" Label="Shared" />

@@ -36,7 +36,7 @@ public static unsafe partial class main_package
     }
 
     // flags placed in a separate struct for easy clearing.
-    private struct fmtFlags
+    private partial struct fmtFlags
     {
         public bool widPresent;
         public bool precPresent;
@@ -51,6 +51,14 @@ public static unsafe partial class main_package
         // different, flagless formats set at the top level.
         public bool plusV;
         public bool sharpV;
+    }
+
+    private partial struct fmtFlags
+    {
+        public static bool operator ==(fmtFlags value, NilType nil) => value.Equals(default(fmtFlags));
+        public static bool operator !=(fmtFlags value, NilType nil) => !(value == nil);
+        public static bool operator ==(NilType nil, fmtFlags value) => value == nil;
+        public static bool operator !=(NilType nil, fmtFlags value) => value != nil;
     }
 
     // A fmt is the raw formatter used by Printf etc.

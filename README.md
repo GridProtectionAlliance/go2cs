@@ -47,6 +47,10 @@ A new command line option to prefer `var` over explicit types would be handy, e.
 
 Ideally as releases are made for an updated `go2cs` executable, this can also include an update to a pre-converted Go Standard Library for download so that users don't have to spend time converting this themselves.
 
+It might be desirable to produce a NuGet package that contains the Go Standard Library as a .NET library that can be imported into C# apps as this might be handy for Go programmers playing around in C#, allowing them to use familiar packages.
+
+The conversion code looks for files that contain a `main` function and converts them into a standard C# project. The conversion process _automatically_ references needed shared projects for each encountered import statement recursively. It does this so that a single executable with no external dependencies can be created just like the original Go source code. If converted code ever gets updated where a new `import` is added, a command line option that would "rescan" the imports in a project and augment the project file to make sure all the needed imports are referenced would be ideal.
+
 ## Installation
 
 1. Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. The only dependency is .NET (see [prerequisites](#prerequisites) below).
@@ -94,6 +98,8 @@ Note that code converted from Go to C# will also target .NET 4.7.1 and compile u
 
 * All imported Go packages are converted into [shared projects](https://docs.microsoft.com/en-us/xamarin/cross-platform/app-fundamentals/shared-projects?tabs=vswin) and added as a reference to the main project so that a single executable is created, i.e., packages are not compiled into external DLL dependencies.
 
+* Go projects that contain a `main` function are converted into a standard C# project. The conversion process will automatically reference the needed shared projects, per defined encountered `import` statements, recursively. In this manner a single executable with no external dependencies, besides .NET runtime, is created - just like its original Go counterpart.
+
 * Conversion of pointer types will use the C# `ref` keyword where possible. When this strategy does not work, a regular pointer will be required -- in these contexts imported packages will be marked as `unsafe` to allow pointers.
 
 * Conversion of Go slices is based on the [`Slice<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/Slice.cs) structure defined in the [`goutils`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/goutil) shared project. For example, the following Go code using slice operations:
@@ -138,7 +144,7 @@ using goutil;
 
 private static partial class main_package
 {
-    private static void Main() => func((defer, panic, recover) => {
+    private static void Main()
     {
         // Create a tic-tac-toe board.
         var board = new Slice<Slice<string>>(new[] {
@@ -157,7 +163,7 @@ private static partial class main_package
         for (var i = 0; i < len(board); i++) {
             fmt.Printf("%s\n", strings.Join(board[i], " "));
         }
-    });
+    }
 }
 ```
 

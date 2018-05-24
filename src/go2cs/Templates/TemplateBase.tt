@@ -1,0 +1,9 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="$(TargetPath)" #>
+<#@ import namespace="go2cs" #>
+<#@ output extension=".cs" #>
+<#+
+public string Version => Common.EntryAssembly.GetName().Version.ToString();
+
+public string GeneratedCodeAttribute => $"GeneratedCode(\"go2cs\", \"{Version}\")";
+#>

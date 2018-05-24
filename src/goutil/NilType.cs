@@ -48,7 +48,7 @@ namespace goutil
             return false;
         }
 
-        // Slice to nil comparisons
+        // ISlice to nil comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(ISlice slice, NilType nil) => slice == null || (slice.Length == 0 && slice.Capacity == 0 && slice.Array == null);
 

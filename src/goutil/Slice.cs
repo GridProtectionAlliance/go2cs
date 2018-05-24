@@ -58,6 +58,7 @@ namespace goutil
         private readonly int m_low;
         private readonly int m_length;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Slice(T[] array)
         {
             if ((object)array == null)
@@ -68,6 +69,7 @@ namespace goutil
             m_length = array.Length;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Slice(T[] array, int low = 0, int high = -1)
         {
             if ((object)array == null)
@@ -89,6 +91,7 @@ namespace goutil
             m_length = length;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Slice(int length, int capacity = -1)
         {
             if (length < 0)
@@ -114,7 +117,7 @@ namespace goutil
 
         public int Available => (object)m_array == null ? 0 : m_array.Length - m_length;
 
-        // Returning by-ref value allows slice to be a struct instead of a class and still allow get and set
+        // Returning by-ref value allows slice to be a struct instead of a class and still allow read and write
         public ref T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -130,6 +133,7 @@ namespace goutil
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int IndexOf(T item)
         {
             if ((object)m_array == null)
@@ -140,16 +144,16 @@ namespace goutil
             return index >= 0 ? index - m_low : -1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains(T item)
         {
             if ((object)m_array == null)
                 throw new InvalidOperationException("Slice array reference is null.");
 
-            int index = System.Array.IndexOf(m_array, item, m_low, m_length);
-
-            return index >= 0;
+            return System.Array.IndexOf(m_array, item, m_low, m_length) >= 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(T[] array, int arrayIndex)
         {
             if ((object)m_array == null)
@@ -158,27 +162,55 @@ namespace goutil
             System.Array.Copy(m_array, m_low, array, arrayIndex, m_length);
         }
 
+        public override string ToString() => $"[{string.Join(" ", this)}]";
+
         public override int GetHashCode() => (object)m_array == null ? 0 : m_array.GetHashCode() ^ m_low ^ m_length;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj) => Equals(obj as ISlice);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(ISlice other) => other?.Array == m_array && other?.Low == m_low && other.Length == m_length;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Slice<T> other) => other.m_array == m_array && other.m_low == m_low && other.m_length == m_length;
 
+        #region [ Equality Operators ]
+
+        // Slice<T> to Slice<T> comparisons
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Slice<T> a, Slice<T> b) => a.Equals(b);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Slice<T> a, Slice<T> b) => !(a == b);
 
+        // Slice<T> to ISlice comparisons
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(ISlice a, Slice<T> b) => a?.Equals(b) ?? false;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(ISlice a, Slice<T> b) => !(a == b);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Slice<T> a, ISlice b) => a.Equals(b);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Slice<T> a, ISlice b) => !(a == b);
 
-        public override string ToString() => $"[{string.Join(" ", this)}]";
+        // Slice<T> to nil comparisons
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Slice<T> slice, NilType nil) => slice.Length == 0 && slice.Capacity == 0 && slice.Array == null;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Slice<T> slice, NilType nil) => !(slice == nil);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(NilType nil, Slice<T> slice) => slice == nil;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(NilType nil, Slice<T> slice) => slice != nil;
+
+        #endregion
 
         #region [ Interface Implementations ]
 
