@@ -49,6 +49,7 @@
     <Compile Include="Common.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
+    <Content Include="go2cs.ico" />
     <Compile Include="Converter.cs" />
     <Compile Include="Converter_Comments.cs" />
     <Compile Include="Converter_ConstDecl.cs" />
@@ -67,119 +68,18 @@
     <Compile Include="Converter_StringLiteral.cs" />
     <Compile Include="Converter_TopLevelDecl.cs" />
     <Compile Include="Converter_Type.cs" />
+    <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="Parser\GolangBaseListener.cs" />
     <Compile Include="Parser\GolangLexer.cs" />
     <Compile Include="Parser\GolangListener.cs" />
     <Compile Include="Parser\GolangParser.cs" />
     <Compile Include="ParseTreeValues.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Templates\InterfaceActionDeclTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>InterfaceActionDeclTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\InterfaceActionInitTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>InterfaceActionInitTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\InterfaceFuncDeclTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>InterfaceFuncDeclTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\InterfaceFuncInitTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>InterfaceFuncInitTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\InterfaceTypeTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>InterfaceTypeTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\MainProjectAssemblyInfoTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>MainProjectAssemblyInfoTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\MainProjectTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>MainProjectTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\SharedProjectFileItemsTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SharedProjectFileItemsTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\SharedProjectFileTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SharedProjectFileTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\StructTypeTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>StructTypeTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\TemplateBase.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>TemplateBase.tt</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="go2cs.ico" />
-    <Content Include="Templates\InterfaceActionDeclTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>InterfaceActionDeclTemplate.cs</LastGenOutput>
-    </Content>
-    <Content Include="Templates\InterfaceActionInitTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>InterfaceActionInitTemplate.cs</LastGenOutput>
-    </Content>
-    <Content Include="Templates\InterfaceFuncDeclTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>InterfaceFuncDeclTemplate.cs</LastGenOutput>
-    </Content>
-    <Content Include="Templates\InterfaceFuncInitTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>InterfaceFuncInitTemplate.cs</LastGenOutput>
-    </Content>
-    <Content Include="Templates\InterfaceTypeTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>InterfaceTypeTemplate.cs</LastGenOutput>
-    </Content>
-    <Content Include="Templates\MainProjectAssemblyInfoTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>MainProjectAssemblyInfoTemplate.cs</LastGenOutput>
-    </Content>
-    <Content Include="Templates\MainProjectTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>MainProjectTemplate.cs</LastGenOutput>
-    </Content>
-    <Content Include="Templates\SharedProjectFileItemsTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>SharedProjectFileItemsTemplate.cs</LastGenOutput>
-    </Content>
-    <Content Include="Templates\SharedProjectFileTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>SharedProjectFileTemplate.cs</LastGenOutput>
-    </Content>
-    <Content Include="Templates\StructTypeTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>StructTypeTemplate.cs</LastGenOutput>
-    </Content>
-    <Content Include="Templates\TemplateBase.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>TemplateBase.cs</LastGenOutput>
-    </Content>
     <Content Include="goutil\README.txt" />
-    <None Include="App.config" />
+    <Content Include="Parser\README.txt" />
     <None Include="Parser\CompileGrammar.bat" />
     <None Include="Parser\Golang.g4" />
-    <Content Include="Parser\README.txt" />
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\goutil\goutil.shproj">
@@ -206,6 +106,107 @@
     <EmbeddedResource Include="..\goutil\TypeExtensions.cs">
       <Link>goutil\TypeExtensions.cs</Link>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Templates\InterfaceActionDeclTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceActionDeclTemplate.cs</LastGenOutput>
+    </Content>
+    <Compile Include="Templates\InterfaceActionDeclTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InterfaceActionDeclTemplate.tt</DependentUpon>
+    </Compile>
+    <Content Include="Templates\InterfaceActionInitTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceActionInitTemplate.cs</LastGenOutput>
+    </Content>
+    <Compile Include="Templates\InterfaceActionInitTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InterfaceActionInitTemplate.tt</DependentUpon>
+    </Compile>
+    <Content Include="Templates\InterfaceFuncDeclTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceFuncDeclTemplate.cs</LastGenOutput>
+    </Content>
+    <Compile Include="Templates\InterfaceFuncDeclTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InterfaceFuncDeclTemplate.tt</DependentUpon>
+    </Compile>
+    <Content Include="Templates\InterfaceFuncInitTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceFuncInitTemplate.cs</LastGenOutput>
+    </Content>
+    <Compile Include="Templates\InterfaceFuncInitTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InterfaceFuncInitTemplate.tt</DependentUpon>
+    </Compile>
+    <Content Include="Templates\InterfaceTypeTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceTypeTemplate.cs</LastGenOutput>
+    </Content>
+    <Compile Include="Templates\InterfaceTypeTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InterfaceTypeTemplate.tt</DependentUpon>
+    </Compile>
+    <Content Include="Templates\MainProjectAssemblyInfoTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MainProjectAssemblyInfoTemplate.cs</LastGenOutput>
+    </Content>
+    <Compile Include="Templates\MainProjectAssemblyInfoTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MainProjectAssemblyInfoTemplate.tt</DependentUpon>
+    </Compile>
+    <Content Include="Templates\MainProjectTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MainProjectTemplate.cs</LastGenOutput>
+    </Content>
+    <Compile Include="Templates\MainProjectTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MainProjectTemplate.tt</DependentUpon>
+    </Compile>
+    <Content Include="Templates\SharedProjectFileItemsTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>SharedProjectFileItemsTemplate.cs</LastGenOutput>
+    </Content>
+    <Compile Include="Templates\SharedProjectFileItemsTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SharedProjectFileItemsTemplate.tt</DependentUpon>
+    </Compile>
+    <Content Include="Templates\SharedProjectFileTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>SharedProjectFileTemplate.cs</LastGenOutput>
+    </Content>
+    <Compile Include="Templates\SharedProjectFileTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SharedProjectFileTemplate.tt</DependentUpon>
+    </Compile>
+    <Content Include="Templates\StructTypeTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>StructTypeTemplate.cs</LastGenOutput>
+    </Content>
+    <Compile Include="Templates\StructTypeTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StructTypeTemplate.tt</DependentUpon>
+    </Compile>
+    <Content Include="Templates\TemplateBase.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>TemplateBase.cs</LastGenOutput>
+    </Content>
+    <Compile Include="Templates\TemplateBase.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TemplateBase.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

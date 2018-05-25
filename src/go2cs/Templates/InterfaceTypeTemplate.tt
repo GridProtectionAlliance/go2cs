@@ -14,78 +14,95 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using goutil;
 
-public static partial class <#=PackageName#>_package
-{
-    [<#=GeneratedCodeAttribute#>]
-    <#=Scope#> class <#=InterfaceName#><T> : <#=InterfaceName#>
+<#=NamespaceHeader#>
+    public static unsafe partial class <#=PackageName#>_package
     {
-        private T m_target;<#
-        
-        foreach (var decl in Functions)
+        [<#=GeneratedCodeAttribute#>]
+        <#=Scope#> class <#=InterfaceName#><T> : <#=InterfaceName#>
         {
-            #><#=new InterfaceFuncDeclTemplate
-            {
-                FunctionName = decl.functionName,
-                Scope = decl.scope,
-                ParameterSignature = decl.parameterSignature,
-                NamedParameters = decl.namedParameters,
-                ParameterTypes = decl.parameterTypes,
-                ResultType = decl.resultType
-            }
-            .TransformText()#><#
-        }
-        
-        foreach (var decl in Actions)
-        {
-            #><#=new InterfaceActionDeclTemplate
-            {
-                ActionName = decl.actionName,
-                Scope = decl.scope,
-                ParameterSignature = decl.parameterSignature,
-                NamedParameters = decl.namedParameters,
-                ParameterTypes = decl.parameterTypes
-            }
-            .TransformText()#><#
-        }#>
-
-        [DebuggerStepperBoundary]
-        static <#=InterfaceName#>()
-        {
-            Type targetType = typeof(T);<#
+            private T m_target;<#
         
             foreach (var decl in Functions)
             {
-                #><#=new InterfaceFuncInitTemplate
+                #><#=new InterfaceFuncDeclTemplate
                 {
                     FunctionName = decl.functionName,
-                    InterfaceName = InterfaceName,
+                    Scope = decl.scope,
+                    ParameterSignature = decl.parameterSignature,
+                    NamedParameters = decl.namedParameters,
                     ParameterTypes = decl.parameterTypes,
                     ResultType = decl.resultType
                 }
                 .TransformText()#><#
             }
-            
+        
             foreach (var decl in Actions)
             {
-                #><#=new InterfaceActionInitTemplate
+                #><#=new InterfaceActionDeclTemplate
                 {
                     ActionName = decl.actionName,
-                    InterfaceName = InterfaceName,
+                    Scope = decl.scope,
+                    ParameterSignature = decl.parameterSignature,
+                    NamedParameters = decl.namedParameters,
                     ParameterTypes = decl.parameterTypes
                 }
                 .TransformText()#><#
             }#>
+
+            [DebuggerStepperBoundary]
+            static <#=InterfaceName#>()
+            {
+                Type targetType = typeof(T);<#
+        
+                foreach (var decl in Functions)
+                {
+                    #><#=new InterfaceFuncInitTemplate
+                    {
+                        FunctionName = decl.functionName,
+                        InterfaceName = InterfaceName,
+                        ParameterTypes = decl.parameterTypes,
+                        ResultType = decl.resultType
+                    }
+                    .TransformText()#><#
+                }
+            
+                foreach (var decl in Actions)
+                {
+                    #><#=new InterfaceActionInitTemplate
+                    {
+                        ActionName = decl.actionName,
+                        InterfaceName = InterfaceName,
+                        ParameterTypes = decl.parameterTypes
+                    }
+                    .TransformText()#><#
+                }#>
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+            public static explicit operator <#=InterfaceName#><T>(T target) => return new <#=InterfaceName#><T> { m_target = target };
+
+            // Enable comparisons between nil and <#=InterfaceName#> interface
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator ==(<#=InterfaceName#> value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(<#=InterfaceName#> value, NilType nil) => !(value == nil);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator ==(NilType nil, <#=InterfaceName#> value) => value == nil;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(NilType nil, <#=InterfaceName#> value) => value != nil;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static explicit operator <#=InterfaceName#><T>(T target) => return new <#=InterfaceName#><T> { m_target = target };
+        [<#=GeneratedCodeAttribute#>, MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        <#=Scope#> static <#=InterfaceName#> <#=InterfaceName#>_cast<T>(T target) => (<#=InterfaceName#><T>)target;
     }
-
-    [<#=GeneratedCodeAttribute#>, MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    <#=Scope#> static <#=InterfaceName#> <#=InterfaceName#>_cast<T>(T target) => (<#=InterfaceName#><T>)target;
-}
+<#=NamespaceFooter#>
 <#+
 // Template Parameters
+public string NamespaceHeader;
+public string NamespaceFooter;
 public string PackageName;
 public string InterfaceName;
 public string Scope;

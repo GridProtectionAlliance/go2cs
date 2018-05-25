@@ -13,27 +13,31 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using goutil;
 
-public static partial class <#=PackageName#>_package
-{
-    [<#=GeneratedCodeAttribute#>]
-    <#=Scope#> partial struct <#=StructName#>
+<#=NamespaceHeader#>
+    public static unsafe partial class <#=PackageName#>_package
     {
-        // Enable comparisons between nil and <#=StructName#> struct
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(<#=StructName#> value, NilType nil) => value.Equals(default(<#=StructName#>));
+        [<#=GeneratedCodeAttribute#>]
+        <#=Scope#> partial struct <#=StructName#>
+        {
+            // Enable comparisons between nil and <#=StructName#> struct
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator ==(<#=StructName#> value, NilType nil) => value.Equals(default(<#=StructName#>));
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(<#=StructName#> value, NilType nil) => !(value == nil);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(<#=StructName#> value, NilType nil) => !(value == nil);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(NilType nil, <#=StructName#> value) => value == nil;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator ==(NilType nil, <#=StructName#> value) => value == nil;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(NilType nil, <#=StructName#> value) => value != nil;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(NilType nil, <#=StructName#> value) => value != nil;
+        }
     }
-}
+<#=NamespaceFooter#>
 <#+
 // Template Parameters
+public string NamespaceHeader;
+public string NamespaceFooter;
 public string PackageName;
 public string StructName;
 public string Scope;

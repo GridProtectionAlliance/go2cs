@@ -54,14 +54,14 @@ using System.Runtime.InteropServices;
                     "lyTitle(\"");
             
             #line 24 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectAssemblyInfoTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(FileName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(AssemblyName));
             
             #line default
             #line hidden
             this.Write("\")]\r\n[assembly: AssemblyDescription(\"");
             
             #line 25 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectAssemblyInfoTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(FileName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(AssemblyName));
             
             #line default
             #line hidden
@@ -80,7 +80,7 @@ using System.Runtime.InteropServices;
         #line 32 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectAssemblyInfoTemplate.tt"
 
 // Template Parameters
-public string FileName;  // File Name (not package, package is always "main")
+public string AssemblyName;  // File name without extension (not package, package is always "main")
 public string UniqueProjectID;
 
         

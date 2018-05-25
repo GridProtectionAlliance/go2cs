@@ -59,6 +59,7 @@ namespace go2cs
 #if DEBUG
             Common.RestoreGoUtilSources(options.TargetGoSrcPath);
             Converter.Convert(options);
+            Converter.WriteProjectFiles();
             return 0;
 #else
             int exitCode = 0;
@@ -67,6 +68,7 @@ namespace go2cs
             {
                 Common.RestoreGoUtilSources(options.TargetGoSrcPath);
                 Converter.Convert(options);
+                Converter.WriteProjectFiles();
             }
             catch (TypeInitializationException ex)
             {

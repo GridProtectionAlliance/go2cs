@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace go2cs
@@ -32,6 +33,7 @@ namespace go2cs
         private string m_package;
         private string m_packageImport;
         private string m_packageUsing;
+        private string m_packageNamespace;
         private string[] m_packageNamespaces;
         private string m_headerLevelComments;
         private string m_packageLevelComments;
@@ -83,15 +85,24 @@ namespace go2cs
                 string package = lastSlash > -1 ? m_packageImport.Substring(lastSlash + 1) : m_packageImport;
 
                 if (!package.Equals(m_package))
+                {
                     AddWarning(context, $"Defined package clause \"{m_package}\" does not match file path \"{m_sourceFileName}\"");
+                    m_packageImport = lastSlash > -1 ? $"{m_packageImport.Substring(0, lastSlash)}.{m_package}" : m_package;
+                }
             }
 
-            m_packageUsing = $"{m_package} = {RootNamespace}.{m_packageImport.Replace('/', '.')}{ClassSuffix}";
+            // Package name should not contain path
+            Debug.Assert(!m_package.Contains("/"));
+
+            m_packageNamespace = $"{RootNamespace}.{m_packageImport.Replace('/', '.')}";
+
+            // Track file name associated with package
+            AddFileToPackage(m_package, m_targetFileName, m_packageNamespace);
+
+            m_packageUsing = $"{m_package} = {m_packageNamespace}{ClassSuffix}";
 
             // Define namespaces
-            List<string> packageNamespaces = new List<string>();
-
-            packageNamespaces.Add(RootNamespace);
+            List<string> packageNamespaces = new List<string> { RootNamespace };
 
             string[] namespaces = m_packageImport.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
 
@@ -105,6 +116,10 @@ namespace go2cs
 
             m_headerLevelComments = CheckForCommentsLeft(context);
             m_packageLevelComments = CheckForCommentsRight(context).TrimStart();
+
+            // Import declarations are optional, make sure entry function is called regardless
+            if ((context.Parent as GolangParser.SourceFileContext)?.importDecl()?.Length == 0)
+                EnterImportDecl(new GolangParser.ImportDeclContext(null, 0));
         }
     }
 }

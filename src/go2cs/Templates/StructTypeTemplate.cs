@@ -43,87 +43,104 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using goutil;
 
-public static partial class ");
+");
             
             #line 16 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(NamespaceHeader));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n    public static unsafe partial class ");
+            
+            #line 17 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
             
             #line default
             #line hidden
-            this.Write("_package\r\n{\r\n    [");
+            this.Write("_package\r\n    {\r\n        [");
             
-            #line 18 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 19 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GeneratedCodeAttribute));
             
             #line default
             #line hidden
-            this.Write("]\r\n    ");
+            this.Write("]\r\n        ");
             
-            #line 19 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 20 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Scope));
             
             #line default
             #line hidden
             this.Write(" partial struct ");
             
-            #line 19 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 20 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
-            this.Write("\r\n    {\r\n        // Enable comparisons between nil and ");
+            this.Write("\r\n        {\r\n            // Enable comparisons between nil and ");
             
-            #line 21 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 22 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
-            this.Write(" struct\r\n        [MethodImpl(MethodImplOptions.AggressiveInlining)]\r\n        publ" +
-                    "ic static bool operator ==(");
+            this.Write(" struct\r\n            [MethodImpl(MethodImplOptions.AggressiveInlining)]\r\n        " +
+                    "    public static bool operator ==(");
             
-            #line 23 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 24 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
             this.Write(" value, NilType nil) => value.Equals(default(");
             
-            #line 23 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 24 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
-            this.Write("));\r\n\r\n        [MethodImpl(MethodImplOptions.AggressiveInlining)]\r\n        public" +
-                    " static bool operator !=(");
+            this.Write("));\r\n\r\n            [MethodImpl(MethodImplOptions.AggressiveInlining)]\r\n          " +
+                    "  public static bool operator !=(");
             
-            #line 26 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 27 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
-            this.Write(" value, NilType nil) => !(value == nil);\r\n\r\n        [MethodImpl(MethodImplOptions" +
-                    ".AggressiveInlining)]\r\n        public static bool operator ==(NilType nil, ");
+            this.Write(" value, NilType nil) => !(value == nil);\r\n\r\n            [MethodImpl(MethodImplOpt" +
+                    "ions.AggressiveInlining)]\r\n            public static bool operator ==(NilType ni" +
+                    "l, ");
             
-            #line 29 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 30 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
-            this.Write(" value) => value == nil;\r\n\r\n        [MethodImpl(MethodImplOptions.AggressiveInlin" +
-                    "ing)]\r\n        public static bool operator !=(NilType nil, ");
+            this.Write(" value) => value == nil;\r\n\r\n            [MethodImpl(MethodImplOptions.AggressiveI" +
+                    "nlining)]\r\n            public static bool operator !=(NilType nil, ");
             
-            #line 32 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 33 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
-            this.Write(" value) => value != nil;\r\n    }\r\n}\r\n");
+            this.Write(" value) => value != nil;\r\n        }\r\n    }\r\n");
+            
+            #line 36 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(NamespaceFooter));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 35 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+        #line 37 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
 
 // Template Parameters
+public string NamespaceHeader;
+public string NamespaceFooter;
 public string PackageName;
 public string StructName;
 public string Scope;

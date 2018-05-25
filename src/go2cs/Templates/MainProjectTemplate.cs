@@ -27,7 +27,7 @@ namespace go2cs.Templates
         {
             
             #line 1 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
- // This template creates a <FileName>.csproj file 
+ // This template creates a <AssemblyName>.csproj file 
             
             #line default
             #line hidden
@@ -48,7 +48,7 @@ namespace go2cs.Templates
                     "espace>\r\n    <AssemblyName>");
             
             #line 13 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(FileName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(AssemblyName));
             
             #line default
             #line hidden
@@ -81,27 +81,13 @@ namespace go2cs.Templates
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include=""System"" />
     <Reference Include=""System.Numerics"" />
+    <Reference Include=""System"" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include=""");
+");
             
             #line 46 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(FileName));
-            
-            #line default
-            #line hidden
-            this.Write(".cs\" />\r\n    <Compile Include=\"Properties\\");
-            
-            #line 47 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(FileName));
-            
-            #line default
-            #line hidden
-            this.Write("_AssemblyInfo.cs\" />\r\n");
-            
-            #line 48 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
   foreach (string projectFile in ProjectFiles)
     {
         
@@ -110,14 +96,14 @@ namespace go2cs.Templates
             #line hidden
             this.Write("    <Compile Include=\"");
             
-            #line 50 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            #line 48 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(projectFile));
             
             #line default
             #line hidden
             this.Write("\" />\r\n");
             
-            #line 51 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            #line 49 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
 
     }
 
@@ -127,7 +113,7 @@ namespace go2cs.Templates
             this.Write("  </ItemGroup>\r\n  <ItemGroup>\r\n    <None Include=\"README.md\" />\r\n  </ItemGroup>\r\n" +
                     "");
             
-            #line 57 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            #line 55 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
   foreach (string sharedProject in SharedProjectReferences)
     {
         
@@ -136,14 +122,14 @@ namespace go2cs.Templates
             #line hidden
             this.Write("    <Import Project=\"");
             
-            #line 59 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            #line 57 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(sharedProject));
             
             #line default
             #line hidden
             this.Write("\" Label=\"Shared\" />\r\n");
             
-            #line 60 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            #line 58 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
 
     }
 
@@ -155,10 +141,10 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 64 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+        #line 62 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
 
 // Template Parameters
-public string FileName;  // File Name (not package, package is always "main")
+public string AssemblyName;  // File name without extension (not package, package is always "main")
 public string UniqueProjectID;
 public string[] ProjectFiles;
 public string[] SharedProjectReferences;

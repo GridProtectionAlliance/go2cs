@@ -44,23 +44,6 @@ namespace go2cs
             EntryAssembly = Assembly.GetEntryAssembly();
         }
 
-        public static string AddPathSuffix(string filePath)
-        {
-            if (string.IsNullOrEmpty(filePath))
-            {
-                filePath = Path.DirectorySeparatorChar.ToString();
-            }
-            else
-            {
-                char suffixChar = filePath[filePath.Length - 1];
-
-                if (suffixChar != Path.DirectorySeparatorChar && suffixChar != Path.AltDirectorySeparatorChar)
-                    filePath += Path.DirectorySeparatorChar;
-            }
-
-            return filePath;
-        }
-
         public static void RestoreGoUtilSources(string targetPath)
         {
             const string prefix = RootNamespace + ".goutil.";
@@ -108,32 +91,86 @@ namespace go2cs
         }
 
         // Use this function to preserve existing shared project Guid when overwriting
-        public static string GetSharedProjectGuid(string sharedProjectFileName)
+        public static string GetProjectGuid(string projectFileName, string tagName)
         {
-            if (File.Exists(sharedProjectFileName))
+            if (File.Exists(projectFileName))
             {
                 XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(sharedProjectFileName);
+                xmlDoc.Load(projectFileName);
 
-                XmlNodeList sharedGuidList = xmlDoc.GetElementsByTagName("SharedGUID");
+                XmlNodeList guidList = xmlDoc.GetElementsByTagName(tagName);
 
-                if (sharedGuidList.Count > 0)
-                    return sharedGuidList[0].InnerText;
+                if (guidList.Count > 0)
+                    return guidList[0].InnerText;
             }
 
             return Guid.NewGuid().ToString();
         }
 
-        private static string GetMD5HashFromFile(string fileName)
+        public static string GetMD5HashFromFile(string fileName)
         {
             using (FileStream stream = File.OpenRead(fileName))
                 return GetMD5HashFromStream(stream);
         }
 
-        private static string GetMD5HashFromStream(Stream stream)
+        public static string GetMD5HashFromString(string source)
+        {
+            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(source)))
+                return GetMD5HashFromStream(stream);
+        }
+
+        public static string GetMD5HashFromStream(Stream stream)
         {
             using (MD5 md5 = MD5.Create())
                 return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty);
+        }
+
+        public static string AddPathSuffix(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                filePath = Path.DirectorySeparatorChar.ToString();
+            }
+            else
+            {
+                char suffixChar = filePath[filePath.Length - 1];
+
+                if (suffixChar != Path.DirectorySeparatorChar && suffixChar != Path.AltDirectorySeparatorChar)
+                    filePath += Path.DirectorySeparatorChar;
+            }
+
+            return filePath;
+        }
+
+        public static bool PathHasFiles(string filePath, string searchPattern)
+        {
+            return Directory.Exists(filePath) && Directory.EnumerateFiles(filePath, searchPattern, SearchOption.TopDirectoryOnly).Any();
+        }
+
+        public static string GetRelativePath(string fileName, string targetPath)
+        {
+            return new DirectoryInfo(targetPath).GetRelativePathTo(new FileInfo(fileName));
+        }
+
+        public static string GetRelativePathFrom(this FileSystemInfo to, FileSystemInfo from)
+        {
+            return from.GetRelativePathTo(to);
+        }
+
+        public static string GetRelativePathTo(this FileSystemInfo from, FileSystemInfo to)
+        {
+            string getPath(FileSystemInfo fsi) => !(fsi is DirectoryInfo d) ? fsi.FullName : AddPathSuffix(d.FullName);
+
+            string fromPath = getPath(from);
+            string toPath = getPath(to);
+
+            Uri fromUri = new Uri(fromPath);
+            Uri toUri = new Uri(toPath);
+
+            Uri relativeUri = fromUri.MakeRelativeUri(toUri);
+            string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+            return relativePath.Replace('/', Path.DirectorySeparatorChar);
         }
     }
 }

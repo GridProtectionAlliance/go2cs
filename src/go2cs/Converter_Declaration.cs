@@ -21,7 +21,9 @@
 //
 //******************************************************************************************************
 
+using System.IO;
 using Antlr4.Runtime.Misc;
+using go2cs.Templates;
 
 namespace go2cs
 {
@@ -35,10 +37,29 @@ namespace go2cs
             if (!m_topLevelDeclaration)
                 m_targetFile.AppendLine();
 
-            m_targetFile.AppendLine($"{Spacing()}{scope} class {identifier}");
+            m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier}");
             m_targetFile.AppendLine($"{Spacing()}{{");
 
+            if (m_structFields.TryGetValue(context.type()?.typeLit()?.structType(), out string fields))
+                m_targetFile.AppendLine($"{Spacing(1)}{fields}");
+
             m_targetFile.AppendLine($"{Spacing()}}}");
+
+            string ancillaryStructFileName = Path.Combine(TargetFilePath, $"{m_package}_{identifier}Struct.cs");
+
+            using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
+                writer.Write(new StructTypeTemplate
+                {
+                    NamespaceHeader = m_namespaceHeader,
+                    NamespaceFooter = m_namespaceFooter,
+                    PackageName = m_package,
+                    StructName = identifier,
+                    Scope = scope
+                }
+                .TransformText());
+
+            // Track file name associated with package
+            AddFileToPackage(m_package, ancillaryStructFileName, m_packageNamespace);
         }
     }
 }

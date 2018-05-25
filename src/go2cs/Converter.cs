@@ -29,6 +29,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
+using go2cs.Templates;
 using static go2cs.Common;
 
 #pragma warning disable SCS0018 // Path traversal
@@ -40,6 +41,9 @@ namespace go2cs
         public const string RootNamespace = "go";
         public const string ClassSuffix = "_package";
         private const string UsingsMarker = ">>MARKER:USINGS<<";
+
+        // Consider only marking classes as unsafe when pointers are encountered
+        //private const string UnsafeMarker = ">>MARKER:UNSAFE<<";
 
         private readonly Options m_options;
         private readonly BufferedTokenStream m_tokenStream;
@@ -110,7 +114,7 @@ namespace go2cs
 
             // Close class and namespaces as begun during Converter_TopLevelDecl visit
             m_targetFile.AppendLine($"{Spacing(indentLevel: 1)}}}");
-            m_targetFile.AppendLine(new string('}', m_packageNamespaces.Length));
+            m_targetFile.AppendLine(m_namespaceFooter);
 
             string targetFile = m_targetFile.ToString();
 
@@ -140,6 +144,8 @@ namespace go2cs
         private static readonly HashSet<string> s_processedFiles;
         private static readonly HashSet<string> s_processedImports;
         private static readonly HashSet<string> s_importQueue;
+        private static readonly HashSet<string> s_mainPackageFiles;
+        private static readonly Dictionary<string, HashSet<(string fileName, string nameSpace)>> m_packageInfo;
         private static int s_totalSkippedFiles;
         private static int s_totalSkippedPackages;
         private static int s_totalWarnings;
@@ -173,6 +179,8 @@ namespace go2cs
             s_processedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             s_processedImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             s_importQueue = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            s_mainPackageFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            m_packageInfo = new Dictionary<string, HashSet<(string, string)>>(StringComparer.Ordinal);
         }
 
         public static int TotalProcessedFiles => s_processedFiles.Count;
@@ -182,6 +190,155 @@ namespace go2cs
         public static int TotalSkippedPackages => s_totalSkippedPackages;
 
         public static int TotalWarnings => s_totalWarnings;
+
+        public static void WriteProjectFiles()
+        {
+            // Map of package names to list of package path and file names
+            Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData = new Dictionary<string, List<(string, string[])>>(StringComparer.Ordinal);
+
+            // Process shared packages
+            foreach (KeyValuePair<string, HashSet<(string, string)>> kvp in m_packageInfo)
+            {
+                string package = kvp.Key;
+                HashSet<(string fileName, string nameSpace)> packageFiles = kvp.Value;
+
+                // Depending on the scope of the conversion, the same package name may exist in multiple paths
+                foreach (var packageGroup in packageFiles.GroupBy(GetDirectoryName, (path, packageInfoItems) => new { Path = path, PackageInfoItems = packageInfoItems.ToArray() }, StringComparer.OrdinalIgnoreCase))
+                {
+                    string packagePath = packageGroup.Path;
+                    string[] packageFileNames = packageGroup.PackageInfoItems.Select(packageInfo => packageInfo.fileName).ToArray();
+                    string packageNamespace = packageGroup.PackageInfoItems.FirstOrDefault().nameSpace ?? "go";
+
+                    List<(string path, string[] fileNames)> groupPackageData = groupedPackageData.GetOrAdd(package, _ => new List<(string path, string[] fileNames)>());
+                    groupPackageData.Add((packagePath, packageFileNames));
+
+                    if (package.Equals("main"))
+                        continue;
+
+                    string sharedProjectItems = Path.Combine(packagePath, $"{package}.projitems");
+                    string sharedProjectFile = Path.Combine(packagePath, $"{package}.shproj");
+                    string uniqueProjectID = GetProjectGuid(sharedProjectItems, "SharedGUID");
+
+                    string sharedProjectItemsContent = new SharedProjectFileItemsTemplate
+                    {
+                        UniqueProjectID = uniqueProjectID,
+                        RootNamespace = packageNamespace,
+                        FileNames = packageFileNames.Select(Path.GetFileName).ToArray()
+                    }
+                    .TransformText();
+
+                    string sharedProjectFileContent = new SharedProjectFileTemplate
+                    {
+                        UniqueProjectID = uniqueProjectID,
+                        PackageName = package
+                    }
+                    .TransformText();
+
+                    // Build a shared project items file (this is the shared project that normal projects will reference)
+                    if (!File.Exists(sharedProjectItems) || GetMD5HashFromFile(sharedProjectItems) != GetMD5HashFromString(sharedProjectItemsContent))
+                        using (StreamWriter writer = File.CreateText(sharedProjectItems))
+                            writer.Write(sharedProjectItemsContent);
+
+                    // Build a shared project file - this can be added to a solution to easily access reference code 
+                    if (!File.Exists(sharedProjectFile) || GetMD5HashFromFile(sharedProjectFile) != GetMD5HashFromString(sharedProjectFileContent))
+                        using (StreamWriter writer = File.CreateText(sharedProjectFile))
+                            writer.Write(sharedProjectFileContent);
+                }
+            }
+
+            foreach (string mainPackageFile in s_mainPackageFiles)
+            {
+                string mainPackageFileName = Path.GetFileName(mainPackageFile) ?? "";
+                string mainPackagePath = Path.GetDirectoryName(mainPackageFile) ?? "";
+                string assemblyName = Path.GetFileNameWithoutExtension(mainPackageFileName);
+                string[] projectFiles = null;
+
+                List<(string path, string[] fileNames)> groupPackageData = groupedPackageData["main"];
+
+                foreach ((string path, string[] fileNames) packageData in groupPackageData)
+                {
+                    if (packageData.path.Equals(mainPackagePath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        projectFiles = packageData.fileNames;
+                        break;
+                    }
+                }
+
+                if ((object)projectFiles == null)
+                    throw new InvalidOperationException($"Failed to find project files for main package file: {mainPackageFile}");
+
+                // When multiple Go source files from the same folder contain a main method,
+                // make sure to only include the target project file
+                List<string> checkedProjectFiles = new List<string>();
+                bool multipleSinglePathMainTargets = false;
+
+                foreach (string projectFile in projectFiles)
+                {
+                    bool isMainPackage = s_mainPackageFiles.Contains(projectFile);
+
+                    if (projectFile.Equals(mainPackageFile))
+                        checkedProjectFiles.Add(projectFile);
+                    else if (isMainPackage)
+                        multipleSinglePathMainTargets = true;
+                    else
+                        checkedProjectFiles.Add(projectFile);
+                }
+
+                string mainProjectFile = Path.Combine(mainPackagePath, $"{assemblyName}.csproj");
+                string uniqueProjectID = GetProjectGuid(mainProjectFile, "ProjectGuid");
+
+                if (uniqueProjectID.StartsWith("{"))
+                    uniqueProjectID = uniqueProjectID.Substring(1, uniqueProjectID.Length - 2);
+
+                string mainProjectAssemblyInfoFile;
+
+                if (multipleSinglePathMainTargets)
+                {
+                    // When multiple main projects exist in the same folder, just manually add a unique assembly name
+                    mainProjectAssemblyInfoFile = Path.Combine(mainPackagePath, $"{assemblyName}_AssemblyInfo.cs");
+                }
+                else
+                {
+                    // Otherwise AssemblyInfo can appear with its default name and location
+                    string mainProjectAssemblyInfoFilePath = Path.Combine(mainPackagePath, "Properties");
+
+                    if (!Directory.Exists(mainProjectAssemblyInfoFilePath))
+                        Directory.CreateDirectory(mainProjectAssemblyInfoFilePath);
+
+                    mainProjectAssemblyInfoFile = Path.Combine(mainProjectAssemblyInfoFilePath, "AssemblyInfo.cs");
+                }
+
+                string mainProjectAssemblyInfoFileContent = new MainProjectAssemblyInfoTemplate
+                    {
+                        AssemblyName = assemblyName,
+                        UniqueProjectID = uniqueProjectID
+                    }
+                    .TransformText();
+
+                // Build a main project assembly info file
+                if (!File.Exists(mainProjectAssemblyInfoFile))
+                    using (StreamWriter writer = File.CreateText(mainProjectAssemblyInfoFile))
+                        writer.Write(mainProjectAssemblyInfoFileContent);
+
+                checkedProjectFiles.Add(mainProjectAssemblyInfoFile);
+
+                // TODO: Add shared project references for tracked imports
+
+                string mainProjectFileContent = new MainProjectTemplate
+                {
+                    AssemblyName = assemblyName,
+                    UniqueProjectID = uniqueProjectID,
+                    ProjectFiles = checkedProjectFiles.Select(fileName => GetRelativePath(fileName, mainPackagePath)).ToArray(),
+                    SharedProjectReferences = new[] { "$(GOPATH)\\src\\go2cs\\goutil\\goutil.projitems" }
+                }
+                .TransformText();
+
+                // Build a main project file
+                if (!File.Exists(mainProjectFile) || GetMD5HashFromFile(mainProjectFile) != GetMD5HashFromString(mainProjectFileContent))
+                    using (StreamWriter writer = File.CreateText(mainProjectFile))
+                        writer.Write(mainProjectFileContent);
+            }
+        }
 
         public static void Convert(Options options)
         {
@@ -327,6 +484,12 @@ namespace go2cs
             }
         }
 
+        private static void AddFileToPackage(string package, string fileName, string nameSpace)
+        {
+            HashSet<(string, string)> packageInfo = m_packageInfo.GetOrAdd(package, _ => new HashSet<(string fileName, string nameSpace)>(PackageInfoComparer.Default));
+            packageInfo.Add((fileName, nameSpace));
+        }
+
         private static string GetAbsolutePath(string filePath)
         {
             if (!Path.IsPathRooted(filePath))
@@ -335,9 +498,21 @@ namespace go2cs
             return filePath;
         }
 
-        private static bool PathHasFiles(string filePath, string searchPattern)
+        private static string GetDirectoryName((string fileName, string _) pair) => Path.GetDirectoryName(pair.fileName);
+
+        private class PackageInfoComparer : IComparer<(string fileName, string nameSpace)>, IEqualityComparer<(string fileName, string nameSpace)>
         {
-            return Directory.Exists(filePath) && Directory.EnumerateFiles(filePath, searchPattern, SearchOption.TopDirectoryOnly).Any();
+            public int Compare((string fileName, string nameSpace) x, (string fileName, string nameSpace) y)
+            {
+                int first = string.Compare(x.fileName, y.fileName, StringComparison.OrdinalIgnoreCase);
+                return first != 0 ? first : string.CompareOrdinal(x.nameSpace, y.nameSpace);
+            }
+
+            public bool Equals((string fileName, string nameSpace) x, (string fileName, string nameSpace) y) => Compare(x, y) == 0;
+
+            public int GetHashCode((string fileName, string nameSpace) obj) => (obj.fileName?.ToLower().GetHashCode() ?? 0) ^ (obj.nameSpace?.GetHashCode() ?? 0);
+
+            public static readonly PackageInfoComparer Default = new PackageInfoComparer();
         }
     }
 }

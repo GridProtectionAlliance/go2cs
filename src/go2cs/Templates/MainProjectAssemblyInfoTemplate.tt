@@ -21,8 +21,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("Release Build")]
 #endif
 
-[assembly: AssemblyTitle("<#=FileName#>")]
-[assembly: AssemblyDescription("<#=FileName#> - auto-converted with go2cs")]
+[assembly: AssemblyTitle("<#=AssemblyName#>")]
+[assembly: AssemblyDescription("<#=AssemblyName#> - auto-converted with go2cs")]
 
 // Other configuration attributes.
 [assembly: ComVisible(false)]
@@ -31,6 +31,6 @@ using System.Runtime.InteropServices;
 [assembly: NeutralResourcesLanguage("en-US")]
 <#+
 // Template Parameters
-public string FileName;  // File Name (not package, package is always "main")
+public string AssemblyName;  // File name without extension (not package, package is always "main")
 public string UniqueProjectID;
 #>

@@ -21,8 +21,6 @@
 //
 //******************************************************************************************************
 
-using System;
-
 namespace go2cs
 {
     public partial class Converter
@@ -44,7 +42,13 @@ namespace go2cs
 
             // Handle Go "main" function as a special case, in C# this should be "Main"
             if (m_currentFunction.Equals("main"))
+            {
                 m_currentFunction = "Main";
+                
+                // Track file names that contain main function in main package
+                if (m_package.Equals("main"))
+                    s_mainPackageFiles.Add(m_targetFileName);
+            }
 
             // Function signature containing result type and parameters have not been visited yet,
             // so we mark their desired positions and replace once the visit has occurred

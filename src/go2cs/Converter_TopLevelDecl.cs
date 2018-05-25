@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.Text;
 
 namespace go2cs
 {
@@ -29,6 +30,8 @@ namespace go2cs
     {
         private bool m_topLevelDeclaration = true;
         private string m_nextDeclComments;
+        private string m_namespaceHeader;
+        private string m_namespaceFooter;
 
         // TopLevelDecl is visited once per each encountered Declaration, FunctionDecl or MethodDecl
         public override void EnterTopLevelDecl(GolangParser.TopLevelDeclContext context)
@@ -37,17 +40,22 @@ namespace go2cs
 
             if (m_topLevelDeclaration)
             {
+                StringBuilder namespaceHeader = new StringBuilder();
+
                 // Begin namespaces
                 for (int i = 0; i < m_packageNamespaces.Length; i++)
                 {
-                    m_targetFile.Append($"namespace {m_packageNamespaces[i]}");
-                    m_targetFile.AppendLine(i == m_packageNamespaces.Length - 1 ? $"{Environment.NewLine}{{" : " {");
+                    namespaceHeader.Append($"namespace {m_packageNamespaces[i]}");
+                    namespaceHeader.Append(i == m_packageNamespaces.Length - 1 ? $"{Environment.NewLine}{{" : $" {{{Environment.NewLine}");
                 }
 
-                string scope = m_package.Equals("main") ? "private" : "public";
+                m_namespaceHeader = namespaceHeader.ToString();
+                m_namespaceFooter = new string('}', m_packageNamespaces.Length);
+
+                m_targetFile.AppendLine(m_namespaceHeader);
 
                 // Begin class
-                m_targetFile.AppendLine($"{Spacing()}{scope} static partial class {m_package}{ClassSuffix}");
+                m_targetFile.AppendLine($"{Spacing()}public static unsafe partial class {m_package}{ClassSuffix}");
                 m_targetFile.AppendLine($"{Spacing()}{{");
 
                 // Write any initial declaration comments created during Converter_ImportDecl visit 

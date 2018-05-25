@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.Linq;
 
 namespace go2cs
 {
@@ -43,6 +44,7 @@ namespace go2cs
         //  arguments (optional)
         //  conversion (required)
         private readonly ParseTreeValues<GoTypeInfo> m_types = new ParseTreeValues<GoTypeInfo>();
+        private readonly ParseTreeValues<string> m_structFields = new ParseTreeValues<string>();
 
         private enum GoTypeClass
         {
@@ -193,7 +195,7 @@ namespace go2cs
             //m_types.TryGetValue(context., out GoTypeInfo typeInfo);
             //m_types.Peek().TypeClass = GoTypeClass.Struct;
 
-
+            m_structFields[context] = string.Join($"{Environment.NewLine}{Spacing(1)}", context.fieldDecl()?.Select(ctx => ctx.GetText()) ?? new[] { "" });
 
             m_types[context.Parent.Parent] = new GoTypeInfo
             {
