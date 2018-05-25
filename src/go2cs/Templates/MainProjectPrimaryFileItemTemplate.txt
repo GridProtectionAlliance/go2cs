@@ -1,4 +1,0 @@
-﻿{0} = Converted / Generated C# File Name from "main" package (no path)
-      e.g.: "main_<InterfaceName>Interface.cs"
->>START
-    <Compile Include="{0}" />

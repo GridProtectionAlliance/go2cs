@@ -14,7 +14,8 @@
   <ItemGroup>
 <# foreach (string fileName in FileNames)
     {
-        #><#=new SharedProjectFileItemTemplate { FileName = fileName }.TransformText()#><#
+        #>    <Compile Include="$(MSBuildThisFileDirectory)<#=fileName#>" />
+<#
     }
 #>  </ItemGroup>
   <ItemGroup>

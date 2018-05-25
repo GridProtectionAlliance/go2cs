@@ -15,9 +15,9 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
+    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public partial class SharedProjectFileItemsTemplate : SharedProjectFileItemsTemplateBase
+    public partial class MainProjectTemplate : MainProjectTemplateBase
     {
 #line hidden
         /// <summary>
@@ -26,67 +26,143 @@ namespace go2cs.Templates
         public virtual string TransformText()
         {
             
-            #line 1 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
- // This template creates a <PackageName>.projitems file (as referenced by the <PackageName>.shproj) 
+            #line 1 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+ // This template creates a <FileName>.csproj file 
             
             #line default
             #line hidden
             this.Write(@"<?xml version=""1.0"" encoding=""utf-8""?>
-<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<Project ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+  <Import Project=""$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"" Condition=""Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"" />
   <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>");
+    <Configuration Condition="" '$(Configuration)' == '' "">Debug</Configuration>
+    <Platform Condition="" '$(Platform)' == '' "">AnyCPU</Platform>
+    <ProjectGuid>{");
             
-            #line 9 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
+            #line 10 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UniqueProjectID));
             
             #line default
             #line hidden
-            this.Write("</SharedGUID>\r\n  </PropertyGroup>\r\n  <PropertyGroup Label=\"Configuration\">\r\n    <" +
-                    "Import_RootNamespace>");
+            this.Write("}</ProjectGuid>\r\n    <OutputType>Exe</OutputType>\r\n    <RootNamespace>go</RootNam" +
+                    "espace>\r\n    <AssemblyName>");
             
-            #line 12 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(RootNamespace));
+            #line 13 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FileName));
             
             #line default
             #line hidden
-            this.Write("</Import_RootNamespace>\r\n  </PropertyGroup>\r\n  <ItemGroup>\r\n");
+            this.Write(@"</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.2</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.2</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include=""System"" />
+    <Reference Include=""System.Numerics"" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include=""");
             
-            #line 15 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
- foreach (string fileName in FileNames)
+            #line 46 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FileName));
+            
+            #line default
+            #line hidden
+            this.Write(".cs\" />\r\n    <Compile Include=\"Properties\\");
+            
+            #line 47 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FileName));
+            
+            #line default
+            #line hidden
+            this.Write("_AssemblyInfo.cs\" />\r\n");
+            
+            #line 48 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+  foreach (string projectFile in ProjectFiles)
     {
         
             
             #line default
             #line hidden
-            this.Write("    <Compile Include=\"$(MSBuildThisFileDirectory)");
+            this.Write("    <Compile Include=\"");
             
-            #line 17 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(fileName));
+            #line 50 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(projectFile));
             
             #line default
             #line hidden
             this.Write("\" />\r\n");
             
-            #line 18 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
+            #line 51 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
 
     }
 
             
             #line default
             #line hidden
-            this.Write("  </ItemGroup>\r\n  <ItemGroup>\r\n    <None Include=\"$(MSBuildThisFileDirectory)READ" +
-                    "ME.md\" />\r\n  </ItemGroup>\r\n</Project>\r\n");
+            this.Write("  </ItemGroup>\r\n  <ItemGroup>\r\n    <None Include=\"README.md\" />\r\n  </ItemGroup>\r\n" +
+                    "");
+            
+            #line 57 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+  foreach (string sharedProject in SharedProjectReferences)
+    {
+        
+            
+            #line default
+            #line hidden
+            this.Write("    <Import Project=\"");
+            
+            #line 59 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(sharedProject));
+            
+            #line default
+            #line hidden
+            this.Write("\" Label=\"Shared\" />\r\n");
+            
+            #line 60 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+
+    }
+
+            
+            #line default
+            #line hidden
+            this.Write("  <Import Project=\"$(MSBuildToolsPath)\\Microsoft.CSharp.targets\" />\r\n</Project>\r\n" +
+                    "");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 25 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
+        #line 64 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
 
 // Template Parameters
+public string FileName;  // File Name (not package, package is always "main")
 public string UniqueProjectID;
-public string RootNamespace;
-public string[] FileNames;
+public string[] ProjectFiles;
+public string[] SharedProjectReferences;
+//              Minimally: <Import Project="$(GOPATH)\src\go2cs\goutil\goutil.projitems" Label="Shared" />
 
         
         #line default
@@ -100,7 +176,7 @@ public string[] FileNames;
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public class SharedProjectFileItemsTemplateBase
+    public class MainProjectTemplateBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

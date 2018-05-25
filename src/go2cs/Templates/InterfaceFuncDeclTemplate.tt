@@ -1,0 +1,15 @@
+﻿<# // This template creates the function declarations in a <PackageName>_<InterfaceName>Interface.cs file #>
+<#@ template language="C#" #>
+
+        private static readonly Func<T<#=ParameterTypes#>, <#=ResultType#>> s_<#=FunctionName#>;
+
+        [DebuggerNonUserCode]
+        <#=Scope#> <#=ResultType#> <#=FunctionName#>(<#=ParameterSignature#>) => s_<#=FunctionName#>(m_target<#=NamedParameters#>);<#+
+// Template Parameters
+public string FunctionName;
+public string Scope;
+public string ParameterSignature; // e.g.: "double p0, string p1"
+public string NamedParameters;    // (comma prefixed), e.g.: ", p0, p1" -- do not prefix for 0 parameters
+public string ParameterTypes;     // (comma prefixed), e.g.: ", double, string" -- do not prefix for 0 parameters
+public string ResultType;
+#>

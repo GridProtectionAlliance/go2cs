@@ -1,0 +1,13 @@
+﻿<# // This template creates the function initializations in a <PackageName>_<InterfaceName>Interface.cs file #>
+<#@ template language="C#" #>
+
+            s_<#=FunctionName#> = targetType.GetExtensionDelegate("<#=FunctionName#>") as Func<T<#=ParameterTypes#>, <#=ResultType#>>;
+
+            if (s_<#=FunctionName#> == null)
+                throw new NotImplementedException($"{{targetType.Name}} does not implement <#=InterfaceName#>.<#=FunctionName#> function");<#+
+// Template Parameters
+public string FunctionName;
+public string InterfaceName;
+public string ParameterTypes;  // (comma prefixed), e.g.: ", double, string" -- do not prefix for 0 parameters
+public string ResultType;
+#>

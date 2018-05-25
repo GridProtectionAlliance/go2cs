@@ -1,0 +1,12 @@
+﻿<# // This template creates the action initializations in a <PackageName>_<InterfaceName>Interface.cs file #>
+<#@ template language="C#" #>
+
+            s_<#=ActionName#> = targetType.GetExtensionDelegate("<#=ActionName#>") as Action<T<#=ParameterTypes#>>;
+
+            if (s_<#=ActionName#> == null)
+                throw new NotImplementedException($"{{targetType.Name}} does not implement <#=InterfaceName#>.<#=ActionName#> method");<#+
+// Template Parameters
+public string ActionName;
+public string InterfaceName;
+public string ParameterTypes;  // (comma prefixed), e.g.: ", double, string" -- do not prefix for 0 parameters
+#>

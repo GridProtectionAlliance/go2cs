@@ -1,4 +1,0 @@
-﻿{0} = Imported Package Project File Name (use $(GOPATH) environmental variable reference)
-      e.g.: "$(GOPATH)\src\go2cs\goutil\goutil.projitems"
->>START
-  <Import Project="{0}" Label="Shared" />

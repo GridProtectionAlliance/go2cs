@@ -15,9 +15,9 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemTemplate.tt"
+    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public partial class SharedProjectFileItemTemplate : SharedProjectFileItemTemplateBase
+    public partial class InterfaceFuncDeclTemplate : InterfaceFuncDeclTemplateBase
     {
 #line hidden
         /// <summary>
@@ -26,26 +26,87 @@ namespace go2cs.Templates
         public virtual string TransformText()
         {
             
-            #line 1 "D:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemTemplate.tt"
- // This template creates the source file items a <PackageName>.projitems file 
+            #line 1 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+ // This template creates the function declarations in a <PackageName>_<InterfaceName>Interface.cs file 
             
             #line default
             #line hidden
-            this.Write("    <Compile Include=\"$(MSBuildThisFileDirectory)");
+            this.Write("\r\n        private static readonly Func<T");
             
-            #line 3 "D:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(FileName));
+            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ParameterTypes));
             
             #line default
             #line hidden
-            this.Write("\" />\r\n");
+            this.Write(", ");
+            
+            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ResultType));
+            
+            #line default
+            #line hidden
+            this.Write("> s_");
+            
+            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
+            
+            #line default
+            #line hidden
+            this.Write(";\r\n\r\n        [DebuggerNonUserCode]\r\n        ");
+            
+            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(Scope));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ResultType));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
+            
+            #line default
+            #line hidden
+            this.Write("(");
+            
+            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ParameterSignature));
+            
+            #line default
+            #line hidden
+            this.Write(") => s_");
+            
+            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
+            
+            #line default
+            #line hidden
+            this.Write("(m_target");
+            
+            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(NamedParameters));
+            
+            #line default
+            #line hidden
+            this.Write(");");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 4 "D:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemTemplate.tt"
+        #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
 
 // Template Parameters
-public string FileName;
+public string FunctionName;
+public string Scope;
+public string ParameterSignature; // e.g.: "double p0, string p1"
+public string NamedParameters;    // (comma prefixed), e.g.: ", p0, p1" -- do not prefix for 0 parameters
+public string ParameterTypes;     // (comma prefixed), e.g.: ", double, string" -- do not prefix for 0 parameters
+public string ResultType;
 
         
         #line default
@@ -59,7 +120,7 @@ public string FileName;
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public class SharedProjectFileItemTemplateBase
+    public class InterfaceFuncDeclTemplateBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

@@ -15,9 +15,9 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
+    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public partial class SharedProjectFileItemsTemplate : SharedProjectFileItemsTemplateBase
+    public partial class InterfaceFuncInitTemplate : InterfaceFuncInitTemplateBase
     {
 #line hidden
         /// <summary>
@@ -26,67 +26,72 @@ namespace go2cs.Templates
         public virtual string TransformText()
         {
             
-            #line 1 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
- // This template creates a <PackageName>.projitems file (as referenced by the <PackageName>.shproj) 
+            #line 1 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+ // This template creates the function initializations in a <PackageName>_<InterfaceName>Interface.cs file 
             
             #line default
             #line hidden
-            this.Write(@"<?xml version=""1.0"" encoding=""utf-8""?>
-<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>");
+            this.Write("\r\n            s_");
             
-            #line 9 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(UniqueProjectID));
+            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
-            this.Write("</SharedGUID>\r\n  </PropertyGroup>\r\n  <PropertyGroup Label=\"Configuration\">\r\n    <" +
-                    "Import_RootNamespace>");
+            this.Write(" = targetType.GetExtensionDelegate(\"");
             
-            #line 12 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(RootNamespace));
-            
-            #line default
-            #line hidden
-            this.Write("</Import_RootNamespace>\r\n  </PropertyGroup>\r\n  <ItemGroup>\r\n");
-            
-            #line 15 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
- foreach (string fileName in FileNames)
-    {
-        
+            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
-            this.Write("    <Compile Include=\"$(MSBuildThisFileDirectory)");
+            this.Write("\") as Func<T");
             
-            #line 17 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(fileName));
-            
-            #line default
-            #line hidden
-            this.Write("\" />\r\n");
-            
-            #line 18 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
-
-    }
-
+            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ParameterTypes));
             
             #line default
             #line hidden
-            this.Write("  </ItemGroup>\r\n  <ItemGroup>\r\n    <None Include=\"$(MSBuildThisFileDirectory)READ" +
-                    "ME.md\" />\r\n  </ItemGroup>\r\n</Project>\r\n");
+            this.Write(", ");
+            
+            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ResultType));
+            
+            #line default
+            #line hidden
+            this.Write(">;\r\n\r\n            if (s_");
+            
+            #line 6 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
+            
+            #line default
+            #line hidden
+            this.Write(" == null)\r\n                throw new NotImplementedException($\"{{targetType.Name}" +
+                    "} does not implement ");
+            
+            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
+            
+            #line default
+            #line hidden
+            this.Write(".");
+            
+            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
+            
+            #line default
+            #line hidden
+            this.Write(" function\");");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 25 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
+        #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
 
 // Template Parameters
-public string UniqueProjectID;
-public string RootNamespace;
-public string[] FileNames;
+public string FunctionName;
+public string InterfaceName;
+public string ParameterTypes;  // (comma prefixed), e.g.: ", double, string" -- do not prefix for 0 parameters
+public string ResultType;
 
         
         #line default
@@ -100,7 +105,7 @@ public string[] FileNames;
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public class SharedProjectFileItemsTemplateBase
+    public class InterfaceFuncInitTemplateBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

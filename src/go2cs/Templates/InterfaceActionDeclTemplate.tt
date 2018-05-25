@@ -1,0 +1,14 @@
+﻿<# // This template creates the action declarations in a <PackageName>_<InterfaceName>Interface.cs file #>
+<#@ template language="C#" #>
+
+        private static readonly Action<T<#=ParameterTypes#>> s_<#=ActionName#>;
+
+        [DebuggerNonUserCode]
+        <#=Scope#> void <#=ActionName#>(<#=ParameterSignature#>) => s_<#=ActionName#>(m_target<#=NamedParameters#>);<#+
+// Template Parameters
+public string ActionName;
+public string Scope;
+public string ParameterSignature; // e.g.: "double p0, string p1"
+public string NamedParameters;    // (comma prefixed), e.g.: ", p0, p1" -- do not prefix for 0 parameters
+public string ParameterTypes;     // (comma prefixed), e.g.: ", double, string" -- do not prefix for 0 parameters
+#>

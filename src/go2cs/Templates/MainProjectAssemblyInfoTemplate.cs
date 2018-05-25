@@ -15,9 +15,9 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
+    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectAssemblyInfoTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public partial class SharedProjectFileItemsTemplate : SharedProjectFileItemsTemplateBase
+    public partial class MainProjectAssemblyInfoTemplate : MainProjectAssemblyInfoTemplateBase
     {
 #line hidden
         /// <summary>
@@ -26,67 +26,62 @@ namespace go2cs.Templates
         public virtual string TransformText()
         {
             
-            #line 1 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
- // This template creates a <PackageName>.projitems file (as referenced by the <PackageName>.shproj) 
+            #line 1 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectAssemblyInfoTemplate.tt"
+ // This template creates a Properties\<FileName>_AssemblyInfo.cs file 
             
             #line default
             #line hidden
-            this.Write(@"<?xml version=""1.0"" encoding=""utf-8""?>
-<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>");
+            this.Write(@"using System;
+using System.Reflection;
+using System.Resources;
+using System.Runtime.InteropServices;
+
+// Assembly identity attributes.
+[assembly: AssemblyVersion(""0.1.*"")]
+
+// Informational attributes.
+[assembly: AssemblyCompany("""")]
+[assembly: AssemblyCopyright(""Copyright (c) ");
             
-            #line 9 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
+            #line 14 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectAssemblyInfoTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(DateTime.Now.Year));
+            
+            #line default
+            #line hidden
+            this.Write("\")]\r\n[assembly: AssemblyProduct(\"https://git.io/vhJqw\")]\r\n\r\n// Assembly manifest " +
+                    "attributes.\r\n#if DEBUG\r\n[assembly: AssemblyConfiguration(\"Debug Build\")]\r\n#else\r" +
+                    "\n[assembly: AssemblyConfiguration(\"Release Build\")]\r\n#endif\r\n\r\n[assembly: Assemb" +
+                    "lyTitle(\"");
+            
+            #line 24 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectAssemblyInfoTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FileName));
+            
+            #line default
+            #line hidden
+            this.Write("\")]\r\n[assembly: AssemblyDescription(\"");
+            
+            #line 25 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectAssemblyInfoTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FileName));
+            
+            #line default
+            #line hidden
+            this.Write(" - auto-converted with go2cs\")]\r\n\r\n// Other configuration attributes.\r\n[assembly:" +
+                    " ComVisible(false)]\r\n[assembly: CLSCompliant(false)]\r\n[assembly: Guid(\"");
+            
+            #line 30 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectAssemblyInfoTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UniqueProjectID));
             
             #line default
             #line hidden
-            this.Write("</SharedGUID>\r\n  </PropertyGroup>\r\n  <PropertyGroup Label=\"Configuration\">\r\n    <" +
-                    "Import_RootNamespace>");
-            
-            #line 12 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(RootNamespace));
-            
-            #line default
-            #line hidden
-            this.Write("</Import_RootNamespace>\r\n  </PropertyGroup>\r\n  <ItemGroup>\r\n");
-            
-            #line 15 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
- foreach (string fileName in FileNames)
-    {
-        
-            
-            #line default
-            #line hidden
-            this.Write("    <Compile Include=\"$(MSBuildThisFileDirectory)");
-            
-            #line 17 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(fileName));
-            
-            #line default
-            #line hidden
-            this.Write("\" />\r\n");
-            
-            #line 18 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
-
-    }
-
-            
-            #line default
-            #line hidden
-            this.Write("  </ItemGroup>\r\n  <ItemGroup>\r\n    <None Include=\"$(MSBuildThisFileDirectory)READ" +
-                    "ME.md\" />\r\n  </ItemGroup>\r\n</Project>\r\n");
+            this.Write("\")]\r\n[assembly: NeutralResourcesLanguage(\"en-US\")]\r\n");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 25 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileItemsTemplate.tt"
+        #line 32 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectAssemblyInfoTemplate.tt"
 
 // Template Parameters
+public string FileName;  // File Name (not package, package is always "main")
 public string UniqueProjectID;
-public string RootNamespace;
-public string[] FileNames;
 
         
         #line default
@@ -100,7 +95,7 @@ public string[] FileNames;
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
-    public class SharedProjectFileItemsTemplateBase
+    public class MainProjectAssemblyInfoTemplateBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

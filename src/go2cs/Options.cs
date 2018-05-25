@@ -132,15 +132,15 @@ namespace go2cs
             m_excludeExpression = new Regex(ExcludeFiles, RegexOptions.Compiled | RegexOptions.Singleline);
         }
 
-        private Options(bool localConvertOnly, string sourcePath)
+        private Options(bool localConvertOnly, string sourcePath, bool convertStandardLibrary = false, bool recurseSubdirectories = false)
         {
             LocalConvertOnly = localConvertOnly;
             OverwriteExistingFiles = false;
             OverwriteExistingPackages = false;
             ShowParseTree = false;
             ExcludeFiles = null;
-            ConvertStandardLibrary = false;
-            RecurseSubdirectories = false;
+            ConvertStandardLibrary = convertStandardLibrary;
+            RecurseSubdirectories = recurseSubdirectories;
             TargetGoSrcPath = null;
             SourcePath = sourcePath;
             TargetPath = null;
@@ -168,7 +168,7 @@ namespace go2cs
             {
                 yield return new Example("·\r\n--> Example to convert a single Go file", new Options(true, "Main.go"));
                 yield return new Example("·\r\n--> Example to convert a Go project", new Options(false, "MyProject\\"));
-                yield return new Example("·\r\n--> Example to convert Go Standard Library", new Options(false, false, false, false, null, true, true, null, "C:\\Go\\src", null));
+                yield return new Example("·\r\n--> Example to convert Go Standard Library", new Options(false, "C:\\Go\\src\\", true, true));
             }
         }
     }

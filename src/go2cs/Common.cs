@@ -35,8 +35,6 @@ namespace go2cs
     {
         public const string RootNamespace = "go2cs";
 
-        public const string TemplateStartMarker = ">>START\n";
-
         public static readonly Assembly EntryAssembly;
 
         public static string GoUtilSharedProject { get; private set; }
@@ -109,47 +107,21 @@ namespace go2cs
             }
         }
 
-        public static string GetTemplate(string templateName, params object[] args)
-        {
-            const string prefix = RootNamespace + ".Templates.";
-            string template = null;
-
-            using (Stream resourceStream = EntryAssembly.GetManifestResourceStream($"{prefix}{templateName}"))
-            {
-                if ((object)resourceStream != null)
-                {
-                    byte[] buffer = new byte[resourceStream.Length];
-                    resourceStream.Read(buffer, 0, (int)resourceStream.Length);
-                    template = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
-                }
-            }
-
-            if (string.IsNullOrEmpty(template))
-                throw new FileNotFoundException("Embedded resource file not found.", templateName);
-
-            int startIndex = template.IndexOf(TemplateStartMarker, StringComparison.Ordinal);
-
-            if (startIndex > 0)
-            {
-                startIndex += TemplateStartMarker.Length;
-                template = template.Substring(startIndex);
-            }
-
-            return string.Format(template, args);
-        }
-
         // Use this function to preserve existing shared project Guid when overwriting
         public static string GetSharedProjectGuid(string sharedProjectFileName)
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(sharedProjectFileName);
+            if (File.Exists(sharedProjectFileName))
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(sharedProjectFileName);
 
-            XmlNodeList sharedGuidList = xmlDoc.GetElementsByTagName("SharedGUID");
+                XmlNodeList sharedGuidList = xmlDoc.GetElementsByTagName("SharedGUID");
 
-            if (sharedGuidList.Count > 0)
-                return sharedGuidList[0].InnerText;
+                if (sharedGuidList.Count > 0)
+                    return sharedGuidList[0].InnerText;
+            }
 
-            throw new InvalidOperationException($"Failed to find <SharedGUID> tag in shared project items file: {sharedProjectFileName}");
+            return Guid.NewGuid().ToString();
         }
 
         private static string GetMD5HashFromFile(string fileName)

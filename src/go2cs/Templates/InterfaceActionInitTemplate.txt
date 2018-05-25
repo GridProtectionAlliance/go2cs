@@ -1,9 +1,0 @@
-{0} = Method Name
-{1} = Parameter Types (comma prefixed), e.g.: ", double, string" -- do not prefix for 0 parameters
-{2} = Interface Name
->>START
-
-            s_{0} = targetType.GetExtensionDelegate("{0}") as Action<T{1}>;
-
-            if (s_{0} == null)
-                throw new NotImplementedException($"{{targetType.Name}} does not implement {2}.{0} method");

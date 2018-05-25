@@ -1,3 +1,0 @@
-﻿{0} = Converted C# File Name (no path)
->>START
-    <Compile Include="$(MSBuildThisFileDirectory){0}" />

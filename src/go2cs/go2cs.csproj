@@ -73,15 +73,45 @@
     <Compile Include="Parser\GolangParser.cs" />
     <Compile Include="ParseTreeValues.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Templates\InterfaceActionDeclTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InterfaceActionDeclTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\InterfaceActionInitTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InterfaceActionInitTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\InterfaceFuncDeclTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InterfaceFuncDeclTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\InterfaceFuncInitTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InterfaceFuncInitTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\InterfaceTypeTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>InterfaceTypeTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\MainProjectAssemblyInfoTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MainProjectAssemblyInfoTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\MainProjectTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MainProjectTemplate.tt</DependentUpon>
+    </Compile>
     <Compile Include="Templates\SharedProjectFileItemsTemplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SharedProjectFileItemsTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\SharedProjectFileItemTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SharedProjectFileItemTemplate.tt</DependentUpon>
     </Compile>
     <Compile Include="Templates\SharedProjectFileTemplate.cs">
       <AutoGen>True</AutoGen>
@@ -101,13 +131,37 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="go2cs.ico" />
+    <Content Include="Templates\InterfaceActionDeclTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceActionDeclTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Templates\InterfaceActionInitTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceActionInitTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Templates\InterfaceFuncDeclTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceFuncDeclTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Templates\InterfaceFuncInitTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceFuncInitTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Templates\InterfaceTypeTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceTypeTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Templates\MainProjectAssemblyInfoTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MainProjectAssemblyInfoTemplate.cs</LastGenOutput>
+    </Content>
+    <Content Include="Templates\MainProjectTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MainProjectTemplate.cs</LastGenOutput>
+    </Content>
     <Content Include="Templates\SharedProjectFileItemsTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>SharedProjectFileItemsTemplate.cs</LastGenOutput>
-    </Content>
-    <Content Include="Templates\SharedProjectFileItemTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>SharedProjectFileItemTemplate.cs</LastGenOutput>
     </Content>
     <Content Include="Templates\SharedProjectFileTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
