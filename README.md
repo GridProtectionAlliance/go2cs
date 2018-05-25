@@ -73,6 +73,7 @@ Note that code converted from Go to C# will also target .NET 4.7.1 and compile u
 2. Execute `go2cs` specifying the Go source path or specific file name to convert. For example:
  * Convert a single Go file: `go2cs -l Main.go`
  * Convert a Go project: `go2cs MyProject`
+ * Convert Go Standard Library: `go2cs -s -r C:\\Go\src\\`
 
 ### Command Line Options
 
@@ -84,6 +85,7 @@ Note that code converted from Go to C# will also target .NET 4.7.1 and compile u
 | -t | (Default: false) Set to show syntax tree of parsed source file. |
 | -e | (Default: $.^) Regular expression to exclude certain files from conversion, e.g., "^.+\_test\\.go$". Defaults to exclude none. |
 | -s | (Default: false) Set to convert needed packages from Go standard library files found in "%GOROOT%\\src". |
+| -r | (Default: false) Set to recursively convert source files in subdirectories when a Go source path is specified. |
 | -g | (Default: %GOPATH%\\src\\go2cs) Target path for converted Go standard library source files. |
 | --help | Display this help screen. |
 | --version | Display version information. |   

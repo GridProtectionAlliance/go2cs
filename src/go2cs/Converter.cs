@@ -201,6 +201,19 @@ namespace go2cs
                     if (convertFileMatch(fileName))
                         ConvertFile(options, fileName);
                 }
+
+                if (options.RecurseSubdirectories)
+                {
+                    foreach (string subDirectory in Directory.EnumerateDirectories(sourcePath))
+                    {
+                        string targetDirectory = options.TargetPath;
+
+                        if (!string.IsNullOrEmpty(targetDirectory))
+                            targetDirectory = Path.Combine(targetDirectory, subDirectory.Substring(sourcePath.Length));
+
+                        Convert(Options.Clone(options, options.OverwriteExistingPackages, subDirectory, targetDirectory));
+                    }
+                }
             }
             else
             {

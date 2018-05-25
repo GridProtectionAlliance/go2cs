@@ -76,6 +76,12 @@ namespace go2cs
             get;
         }
 
+        [Option('r', Required = false, Default = false, HelpText = "Set to recursively convert source files in subdirectories when a Go source path is specified.")]
+        public bool RecurseSubdirectories
+        {
+            get;
+        }
+
         [Option('g', Required = false, Default = DefaultTargetGoSrcPath, HelpText = "Target path for converted Go standard library source files.")]
         public string TargetGoSrcPath
         {
@@ -101,6 +107,7 @@ namespace go2cs
             bool showParseTree,
             string excludeFiles,
             bool convertStandardLibrary,
+            bool recurseSubdirectories,
             string targetGoSrcPath,
             string sourcePath,
             string targetPath)
@@ -117,6 +124,7 @@ namespace go2cs
             ShowParseTree = showParseTree;
             ExcludeFiles = excludeFiles;
             ConvertStandardLibrary = convertStandardLibrary;
+            RecurseSubdirectories = recurseSubdirectories;
             TargetGoSrcPath = AddPathSuffix(Path.GetFullPath(Environment.ExpandEnvironmentVariables(targetGoSrcPath)));
             SourcePath = sourcePath == null ? null : Environment.ExpandEnvironmentVariables(sourcePath);
             TargetPath = targetPath == null ? null : Environment.ExpandEnvironmentVariables(targetPath);
@@ -132,6 +140,7 @@ namespace go2cs
             ShowParseTree = false;
             ExcludeFiles = null;
             ConvertStandardLibrary = false;
+            RecurseSubdirectories = false;
             TargetGoSrcPath = null;
             SourcePath = sourcePath;
             TargetPath = null;
@@ -147,6 +156,7 @@ namespace go2cs
                 options.ShowParseTree, 
                 options.ExcludeFiles,
                 options.ConvertStandardLibrary,
+                options.RecurseSubdirectories,
                 options.TargetGoSrcPath, 
                 sourcePath, 
                 targetPath);
@@ -158,6 +168,7 @@ namespace go2cs
             {
                 yield return new Example("·\r\n--> Example to convert a single Go file", new Options(true, "Main.go"));
                 yield return new Example("·\r\n--> Example to convert a Go project", new Options(false, "MyProject\\"));
+                yield return new Example("·\r\n--> Example to convert Go Standard Library", new Options(false, false, false, false, null, true, true, null, "C:\\Go\\src", null));
             }
         }
     }
