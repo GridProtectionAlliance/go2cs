@@ -145,7 +145,7 @@ namespace go2cs
         private static readonly HashSet<string> s_processedImports;
         private static readonly HashSet<string> s_importQueue;
         private static readonly HashSet<string> s_mainPackageFiles;
-        private static readonly Dictionary<string, HashSet<(string fileName, string nameSpace)>> m_packageInfo;
+        private static readonly Dictionary<string, (string nameSpace, HashSet<string> fileNames)> s_packageInfo;
         private static int s_totalSkippedFiles;
         private static int s_totalSkippedPackages;
         private static int s_totalWarnings;
@@ -180,7 +180,7 @@ namespace go2cs
             s_processedImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             s_importQueue = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             s_mainPackageFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            m_packageInfo = new Dictionary<string, HashSet<(string, string)>>(StringComparer.Ordinal);
+            s_packageInfo = new Dictionary<string, (string, HashSet<string>)>(StringComparer.Ordinal);
         }
 
         public static int TotalProcessedFiles => s_processedFiles.Count;
@@ -196,18 +196,18 @@ namespace go2cs
             // Map of package names to list of package path and file names
             Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData = new Dictionary<string, List<(string, string[])>>(StringComparer.Ordinal);
 
-            // Process shared packages
-            foreach (KeyValuePair<string, HashSet<(string, string)>> kvp in m_packageInfo)
+            // Process packages - these become shared projects
+            foreach (KeyValuePair<string, (string nameSpace, HashSet<string> fileNames)> kvp in s_packageInfo)
             {
                 string package = kvp.Key;
-                HashSet<(string fileName, string nameSpace)> packageFiles = kvp.Value;
+                string packageNamespace = kvp.Value.nameSpace ?? "go";
+                HashSet<string> packageFiles = kvp.Value.fileNames;
 
                 // Depending on the scope of the conversion, the same package name may exist in multiple paths
-                foreach (var packageGroup in packageFiles.GroupBy(GetDirectoryName, (path, packageInfoItems) => new { Path = path, PackageInfoItems = packageInfoItems.ToArray() }, StringComparer.OrdinalIgnoreCase))
+                foreach (var fileGroup in packageFiles.GroupBy(Path.GetDirectoryName, (path, fileNames) => new { Path = path, FileNames = fileNames.ToArray() }, StringComparer.OrdinalIgnoreCase))
                 {
-                    string packagePath = packageGroup.Path;
-                    string[] packageFileNames = packageGroup.PackageInfoItems.Select(packageInfo => packageInfo.fileName).ToArray();
-                    string packageNamespace = packageGroup.PackageInfoItems.FirstOrDefault().nameSpace ?? "go";
+                    string packagePath = fileGroup.Path;
+                    string[] packageFileNames = fileGroup.FileNames;
 
                     List<(string path, string[] fileNames)> groupPackageData = groupedPackageData.GetOrAdd(package, _ => new List<(string path, string[] fileNames)>());
                     groupPackageData.Add((packagePath, packageFileNames));
@@ -309,13 +309,13 @@ namespace go2cs
                 }
 
                 string mainProjectAssemblyInfoFileContent = new MainProjectAssemblyInfoTemplate
-                    {
-                        AssemblyName = assemblyName,
-                        UniqueProjectID = uniqueProjectID
-                    }
-                    .TransformText();
+                {
+                    AssemblyName = assemblyName,
+                    UniqueProjectID = uniqueProjectID
+                }
+                .TransformText();
 
-                // Build a main project assembly info file
+                // Build a main project assembly info file (don't overwrite possible user changes)
                 if (!File.Exists(mainProjectAssemblyInfoFile))
                     using (StreamWriter writer = File.CreateText(mainProjectAssemblyInfoFile))
                         writer.Write(mainProjectAssemblyInfoFileContent);
@@ -486,8 +486,8 @@ namespace go2cs
 
         private static void AddFileToPackage(string package, string fileName, string nameSpace)
         {
-            HashSet<(string, string)> packageInfo = m_packageInfo.GetOrAdd(package, _ => new HashSet<(string fileName, string nameSpace)>(PackageInfoComparer.Default));
-            packageInfo.Add((fileName, nameSpace));
+            (string, HashSet<string> fileNames) packageInfo = s_packageInfo.GetOrAdd(package, _ => (nameSpace, new HashSet<string>(StringComparer.OrdinalIgnoreCase)));
+            packageInfo.fileNames.Add(fileName);
         }
 
         private static string GetAbsolutePath(string filePath)
@@ -496,23 +496,6 @@ namespace go2cs
                 filePath = Path.Combine(s_goPath, filePath);
 
             return filePath;
-        }
-
-        private static string GetDirectoryName((string fileName, string _) pair) => Path.GetDirectoryName(pair.fileName);
-
-        private class PackageInfoComparer : IComparer<(string fileName, string nameSpace)>, IEqualityComparer<(string fileName, string nameSpace)>
-        {
-            public int Compare((string fileName, string nameSpace) x, (string fileName, string nameSpace) y)
-            {
-                int first = string.Compare(x.fileName, y.fileName, StringComparison.OrdinalIgnoreCase);
-                return first != 0 ? first : string.CompareOrdinal(x.nameSpace, y.nameSpace);
-            }
-
-            public bool Equals((string fileName, string nameSpace) x, (string fileName, string nameSpace) y) => Compare(x, y) == 0;
-
-            public int GetHashCode((string fileName, string nameSpace) obj) => (obj.fileName?.ToLower().GetHashCode() ?? 0) ^ (obj.nameSpace?.GetHashCode() ?? 0);
-
-            public static readonly PackageInfoComparer Default = new PackageInfoComparer();
         }
     }
 }
