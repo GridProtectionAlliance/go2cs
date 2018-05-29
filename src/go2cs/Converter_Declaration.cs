@@ -24,6 +24,7 @@
 using System.IO;
 using Antlr4.Runtime.Misc;
 using go2cs.Templates;
+using static go2cs.Common;
 
 namespace go2cs
 {
@@ -34,6 +35,8 @@ namespace go2cs
             string identifier = context.IDENTIFIER().GetText();
             string scope = char.IsUpper(identifier[0]) ? "public" : "private";
 
+            identifier = SanitizedIdentifier(identifier);
+
             if (!m_topLevelDeclaration)
                 m_targetFile.AppendLine();
 
@@ -41,11 +44,34 @@ namespace go2cs
             m_targetFile.AppendLine($"{Spacing()}{{");
 
             if (m_structFields.TryGetValue(context.type()?.typeLit()?.structType(), out string fields))
-                m_targetFile.AppendLine($"{Spacing(1)}{fields}");
+            {
+                m_targetFile.Append(fields);
+            }
+            else if (m_types.TryGetValue(context.type(), out GoTypeInfo typeInfo))
+            {
+                // TODO: The following works well for a primitive type definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
+                string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{m_package}_{identifier}StructOf({typeInfo.Name}).cs");
+
+                using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
+                    writer.Write(new InheritedTypeTemplate
+                        {
+                            NamespaceHeader = m_namespaceHeader,
+                            NamespaceFooter = m_namespaceFooter,
+                            PackageName = m_package,
+                            StructName = identifier,
+                            Scope = scope,
+                            TypeName = typeInfo.PrimitiveName
+                        }
+                        .TransformText());
+
+                // Track file name associated with package
+                AddFileToPackage(m_package, ancillaryInheritedTypeFileName, m_packageNamespace);
+                m_targetFile.AppendLine($"{Spacing(1)}// Redeclares Go {typeInfo.Name} type - see \"{Path.GetFileName(ancillaryInheritedTypeFileName)}\"");
+            }
 
             m_targetFile.AppendLine($"{Spacing()}}}");
 
-            string ancillaryStructFileName = Path.Combine(TargetFilePath, $"{m_package}_{identifier}Struct.cs");
+            string ancillaryStructFileName = Path.Combine(TargetFilePath, $"{m_package}_{identifier}StructIsNil.cs");
 
             using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
                 writer.Write(new StructTypeTemplate

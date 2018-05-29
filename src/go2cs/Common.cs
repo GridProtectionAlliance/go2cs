@@ -22,6 +22,8 @@
 //******************************************************************************************************
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -37,11 +39,27 @@ namespace go2cs
 
         public static readonly Assembly EntryAssembly;
 
+        public static string GoStandardLibraryProject { get; private set; }
+
         public static string GoUtilSharedProject { get; private set; }
+
+        private static readonly HashSet<string> s_keywords;
 
         static Common()
         {
             EntryAssembly = Assembly.GetEntryAssembly();
+
+            s_keywords = new HashSet<string>(new[]
+            {
+                "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const",
+                "continue", "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern",
+                "false", "finally", "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in", "int", "interface",
+                "internal", "is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override",
+                "params", "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short",
+                "sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true", "try", "typeof",
+                "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while"
+            },
+            StringComparer.Ordinal);
         }
 
         public static void RestoreGoUtilSources(string targetPath)
@@ -88,6 +106,8 @@ namespace go2cs
                     }
                 }
             }
+
+            GoStandardLibraryProject = Path.Combine(targetPath, $"{Converter.StandardLibrary}.projitems");
         }
 
         // Use this function to preserve existing shared project Guid when overwriting
@@ -172,5 +192,7 @@ namespace go2cs
 
             return relativePath.Replace('/', Path.DirectorySeparatorChar);
         }
+
+        public static string SanitizedIdentifier(string identifier) => s_keywords.Contains(identifier) ? $"@{identifier}" : identifier;
     }
 }

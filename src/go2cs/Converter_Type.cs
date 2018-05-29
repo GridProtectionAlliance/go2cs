@@ -22,7 +22,10 @@
 //******************************************************************************************************
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using static go2cs.Common;
 
 namespace go2cs
 {
@@ -59,7 +62,6 @@ namespace go2cs
         private class GoTypeInfo
         {
             public string Name;
-            public string MappedName;       // Intra-function declaration name
             public string PrimitiveName;
             public string FrameworkName;
             public GoTypeClass TypeClass;
@@ -77,7 +79,6 @@ namespace go2cs
         private readonly GoTypeInfo ObjectType = new GoTypeInfo
         {
             Name = "object",
-            MappedName = "object",
             PrimitiveName = "object",
             FrameworkName = "System.Object",
             TypeClass = GoTypeClass.Simple
@@ -98,7 +99,6 @@ namespace go2cs
             m_types[context.Parent] = new GoTypeInfo
             {
                 Name = type,
-                MappedName = GetMappedName(type),
                 PrimitiveName = ConvertToPrimitiveType(type),
                 FrameworkName = ConvertToFrameworkType(type),
                 TypeClass = GoTypeClass.Simple
@@ -135,7 +135,6 @@ namespace go2cs
             m_types[context.Parent.Parent] = new GoTypeInfo
             {
                 Name = typeInfo.Name,
-                MappedName = typeInfo.MappedName,
                 PrimitiveName = $"{typeInfo.PrimitiveName}{arrayLength}",
                 FrameworkName = $"{typeInfo.FrameworkName}{arrayLength}",
                 TypeClass = GoTypeClass.Simple,
@@ -162,7 +161,6 @@ namespace go2cs
             m_types[context.Parent.Parent] = new GoMapTypeInfo
             {
                 Name = type,
-                MappedName = type,
                 PrimitiveName = $"Dictionary<{keyTypeInfo.PrimitiveName}, {elementTypeInfo.PrimitiveName}>",
                 FrameworkName = $"System.Collections.Generic.Dictionary<{keyTypeInfo.FrameworkName}, {elementTypeInfo.FrameworkName}>",
                 ElementTypeInfo = elementTypeInfo,
@@ -181,7 +179,6 @@ namespace go2cs
             m_types[context.Parent.Parent] = new GoTypeInfo
             {
                 Name = typeInfo.Name,
-                MappedName = typeInfo.MappedName,
                 PrimitiveName = $"Slice<{typeInfo.PrimitiveName}>",
                 FrameworkName = $"goutil.Slice<{typeInfo.FrameworkName}>",
                 TypeClass = GoTypeClass.Simple,
@@ -195,17 +192,60 @@ namespace go2cs
             //m_types.TryGetValue(context., out GoTypeInfo typeInfo);
             //m_types.Peek().TypeClass = GoTypeClass.Struct;
 
-            m_structFields[context] = string.Join($"{Environment.NewLine}{Spacing(1)}", context.fieldDecl()?.Select(ctx => ctx.GetText()) ?? new[] { "" });
+            List<(string fieldName, string fieldType, string description, string comment)> fields = new List<(string, string, string, string)>();
 
-            m_types[context.Parent.Parent] = new GoTypeInfo
+            for (int i = 0; i < context.fieldDecl().Length; i++)
             {
-                //Name = typeInfo.Name,
-                //MappedName = typeInfo.MappedName,
-                //PrimitiveName = $"Slice<{typeInfo.PrimitiveName}>",
-                //FrameworkName = $"goutil.Slice<{typeInfo.FrameworkName}>",
-                //TypeClass = GoTypeClass.Simple,
-                //IsSlice = true
-            };
+                GolangParser.FieldDeclContext fieldDecl = context.fieldDecl(i);
+                GoTypeInfo typeInfo;
+                string description = fieldDecl.STRING_LIT()?.GetText();
+
+                if (m_identifiers.TryGetValue(fieldDecl.identifierList(), out string[] identifiers) && m_types.TryGetValue(fieldDecl.type(), out typeInfo))
+                {
+                    foreach (string identifier in identifiers)
+                        fields.Add(($"{SanitizedIdentifier(identifier)}", typeInfo.PrimitiveName, description, CheckForCommentsRight(fieldDecl)));
+                }
+                else if (m_types.TryGetValue(fieldDecl.anonymousField(), out typeInfo))
+                {
+                    // TODO: Handle promoted field values
+                    fields.Add(($"@{typeInfo.PrimitiveName}", typeInfo.PrimitiveName, description, CheckForCommentsRight(fieldDecl)));
+                }
+            }
+
+            string getStructureField((string fieldName, string fieldType, string description, string comment) field)
+            {
+                StringBuilder fieldDecl = new StringBuilder();
+
+                if (!string.IsNullOrWhiteSpace(field.description))
+                {
+                    string description = field.description.Trim();
+
+                    if (description.Length > 2)
+                    {
+                        m_requiredUsings.Add("System.ComponentModel");
+                        fieldDecl.AppendLine($"{Spacing(1)}[Description(\"{description.Substring(1, description.Length - 2)}\")]");
+                    }
+                }
+
+                fieldDecl.Append($"{Spacing(1)}public {field.fieldType} {field.fieldName};");
+
+                if (!string.IsNullOrEmpty(field.comment))
+                    fieldDecl.Append(field.comment);
+
+                return fieldDecl.ToString();
+            }
+
+            m_structFields[context] = string.Join($"{Environment.NewLine}", fields.Select(getStructureField));
+
+            //m_types[context.Parent.Parent] = new GoTypeInfo
+            //{
+            //    //Name = typeInfo.Name,
+            //    //MappedName = typeInfo.MappedName,
+            //    //PrimitiveName = $"Slice<{typeInfo.PrimitiveName}>",
+            //    //FrameworkName = $"goutil.Slice<{typeInfo.FrameworkName}>",
+            //    //TypeClass = GoTypeClass.Simple,
+            //    //IsSlice = true
+            //};
         }
 
         public override void ExitFunctionType(GolangParser.FunctionTypeContext context)

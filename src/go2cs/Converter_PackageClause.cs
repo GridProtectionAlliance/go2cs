@@ -23,8 +23,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using static go2cs.Common;
 
 namespace go2cs
 {
@@ -49,7 +50,7 @@ namespace go2cs
             // Go package clause is the first keyword encountered - cache details and comments
             // that will be written out after imports. C# import statements (i.e., usings)
             // typically occur before namespace and class definitions
-            m_package = context.IDENTIFIER().GetText();
+            m_package = SanitizedIdentifier(context.IDENTIFIER().GetText());
 
             if (m_package.Equals("main"))
             {
@@ -82,7 +83,7 @@ namespace go2cs
                 m_packageImport = $"{m_packageImport.Replace('\\', '/')}";
 
                 lastSlash = m_packageImport.LastIndexOf('/');
-                string package = lastSlash > -1 ? m_packageImport.Substring(lastSlash + 1) : m_packageImport;
+                string package = SanitizedIdentifier(lastSlash > -1 ? m_packageImport.Substring(lastSlash + 1) : m_packageImport);
 
                 if (!package.Equals(m_package))
                 {
@@ -91,24 +92,21 @@ namespace go2cs
                 }
             }
 
-            // Package name should not contain path
-            Debug.Assert(!m_package.Contains("/"));
+            string[] paths = m_packageImport.Split('/').Select(SanitizedIdentifier).ToArray();
+            string packageNamespace = $"{RootNamespace}.{string.Join(".", paths)}";
 
-            m_packageNamespace = $"{RootNamespace}.{m_packageImport.Replace('/', '.')}";
+            m_packageUsing = $"{m_package} = {packageNamespace}{ClassSuffix}";
+            m_packageNamespace = packageNamespace.Substring(0, packageNamespace.LastIndexOf('.'));
 
             // Track file name associated with package
             AddFileToPackage(m_package, m_targetFileName, m_packageNamespace);
 
-            m_packageUsing = $"{m_package} = {m_packageNamespace}{ClassSuffix}";
-
             // Define namespaces
             List<string> packageNamespaces = new List<string> { RootNamespace };
 
-            string[] namespaces = m_packageImport.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
-
-            if (namespaces.Length > 1)
+            if (paths.Length > 1)
             {
-                packageNamespaces.AddRange(namespaces);
+                packageNamespaces.AddRange(paths);
                 packageNamespaces.RemoveAt(packageNamespaces.Count - 1);
             }
 

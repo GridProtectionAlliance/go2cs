@@ -23,6 +23,7 @@
 
 using System;
 using System.Globalization;
+using static go2cs.Common;
 
 namespace go2cs
 {
@@ -73,6 +74,8 @@ namespace go2cs
                 else
                 {
                     string scope = char.IsUpper(identifier[0]) ? "public" : "private";
+
+                    identifier = SanitizedIdentifier(identifier);
 
                     //if (type == "Complex")
                     //    m_targetFile.Append($"{Spacing()}{scope} readonly Complex {identifier} = new {ApplyIota("Complex", type)};");

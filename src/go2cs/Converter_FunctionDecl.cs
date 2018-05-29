@@ -21,6 +21,8 @@
 //
 //******************************************************************************************************
 
+using static go2cs.Common;
+
 namespace go2cs
 {
     public partial class Converter
@@ -39,6 +41,8 @@ namespace go2cs
             m_currentFunction = context.IDENTIFIER().GetText();
 
             string scope = char.IsUpper(m_currentFunction[0]) ? "public" : "private";
+
+            m_currentFunction = SanitizedIdentifier(m_currentFunction);
 
             // Handle Go "main" function as a special case, in C# this should be "Main"
             if (m_currentFunction.Equals("main"))
@@ -87,7 +91,10 @@ namespace go2cs
         public override void ExitFunction(GolangParser.FunctionContext context)
         {
             string tempBlock = context.block().GetText();
-            tempBlock = tempBlock.Substring(1, tempBlock.Length - 2);
+
+            if (tempBlock.Length > 0)
+                tempBlock = tempBlock.Substring(1, tempBlock.Length - 2);
+
             m_targetFile.AppendLine(FixForwardSpacing(tempBlock));
         }
     }

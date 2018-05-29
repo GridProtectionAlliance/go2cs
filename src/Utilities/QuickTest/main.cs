@@ -2,7 +2,6 @@
 using goutil;
 using System;
 using System.Numerics;
-using MyFloat = System.Double;
 
 public static unsafe partial class main_package
 {
@@ -84,6 +83,8 @@ public static unsafe partial class main_package
 
     private static string Error(this MyError myError)
     {
+        //ValueTuple<double> AnotherType; // = new ValueTuple<double>();
+
         fmt f = new fmt();
 
         val(ref *f.buf);
@@ -96,6 +97,16 @@ public static unsafe partial class main_package
     private static void val(ref buffer buf)
     {
 
+    }
+
+    public partial struct MyFloat
+    {
+        private readonly double m_value;
+
+        public MyFloat(double value) => m_value = value;
+
+        public static implicit operator MyFloat(double value) => new MyFloat(value);
+        public static implicit operator double(MyFloat value) => value.m_value;
     }
 
     private static void Main1()

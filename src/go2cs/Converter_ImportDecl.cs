@@ -23,6 +23,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using static go2cs.Common;
 
 namespace go2cs
 {
@@ -69,15 +71,21 @@ namespace go2cs
 
         public override void EnterImportPath(GolangParser.ImportPathContext context)
         {
-            string package = context.STRING_LIT().GetText();
+            string packagePath = context.STRING_LIT().GetText();
 
             // Remove quotes from package name
-            package = package.Substring(1, package.Length - 2);
+            packagePath = packagePath.Substring(1, packagePath.Length - 2);
+
+            int lastSlash = packagePath.LastIndexOf('/');
+
+            string packageName = SanitizedIdentifier(lastSlash > -1 ? packagePath.Substring(lastSlash + 1) : packagePath);
 
             // Add package to import queue
-            s_importQueue.Add(package);
+            s_importQueue.Add(packagePath);
 
-            m_targetFile.Append($"using {package} = {RootNamespace}.{package.Replace('/', '.')}{ClassSuffix};");
+            IEnumerable<string> paths = packagePath.Split('/').Select(SanitizedIdentifier);
+
+            m_targetFile.Append($"using {packageName} = {RootNamespace}.{string.Join(".", paths)}{ClassSuffix};");
 
             m_targetFile.Append(CheckForCommentsRight(context));
 

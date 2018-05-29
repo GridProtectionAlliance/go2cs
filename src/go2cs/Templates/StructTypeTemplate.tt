@@ -1,4 +1,4 @@
-﻿<# // This template creates a <PackageName>_<StructName>Struct.cs file #>
+﻿<# // This template creates a <PackageName>_<StructName>StructIsNil.cs file #>
 <#@ template language="C#" inherits="TemplateBase" #>
 <#@ output extension=".cs" #>
 //---------------------------------------------------------
@@ -8,9 +8,8 @@
 //     if the code is regenerated.
 // </auto-generated>
 //---------------------------------------------------------
-using System;
 using System.CodeDom.Compiler;
-using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using goutil;
 
 <#=NamespaceHeader#>
@@ -31,6 +30,9 @@ using goutil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, <#=StructName#> value) => value != nil;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator <#=StructName#>(NilType nil) => default(<#=StructName#>);
         }
     }
 <#=NamespaceFooter#>

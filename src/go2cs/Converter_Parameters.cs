@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-using Antlr4.Runtime.Tree;
+using static go2cs.Common;
 
 namespace go2cs
 {
@@ -79,7 +79,7 @@ namespace go2cs
             {
                 for (int i = 0; i < identifiers.Length; i++)
                 {
-                    string identifier = identifiers[i];
+                    string identifier = SanitizedIdentifier(identifiers[i]);
 
                     // Check for unnamed parameters
                     if (string.IsNullOrWhiteSpace(identifier))
