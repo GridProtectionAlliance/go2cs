@@ -145,7 +145,7 @@ namespace go2cs
         private static readonly HashSet<string> s_processedImports;
         private static readonly HashSet<string> s_importQueue;
         private static readonly HashSet<string> s_mainPackageFiles;
-        private static readonly Dictionary<string, (string nameSpace, HashSet<string> fileNames)> s_packageInfo;
+        private static readonly Dictionary<string, Dictionary<string, (string nameSpace, HashSet<string> fileNames)>> s_packageInfo;
         private static int s_totalSkippedFiles;
         private static int s_totalSkippedPackages;
         private static int s_totalWarnings;
@@ -180,7 +180,7 @@ namespace go2cs
             s_processedImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             s_importQueue = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             s_mainPackageFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            s_packageInfo = new Dictionary<string, (string, HashSet<string>)>(StringComparer.Ordinal);
+            s_packageInfo = new Dictionary<string, Dictionary<string, (string, HashSet<string>)>>(StringComparer.Ordinal);
         }
 
         public static int TotalProcessedFiles => s_processedFiles.Count;
@@ -197,17 +197,16 @@ namespace go2cs
             Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData = new Dictionary<string, List<(string, string[])>>(StringComparer.Ordinal);
 
             // Process packages - these become shared projects
-            foreach (KeyValuePair<string, (string nameSpace, HashSet<string> fileNames)> kvp in s_packageInfo)
+            foreach (KeyValuePair<string, Dictionary<string, (string nameSpace, HashSet<string> fileNames)>> kvp in s_packageInfo)
             {
                 string package = kvp.Key;
-                string packageNamespace = kvp.Value.nameSpace ?? "go";
-                HashSet<string> packageFiles = kvp.Value.fileNames;
 
                 // Depending on the scope of the conversion, the same package name may exist in multiple paths
-                foreach (var fileGroup in packageFiles.GroupBy(Path.GetDirectoryName, (path, fileNames) => new { Path = path, FileNames = fileNames.ToArray() }, StringComparer.OrdinalIgnoreCase))
+                foreach (KeyValuePair<string, (string nameSpace, HashSet<string> fileNames)> fileGroup in kvp.Value)
                 {
-                    string packagePath = fileGroup.Path;
-                    string[] packageFileNames = fileGroup.FileNames;
+                    string packagePath = fileGroup.Key;
+                    string packageNamespace = fileGroup.Value.nameSpace ?? "go";
+                    string[] packageFileNames = fileGroup.Value.fileNames.ToArray();
 
                     List<(string path, string[] fileNames)> groupPackageData = groupedPackageData.GetOrAdd(package, _ => new List<(string path, string[] fileNames)>());
                     groupPackageData.Add((packagePath, packageFileNames));
@@ -486,8 +485,10 @@ namespace go2cs
 
         private static void AddFileToPackage(string package, string fileName, string nameSpace)
         {
-            (string, HashSet<string> fileNames) packageInfo = s_packageInfo.GetOrAdd(package, _ => (nameSpace, new HashSet<string>(StringComparer.OrdinalIgnoreCase)));
-            packageInfo.fileNames.Add(fileName);
+            // Since the same package name may exist at multiple paths, we track details by path
+            Dictionary<string, (string, HashSet<string>)> packageInfo = s_packageInfo.GetOrAdd(Path.GetDirectoryName(fileName), _ => new Dictionary<string, (string, HashSet<string>)>(StringComparer.OrdinalIgnoreCase));
+            (string, HashSet<string> fileNames) fileGroup = packageInfo.GetOrAdd(package, _ => (nameSpace, new HashSet<string>(StringComparer.OrdinalIgnoreCase)));
+            fileGroup.fileNames.Add(fileName);
         }
 
         private static string GetAbsolutePath(string filePath)
