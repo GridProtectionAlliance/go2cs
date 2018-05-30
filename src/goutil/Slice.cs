@@ -27,9 +27,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using static goutil.BuiltInFunctions;
+using static go.BuiltInFunctions;
 
-namespace goutil
+namespace go
 {
     public interface ISlice
     {
@@ -209,6 +209,9 @@ namespace goutil
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, Slice<T> slice) => slice != nil;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Slice<T>(NilType nil) => default;
 
         #endregion
 

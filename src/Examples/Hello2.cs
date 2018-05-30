@@ -5,26 +5,26 @@
 // Package utf8 implements functions and constants to support text encoded in
 // UTF-8. It includes functions to translate between runes and UTF-8 byte sequences.
 
-// package main -- go2cs converted at 2018 May 23 21:06:31 UTC
+// package main -- go2cs converted at 2018 May 30 19:31:16 UTC
 // Original source: D:\Projects\go2cs\src\Examples\Hello2.go
 
 // Package comments
 
 // More comments...
 using fmt = go.fmt_package; /* comment after import */
-using math/rand = go.math.rand_package; // comment after import 2
+using rand = go.math.rand_package; // comment after import 2
 using another = go.another_package;
-using test/and/two/noy = go.test.and.two.noy_package;
+using noy = go.test.and.two.noy_package;
 
-using static goutil.BuiltInFunctions;
-using goutil;
+using static go.BuiltInFunctions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 
 namespace go
 {
-    private static partial class main_package
+    public static unsafe partial class main_package
     {
         // The conditions RuneError==unicode.ReplacementChar and
         // MaxRune==unicode.MaxRune are verified in the tests.
@@ -44,30 +44,40 @@ namespace go
 
 
 
-        public class Person
+        public partial struct Person
         {
+            // Redeclares Go map[string]string type - see "Hello2_PersonStructOf(map[string]string).cs"
         }
 
-        public class Job
+        public partial struct Job
         {
+            // Redeclares Go map[string]string type - see "Hello2_JobStructOf(map[string]string).cs"
         }
 
-        private class span
+        private partial struct span
         {
-        }
+            [Description("start field")]
+            public long start;
+            [Description("end field")]
+            public long end;
+            [Description("another field")]
+            public long another;        }
 
-        public class User
+        public partial struct User
         {
-        }
+            public long Id;
+            public string Name;        }
 
-        public class Employee
+        public partial struct Employee
         {
-        }
+            public Title User;
+            public Department @string;
+            public string @string;        }
 
         /* comment before function */
         private static void Main() => func((defer, panic, recover) =>
         {
-            ThreadPool.QueueUserWorkItem(state => DoIt("Yup!"));            fmt.Println("Hello, 世界")test(12)goDoIt("Yup!")fmt.Println("My favorite number is",rand.Intn(10))fmt.Println("My second favorite number is",rand.Intn(10))
+            ThreadPool.QueueUserWorkItem(state => "DoIt(\"Yup!\")");            fmt.Println("Hello, 世界")test(12)goDoIt("Yup!")fmt.Println("My favorite number is",rand.Intn(10))fmt.Println("My second favorite number is",rand.Intn(10))
         });
 
         /* comment after function
@@ -79,7 +89,7 @@ namespace go
             fmt.Println(a)
         });
 
-        private static (message string, err error) noComment(string ya, long andAnother, string _p2) => func((defer, panic, recover) =>
+        private static (message @string, err error) noComment(string ya, long andAnother, string _p2) => func((defer, panic, recover) =>
         {
 
         });
@@ -98,9 +108,10 @@ namespace go
         public static Slice<string> FieldsFunc(string s, Func<char, bool> f) => func((defer, panic, recover) =>
         {
 
-            private class span
+            private partial struct span
             {
-            }
+                public long start;
+                public long end;            }
             typespanstruct{startintendint}spans:=make([]span,0,32)wasField:=falsefromIndex:=0ifwasField{spans=append(spans,span{fromIndex,len(s)})}a:=make([]string,len(spans))returna
         });
 

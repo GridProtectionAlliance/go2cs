@@ -1,4 +1,4 @@
-﻿<# // This template creates a <PackageName>_<StructName>StructIsNil.cs file #>
+﻿<# // This template creates a <PackageName>_<StructName>Struct.cs file #>
 <#@ template language="C#" inherits="TemplateBase" #>
 <#@ output extension=".cs" #>
 //---------------------------------------------------------
@@ -10,14 +10,43 @@
 //---------------------------------------------------------
 using System.CodeDom.Compiler;
 using System.Runtime.CompilerServices;
-using goutil;
+<#if (!NamespacePrefix.Equals("go")) {#>
+using go;
+<#}#>
 
 <#=NamespaceHeader#>
     public static unsafe partial class <#=PackageName#>_package
     {
         [<#=GeneratedCodeAttribute#>]
-        <#=Scope#> partial struct <#=StructName#>
+        <#=Scope#> partial struct <#=StructName#><#=InheritedInterfaces#>
         {
+            private class struct_value
+            {
+                // Field instance values
+                //public DateTime When;
+                //public string What = "";
+            }
+
+            private readonly struct_value _value;
+            
+            public <#=StructName#>(NilType _)
+            {
+                _value = new struct_value();
+                // Inherited interface initializations
+                // Inherited structure initializations
+            }
+
+            // Only include constructor if struct contains fields
+            //public <#=StructName#>(params)
+            //{
+            //    _value = new struct_value
+            //    {
+            //       Field = Field,
+            //    };
+            //    // Inherited interface initializations
+            //    // Inherited structure initializations
+            //}
+
             // Enable comparisons between nil and <#=StructName#> struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(<#=StructName#> value, NilType nil) => value.Equals(default(<#=StructName#>));
@@ -35,12 +64,13 @@ using goutil;
             public static implicit operator <#=StructName#>(NilType nil) => default(<#=StructName#>);
         }
     }
-<#=NamespaceFooter#>
-<#+
+<#=NamespaceFooter#><#+
 // Template Parameters
+public string NamespacePrefix;
 public string NamespaceHeader;
 public string NamespaceFooter;
 public string PackageName;
 public string StructName;
 public string Scope;
+public string InheritedInterfaces;
 #>

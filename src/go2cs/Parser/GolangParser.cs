@@ -160,6 +160,9 @@ public partial class GolangParser : Parser {
 
 	        IToken ahead = TokenStream.Get(possibleIndexEosToken);
 
+	        if (ahead == null)
+	            return false;
+
 	        if (ahead.Channel != TokenConstants.HiddenChannel && ahead.Channel != GolangLexer.LineCommentChannel)
 	        {
 	            // We're only interested in tokens on the HIDDEN channels.

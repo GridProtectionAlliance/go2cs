@@ -102,5 +102,32 @@ namespace go2cs
                 parameterDeclarations.Add($"{typeInfo.PrimitiveName} _p{parameterDeclarations.Count}");
             }
         }
+
+        private void ExtractParameterLists(string parameters, out string namedParameters, out string parameterTypes)
+        {
+            if (string.IsNullOrWhiteSpace(parameters))
+            {
+                namedParameters = "";
+                parameterTypes = "";
+                return;
+            }
+                
+            List<string> names = new List<string>();
+            List<string> types = new List<string>();
+
+            foreach (string declaration in parameters.Split(','))
+            {
+                string[] parts = declaration.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length == 2)
+                {
+                    types.Add(parts[0].Trim());
+                    names.Add(parts[1].Trim());
+                }
+            }
+
+            namedParameters = $", {string.Join(", ", names)}";
+            parameterTypes = $", {string.Join(", ", types)}";
+        }
     }
 }

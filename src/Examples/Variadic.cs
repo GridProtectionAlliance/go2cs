@@ -1,16 +1,15 @@
-// package main -- go2cs converted at 2018 May 23 21:06:32 UTC
+// package main -- go2cs converted at 2018 May 30 19:31:17 UTC
 // Original source: D:\Projects\go2cs\src\Examples\Variadic.go
 
 using fmt = go.fmt_package;// Here's a function that will take an arbitrary number
 // of `int`s as arguments.
 
-using static goutil.BuiltInFunctions;
-using goutil;
+using static go.BuiltInFunctions;
 using System;
 
 namespace go
 {
-    private static partial class main_package
+    public static unsafe partial class main_package
     {
         // Here's a function that will take an arbitrary number
         // of `int`s as arguments.

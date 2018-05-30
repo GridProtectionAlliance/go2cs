@@ -1,10 +1,10 @@
 ﻿<# // This template creates the action declarations in a <PackageName>_<InterfaceName>Interface.cs file #>
 <#@ template language="C#" #>
 
-        private static readonly Action<T<#=ParameterTypes#>> s_<#=ActionName#>;
+            private static readonly Action<T<#=ParameterTypes#>> s_<#=ActionName#>;
 
-        [DebuggerNonUserCode]
-        <#=Scope#> void <#=ActionName#>(<#=ParameterSignature#>) => s_<#=ActionName#>(m_target<#=NamedParameters#>);<#+
+            [DebuggerNonUserCode]
+            <#=Scope#> void <#=ActionName#>(<#=ParameterSignature#>) => s_<#=ActionName#>(m_target<#=NamedParameters#>);<#+
 // Template Parameters
 public string ActionName;
 public string Scope;

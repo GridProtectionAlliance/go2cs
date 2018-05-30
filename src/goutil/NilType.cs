@@ -23,12 +23,12 @@
 
 using System.Runtime.CompilerServices;
 
-namespace goutil
+namespace go
 {
     /// <summary>
     /// Represents the "nil" type.
     /// </summary>
-    public class NilType
+    public partial class NilType
     {
         public static NilType Default = null;
 

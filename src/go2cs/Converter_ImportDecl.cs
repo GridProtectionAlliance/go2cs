@@ -58,8 +58,7 @@ namespace go2cs
         public override void ExitImportDecl(GolangParser.ImportDeclContext context)
         {
             // Add commonly required using statements
-            m_requiredUsings.Add("static goutil.BuiltInFunctions");
-            m_requiredUsings.Add("goutil");
+            m_requiredUsings.Add("static go.BuiltInFunctions");
             m_requiredUsings.Add("System");
 
             // Mark end of using statements so that other usings and type aliases can be added later
@@ -71,10 +70,8 @@ namespace go2cs
 
         public override void EnterImportPath(GolangParser.ImportPathContext context)
         {
-            string packagePath = context.STRING_LIT().GetText();
-
             // Remove quotes from package name
-            packagePath = packagePath.Substring(1, packagePath.Length - 2);
+            string packagePath = RemoveSurrounding(ToStringLiteral(context.STRING_LIT().GetText()));
 
             int lastSlash = packagePath.LastIndexOf('/');
 

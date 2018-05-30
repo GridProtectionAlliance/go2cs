@@ -21,9 +21,8 @@
 //
 //******************************************************************************************************
 
-using System.Collections.Generic;
 using System.Diagnostics;
-using Antlr4.Runtime.Tree;
+using static go2cs.Common;
 
 namespace go2cs
 {   
@@ -53,7 +52,7 @@ namespace go2cs
 
         public override void EnterExpression(GolangParser.ExpressionContext context)
         {
-            m_expressions[context] = InterpretStringLiteral(context.GetText().Replace("&^", "& ~"));
+            m_expressions[context] = ToStringLiteral(context.GetText().Replace("&^", "& ~"));
         }
 
         public override void ExitExpression(GolangParser.ExpressionContext context)
@@ -72,7 +71,6 @@ namespace go2cs
 
         public override void ExitBasicLit(GolangParser.BasicLitContext context)
         {
-            // using static goutil.TypeHelpers;
             if (context.IMAGINARY_LIT() != null)
             {
             }

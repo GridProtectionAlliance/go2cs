@@ -28,7 +28,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace goutil
+namespace go
 {
     /// <summary>
     /// Defines type related helper functions.

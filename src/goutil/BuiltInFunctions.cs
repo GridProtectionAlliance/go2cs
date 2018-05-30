@@ -29,7 +29,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using static System.Math;
 
-namespace goutil
+namespace go
 {
     public static class BuiltInFunctions
     {

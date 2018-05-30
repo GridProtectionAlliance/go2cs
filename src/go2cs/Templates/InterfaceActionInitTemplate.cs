@@ -15,7 +15,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
+    #line 1 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
     public partial class InterfaceActionInitTemplate : InterfaceActionInitTemplateBase
     {
@@ -26,50 +26,50 @@ namespace go2cs.Templates
         public virtual string TransformText()
         {
             
-            #line 1 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
+            #line 1 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
  // This template creates the action initializations in a <PackageName>_<InterfaceName>Interface.cs file 
             
             #line default
             #line hidden
-            this.Write("\r\n            s_");
+            this.Write("\r\n                s_");
             
-            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
+            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ActionName));
             
             #line default
             #line hidden
             this.Write(" = targetType.GetExtensionDelegate(\"");
             
-            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
+            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ActionName));
             
             #line default
             #line hidden
             this.Write("\") as Action<T");
             
-            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
+            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ParameterTypes));
             
             #line default
             #line hidden
-            this.Write(">;\r\n\r\n            if (s_");
+            this.Write(">;\r\n\r\n                if (s_");
             
-            #line 6 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
+            #line 6 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ActionName));
             
             #line default
             #line hidden
-            this.Write(" == null)\r\n                throw new NotImplementedException($\"{{targetType.Name}" +
-                    "} does not implement ");
+            this.Write(" == null)\r\n                    throw new NotImplementedException($\"{targetType.Na" +
+                    "me} does not implement ");
             
-            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
+            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
             this.Write(".");
             
-            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
+            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ActionName));
             
             #line default
@@ -78,7 +78,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
+        #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceActionInitTemplate.tt"
 
 // Template Parameters
 public string ActionName;

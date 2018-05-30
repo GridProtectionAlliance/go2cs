@@ -45,59 +45,72 @@ namespace go2cs.Templates
 // </auto-generated>
 //---------------------------------------------------------
 using System.Runtime.CompilerServices;
-
 ");
             
-            #line 14 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 13 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+if (!NamespacePrefix.Equals("go")) {
+            
+            #line default
+            #line hidden
+            this.Write("using go;\r\n");
+            
+            #line 15 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+}
+            
+            #line default
+            #line hidden
+            this.Write("\r\n");
+            
+            #line 17 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(NamespaceHeader));
             
             #line default
             #line hidden
             this.Write("\r\n    public static unsafe partial class ");
             
-            #line 15 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 18 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
             
             #line default
             #line hidden
             this.Write("_package\r\n    {\r\n        ");
             
-            #line 17 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 20 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Scope));
             
             #line default
             #line hidden
             this.Write(" partial struct ");
             
-            #line 17 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 20 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
             this.Write("\r\n        {\r\n            // Value of the ");
             
-            #line 19 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 22 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
             this.Write(" struct\r\n            private readonly ");
             
-            #line 20 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 23 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
             
             #line default
             #line hidden
             this.Write(" m_value;\r\n\r\n            public ");
             
-            #line 22 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 25 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
             this.Write("(");
             
-            #line 22 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 25 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
             
             #line default
@@ -105,14 +118,14 @@ using System.Runtime.CompilerServices;
             this.Write(" value) => m_value = value;\r\n\r\n            // Enable implicit conversions between" +
                     " ");
             
-            #line 24 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 27 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
             
             #line default
             #line hidden
             this.Write(" and ");
             
-            #line 24 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 27 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
@@ -120,21 +133,21 @@ using System.Runtime.CompilerServices;
             this.Write(" struct\r\n            [MethodImpl(MethodImplOptions.AggressiveInlining)]\r\n        " +
                     "    public static implicit operator ");
             
-            #line 26 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 29 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
             this.Write("(");
             
-            #line 26 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 29 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
             
             #line default
             #line hidden
             this.Write(" value) => new ");
             
-            #line 26 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 29 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
@@ -142,21 +155,84 @@ using System.Runtime.CompilerServices;
             this.Write("(value);\r\n            \r\n            [MethodImpl(MethodImplOptions.AggressiveInlin" +
                     "ing)]\r\n            public static implicit operator ");
             
-            #line 29 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 32 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
             
             #line default
             #line hidden
             this.Write("(");
             
-            #line 29 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 32 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
-            this.Write(" value) => value.m_value;\r\n        }\r\n    }\r\n");
+            this.Write(" value) => value.m_value;\r\n            \r\n            // Enable comparisons betwee" +
+                    "n nil and ");
             
-            #line 32 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            #line 34 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
+            
+            #line default
+            #line hidden
+            this.Write(" struct\r\n            [MethodImpl(MethodImplOptions.AggressiveInlining)]\r\n        " +
+                    "    public static bool operator ==(");
+            
+            #line 36 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
+            
+            #line default
+            #line hidden
+            this.Write(" value, NilType nil) => value.Equals(default(");
+            
+            #line 36 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
+            
+            #line default
+            #line hidden
+            this.Write("));\r\n\r\n            [MethodImpl(MethodImplOptions.AggressiveInlining)]\r\n          " +
+                    "  public static bool operator !=(");
+            
+            #line 39 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
+            
+            #line default
+            #line hidden
+            this.Write(" value, NilType nil) => !(value == nil);\r\n\r\n            [MethodImpl(MethodImplOpt" +
+                    "ions.AggressiveInlining)]\r\n            public static bool operator ==(NilType ni" +
+                    "l, ");
+            
+            #line 42 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
+            
+            #line default
+            #line hidden
+            this.Write(" value) => value == nil;\r\n\r\n            [MethodImpl(MethodImplOptions.AggressiveI" +
+                    "nlining)]\r\n            public static bool operator !=(NilType nil, ");
+            
+            #line 45 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
+            
+            #line default
+            #line hidden
+            this.Write(" value) => value != nil;\r\n\r\n            [MethodImpl(MethodImplOptions.AggressiveI" +
+                    "nlining)]\r\n            public static implicit operator ");
+            
+            #line 48 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
+            
+            #line default
+            #line hidden
+            this.Write("(NilType nil) => default(");
+            
+            #line 48 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
+            
+            #line default
+            #line hidden
+            this.Write(");\r\n        }\r\n    }\r\n");
+            
+            #line 51 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(NamespaceFooter));
             
             #line default
@@ -165,9 +241,10 @@ using System.Runtime.CompilerServices;
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 33 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
+        #line 52 "D:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
 
 // Template Parameters
+public string NamespacePrefix;
 public string NamespaceHeader;
 public string NamespaceFooter;
 public string PackageName;
