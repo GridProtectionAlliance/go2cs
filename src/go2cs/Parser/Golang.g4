@@ -916,7 +916,7 @@ fragment RAW_STRING_LIT
 
 //interpreted_string_lit = `"` { unicode_value | byte_value } `"` .
 fragment INTERPRETED_STRING_LIT
-    : '"' ( UNICODE_VALUE | BYTE_VALUE )* '"'
+    : '"' ( '\\"' | UNICODE_VALUE | BYTE_VALUE )*? '"'
     ;
 
 
