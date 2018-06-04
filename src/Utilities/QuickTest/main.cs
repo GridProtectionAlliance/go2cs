@@ -26,40 +26,30 @@ namespace go
 
         public partial struct MyError
         {
-            public ref DateTime When => ref _value.When;
+            public /*ref*/ DateTime When; // => ref _value.When;
 
-            public ref string What => ref _value.What;
+            public /*ref*/ string What; // => ref _value.What;
         }
 
         public partial struct MyError
         {
-            private class struct_value
-            {
-                public DateTime When;
-                public string What = "";
-            }
-
-            private readonly struct_value _value;
-
             public MyError(NilType _)
             {
-                _value = new struct_value();
+                When = default;
+                What = "";
             }
 
             public MyError(DateTime When, string What)
             {
-                _value = new struct_value
-                {
-                    When = When,
-                    What = What
-                };
+                this.When = When;
+                this.What = What;
             }
         }
 
 
         public partial struct MyCustomError
         {
-            public ref string Message => ref _value.Message;
+            public /*ref*/ string Message; // => ref _value.Message;
 
             public Abser Abser;
 
@@ -68,38 +58,42 @@ namespace go
 
         public partial struct MyCustomError : Abser
         {
-            private class struct_value
-            {
-                public string Message = "";
-            }
+            //private class struct_value
+            //{
+            //    public string Message = "";
+            //}
 
-            private readonly struct_value _value;
+            //private readonly struct_value _value;
 
             // Abser interface promotion
             public double Abs() => Abser.Abs();
 
             // MyError structure promotion
-            public ref DateTime When => ref MyError.When;
+            public DateTime When
+            {
+                get => MyError.When;
+                set => MyError.When = value;
+            }
 
-            public ref string What => ref MyError.What;
+            public string What
+            {
+                get => MyError.What;
+                set => MyError.What = value;
+            }
 
             public MyCustomError(NilType _)
             {
-                _value = new struct_value();
+                //_value = new struct_value();
+                Message = "";
                 this.Abser = null;
-                MyError = new MyError(nil);
+                this.MyError = new MyError(nil);
             }
 
-            public MyCustomError(string Message, Abser Abser, DateTime When, string What)
+            public MyCustomError(string Message, Abser Abser, MyError MyError)
             {
-                _value = new struct_value
-                {
-                    Message = Message
-                };
-
+                this.Message = Message;
                 this.Abser = Abser;
-
-                MyError = new MyError(When, What);
+                this.MyError = MyError;
             }
         }
 
@@ -392,6 +386,14 @@ namespace go
             p = &j;
             *p = *p / 37;
             Console.WriteLine(j);
+
+
+            Vertex v = new Vertex {X = 1, Y = 2};
+            Vertex* pv = &v;
+
+            pv->X = 12;
+
+            (*pv).X = 99;
         }
     }
 }

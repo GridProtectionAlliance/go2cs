@@ -95,52 +95,36 @@ if (!NamespacePrefix.Equals("go")) {
             
             #line default
             #line hidden
-            this.Write(@"
-        {
-            private class struct_value
-            {
-                // Field instance values
-                //public DateTime When;
-                //public string What = """";
-            }
-
-            private readonly struct_value _value;
+            this.Write("\r\n        {\r\n            public ");
             
-            public ");
-            
-            #line 32 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 23 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
             this.Write(@"(NilType _)
             {
-                _value = new struct_value();
-                // Inherited interface initializations
+                // Field instance values
+                //public DateTime When;
+                //public string What = """"; <- string initialized to empty
+                // Inherited interface initializations (set to null / default)
                 // Inherited structure initializations
             }
 
             // Only include constructor if struct contains fields
             //public ");
             
-            #line 40 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 33 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
-            this.Write(@"(params)
-            //{
-            //    _value = new struct_value
-            //    {
-            //       Field = Field,
-            //    };
-            //    // Inherited interface initializations
-            //    // Inherited structure initializations
-            //}
-
-            // Enable comparisons between nil and ");
+            this.Write("(params)\r\n            //{\r\n            //    this.Field = Field,\r\n            // " +
+                    "   // Inherited interface initializations\r\n            //    // Inherited struct" +
+                    "ure initializations\r\n            //}\r\n\r\n            // Enable comparisons betwee" +
+                    "n nil and ");
             
-            #line 50 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 40 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
@@ -148,14 +132,14 @@ if (!NamespacePrefix.Equals("go")) {
             this.Write(" struct\r\n            [MethodImpl(MethodImplOptions.AggressiveInlining)]\r\n        " +
                     "    public static bool operator ==(");
             
-            #line 52 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 42 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
             this.Write(" value, NilType nil) => value.Equals(default(");
             
-            #line 52 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 42 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
@@ -163,7 +147,7 @@ if (!NamespacePrefix.Equals("go")) {
             this.Write("));\r\n\r\n            [MethodImpl(MethodImplOptions.AggressiveInlining)]\r\n          " +
                     "  public static bool operator !=(");
             
-            #line 55 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 45 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
@@ -172,7 +156,7 @@ if (!NamespacePrefix.Equals("go")) {
                     "ions.AggressiveInlining)]\r\n            public static bool operator ==(NilType ni" +
                     "l, ");
             
-            #line 58 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 48 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
@@ -180,7 +164,7 @@ if (!NamespacePrefix.Equals("go")) {
             this.Write(" value) => value == nil;\r\n\r\n            [MethodImpl(MethodImplOptions.AggressiveI" +
                     "nlining)]\r\n            public static bool operator !=(NilType nil, ");
             
-            #line 61 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 51 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
@@ -188,21 +172,21 @@ if (!NamespacePrefix.Equals("go")) {
             this.Write(" value) => value != nil;\r\n\r\n            [MethodImpl(MethodImplOptions.AggressiveI" +
                     "nlining)]\r\n            public static implicit operator ");
             
-            #line 64 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 54 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
             this.Write("(NilType nil) => default(");
             
-            #line 64 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 54 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StructName));
             
             #line default
             #line hidden
             this.Write(");\r\n        }\r\n    }\r\n");
             
-            #line 67 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            #line 57 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(NamespaceFooter));
             
             #line default
@@ -210,7 +194,7 @@ if (!NamespacePrefix.Equals("go")) {
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 67 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+        #line 57 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
 
 // Template Parameters
 public string NamespacePrefix;
