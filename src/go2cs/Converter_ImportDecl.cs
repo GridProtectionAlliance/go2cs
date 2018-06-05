@@ -68,21 +68,28 @@ namespace go2cs
             m_initialDeclComments = CheckForCommentsRight(context);
         }
 
-        public override void EnterImportPath(GolangParser.ImportPathContext context)
+        public override void EnterImportSpec(GolangParser.ImportSpecContext context)
         {
+            string alternateName = SanitizedIdentifier(context.IDENTIFIER()?.GetText());
+            bool useStatic = (object)alternateName == null && context.ChildCount > 1 && context.GetChild(0).GetText().Equals(".");
+
             // Remove quotes from package name
-            string packagePath = RemoveSurrounding(ToStringLiteral(context.STRING_LIT().GetText()));
+            string packagePath = RemoveSurrounding(ToStringLiteral(context.importPath().STRING_LIT().GetText()));
 
             int lastSlash = packagePath.LastIndexOf('/');
-
             string packageName = SanitizedIdentifier(lastSlash > -1 ? packagePath.Substring(lastSlash + 1) : packagePath);
 
             // Add package to import queue
             s_importQueue.Add(packagePath);
 
-            IEnumerable<string> paths = packagePath.Split('/').Select(SanitizedIdentifier);
+            string targetUsing = $"{RootNamespace}.{string.Join(".", packagePath.Split('/').Select(SanitizedIdentifier))}{ClassSuffix}";
 
-            m_targetFile.Append($"using {packageName} = {RootNamespace}.{string.Join(".", paths)}{ClassSuffix};");
+            if (useStatic)
+                m_targetFile.Append($"using static {targetUsing};");
+            else if (alternateName?.Equals("_") ?? false)
+                m_targetFile.Append($"using _{packageName}_ = {targetUsing};");
+            else
+                m_targetFile.Append($"using {alternateName ?? packageName} = {targetUsing};");
 
             m_targetFile.Append(CheckForCommentsRight(context));
 
