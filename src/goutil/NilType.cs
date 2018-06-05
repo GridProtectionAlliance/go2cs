@@ -37,15 +37,18 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (obj is NilType)
-                return true;
+            switch (obj)
+            {
+                case NilType _:
+                    return true;
+                case ISlice slice:
+                    return slice == Default;
+                case string str:
+                    return str == Default;
+                // TODO: Add map, channel, etc...
+            }
 
-            if (obj is ISlice slice)
-                return slice == Default;
-
-            // TODO: Add map, channel, etc...
-
-            return false;
+            return obj == null;
         }
 
         // ISlice to nil comparisons
@@ -60,6 +63,22 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, ISlice slice) => slice != nil;
+
+        // string to nil comparisons
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(string obj, NilType nil) => string.IsNullOrEmpty(obj);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(string obj, NilType nil) => !string.IsNullOrEmpty(obj);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(NilType nil, string obj) => string.IsNullOrEmpty(obj);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(NilType nil, string obj) => !string.IsNullOrEmpty(obj);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator string(NilType nil) => ""; // In Go, string defaults to empty string, not null
 
         // object to nil comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
