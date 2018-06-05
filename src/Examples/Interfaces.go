@@ -30,7 +30,8 @@ func (f MyFloat) Abs() float64 {
 }
 
 type Vertex struct {
-	X, Y float64
+	X float64 `"X" Description` /* X Comment */
+	Y float64 "`Y` Description" // Y Comment
 }
 
 func (v *Vertex) Abs() float64 {

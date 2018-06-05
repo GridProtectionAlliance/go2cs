@@ -48,6 +48,7 @@ namespace go2cs
         //  conversion (required)
         private readonly ParseTreeValues<GoTypeInfo> m_types = new ParseTreeValues<GoTypeInfo>();
         private readonly ParseTreeValues<string> m_structFields = new ParseTreeValues<string>();
+        private readonly ParseTreeValues<List<(string functionName, string parameterSignature, string namedParameters, string parameterTypes, string resultType)>> m_interfaceMethods = new ParseTreeValues<List<(string, string, string, string, string)>>();
 
         private enum GoTypeClass
         {
@@ -188,27 +189,23 @@ namespace go2cs
 
         public override void ExitStructType(GolangParser.StructTypeContext context)
         {
-            // TODO: Add new struct type...
-            //m_types.TryGetValue(context., out GoTypeInfo typeInfo);
-            //m_types.Peek().TypeClass = GoTypeClass.Struct;
-
             List<(string fieldName, string fieldType, string description, string comment)> fields = new List<(string, string, string, string)>();
 
             for (int i = 0; i < context.fieldDecl().Length; i++)
             {
                 GolangParser.FieldDeclContext fieldDecl = context.fieldDecl(i);
                 GoTypeInfo typeInfo;
-                string description = fieldDecl.STRING_LIT()?.GetText();
+                string description = ToStringLiteral(fieldDecl.STRING_LIT()?.GetText());
 
                 if (m_identifiers.TryGetValue(fieldDecl.identifierList(), out string[] identifiers) && m_types.TryGetValue(fieldDecl.type(), out typeInfo))
                 {
                     foreach (string identifier in identifiers)
-                        fields.Add(($"{SanitizedIdentifier(identifier)}", typeInfo.PrimitiveName, description, CheckForCommentsRight(fieldDecl)));
+                        fields.Add((SanitizedIdentifier(identifier), typeInfo.PrimitiveName, description, CheckForCommentsRight(fieldDecl)));
                 }
                 else if (m_types.TryGetValue(fieldDecl.anonymousField(), out typeInfo))
                 {
-                    // TODO: Handle promoted field values
-                    fields.Add(($"@{typeInfo.PrimitiveName}", typeInfo.PrimitiveName, description, CheckForCommentsRight(fieldDecl)));
+                    // TODO: Handle promoted structures and interfaces
+                    fields.Add((GetValidIdentifierName(typeInfo.PrimitiveName), typeInfo.PrimitiveName, description, CheckForCommentsRight(fieldDecl)));
                 }
             }
 
@@ -223,7 +220,7 @@ namespace go2cs
                     if (description.Length > 2)
                     {
                         m_requiredUsings.Add("System.ComponentModel");
-                        fieldDecl.AppendLine($"{Spacing(1)}[Description(\"{description.Substring(1, description.Length - 2)}\")]");
+                        fieldDecl.AppendLine($"{Spacing(1)}[Description({description})]");
                     }
                 }
 
@@ -235,17 +232,40 @@ namespace go2cs
                 return fieldDecl.ToString();
             }
 
-            m_structFields[context] = string.Join($"{Environment.NewLine}", fields.Select(getStructureField));
+            m_structFields[context] = string.Join(Environment.NewLine, fields.Select(getStructureField));
+        }
 
-            //m_types[context.Parent.Parent] = new GoTypeInfo
-            //{
-            //    //Name = typeInfo.Name,
-            //    //MappedName = typeInfo.MappedName,
-            //    //PrimitiveName = $"Slice<{typeInfo.PrimitiveName}>",
-            //    //FrameworkName = $"goutil.Slice<{typeInfo.FrameworkName}>",
-            //    //TypeClass = GoTypeClass.Simple,
-            //    //IsSlice = true
-            //};
+        public override void ExitInterfaceType(GolangParser.InterfaceTypeContext context)
+        {
+            List<(string functionName, string parameterSignature, string namedParameters, string parameterTypes, string resultType)> functions = new List<(string, string, string, string, string)>();
+
+            for (int i = 0; i < context.methodSpec().Length; i++)
+            {
+                GolangParser.MethodSpecContext methodSpec = context.methodSpec(i);
+
+                string identifier = methodSpec.IDENTIFIER()?.GetText();
+
+                if (string.IsNullOrEmpty(identifier))
+                {
+                    // TODO: Handle promoted interfaces
+                    //if (m_types.TryGetValue(methodSpec, out GoTypeInfo typeInfo))
+                    //    methods.Add($"{Spacing(1)}public {typeInfo.PrimitiveName} {GetValidIdentifierName(typeInfo.PrimitiveName)} {{ get; set; }}");
+                }
+                else
+                {
+                    //(string parameters, string result) signature;
+                    identifier = GetValidIdentifierName(identifier);
+
+                    if (m_signatures.TryGetValue(methodSpec.signature(), out (string parameters, string result) signature))
+                    {
+                        string parameters = RemoveSurrounding(signature.parameters, "(", ")");
+                        ExtractParameterLists(parameters, out string namedParameters, out string parameterTypes);
+                        functions.Add((identifier, parameters, namedParameters, parameterTypes, signature.result));
+                    }
+                }
+            }
+
+            m_interfaceMethods[context] = functions;
         }
 
         public override void ExitFunctionType(GolangParser.FunctionTypeContext context)
@@ -273,11 +293,6 @@ namespace go2cs
                 FrameworkName = frameworkName,
                 TypeClass = GoTypeClass.Function
             };
-        }
-
-        public override void ExitInterfaceType(GolangParser.InterfaceTypeContext context)
-        {
-            // TODO: Add new interface type
         }
 
         public override void ExitChannelType(GolangParser.ChannelTypeContext context)
@@ -367,6 +382,16 @@ namespace go2cs
                 default:
                     return $"{type}";
             }
+        }
+
+        private static string GetValidIdentifierName(string identifier)
+        {
+            int lastDotIndex = identifier.LastIndexOf('.');
+
+            if (lastDotIndex > 0)
+                identifier = identifier.Substring(lastDotIndex + 1);
+
+            return SanitizedIdentifier(identifier);
         }
     }
 }

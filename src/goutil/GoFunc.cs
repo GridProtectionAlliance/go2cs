@@ -27,7 +27,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace goutil
+namespace go
 {
     /// <summary>
     /// Delegate for the Go "defer" function.

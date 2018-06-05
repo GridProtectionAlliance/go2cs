@@ -15,7 +15,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+    #line 1 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
     public partial class InterfaceFuncDeclTemplate : InterfaceFuncDeclTemplateBase
     {
@@ -26,70 +26,70 @@ namespace go2cs.Templates
         public virtual string TransformText()
         {
             
-            #line 1 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            #line 1 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
  // This template creates the function declarations in a <PackageName>_<InterfaceName>Interface.cs file 
             
             #line default
             #line hidden
-            this.Write("\r\n        private static readonly Func<T");
+            this.Write("\r\n            private static readonly Func<T");
             
-            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ParameterTypes));
             
             #line default
             #line hidden
             this.Write(", ");
             
-            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ResultType));
             
             #line default
             #line hidden
             this.Write("> s_");
             
-            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
-            this.Write(";\r\n\r\n        [DebuggerNonUserCode]\r\n        ");
+            this.Write(";\r\n\r\n            [DebuggerNonUserCode]\r\n            ");
             
-            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Scope));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ResultType));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("(");
             
-            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ParameterSignature));
             
             #line default
             #line hidden
             this.Write(") => s_");
             
-            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("(m_target");
             
-            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(NamedParameters));
             
             #line default
@@ -98,7 +98,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
+        #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
 
 // Template Parameters
 public string FunctionName;

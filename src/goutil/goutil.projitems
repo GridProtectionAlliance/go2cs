@@ -6,7 +6,7 @@
     <SharedGUID>948613fc-fd76-4c34-97af-5cc7f5697952</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>goutil</Import_RootNamespace>
+    <Import_RootNamespace>go</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BuiltInFunctions.cs" />

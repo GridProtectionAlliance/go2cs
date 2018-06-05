@@ -22,8 +22,9 @@
 //******************************************************************************************************
 
 using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -45,6 +46,10 @@ namespace go2cs
 
         private static readonly HashSet<string> s_keywords;
 
+        private static readonly CodeDomProvider s_provider;
+
+        private static readonly CodeGeneratorOptions s_generatorOptions;
+
         static Common()
         {
             EntryAssembly = Assembly.GetEntryAssembly();
@@ -60,6 +65,9 @@ namespace go2cs
                 "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while"
             },
             StringComparer.Ordinal);
+
+            s_provider = CodeDomProvider.CreateProvider("CSharp");
+            s_generatorOptions = new CodeGeneratorOptions { IndentString = "    " };
         }
 
         public static void RestoreGoUtilSources(string targetPath)
@@ -193,6 +201,33 @@ namespace go2cs
             return relativePath.Replace('/', Path.DirectorySeparatorChar);
         }
 
+        public static string RemoveSurrounding(string source, string left = "\"", string right = "\"")
+        {
+            if (string.IsNullOrEmpty(source))
+                return source;
+
+            if (source.StartsWith(left) && source.EndsWith(right))
+            {
+                if (source.Length > left.Length + right.Length)
+                    return source.Substring(left.Length, source.Length - (left.Length + right.Length));
+
+                return "";
+            }
+
+            return source;
+        }
+
         public static string SanitizedIdentifier(string identifier) => s_keywords.Contains(identifier) ? $"@{identifier}" : identifier;
+
+        public static string ToStringLiteral(string input)
+        {
+            input = RemoveSurrounding(RemoveSurrounding(input ?? ""), "`", "`");
+
+            using (StringWriter writer = new StringWriter())
+            {
+                s_provider.GenerateCodeFromExpression(new CodePrimitiveExpression(input), writer, s_generatorOptions);
+                return writer.ToString();
+            }
+        }
     }
 }

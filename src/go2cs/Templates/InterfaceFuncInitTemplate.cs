@@ -15,7 +15,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+    #line 1 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
     public partial class InterfaceFuncInitTemplate : InterfaceFuncInitTemplateBase
     {
@@ -26,57 +26,57 @@ namespace go2cs.Templates
         public virtual string TransformText()
         {
             
-            #line 1 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 1 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
  // This template creates the function initializations in a <PackageName>_<InterfaceName>Interface.cs file 
             
             #line default
             #line hidden
-            this.Write("\r\n            s_");
+            this.Write("\r\n                s_");
             
-            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write(" = targetType.GetExtensionDelegate(\"");
             
-            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("\") as Func<T");
             
-            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ParameterTypes));
             
             #line default
             #line hidden
             this.Write(", ");
             
-            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ResultType));
             
             #line default
             #line hidden
-            this.Write(">;\r\n\r\n            if (s_");
+            this.Write(">;\r\n\r\n                if (s_");
             
-            #line 6 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 6 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
-            this.Write(" == null)\r\n                throw new NotImplementedException($\"{{targetType.Name}" +
-                    "} does not implement ");
+            this.Write(" == null)\r\n                    throw new NotImplementedException($\"{targetType.Na" +
+                    "me} does not implement ");
             
-            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
             this.Write(".");
             
-            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
@@ -85,7 +85,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 7 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+        #line 7 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
 
 // Template Parameters
 public string FunctionName;

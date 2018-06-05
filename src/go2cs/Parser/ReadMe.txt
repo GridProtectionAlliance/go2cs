@@ -81,6 +81,11 @@ Specific grammar and embedded code changes:
     }
 }
 
+//raw_string_lit         = "`" { unicode_char | newline } "`" .
+fragment RAW_STRING_LIT
+    : '`' ( UNICODE_CHAR | NEWLINE | [~`] )*? '`'
+    ;
+
 eos
     : ';'
     | EOF

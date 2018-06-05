@@ -65,7 +65,6 @@
     <Compile Include="Converter_PackageClause.cs" />
     <Compile Include="Converter_Parameters.cs" />
     <Compile Include="Converter_Signature.cs" />
-    <Compile Include="Converter_StringLiteral.cs" />
     <Compile Include="Converter_TopLevelDecl.cs" />
     <Compile Include="Converter_Type.cs" />
     <Compile Include="DictionaryExtensions.cs" />

@@ -9,13 +9,14 @@
 // ------------------------------------------------------------------------------
 namespace go2cs.Templates
 {
+    using System.Linq;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+    #line 1 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
     public partial class InterfaceTypeTemplate : TemplateBase
     {
@@ -26,7 +27,7 @@ namespace go2cs.Templates
         public override string TransformText()
         {
             
-            #line 1 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 1 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
  // This template creates a <PackageName>_<InterfaceName>Interface.cs file 
             
             #line default
@@ -42,67 +43,79 @@ using System;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using goutil;
-
 ");
             
-            #line 17 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 16 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+if (!NamespacePrefix.Equals("go")) {
+            
+            #line default
+            #line hidden
+            this.Write("using go;\r\n");
+            
+            #line 18 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+}
+            
+            #line default
+            #line hidden
+            this.Write("\r\n");
+            
+            #line 20 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(NamespaceHeader));
             
             #line default
             #line hidden
             this.Write("\r\n    public static unsafe partial class ");
             
-            #line 18 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 21 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
             
             #line default
             #line hidden
             this.Write("_package\r\n    {\r\n        [");
             
-            #line 20 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 23 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GeneratedCodeAttribute));
             
             #line default
             #line hidden
             this.Write("]\r\n        ");
             
-            #line 21 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 24 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Scope));
             
             #line default
             #line hidden
-            this.Write(" class ");
+            this.Write(" struct ");
             
-            #line 21 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 24 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
             this.Write("<T> : ");
             
-            #line 21 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 24 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
-            this.Write("\r\n        {\r\n            private T m_target;");
+            this.Write("\r\n        {\r\n            private T m_target;\r\n");
             
-            #line 23 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 27 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
 
         
-            foreach (var decl in Functions)
+            foreach (var decl in Functions.Where(function => !function.resultType.Equals("void")))
             {
                 
             
             #line default
             #line hidden
             
-            #line 27 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 31 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(new InterfaceFuncDeclTemplate
                 {
                     FunctionName = decl.functionName,
-                    Scope = decl.scope,
+                    Scope = "public",
                     ParameterSignature = decl.parameterSignature,
                     NamedParameters = decl.namedParameters,
                     ParameterTypes = decl.parameterTypes,
@@ -113,22 +126,22 @@ using goutil;
             #line default
             #line hidden
             
-            #line 36 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 40 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
 
             }
         
-            foreach (var decl in Actions)
+            foreach (var decl in Functions.Where(function => function.resultType.Equals("void")))
             {
                 
             
             #line default
             #line hidden
             
-            #line 41 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 45 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(new InterfaceActionDeclTemplate
                 {
-                    ActionName = decl.actionName,
-                    Scope = decl.scope,
+                    ActionName = decl.functionName,
+                    Scope = "public",
                     ParameterSignature = decl.parameterSignature,
                     NamedParameters = decl.namedParameters,
                     ParameterTypes = decl.parameterTypes
@@ -138,32 +151,32 @@ using goutil;
             #line default
             #line hidden
             
-            #line 49 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 53 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
 
             }
             
             #line default
             #line hidden
-            this.Write("\r\n            [DebuggerStepperBoundary]\r\n            static ");
+            this.Write("\r\n\r\n            [DebuggerStepperBoundary]\r\n            static ");
             
-            #line 53 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 58 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
-            this.Write("()\r\n            {\r\n                Type targetType = typeof(T);");
+            this.Write("()\r\n            {\r\n                Type targetType = typeof(T);\r\n");
             
-            #line 55 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 61 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
 
         
-                foreach (var decl in Functions)
+                foreach (var decl in Functions.Where(function => !function.resultType.Equals("void")))
                 {
                     
             
             #line default
             #line hidden
             
-            #line 59 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 65 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(new InterfaceFuncInitTemplate
                     {
                         FunctionName = decl.functionName,
@@ -176,21 +189,21 @@ using goutil;
             #line default
             #line hidden
             
-            #line 66 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 72 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
 
                 }
             
-                foreach (var decl in Actions)
+                foreach (var decl in Functions.Where(function => function.resultType.Equals("void")))
                 {
                     
             
             #line default
             #line hidden
             
-            #line 71 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 77 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(new InterfaceActionInitTemplate
                     {
-                        ActionName = decl.actionName,
+                        ActionName = decl.functionName,
                         InterfaceName = InterfaceName,
                         ParameterTypes = decl.parameterTypes
                     }
@@ -199,71 +212,77 @@ using goutil;
             #line default
             #line hidden
             
-            #line 77 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 83 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
 
                 }
             
             #line default
             #line hidden
-            this.Write("            }\r\n\r\n            [MethodImpl(MethodImplOptions.AggressiveInlining), D" +
-                    "ebuggerNonUserCode]\r\n            public static explicit operator ");
+            this.Write("\r\n            }\r\n\r\n            [MethodImpl(MethodImplOptions.AggressiveInlining)," +
+                    " DebuggerNonUserCode]\r\n            public static explicit operator ");
             
-            #line 82 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 89 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
-            this.Write("<T>(T target) => return new ");
+            this.Write("<T>(T target) => new ");
             
-            #line 82 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 89 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
             this.Write("<T> { m_target = target };\r\n\r\n            // Enable comparisons between nil and ");
             
-            #line 84 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 91 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
-            this.Write(" interface\r\n            [MethodImpl(MethodImplOptions.AggressiveInlining)]\r\n     " +
-                    "       public static bool operator ==(");
+            this.Write("<T> interface instance\r\n            [MethodImpl(MethodImplOptions.AggressiveInlin" +
+                    "ing)]\r\n            public static bool operator ==(");
             
-            #line 86 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 93 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
-            this.Write(" value, NilType nil) => (object)value == null || Activator.CreateInstance(value.G" +
-                    "etType()).Equals(value);\r\n\r\n            [MethodImpl(MethodImplOptions.Aggressive" +
-                    "Inlining)]\r\n            public static bool operator !=(");
+            this.Write("<T> value, NilType nil) => (object)value == null || Activator.CreateInstance<");
             
-            #line 89 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 93 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
-            this.Write(" value, NilType nil) => !(value == nil);\r\n\r\n            [MethodImpl(MethodImplOpt" +
-                    "ions.AggressiveInlining)]\r\n            public static bool operator ==(NilType ni" +
-                    "l, ");
+            this.Write("<T>>().Equals(value);\r\n\r\n            [MethodImpl(MethodImplOptions.AggressiveInli" +
+                    "ning)]\r\n            public static bool operator !=(");
             
-            #line 92 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 96 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
-            this.Write(" value) => value == nil;\r\n\r\n            [MethodImpl(MethodImplOptions.AggressiveI" +
-                    "nlining)]\r\n            public static bool operator !=(NilType nil, ");
+            this.Write("<T> value, NilType nil) => !(value == nil);\r\n\r\n            [MethodImpl(MethodImpl" +
+                    "Options.AggressiveInlining)]\r\n            public static bool operator ==(NilType" +
+                    " nil, ");
             
-            #line 95 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 99 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
-            this.Write(" value) => value != nil;\r\n        }\r\n\r\n        [");
+            this.Write("<T> value) => value == nil;\r\n\r\n            [MethodImpl(MethodImplOptions.Aggressi" +
+                    "veInlining)]\r\n            public static bool operator !=(NilType nil, ");
             
-            #line 98 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 102 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
+            
+            #line default
+            #line hidden
+            this.Write("<T> value) => value != nil;\r\n        }\r\n\r\n        [");
+            
+            #line 105 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(GeneratedCodeAttribute));
             
             #line default
@@ -271,53 +290,143 @@ using goutil;
             this.Write(", MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]\r\n       " +
                     " ");
             
-            #line 99 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 106 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Scope));
             
             #line default
             #line hidden
             this.Write(" static ");
             
-            #line 99 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 106 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 99 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 106 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
             this.Write("_cast<T>(T target) => (");
             
-            #line 99 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 106 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
             this.Write("<T>)target;\r\n    }\r\n");
             
-            #line 101 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            #line 108 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(NamespaceFooter));
             
             #line default
             #line hidden
-            this.Write("\r\n");
+            this.Write("\r\n\r\nnamespace go\r\n{\r\n    public partial class NilType\r\n    {\r\n        // Enable c" +
+                    "omparisons between nil and Abser interface\r\n        [MethodImpl(MethodImplOption" +
+                    "s.AggressiveInlining)]\r\n        public static bool operator ==(");
+            
+            #line 116 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(NamespacePrefix));
+            
+            #line default
+            #line hidden
+            this.Write(".");
+            
+            #line 116 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
+            
+            #line default
+            #line hidden
+            this.Write("_package.");
+            
+            #line 116 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
+            
+            #line default
+            #line hidden
+            this.Write(" value, NilType nil) => (object)value == null || Activator.CreateInstance(value.G" +
+                    "etType()).Equals(value);\r\n\r\n        [MethodImpl(MethodImplOptions.AggressiveInli" +
+                    "ning)]\r\n        public static bool operator !=(");
+            
+            #line 119 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(NamespacePrefix));
+            
+            #line default
+            #line hidden
+            this.Write(".");
+            
+            #line 119 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
+            
+            #line default
+            #line hidden
+            this.Write("_package.");
+            
+            #line 119 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
+            
+            #line default
+            #line hidden
+            this.Write(" value, NilType nil) => !(value == nil);\r\n\r\n        [MethodImpl(MethodImplOptions" +
+                    ".AggressiveInlining)]\r\n        public static bool operator ==(NilType nil, ");
+            
+            #line 122 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(NamespacePrefix));
+            
+            #line default
+            #line hidden
+            this.Write(".");
+            
+            #line 122 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
+            
+            #line default
+            #line hidden
+            this.Write("_package.");
+            
+            #line 122 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
+            
+            #line default
+            #line hidden
+            this.Write(" value) => value == nil;\r\n\r\n        [MethodImpl(MethodImplOptions.AggressiveInlin" +
+                    "ing)]\r\n        public static bool operator !=(NilType nil, ");
+            
+            #line 125 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(NamespacePrefix));
+            
+            #line default
+            #line hidden
+            this.Write(".");
+            
+            #line 125 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
+            
+            #line default
+            #line hidden
+            this.Write("_package.");
+            
+            #line 125 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
+            
+            #line default
+            #line hidden
+            this.Write(" value) => value != nil;\r\n    }\r\n}");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 102 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+        #line 127 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
 
 // Template Parameters
+public string NamespacePrefix;
 public string NamespaceHeader;
 public string NamespaceFooter;
 public string PackageName;
 public string InterfaceName;
 public string Scope;
-public (string functionName, string scope, string parameterSignature, string namedParameters, string parameterTypes, string resultType)[] Functions;
-public (string actionName, string scope, string parameterSignature, string namedParameters, string parameterTypes)[] Actions;
+public (string functionName, string parameterSignature, string namedParameters, string parameterTypes, string resultType)[] Functions;
 
         
         #line default

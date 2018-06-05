@@ -22,9 +22,7 @@
 //******************************************************************************************************
 
 using System;
-using System.Collections.Generic;
-using Antlr4.Runtime.Misc;
-using Antlr4.Runtime.Tree;
+using static go2cs.Common;
 
 namespace go2cs
 {
@@ -65,11 +63,7 @@ namespace go2cs
 
         private string ExtractFunctionSignature(string parameters)
         {
-            if (parameters.StartsWith("("))
-                parameters = parameters.Substring(1);
-
-            if (parameters.EndsWith(")"))
-                parameters = parameters.Substring(0, parameters.Length - 1);
+            parameters = RemoveSurrounding(parameters, "(", ")");
 
             if (string.IsNullOrWhiteSpace(parameters))
                 return "";

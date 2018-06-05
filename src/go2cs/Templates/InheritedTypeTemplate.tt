@@ -10,6 +10,9 @@
 // </auto-generated>
 //---------------------------------------------------------
 using System.Runtime.CompilerServices;
+<#if (!NamespacePrefix.Equals("go")) {#>
+using go;
+<#}#>
 
 <#=NamespaceHeader#>
     public static unsafe partial class <#=PackageName#>_package
@@ -27,11 +30,28 @@ using System.Runtime.CompilerServices;
             
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator <#=TypeName#>(<#=StructName#> value) => value.m_value;
+            
+            // Enable comparisons between nil and <#=StructName#> struct
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator ==(<#=StructName#> value, NilType nil) => value.Equals(default(<#=StructName#>));
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(<#=StructName#> value, NilType nil) => !(value == nil);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator ==(NilType nil, <#=StructName#> value) => value == nil;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(NilType nil, <#=StructName#> value) => value != nil;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator <#=StructName#>(NilType nil) => default(<#=StructName#>);
         }
     }
 <#=NamespaceFooter#>
 <#+
 // Template Parameters
+public string NamespacePrefix;
 public string NamespaceHeader;
 public string NamespaceFooter;
 public string PackageName;

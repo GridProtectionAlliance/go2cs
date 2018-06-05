@@ -24,7 +24,7 @@
 using System;
 using System.Diagnostics;
 
-namespace goutil
+namespace go
 {
     /// <summary>
     /// Represents an exception for the "panic" keyword.

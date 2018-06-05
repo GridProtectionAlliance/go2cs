@@ -8,35 +8,70 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
-using goutil;
+using System.Runtime.CompilerServices;
 
-public static partial class main_package
+namespace go
 {
-    [GeneratedCode("go2cs", "1.0")]
-    public class Abser<T> : Abser
+    public static unsafe partial class main_package
     {
-        private T m_target;
-
-        private static readonly Func<T, double> s_Abs;
-
-        [DebuggerNonUserCode]
-        public double Abs() => s_Abs(m_target);
-
-        [DebuggerStepperBoundary]
-        static Abser()
+        [GeneratedCode("go2cs", "0.1.1.0")]
+        public struct Abser<T> : Abser
         {
-            Type targetType = typeof(T);
+            private T m_target;
 
-            s_Abs = targetType.GetExtensionDelegate("Abs") as Func<T, double>;
+            private static readonly Func<T, double> s_Abs;
 
-            if (s_Abs == null)
-                throw new NotImplementedException($"{targetType.Name} does not implement Abser.Abs function");
+            [DebuggerNonUserCode]
+            public double Abs() => s_Abs(m_target);
+
+            [DebuggerStepperBoundary]
+            static Abser()
+            {
+                Type targetType = typeof(T);
+
+                s_Abs = targetType.GetExtensionDelegate("Abs") as Func<T, double>;
+
+                if (s_Abs == null)
+                    throw new NotImplementedException($"{targetType.Name} does not implement Abser.Abs function");
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+            public static explicit operator Abser<T>(T target) => new Abser<T> { m_target = target };
+
+            // Enable comparisons between nil and Abser<T> interface instance
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator ==(Abser<T> value, NilType nil) => (object)value == null || Activator.CreateInstance<Abser<T>>().Equals(value);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(Abser<T> value, NilType nil) => !(value == nil);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator ==(NilType nil, Abser<T> value) => value == nil;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(NilType nil, Abser<T> value) => value != nil;
         }
 
-        [DebuggerNonUserCode]
-        public static explicit operator Abser<T>(T target) => new Abser<T> { m_target = target };
+        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static Abser Abser_cast<T>(T target) => (Abser<T>)target;
     }
+}
 
-    [GeneratedCode("go2cs", "1.0"), DebuggerNonUserCode]
-    public static Abser Abser_cast<T>(T target) => (Abser<T>) target;
+namespace go
+{
+    public partial class NilType
+    {
+        // Enable comparisons between nil and Abser interface
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(go.main_package.Abser value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(go.main_package.Abser value, NilType nil) => !(value == nil);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(NilType nil, go.main_package.Abser value) => value == nil;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(NilType nil, go.main_package.Abser value) => value != nil;
+    }
 }

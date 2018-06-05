@@ -90,10 +90,7 @@ namespace go2cs
 
         public override void ExitFunction(GolangParser.FunctionContext context)
         {
-            string tempBlock = context.block().GetText();
-
-            if (tempBlock.Length > 0)
-                tempBlock = tempBlock.Substring(1, tempBlock.Length - 2);
+            string tempBlock = RemoveSurrounding(context.block().GetText(), "{", "}");
 
             m_targetFile.AppendLine(FixForwardSpacing(tempBlock));
         }
