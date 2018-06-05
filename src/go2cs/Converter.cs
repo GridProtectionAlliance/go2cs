@@ -383,19 +383,19 @@ namespace go2cs
                     string uniqueProjectID = GetProjectGuid(sharedProjectItems, "SharedGUID");
 
                     string sharedProjectItemsContent = new SharedProjectFileItemsTemplate
-                        {
-                            UniqueProjectID = uniqueProjectID,
-                            RootNamespace = packageNamespace,
-                            FileNames = packageFileNames.Select(Path.GetFileName).ToArray()
-                        }
-                        .TransformText();
+                    {
+                        UniqueProjectID = uniqueProjectID,
+                        RootNamespace = packageNamespace,
+                        FileNames = packageFileNames.Select(Path.GetFileName).ToArray()
+                    }
+                    .TransformText();
 
                     string sharedProjectFileContent = new SharedProjectFileTemplate
-                        {
-                            UniqueProjectID = uniqueProjectID,
-                            PackageName = package
-                        }
-                        .TransformText();
+                    {
+                        UniqueProjectID = uniqueProjectID,
+                        PackageName = package
+                    }
+                    .TransformText();
 
                     // Build a shared project items file (this is the shared project that normal projects will reference)
                     if (!File.Exists(sharedProjectItems) || GetMD5HashFromFile(sharedProjectItems) != GetMD5HashFromString(sharedProjectItemsContent))
