@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{ee04828f-c561-4da6-807b-8299eb4666fe}</ProjectGuid>
+    <ProjectGuid>{6e48349f-470c-4097-acf4-393759ef503c}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>Packages</AssemblyName>
+    <AssemblyName>StructPromoted</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -53,10 +53,10 @@
     <Compile Include="Interfaces_VertexStruct.cs" />
     <Compile Include="Methods2_MyFloatStructOf(float64).cs" />
     <Compile Include="MethodsPointers_VertexStruct.cs" />
-    <Compile Include="Packages.cs" />
+    <Compile Include="StructPromoted.cs" />
     <Compile Include="StructPromoted_DoDadStruct.cs" />
     <Compile Include="StructPromoted_VertexStruct.cs" />
-    <Compile Include="Packages_AssemblyInfo.cs" />
+    <Compile Include="StructPromoted_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

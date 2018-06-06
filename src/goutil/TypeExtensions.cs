@@ -77,14 +77,16 @@ namespace go
         /// </summary>
         /// <param name="targetType">Target <see cref="Type"/> to search.</param>
         /// <param name="methodName">Name of extension method to find.</param>
+        /// <param name="isByRef">Determines if extension target is accessed by reference.</param>
         /// <returns>Callable delegate referencing extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
-        public static Delegate GetExtensionDelegate(this Type targetType, string methodName)
+        public static Delegate GetExtensionDelegate(this Type targetType, string methodName, out bool isByRef)
         {
-            return targetType.GetExtensionMethod(methodName)?.CreateStaticDelegate();
+            isByRef = false;
+            return targetType.GetExtensionMethod(methodName)?.CreateStaticDelegate(out isByRef);
         }
 
         // Creates a delegate for the given static method metadata.
-        private static Delegate CreateStaticDelegate(this MethodInfo methodInfo)
+        private static Delegate CreateStaticDelegate(this MethodInfo methodInfo, out bool isByRef)
         {
             Func<Type[], Type> getMethodType;
             List<Type> types = methodInfo.GetParameters().Select(paramInfo => paramInfo.ParameterType).ToList();
@@ -98,6 +100,8 @@ namespace go
                 getMethodType = Expression.GetFuncType;
                 types.Add(methodInfo.ReturnType);
             }
+
+            isByRef = types[0].IsByRef;
 
             return Delegate.CreateDelegate(getMethodType(types.ToArray()), methodInfo);
         }

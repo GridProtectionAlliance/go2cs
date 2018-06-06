@@ -53,6 +53,8 @@
     <Compile Include="Interfaces_VertexStruct.cs" />
     <Compile Include="Methods2_MyFloatStructOf(float64).cs" />
     <Compile Include="MethodsPointers_VertexStruct.cs" />
+    <Compile Include="StructPromoted_DoDadStruct.cs" />
+    <Compile Include="StructPromoted_VertexStruct.cs" />
     <Compile Include="Variadic.cs" />
     <Compile Include="Variadic_AssemblyInfo.cs" />
   </ItemGroup>

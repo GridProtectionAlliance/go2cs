@@ -13,9 +13,9 @@ namespace go
     public static unsafe partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        private partial struct span
+        public partial struct DoDad
         {
-            public span(NilType _)
+            public DoDad(NilType _)
             {
                 // Field instance values
                 //public DateTime When;
@@ -25,28 +25,28 @@ namespace go
             }
 
             // Only include constructor if struct contains fields
-            //public span(params)
+            //public DoDad(params)
             //{
             //    this.Field = Field,
             //    // Inherited interface initializations
             //    // Inherited structure initializations
             //}
 
-            // Enable comparisons between nil and span struct
+            // Enable comparisons between nil and DoDad struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(span value, NilType nil) => value.Equals(default(span));
+            public static bool operator ==(DoDad value, NilType nil) => value.Equals(default(DoDad));
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(span value, NilType nil) => !(value == nil);
+            public static bool operator !=(DoDad value, NilType nil) => !(value == nil);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, span value) => value == nil;
+            public static bool operator ==(NilType nil, DoDad value) => value == nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, span value) => value != nil;
+            public static bool operator !=(NilType nil, DoDad value) => value != nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator span(NilType nil) => default(span);
+            public static implicit operator DoDad(NilType nil) => default(DoDad);
         }
     }
 }

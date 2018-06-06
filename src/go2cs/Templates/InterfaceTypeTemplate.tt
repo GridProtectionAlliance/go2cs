@@ -26,7 +26,7 @@ using go;
             private T m_target;
 <#
         
-            foreach (var decl in Functions.Where(function => !function.resultType.Equals("void")))
+            foreach (var decl in Functions)
             {
                 #><#=new InterfaceFuncDeclTemplate
                 {
@@ -38,19 +38,6 @@ using go;
                     ResultType = decl.resultType
                 }
                 .TransformText()#><#
-            }
-        
-            foreach (var decl in Functions.Where(function => function.resultType.Equals("void")))
-            {
-                #><#=new InterfaceActionDeclTemplate
-                {
-                    ActionName = decl.functionName,
-                    Scope = "public",
-                    ParameterSignature = decl.parameterSignature,
-                    NamedParameters = decl.namedParameters,
-                    ParameterTypes = decl.parameterTypes
-                }
-                .TransformText()#><#
             }#>
 
 
@@ -58,27 +45,15 @@ using go;
             static <#=InterfaceName#>()
             {
                 Type targetType = typeof(T);
-<#
-        
-                foreach (var decl in Functions.Where(function => !function.resultType.Equals("void")))
+                Delegate extensionMethod;
+                bool isByRef;
+<#        
+                foreach (var decl in Functions)
                 {
                     #><#=new InterfaceFuncInitTemplate
                     {
                         FunctionName = decl.functionName,
-                        InterfaceName = InterfaceName,
-                        ParameterTypes = decl.parameterTypes,
-                        ResultType = decl.resultType
-                    }
-                    .TransformText()#><#
-                }
-            
-                foreach (var decl in Functions.Where(function => function.resultType.Equals("void")))
-                {
-                    #><#=new InterfaceActionInitTemplate
-                    {
-                        ActionName = decl.functionName,
-                        InterfaceName = InterfaceName,
-                        ParameterTypes = decl.parameterTypes
+                        InterfaceName = InterfaceName
                     }
                     .TransformText()#><#
                 }#>

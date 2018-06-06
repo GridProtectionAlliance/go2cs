@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 May 30 19:31:16 UTC
-// Original source: D:\Projects\go2cs\src\Examples\NilSlices.go
+// package main -- go2cs converted at 2018 June 05 23:51:43 UTC
+// Original source: C:\Projects\go2cs\src\Examples\NilSlices.go
 
 using fmt = go.fmt_package;
 

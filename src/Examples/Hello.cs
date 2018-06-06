@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 May 30 19:31:15 UTC
-// Original source: D:\Projects\go2cs\src\Examples\Hello.go
+// package main -- go2cs converted at 2018 June 05 23:51:41 UTC
+// Original source: C:\Projects\go2cs\src\Examples\Hello.go
 
 using fmt = go.fmt_package;
 

@@ -54,6 +54,8 @@
     <Compile Include="Methods2_MyFloatStructOf(float64).cs" />
     <Compile Include="MethodsPointers_VertexStruct.cs" />
     <Compile Include="SlicesOfSlice.cs" />
+    <Compile Include="StructPromoted_DoDadStruct.cs" />
+    <Compile Include="StructPromoted_VertexStruct.cs" />
     <Compile Include="SlicesOfSlice_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,8 @@
 ﻿using static go.BuiltInFunctions;
 using System;
+using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace go
 {
@@ -58,15 +60,34 @@ namespace go
 
         public partial struct MyCustomError : Abser
         {
-            //private class struct_value
-            //{
-            //    public string Message = "";
-            //}
-
-            //private readonly struct_value _value;
-
             // Abser interface promotion
-            public double Abs() => Abser.Abs();
+            private delegate double AbsByVal(MyCustomError value);
+            private delegate double AbsByRef(ref MyCustomError value);
+
+            private static readonly AbsByVal s_AbsByVal;
+            private static readonly AbsByRef s_AbsByRef;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public double Abs() => s_AbsByRef?.Invoke(ref this) ?? s_AbsByVal?.Invoke(this) ?? Abser?.Abs() ?? throw new PanicException("runtime error: invalid memory address or nil pointer dereference");
+
+            [DebuggerStepperBoundary]
+            static MyCustomError()
+            {
+                Type targetType = typeof(MyCustomError);
+                Delegate extensionMethod;
+                bool isByRef;
+
+                // Any existing defined extensions will override interface reference calls
+                extensionMethod = targetType.GetExtensionDelegate("Abs", out isByRef);
+
+                if (extensionMethod != null)
+                {
+                    if (isByRef)
+                        s_AbsByRef = extensionMethod as AbsByRef;
+                    else
+                        s_AbsByVal = extensionMethod as AbsByVal;
+                }
+            }
 
             // MyError structure promotion
             public DateTime When

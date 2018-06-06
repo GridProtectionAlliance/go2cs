@@ -111,28 +111,10 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>InheritedTypeTemplate.cs</LastGenOutput>
     </Content>
-    <Content Include="Templates\InterfaceActionDeclTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>InterfaceActionDeclTemplate.cs</LastGenOutput>
-    </Content>
     <Compile Include="Templates\InheritedTypeTemplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>InheritedTypeTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\InterfaceActionDeclTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>InterfaceActionDeclTemplate.tt</DependentUpon>
-    </Compile>
-    <Content Include="Templates\InterfaceActionInitTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>InterfaceActionInitTemplate.cs</LastGenOutput>
-    </Content>
-    <Compile Include="Templates\InterfaceActionInitTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>InterfaceActionInitTemplate.tt</DependentUpon>
     </Compile>
     <Content Include="Templates\InterfaceFuncDeclTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>

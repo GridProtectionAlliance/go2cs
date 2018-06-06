@@ -19,20 +19,32 @@ namespace go
         {
             private T m_target;
 
-            private static readonly Func<T, double> s_Abs;
+            private delegate double AbsByVal(T value);
+            private delegate double AbsByRef(ref T value);
 
-            [DebuggerNonUserCode]
-            public double Abs() => s_Abs(m_target);
+            private static readonly AbsByVal s_AbsByVal;
+            private static readonly AbsByRef s_AbsByRef;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public double Abs() => s_AbsByRef?.Invoke(ref m_target) ?? s_AbsByVal(m_target);
 
             [DebuggerStepperBoundary]
             static Abser()
             {
                 Type targetType = typeof(T);
+                Delegate extensionMethod;
+                bool isByRef;
 
-                s_Abs = targetType.GetExtensionDelegate("Abs") as Func<T, double>;
+                extensionMethod = targetType.GetExtensionDelegate("Abs", out isByRef);
 
-                if (s_Abs == null)
+                // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
+                if ((object)extensionMethod == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement Abser.Abs function");
+
+                if (isByRef)
+                    s_AbsByRef = extensionMethod as AbsByRef;
+                else
+                    s_AbsByVal = extensionMethod as AbsByVal;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

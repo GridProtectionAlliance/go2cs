@@ -478,7 +478,7 @@ namespace go2cs
                     AssemblyName = assemblyName,
                     UniqueProjectID = uniqueProjectID
                 }
-                    .TransformText();
+                .TransformText();
 
                 // Build a main project assembly info file (don't overwrite possible user changes)
                 if (!File.Exists(mainProjectAssemblyInfoFile))
@@ -496,7 +496,7 @@ namespace go2cs
                     ProjectFiles = checkedProjectFiles.Select(fileName => GetRelativePath(fileName, mainPackagePath)).ToArray(),
                     SharedProjectReferences = new[] { "$(GOPATH)\\src\\go2cs\\goutil\\goutil.projitems" }
                 }
-                    .TransformText();
+                .TransformText();
 
                 // Build a main project file
                 if (!File.Exists(mainProjectFile) || GetMD5HashFromFile(mainProjectFile) != GetMD5HashFromString(mainProjectFileContent))

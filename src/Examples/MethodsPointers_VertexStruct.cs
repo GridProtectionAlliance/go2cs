@@ -15,29 +15,19 @@ namespace go
         [GeneratedCode("go2cs", "0.1.1.0")]
         public partial struct Vertex
         {
-            private class struct_value
+            public Vertex(NilType _)
             {
                 // Field instance values
                 //public DateTime When;
-                //public string What = "";
-            }
-
-            private readonly struct_value _value;
-            
-            public Vertex(NilType _)
-            {
-                _value = new struct_value();
-                // Inherited interface initializations
+                //public string What = ""; <- string initialized to empty
+                // Inherited interface initializations (set to null / default)
                 // Inherited structure initializations
             }
 
             // Only include constructor if struct contains fields
             //public Vertex(params)
             //{
-            //    _value = new struct_value
-            //    {
-            //       Field = Field,
-            //    };
+            //    this.Field = Field,
             //    // Inherited interface initializations
             //    // Inherited structure initializations
             //}
