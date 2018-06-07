@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{ec815a02-54be-4920-a6b7-dfe63cf6be02}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>go</RootNamespace>
+    <AssemblyName>ImportOptions</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.2</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.2</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ImportOptions.cs" />
+    <Compile Include="InterfaceCasting_MyErrorStruct.cs" />
+    <Compile Include="InterfaceImplementation_AnimalInterface.cs" />
+    <Compile Include="InterfaceImplementation_DogStruct.cs" />
+    <Compile Include="InterfaceImplementation_FrogStruct.cs" />
+    <Compile Include="InterfaceInheritance_T1Struct.cs" />
+    <Compile Include="InterfaceInheritance_T2Struct.cs" />
+    <Compile Include="InterfaceInheritance_IInterface.cs" />
+    <Compile Include="InterfaceInheritance_VInterface.cs" />
+    <Compile Include="SortArrayType_PersonStruct.cs" />
+    <Compile Include="SortArrayType_PeopleByShoeSizeStructOf(Slice(Person)).cs" />
+    <Compile Include="StructPromotion_PersonStruct.cs" />
+    <Compile Include="StructPromotion_EmployeeStruct.cs" />
+    <Compile Include="StructPromotion_RecordStruct.cs" />
+    <Compile Include="ImportOptions_AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
+    <Import Project="$(GOPATH)\src\go2cs\goutil\goutil.projitems" Label="Shared" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

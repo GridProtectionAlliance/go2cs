@@ -175,6 +175,11 @@ namespace go2cs
             return Directory.Exists(filePath) && Directory.EnumerateFiles(filePath, searchPattern, SearchOption.TopDirectoryOnly).Any();
         }
 
+        public static string RemoveInvalidCharacters(string fileName)
+        {
+            return fileName.Replace('<', '(').Replace('>', ')');
+        }
+
         public static string GetRelativePath(string fileName, string targetPath)
         {
             return new DirectoryInfo(targetPath).GetRelativePathTo(new FileInfo(fileName));

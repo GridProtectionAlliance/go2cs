@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,8 +36,7 @@ namespace go2cs
         private string m_packageUsing;
         private string m_packageNamespace;
         private string[] m_packageNamespaces;
-        private string m_headerLevelComments;
-        private string m_packageLevelComments;
+        private readonly HashSet<string> m_requiredUsings = new HashSet<string>(StringComparer.Ordinal);
 
         public string Package => m_package;
 
@@ -58,9 +58,9 @@ namespace go2cs
             else
             {
                 // Define package import path
-                m_packageImport = Path.GetDirectoryName(m_sourceFileName) ?? m_package;
-                m_packageImport = m_packageImport.Replace(s_goRoot, "");
-                m_packageImport = m_packageImport.Replace(s_goPath, "");
+                m_packageImport = Path.GetDirectoryName(SourceFileName) ?? m_package;
+                m_packageImport = m_packageImport.Replace(GoRoot, "");
+                m_packageImport = m_packageImport.Replace(GoPath, "");
 
                 while (m_packageImport.StartsWith(Path.DirectorySeparatorChar.ToString()) || m_packageImport.StartsWith(Path.AltDirectorySeparatorChar.ToString()))
                     m_packageImport = m_packageImport.Substring(1);
@@ -86,7 +86,7 @@ namespace go2cs
 
                 if (!package.Equals(m_package))
                 {
-                    AddWarning(context, $"Defined package clause \"{m_package}\" does not match file path \"{m_sourceFileName}\"");
+                    AddWarning(context, $"Defined package clause \"{m_package}\" does not match file path \"{SourceFileName}\"");
                     m_packageImport = lastSlash > -1 ? $"{m_packageImport.Substring(0, lastSlash)}.{m_package}" : m_package;
                 }
             }
@@ -98,7 +98,7 @@ namespace go2cs
             m_packageNamespace = packageNamespace.Substring(0, packageNamespace.LastIndexOf('.'));
 
             // Track file name associated with package
-            AddFileToPackage(m_package, m_targetFileName, m_packageNamespace);
+            AddFileToPackage(m_package, TargetFileName, m_packageNamespace);
 
             // Define namespaces
             List<string> packageNamespaces = new List<string> { RootNamespace };
@@ -111,12 +111,30 @@ namespace go2cs
 
             m_packageNamespaces = packageNamespaces.ToArray();
 
-            m_headerLevelComments = CheckForCommentsLeft(context);
-            m_packageLevelComments = CheckForCommentsRight(context).TrimStart();
+            string headerLevelComments = CheckForCommentsLeft(context);
+            string packageLevelComments = CheckForCommentsRight(context).TrimStart();
 
-            // Import declarations are optional, make sure entry function is called regardless
-            if ((context.Parent as GolangParser.SourceFileContext)?.importDecl()?.Length == 0)
-                EnterImportDecl(new GolangParser.ImportDeclContext(null, 0));
+            if (!string.IsNullOrWhiteSpace(headerLevelComments))
+            {
+                m_targetFile.AppendLine(headerLevelComments);
+
+                if (!headerLevelComments.EndsWith("\r") && !headerLevelComments.EndsWith("\n"))
+                    m_targetFile.AppendLine();
+            }
+
+            m_targetFile.AppendLine($"// package {m_package} -- go2cs converted at {DateTime.UtcNow:yyyy MMMM dd HH:mm:ss} UTC");
+
+            if (!m_packageImport.Equals("main"))
+                m_targetFile.AppendLine($"// import \"{m_packageImport}\" ==> using {m_packageUsing}");
+
+            m_targetFile.AppendLine($"// Original source: {SourceFileName}");
+            m_targetFile.AppendLine();
+
+            if (!string.IsNullOrWhiteSpace(packageLevelComments))
+                m_targetFile.Append(packageLevelComments);
+
+            // Add commonly required using statements
+            m_requiredUsings.Add("static go.BuiltInFunctions");
         }
     }
 }

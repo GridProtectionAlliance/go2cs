@@ -58,7 +58,7 @@ namespace go
                 .Where(type => type.IsSealed && !type.IsGenericType && !type.IsNested)
                 .SelectMany(type => type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                 .Where(methodInfo => methodInfo.IsDefined(typeof(ExtensionAttribute), false))
-                .Where(methodInfo => methodInfo.GetParameters()[0].ParameterType == targetType);
+                .Where(methodInfo => methodInfo.GetParameters()[0].ParameterType.IsAssignableFrom(targetType));
         }
 
         /// <summary>
@@ -83,6 +83,38 @@ namespace go
         {
             isByRef = false;
             return targetType.GetExtensionMethod(methodName)?.CreateStaticDelegate(out isByRef);
+        }
+
+        /// <summary>
+        /// Attempts to create a callable delegate for the specified extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> or any of its promotions.
+        /// </summary>
+        /// <param name="targetType">Target <see cref="Type"/> to search.</param>
+        /// <param name="methodName">Name of extension method to find.</param>
+        /// <param name="isByRef">Determines if extension target is accessed by reference.</param>
+        /// <returns>Callable delegate referencing extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
+        /// <typeparam name="TPromotedAttribute">Promoted type attribute.</typeparam>
+        public static Delegate GetExtensionDelegateSearchingPromotions<TPromotedAttribute>(this Type targetType, string methodName, out bool isByRef) where TPromotedAttribute : PromotedTypeAttributeBase
+        {
+            isByRef = false;
+            Delegate extensionMethod = targetType.GetExtensionMethod(methodName)?.CreateStaticDelegate(out isByRef);
+
+            if ((object)extensionMethod == null)
+            {
+                object[] customAttributes = targetType.GetCustomAttributes(typeof(TPromotedAttribute), true);
+
+                if (customAttributes.Length > 0)
+                {
+                    foreach (TPromotedAttribute attribute in customAttributes.Cast<TPromotedAttribute>())
+                    {
+                        extensionMethod = attribute.PromotedType.GetExtensionDelegateSearchingPromotions<TPromotedAttribute>(methodName, out isByRef);
+
+                        if ((object)extensionMethod != null)
+                            break;
+                    }
+                }
+            }
+
+            return extensionMethod;
         }
 
         // Creates a delegate for the given static method metadata.

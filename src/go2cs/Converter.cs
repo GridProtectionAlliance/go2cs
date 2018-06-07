@@ -26,9 +26,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using Antlr4.Runtime;
-using Antlr4.Runtime.Tree;
 using go2cs.Templates;
 using static go2cs.Common;
 
@@ -36,82 +34,33 @@ using static go2cs.Common;
 
 namespace go2cs
 {
-    public partial class Converter : GolangBaseListener
+    public partial class Converter : ScannerBase
     {
         public const string RootNamespace = "go";
         public const string ClassSuffix = "_package";
         public const string StandardLibrary = "GoStandardLibrary";
         private const string UsingsMarker = ">>MARKER:USINGS<<";
 
-        // Consider only marking classes as unsafe when pointers are encountered
+        // Consider only marking classes as unsafe when pointers are encountered (per package)
         //private const string UnsafeMarker = ">>MARKER:UNSAFE<<";
 
-        private readonly Options m_options;
-        private readonly BufferedTokenStream m_tokenStream;
-        private readonly GolangParser m_parser;
-        private readonly string m_sourceFileName;
-        private readonly string m_sourceFilePath;
-        private readonly string m_targetFileName;
-        private readonly string m_targetFilePath;
         private readonly StringBuilder m_targetFile = new StringBuilder();
-        private readonly List<string> m_warnings = new List<string>();
 
-        public Options Options => m_options;
-
-        public string SourceFileName => m_sourceFileName;
-
-        public string SourceFilePath => m_sourceFilePath;
-
-        public string TargetFileName => m_targetFileName;
-
-        public string TargetFilePath => m_targetFilePath;
-
-        public string[] Warnings => m_warnings.ToArray();
-
-        public Converter(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName)
+        public Converter(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
         {
-            m_options = options;
-
-            if (string.IsNullOrWhiteSpace(fileName))
-                throw new ArgumentNullException(nameof(fileName));
-
-            if (!File.Exists(fileName))
-                throw new FileNotFoundException($"WARNING: Source file \"{fileName}\" cannot be found.", fileName);
-
-            m_tokenStream = tokenStream;
-            m_parser = parser;
-            m_sourceFileName = Path.GetFullPath(fileName);
-            m_sourceFilePath = Path.GetDirectoryName(m_sourceFileName) ?? "";
-            m_targetFileName = $"{Path.GetFileNameWithoutExtension(m_sourceFileName)}.cs";
-
-            if (string.IsNullOrWhiteSpace(options.TargetPath))
-                m_targetFilePath = m_sourceFilePath;
-            else
-                m_targetFilePath = Path.GetDirectoryName(Path.GetFullPath(options.TargetPath)) ?? "";
-
-            if (!Directory.Exists(m_targetFilePath))
-                Directory.CreateDirectory(m_targetFilePath);
-
-            m_targetFileName = Path.Combine(m_targetFilePath, m_targetFileName);
         }
 
-        public void Convert()
+        public override void Scan(bool showParseTree)
         {
-            IParseTree sourceTree = m_parser.sourceFile();
-
-            if (m_options.ShowParseTree)
-                Console.WriteLine(sourceTree.ToStringTree(m_parser));
-            
-            // Walk parsed source tree to start visiting nodes
-            ParseTreeWalker walker = new ParseTreeWalker();
-            walker.Walk(this, sourceTree);
+            // Base class walks parse tree
+            base.Scan(showParseTree);
 
             // Write any end of file comments
             if (!string.IsNullOrWhiteSpace(m_nextDeclComments))
             {
                 m_targetFile.AppendLine();
                 m_targetFile.Append(FixForwardSpacing(m_nextDeclComments, indentLevel: 2));
-            }                
+            }
 
             // Close class and namespaces as begun during Converter_TopLevelDecl visit
             m_targetFile.AppendLine($"{Spacing(indentLevel: 1)}}}");
@@ -129,216 +78,47 @@ namespace go2cs
             // Remove code markers
             targetFile = targetFile.Replace(UsingsMarker, "");
 
-            using (StreamWriter writer = File.CreateText(m_targetFileName))
+            using (StreamWriter writer = File.CreateText(TargetFileName))
                 writer.Write(targetFile);
         }
 
-        private void AddWarning(ParserRuleContext context, string message)
+        protected override void BeforeScan()
         {
-            m_warnings.Add($"{Path.GetFileName(m_sourceFileName)}:{context.Start.Line}:{context.Start.Column}: {message}");
+            Console.WriteLine($"Converting from{Environment.NewLine}    \"{SourceFileName}\" to{Environment.NewLine}    \"{TargetFileName}\"...");
         }
 
-        private static readonly bool s_isPosix;
-        private static readonly string s_goRoot;
-        private static readonly string s_goPath;
-        private static readonly string[] s_newLineDelimeters;
-        private static readonly HashSet<string> s_processedFiles;
-        private static readonly HashSet<string> s_processedImports;
-        private static readonly HashSet<string> s_importQueue;
+        protected override void AfterScan()
+        {
+            if (!PackageImport.Equals("main"))
+                Console.WriteLine($"    import \"{PackageImport}\" ==> using {PackageUsing}");
+
+            Console.WriteLine("    Finished.");
+        }
+
+        protected override void SkippingScan()
+        {
+            Console.WriteLine($"Skipping convert for{Environment.NewLine}    \"{SourceFileName}\", target{Environment.NewLine}    \"{TargetFileName}\" already exists.");
+        }
+
+        protected override void SkippingImport(string import)
+        {
+            Console.WriteLine($"Skipping convert for Go standard library import package \"{import}\".");
+            Console.WriteLine();
+        }
+
         private static readonly HashSet<string> s_mainPackageFiles;
         private static readonly Dictionary<string, Dictionary<string, (string nameSpace, HashSet<string> fileNames)>> s_packageInfo;
-        private static int s_totalSkippedFiles;
-        private static int s_totalSkippedPackages;
-        private static int s_totalWarnings;
 
         static Converter()
         {
-            s_isPosix = Path.DirectorySeparatorChar == '/';
-
-            s_goRoot = Environment.GetEnvironmentVariable("GOROOT");
-
-            if (string.IsNullOrWhiteSpace(s_goRoot))
-                s_goRoot = Path.GetFullPath($"{Path.DirectorySeparatorChar}Go");
-
-            s_goRoot = AddPathSuffix($"{AddPathSuffix(s_goRoot)}src");
-
-            if (!Directory.Exists(s_goRoot))
-                throw new InvalidOperationException($"Unable to resolve GOROOT src directory: \"{s_goRoot}\". Validate that Go is properly installed.");
-
-            s_goPath = Environment.GetEnvironmentVariable("GOPATH");
-
-            if (string.IsNullOrWhiteSpace(s_goPath))
-                s_goPath = Environment.ExpandEnvironmentVariables(s_isPosix ? "$HOME/go" : "%USERPROFILE%\\go");
-
-            s_goPath = AddPathSuffix($"{AddPathSuffix(s_goPath)}src");
-
-            if (!Directory.Exists(s_goPath))
-                Directory.CreateDirectory(s_goPath);
-
-            s_newLineDelimeters = new[] { "\r\n", "\r", "\n" };
-
-            s_processedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            s_processedImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            s_importQueue = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             s_mainPackageFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             s_packageInfo = new Dictionary<string, Dictionary<string, (string, HashSet<string>)>>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public static int TotalProcessedFiles => s_processedFiles.Count;
-
-        public static int TotalSkippedFiles => s_totalSkippedFiles;
-
-        public static int TotalSkippedPackages => s_totalSkippedPackages;
-
-        public static int TotalWarnings => s_totalWarnings;
-
         public static void Convert(Options options)
         {
-            string sourcePath = GetAbsolutePath(options.SourcePath);
-
-            if (File.Exists(sourcePath))
-            {
-                string filePath = Path.GetDirectoryName(sourcePath) ?? "";
-
-                if (filePath.StartsWith(s_goRoot, StringComparison.OrdinalIgnoreCase))
-                    ConvertFile(Options.Clone(options, options.OverwriteExistingFiles, sourcePath, Path.Combine(options.TargetGoSrcPath, filePath.Substring(s_goRoot.Length))), sourcePath);
-                else
-                    ConvertFile(options, sourcePath);
-            }
-            else if (Directory.Exists(sourcePath))
-            {
-                Regex excludeExpression = options.GetExcludeExpression();
-                bool convertFileMatch(string fileName) => !excludeExpression.IsMatch(fileName);
-
-                foreach (string fileName in Directory.EnumerateFiles(sourcePath, "*.go", SearchOption.TopDirectoryOnly))
-                {
-                    if (convertFileMatch(fileName))
-                        ConvertFile(options, fileName);
-                }
-
-                if (options.RecurseSubdirectories)
-                {
-                    foreach (string subDirectory in Directory.EnumerateDirectories(sourcePath))
-                    {
-                        string targetDirectory = options.TargetPath;
-
-                        if (!string.IsNullOrEmpty(targetDirectory))
-                            targetDirectory = Path.Combine(targetDirectory, subDirectory.Substring(sourcePath.Length));
-
-                        Convert(Options.Clone(options, options.OverwriteExistingPackages, subDirectory, targetDirectory));
-                    }
-                }
-            }
-            else
-            {
-                throw new DirectoryNotFoundException($"WARNING: Source path \"{sourcePath}\" cannot be found.");
-            }
-        }
-
-        public static void ConvertFile(Options options, string fileName)
-        {
-            if (s_processedFiles.Contains(fileName))
-                return;
-
-            s_processedFiles.Add(fileName);
-
-            AntlrInputStream inputStream;
-
-            using (StreamReader reader = File.OpenText(fileName))
-                inputStream = new AntlrInputStream(reader);
-
-            GolangLexer lexer = new GolangLexer(inputStream);
-            CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-            GolangParser parser = new GolangParser(tokenStream);
-            Converter converter = new Converter(tokenStream, parser, options, fileName);
-
-            parser.RemoveErrorListeners();
-            parser.AddErrorListener(new ParserErrorListener(converter));
-
-            if (options.OverwriteExistingFiles || !File.Exists(converter.TargetFileName))
-            {
-                Console.WriteLine($"Converting from{Environment.NewLine}    \"{converter.SourceFileName}\" to{Environment.NewLine}    \"{converter.TargetFileName}\"...");
-                converter.Convert();
-                Console.WriteLine("    Finished.");
-
-                if (!converter.PackageImport.Equals("main"))
-                    Console.WriteLine($"   import \"{converter.PackageImport}\" ==> using {converter.PackageUsing}");
-            }
-            else
-            {
-                Console.WriteLine($"Skipping convert for{Environment.NewLine}    \"{converter.SourceFileName}\", target{Environment.NewLine}    \"{converter.TargetFileName}\" already exists.");
-                s_totalSkippedFiles++;
-            }
-
-            string[] warnings = converter.Warnings;
-
-            if (warnings.Length > 0)
-            {
-                Console.WriteLine();
-                Console.WriteLine("WARNINGS:");
-
-                foreach (string warning in warnings)
-                    Console.WriteLine($"    {warning}");
-
-                s_totalWarnings += warnings.Length;
-            }
-
-            Console.WriteLine();
-
-            if (!options.LocalConvertOnly)
-                ConvertImports(options);
-        }
-
-        private static void ConvertImports(Options options)
-        {
-            string[] imports = s_importQueue.ToArray();
-
-            foreach (string import in imports)
-            {
-                if (s_processedImports.Contains(import))
-                    continue;
-
-                s_processedImports.Add(import);
-
-                string importPath = AddPathSuffix(import.Replace("/", "\\"));
-                string goRootImport = Path.Combine(s_goRoot, importPath);
-                string goPathImport = Path.Combine(s_goPath, importPath);
-                string targetPath = null;
-
-                if (Directory.Exists(goRootImport))
-                {
-                    targetPath = Path.Combine(options.TargetGoSrcPath, importPath);
-
-                    if (options.ConvertStandardLibrary)
-                    {
-                        Convert(Options.Clone(options, options.OverwriteExistingPackages, goRootImport, targetPath));
-                    }
-                    else
-                    {
-                        // Only count package conversion as skipped when there are no existing converted files
-                        if (PathHasFiles(targetPath, "*.cs"))
-                            continue;
-
-                        Console.WriteLine($"Skipping convert for Go standard library import package \"{import}\".");
-                        Console.WriteLine();
-                        s_totalSkippedPackages++;
-                    }
-                }
-                else if (Directory.Exists(goPathImport))
-                {
-                    if (!string.IsNullOrEmpty(options.TargetPath))
-                        targetPath = Path.Combine(options.TargetPath, importPath);
-
-                    Convert(Options.Clone(options, options.OverwriteExistingPackages, goPathImport, targetPath));
-                }
-                else
-                {
-                    Console.WriteLine($"WARNING: Failed to locate package \"{import}\" at either:");
-                    Console.WriteLine($"    {goRootImport} (from %GOROOT%)");
-                    Console.WriteLine($"    {goPathImport} (from %GOPATH%)");
-                    Console.WriteLine();
-                }
-            }
+            ResetScanner();
+            Scan(options, options.ShowParseTree, (tokenStream, parser, _options, fileName) => new Converter(tokenStream, parser, _options, fileName));
         }
 
         public static void WriteProjectFiles(Options options)
@@ -353,7 +133,7 @@ namespace go2cs
             ProcessMainProjectPackages(groupedPackageData);
 
             // If converting the full Go standard library, create shared and standard projects for the complete library
-            if (options.ConvertStandardLibrary && options.RecurseSubdirectories && AddPathSuffix(options.SourcePath).Equals(s_goPath))
+            if (options.ConvertStandardLibrary && options.RecurseSubdirectories && AddPathSuffix(options.SourcePath).Equals(GoPath))
                 ProcessStandardLibraryPackages(options, groupedPackageData);
         }
 
@@ -511,7 +291,7 @@ namespace go2cs
 
             foreach (KeyValuePair<string, List<(string path, string[] fileNames)>> packageData in groupedPackageData)
             {
-                foreach ((string path, string[] fileNames) rootPackage in packageData.Value.Where(info => info.path.StartsWith(s_goRoot)))
+                foreach ((string path, string[] fileNames) rootPackage in packageData.Value.Where(info => info.path.StartsWith(GoRoot)))
                 {
                     packageFileNames.AddRange(rootPackage.fileNames.Where(fileName => !fileName.EndsWith("_test.go")));
                 }
@@ -520,7 +300,7 @@ namespace go2cs
             string sharedProjectItems = Path.Combine(options.TargetGoSrcPath, $"{StandardLibrary}.projitems");
             string sharedProjectFile = Path.Combine(options.TargetGoSrcPath, $"{StandardLibrary}.shproj");
             string uniqueProjectID = GetProjectGuid(sharedProjectItems, "SharedGUID");
-            int rootIndex = s_goPath.Length;
+            int rootIndex = GoPath.Length;
 
             string sharedProjectItemsContent = new SharedProjectFileItemsTemplate
             {
@@ -554,14 +334,6 @@ namespace go2cs
             Dictionary<string, (string, HashSet<string>)> packageInfo = s_packageInfo.GetOrAdd(Path.GetDirectoryName(fileName), _ => new Dictionary<string, (string, HashSet<string>)>(StringComparer.Ordinal));
             (string, HashSet<string> fileNames) fileGroup = packageInfo.GetOrAdd(package, _ => (nameSpace, new HashSet<string>(StringComparer.OrdinalIgnoreCase)));
             fileGroup.fileNames.Add(fileName);
-        }
-
-        private static string GetAbsolutePath(string filePath)
-        {
-            if (!Path.IsPathRooted(filePath))
-                filePath = Path.Combine(s_goPath, filePath);
-
-            return filePath;
         }
     }
 }

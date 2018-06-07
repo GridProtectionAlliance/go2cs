@@ -47,6 +47,11 @@
   <ItemGroup>
     <Compile Include="Arguments.cs" />
     <Compile Include="Common.cs" />
+    <Compile Include="Metadata\FieldInfo.cs" />
+    <Compile Include="Metadata\FunctionSignature.cs" />
+    <Compile Include="Metadata\InterfaceInfo.cs" />
+    <Compile Include="Metadata\ParameterInfo.cs" />
+    <Compile Include="Metadata\StructInfo.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
     <Content Include="go2cs.ico" />
@@ -54,7 +59,6 @@
     <Compile Include="Converter_Comments.cs" />
     <Compile Include="Converter_ConstDecl.cs" />
     <Compile Include="Converter_Declaration.cs" />
-    <Compile Include="Converter_ErrorHandler.cs" />
     <Compile Include="Converter_Expression.cs" />
     <Compile Include="Converter_ExpressionList.cs" />
     <Compile Include="Converter_FunctionDecl.cs" />
@@ -99,6 +103,15 @@
     <EmbeddedResource Include="..\goutil\PanicException.cs">
       <Link>goutil\PanicException.cs</Link>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\PromotedInterfaceAttribute.cs">
+      <Link>goutil\PromotedInterfaceAttribute.cs</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\PromotedStructAttribute.cs">
+      <Link>goutil\PromotedStructAttribute.cs</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\PromotedTypeAttributeBase.cs">
+      <Link>goutil\PromotedTypeAttributeBase.cs</Link>
+    </EmbeddedResource>
     <EmbeddedResource Include="..\goutil\Slice.cs">
       <Link>goutil\Slice.cs</Link>
     </EmbeddedResource>
@@ -111,6 +124,7 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>InheritedTypeTemplate.cs</LastGenOutput>
     </Content>
+    <Compile Include="ScannerBase.cs" />
     <Compile Include="Templates\InheritedTypeTemplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

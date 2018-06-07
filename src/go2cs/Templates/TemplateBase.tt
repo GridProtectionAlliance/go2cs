@@ -6,4 +6,6 @@
 public string Version => Common.EntryAssembly.GetName().Version.ToString();
 
 public string GeneratedCodeAttribute => $"GeneratedCode(\"go2cs\", \"{Version}\")";
+
+public string GeneratedTime => $"{DateTime.UtcNow:yyyy MMMM dd HH:mm:ss} UTC";
 #>

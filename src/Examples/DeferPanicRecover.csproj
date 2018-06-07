@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{49bc29d2-bdd6-41f5-a5d1-817f5fc55118}</ProjectGuid>
+    <ProjectGuid>{22ab9327-a2a9-48e7-9171-b88e9bcfdb4a}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>DeferPanicRecover</AssemblyName>

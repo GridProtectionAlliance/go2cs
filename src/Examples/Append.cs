@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 05 23:51:41 UTC
+// package main -- go2cs converted at 2018 June 06 01:27:07 UTC
 // Original source: C:\Projects\go2cs\src\Examples\Append.go
 
 using fmt = go.fmt_package;

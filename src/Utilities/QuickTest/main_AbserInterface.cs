@@ -35,7 +35,7 @@ namespace go
                 Delegate extensionMethod;
                 bool isByRef;
 
-                extensionMethod = targetType.GetExtensionDelegate("Abs", out isByRef);
+                extensionMethod = targetType.GetExtensionDelegateSearchingPromotions<PromotedStructAttribute>("Abs", out isByRef);
 
                 // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)extensionMethod == null)

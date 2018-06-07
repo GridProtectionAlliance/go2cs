@@ -16,7 +16,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\Projects\go2cs\src\go2cs\Templates\TemplateBase.tt"
+    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\TemplateBase.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
     public partial class TemplateBase : TemplateBaseBase
     {
@@ -29,11 +29,13 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 5 "D:\Projects\go2cs\src\go2cs\Templates\TemplateBase.tt"
+        #line 5 "C:\Projects\go2cs\src\go2cs\Templates\TemplateBase.tt"
 
 public string Version => Common.EntryAssembly.GetName().Version.ToString();
 
 public string GeneratedCodeAttribute => $"GeneratedCode(\"go2cs\", \"{Version}\")";
+
+public string GeneratedTime => $"{DateTime.UtcNow:yyyy MMMM dd HH:mm:ss} UTC";
 
         
         #line default

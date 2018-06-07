@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 05 23:51:44 UTC
+// package main -- go2cs converted at 2018 June 06 01:27:10 UTC
 // Original source: C:\Projects\go2cs\src\Examples\Variadic.go
 
 using fmt = go.fmt_package;// Here's a function that will take an arbitrary number

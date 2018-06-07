@@ -31,7 +31,8 @@ namespace go2cs.Templates
             
             #line default
             #line hidden
-            this.Write("\r\n                extensionMethod = targetType.GetExtensionDelegate(\"");
+            this.Write("\r\n                extensionMethod = targetType.GetExtensionDelegateSearchingPromo" +
+                    "tions<PromotedStructAttribute>(\"");
             
             #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));

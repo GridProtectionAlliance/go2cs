@@ -51,7 +51,7 @@ namespace go2cs
                 
                 // Track file names that contain main function in main package
                 if (m_package.Equals("main"))
-                    s_mainPackageFiles.Add(m_targetFileName);
+                    s_mainPackageFiles.Add(TargetFileName);
             }
 
             // Function signature containing result type and parameters have not been visited yet,
@@ -59,7 +59,7 @@ namespace go2cs
             m_functionResultTypeMarker = string.Format(FunctionResultTypeMarker, m_currentFunction);
             m_functionParametersMarker = string.Format(FunctionParametersMarker, m_currentFunction);
 
-            if (!m_topLevelDeclaration)
+            if (!m_firstTopLevelDeclaration)
                 m_targetFile.AppendLine();
 
             if (!string.IsNullOrWhiteSpace(m_nextDeclComments))

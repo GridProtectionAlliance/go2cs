@@ -23,7 +23,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using Antlr4.Runtime.Misc;
 using go2cs.Templates;
 using static go2cs.Common;
 
@@ -31,15 +30,15 @@ namespace go2cs
 {
     public partial class Converter
     {
-        public override void ExitTypeSpec([NotNull] GolangParser.TypeSpecContext context)
+        public override void ExitTypeSpec(GolangParser.TypeSpecContext context)
         {
             string identifier = context.IDENTIFIER().GetText();
             string scope = char.IsUpper(identifier[0]) ? "public" : "private";
-            string target = m_package.Equals("main") ? Path.GetFileNameWithoutExtension(m_targetFileName) : m_package;
+            string target = Path.GetFileNameWithoutExtension(TargetFileName);
 
             identifier = SanitizedIdentifier(identifier);
 
-            if (!m_topLevelDeclaration)
+            if (!m_firstTopLevelDeclaration)
                 m_targetFile.AppendLine();
 
             if (m_interfaceMethods.TryGetValue(context.type()?.typeLit()?.interfaceType(), out List<(string functionName, string parameterSignature, string namedParameters, string parameterTypes, string resultType)> functions))
@@ -86,7 +85,8 @@ namespace go2cs
                         PackageName = m_package,
                         StructName = identifier,
                         Scope = scope,
-                        InheritedInterfaces = "" // TODO <<
+                        InheritedInterfaces = new[] { "" }, // TODO <<
+                        PromotedStructs = new[] { "" }     // TODO <<
                     }
                     .TransformText());
 
@@ -95,13 +95,13 @@ namespace go2cs
 
                 m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier}");
                 m_targetFile.AppendLine($"{Spacing()}{{");
-                m_targetFile.Append(fields);
+                m_targetFile.AppendLine(fields);
                 m_targetFile.AppendLine($"{Spacing()}}}");
             }
             else if (m_types.TryGetValue(context.type(), out GoTypeInfo typeInfo))
             {
                 // Handle declaration like "type MyFloat float64"
-                string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}StructOf({typeInfo.Name}).cs");
+                string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.PrimitiveName)}).cs");
 
                 // TODO: The following works well for a primitive type definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
                 using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
@@ -120,9 +120,8 @@ namespace go2cs
                 // Track file name associated with package
                 AddFileToPackage(m_package, ancillaryInheritedTypeFileName, m_packageNamespace);
 
-                m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier}");
+                m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // {typeInfo.PrimitiveName}");
                 m_targetFile.AppendLine($"{Spacing()}{{");
-                m_targetFile.AppendLine($"{Spacing(1)}// Redeclares Go {typeInfo.Name} type - see \"{Path.GetFileName(ancillaryInheritedTypeFileName)}\"");
                 m_targetFile.AppendLine($"{Spacing()}}}");
             }
         }

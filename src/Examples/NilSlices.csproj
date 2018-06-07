@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8cbf8128-91f0-4fa8-b0ea-b180e2abff90}</ProjectGuid>
+    <ProjectGuid>{9093e019-8df4-405c-a6ce-d655b35f0a1e}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>NilSlices</AssemblyName>

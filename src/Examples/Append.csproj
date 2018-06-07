@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8af8b447-e1b3-4d0d-8142-04cb0f225716}</ProjectGuid>
+    <ProjectGuid>{844d72c3-edec-4556-ac60-c72b673f639b}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>Append</AssemblyName>

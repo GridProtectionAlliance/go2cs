@@ -28,7 +28,7 @@ namespace go2cs
 {
     public partial class Converter
     {
-        private bool m_topLevelDeclaration = true;
+        private bool m_firstTopLevelDeclaration = true;
         private string m_nextDeclComments;
         private string m_namespaceHeader;
         private string m_namespaceFooter;
@@ -38,7 +38,7 @@ namespace go2cs
         {
             m_indentLevel++;
 
-            if (m_topLevelDeclaration)
+            if (m_firstTopLevelDeclaration)
             {
                 StringBuilder namespaceHeader = new StringBuilder();
 
@@ -52,15 +52,21 @@ namespace go2cs
                 m_namespaceHeader = namespaceHeader.ToString();
                 m_namespaceFooter = new string('}', m_packageNamespaces.Length);
 
+                // Mark end of using statements so that other usings and type aliases can be added later
+                m_targetFile.AppendLine(UsingsMarker);
+
                 m_targetFile.AppendLine(m_namespaceHeader);
 
                 // Begin class
                 m_targetFile.AppendLine($"{Spacing()}public static unsafe partial class {m_package}{ClassSuffix}");
                 m_targetFile.AppendLine($"{Spacing()}{{");
 
+                // Check for comments after initial declaration
+                string initialDeclComments = CheckForCommentsLeft(context);
+
                 // Write any initial declaration comments created during Converter_ImportDecl visit 
-                if (!string.IsNullOrWhiteSpace(m_initialDeclComments))
-                    m_targetFile.Append(FixForwardSpacing(m_initialDeclComments, 1));
+                if (!string.IsNullOrWhiteSpace(initialDeclComments))
+                    m_targetFile.Append(FixForwardSpacing(initialDeclComments, 1));
 
                 // End class and namespace "}" occur as a last step in Convert() method
                 m_indentLevel++;
@@ -69,9 +75,9 @@ namespace go2cs
 
         public override void ExitTopLevelDecl(GolangParser.TopLevelDeclContext context)
         {
-            // There can be only one... top level declaration
-            if (m_topLevelDeclaration)
-                m_topLevelDeclaration = false;
+            // There can be only one... first top level declaration
+            if (m_firstTopLevelDeclaration)
+                m_firstTopLevelDeclaration = false;
 
             m_nextDeclComments = CheckForCommentsRight(context);
             m_indentLevel--;

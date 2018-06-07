@@ -31,7 +31,7 @@ namespace go2cs
 
         public override void EnterMethodDecl(GolangParser.MethodDeclContext context)
         {
-            if (!m_topLevelDeclaration)
+            if (!m_firstTopLevelDeclaration)
                 m_methodBuffer.AppendLine();
         }
     }

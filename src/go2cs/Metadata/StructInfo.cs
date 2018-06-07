@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  Converter_ErrorHandler.cs - Gbtc
+//  StructInfo.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,28 +16,19 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  05/18/2018 - J. Ritchie Carroll
+//  06/06/2018 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using System.IO;
-using Antlr4.Runtime;
-
-namespace go2cs
+namespace go2cs.Metadata
 {
-    public partial class Converter
+    public class StructInfo
     {
-        private sealed class ParserErrorListener : IAntlrErrorListener<IToken>
-        {
-            private readonly Converter m_converter;
-
-            public ParserErrorListener(Converter converter) => m_converter = converter;
-
-            public void SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
-            {
-                m_converter.m_warnings.Add($"{Path.GetFileName(m_converter.m_sourceFileName)}:{line}:{charPositionInLine}: {msg}");
-            }
-        }
+        public string Name;
+        public string FullName;
+        public FieldInfo[] Fields;
+        public InterfaceInfo[] InheritedInterfaces;
+        public StructInfo[] PromotedStructs;
     }
 }

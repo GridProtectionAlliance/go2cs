@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{e442d9a3-7fcd-4caa-87cc-6dc61acedfe6}</ProjectGuid>
+    <ProjectGuid>{0c9d9bea-c44d-43bd-ac36-2d56d780d3a6}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>Variadic</AssemblyName>

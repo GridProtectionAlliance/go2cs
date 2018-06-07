@@ -28,9 +28,8 @@ namespace go
 
         public partial struct MyError
         {
-            public /*ref*/ DateTime When; // => ref _value.When;
-
-            public /*ref*/ string What; // => ref _value.What;
+            public DateTime When;
+            public string What;
         }
 
         public partial struct MyError
@@ -51,13 +50,15 @@ namespace go
 
         public partial struct MyCustomError
         {
-            public /*ref*/ string Message; // => ref _value.Message;
+            public string Message;
 
             public Abser Abser;
 
             public MyError MyError;
         }
 
+        [PromotedInterface(typeof(Abser))]
+        [PromotedStruct(typeof(MyError))]
         public partial struct MyCustomError : Abser
         {
             // Abser interface promotion
@@ -68,7 +69,7 @@ namespace go
             private static readonly AbsByRef s_AbsByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public double Abs() => s_AbsByRef?.Invoke(ref this) ?? s_AbsByVal?.Invoke(this) ?? Abser?.Abs() ?? throw new PanicException("runtime error: invalid memory address or nil pointer dereference");
+            public double Abs() => s_AbsByRef?.Invoke(ref this) ?? s_AbsByVal?.Invoke(this) ?? Abser?.Abs() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             [DebuggerStepperBoundary]
             static MyCustomError()
@@ -78,7 +79,7 @@ namespace go
                 bool isByRef;
 
                 // Any existing defined extensions will override interface reference calls
-                extensionMethod = targetType.GetExtensionDelegate("Abs", out isByRef);
+                extensionMethod = targetType.GetExtensionDelegateSearchingPromotions<PromotedStructAttribute>("Abs", out isByRef);
 
                 if (extensionMethod != null)
                 {
@@ -102,10 +103,10 @@ namespace go
                 set => MyError.What = value;
             }
 
+            // Constructors
             public MyCustomError(NilType _)
             {
-                //_value = new struct_value();
-                Message = "";
+                this.Message = "";
                 this.Abser = null;
                 this.MyError = new MyError(nil);
             }

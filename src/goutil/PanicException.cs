@@ -37,4 +37,12 @@ namespace go
 
         public PanicException(object state) : base(state?.ToString() ?? "nil") => State = state;
     }
+
+    /// <summary>
+    /// Represents common runtime error messages thrown in Go environment.
+    /// </summary>
+    public static class RuntimeErrorPanic
+    {
+        public const string NilPointerDereference = "runtime error: invalid memory address or nil pointer dereference";
+    }
 }

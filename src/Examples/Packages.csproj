@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{ee04828f-c561-4da6-807b-8299eb4666fe}</ProjectGuid>
+    <ProjectGuid>{6c741573-163d-4830-8a0d-5ad3b7b9c1a5}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>Packages</AssemblyName>

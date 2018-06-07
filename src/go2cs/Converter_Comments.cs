@@ -57,7 +57,7 @@ namespace go2cs
             indentLevel += offsetLevel;
 
             string forwardSpacing = Spacing(0, indentLevel);
-            string[] lines = source.Split(s_newLineDelimeters, StringSplitOptions.None);
+            string[] lines = source.Split(NewLineDelimeters, StringSplitOptions.None);
             return string.Join(Environment.NewLine, lines.Select(line => string.IsNullOrWhiteSpace(line) ? "" : $"{forwardSpacing}{(autoTrim? line.Trim() : line)}"));
         }
 
@@ -68,7 +68,7 @@ namespace go2cs
 
             indentLevel += offsetLevel;
 
-            return CheckForComments(indentLevel, context.Start.TokenIndex, m_tokenStream.GetHiddenTokensToLeft);
+            return CheckForComments(indentLevel, context.Start.TokenIndex, TokenStream.GetHiddenTokensToLeft);
         }
 
         private string CheckForCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
@@ -78,7 +78,7 @@ namespace go2cs
 
             indentLevel += offsetLevel;
 
-            return CheckForComments(indentLevel, context.Stop.TokenIndex, m_tokenStream.GetHiddenTokensToRight);
+            return CheckForComments(indentLevel, context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight);
         }
 
         private string CheckForComments(int indentLevel, int tokenIndex, Func<int, int, IList<IToken>> getHiddenTokens)

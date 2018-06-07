@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{48841bde-cb97-40b3-9999-c913a96ce8e5}</ProjectGuid>
+    <ProjectGuid>{c8f5248d-31e7-427d-8c6e-d924c142793c}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>SliceLenCap</AssemblyName>
