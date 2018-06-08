@@ -108,18 +108,27 @@ namespace go2cs
 
         public override void ExitPointerType(GolangParser.PointerTypeContext context)
         {
+            string type = context.GetText();
+
             m_types.TryGetValue(context.type(), out GoTypeInfo typeInfo);
 
             if (typeInfo == null)
                 return; // throw new InvalidOperationException("Pointer type undefined.");
 
-            typeInfo.PrimitiveName += "?";
-            typeInfo.FrameworkName += "?";
-            typeInfo.IsPointer = true;
+            m_types[context.Parent.Parent] = new GoTypeInfo
+            {
+                Name = type,
+                PrimitiveName = $"ref {typeInfo.PrimitiveName}",
+                FrameworkName = $"ref {typeInfo.FrameworkName}",
+                IsPointer = true,
+                TypeClass = GoTypeClass.Simple
+            };
         }
 
         public override void ExitArrayType(GolangParser.ArrayTypeContext context)
         {
+            string type = context.GetText();
+
             m_types.TryGetValue(context.elementType().type(), out GoTypeInfo typeInfo);
 
             if (typeInfo == null)
@@ -135,7 +144,7 @@ namespace go2cs
 
             m_types[context.Parent.Parent] = new GoTypeInfo
             {
-                Name = typeInfo.Name,
+                Name = type,
                 PrimitiveName = $"{typeInfo.PrimitiveName}{arrayLength}",
                 FrameworkName = $"{typeInfo.FrameworkName}{arrayLength}",
                 TypeClass = GoTypeClass.Simple,
