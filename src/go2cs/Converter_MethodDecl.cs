@@ -84,7 +84,7 @@ namespace go2cs
                 if (!m_parameterDeclarations.TryGetValue(context.signature()?.parameters().parameterList(), out (List<string> parameters, List<string> byRefParams) parameterDeclarations))
                     m_parameterDeclarations.TryGetValue(context.function().signature().parameters().parameterList(), out parameterDeclarations);
 
-                List<string> combinedByRefParameters = new List<string>(receiverDeclarations.byRefParams);
+                List<string> combinedByRefParameters = new List<string>(receiverDeclarations.byRefParams ?? new List<string>());
 
                 if ((object)parameterDeclarations.byRefParams != null)
                     combinedByRefParameters.AddRange(parameterDeclarations.byRefParams);

@@ -67,7 +67,8 @@ namespace go2cs
             public string FrameworkName;
             public GoTypeClass TypeClass;
             public bool IsArray;
-            public bool IsPointer;          // Nullable<T> (as '?' operator)
+            public bool IsPointer;
+            public bool IsByRefPointer;
             public bool IsSlice;            // Slice<T>
         }
 
@@ -115,12 +116,66 @@ namespace go2cs
             if (typeInfo == null)
                 return; // throw new InvalidOperationException("Pointer type undefined.");
 
-            m_types[context.Parent.Parent] = new GoTypeInfo
+            if (type.StartsWith("**"))
             {
-                Name = type,
-                PrimitiveName = $"ref {typeInfo.PrimitiveName}",
-                FrameworkName = $"ref {typeInfo.FrameworkName}",
+                int count = 0;
+
+                while (type[count] == '*')
+                    count++;
+
+                string depth = new string('*', count - (typeInfo.IsByRefPointer ? 1 : 0));
+
+                typeInfo = ConvertByRefToBasicPointer(typeInfo);
+
+                m_types[context.Parent.Parent] = new GoTypeInfo
+                {
+                    Name = type,
+                    PrimitiveName = $"{typeInfo.PrimitiveName}{depth}",
+                    FrameworkName = $"{typeInfo.FrameworkName}{depth}",
+                    IsPointer = true,
+                    IsByRefPointer = false,
+                    TypeClass = GoTypeClass.Simple
+                };
+            }
+            else
+            {
+                m_types[context.Parent.Parent] = new GoTypeInfo
+                {
+                    Name = type,
+                    PrimitiveName = $"ref {typeInfo.PrimitiveName}",
+                    FrameworkName = $"ref {typeInfo.FrameworkName}",
+                    IsPointer = true,
+                    IsByRefPointer = true,
+                    TypeClass = GoTypeClass.Simple
+                };
+            }
+        }
+
+        private GoTypeInfo ConvertByRefToBasicPointer(GoTypeInfo typeInfo)
+        {
+            if (!typeInfo.IsByRefPointer)
+                return typeInfo;
+
+            string primitiveName = typeInfo.PrimitiveName;
+            string frameworkName = typeInfo.FrameworkName;
+
+            string[] parts = primitiveName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 2)
+                primitiveName = $"{parts[1]}*";
+
+            parts = frameworkName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 2)
+                frameworkName = $"{parts[1]}*";
+
+            return new GoTypeInfo
+            {
+                Name = typeInfo.Name,
+                PrimitiveName = primitiveName,
+                FrameworkName = frameworkName,
                 IsPointer = true,
+                IsByRefPointer = false,
                 TypeClass = GoTypeClass.Simple
             };
         }
@@ -209,12 +264,12 @@ namespace go2cs
                 if (m_identifiers.TryGetValue(fieldDecl.identifierList(), out string[] identifiers) && m_types.TryGetValue(fieldDecl.type(), out typeInfo))
                 {
                     foreach (string identifier in identifiers)
-                        fields.Add((SanitizedIdentifier(identifier), typeInfo.PrimitiveName, description, CheckForCommentsRight(fieldDecl)));
+                        fields.Add((SanitizedIdentifier(identifier), ConvertByRefToBasicPointer(typeInfo).PrimitiveName, description, CheckForCommentsRight(fieldDecl)));
                 }
                 else if (m_types.TryGetValue(fieldDecl.anonymousField(), out typeInfo))
                 {
                     // TODO: Handle promoted structures and interfaces
-                    fields.Add((GetValidIdentifierName(typeInfo.PrimitiveName), typeInfo.PrimitiveName, description, CheckForCommentsRight(fieldDecl)));
+                    fields.Add((GetValidIdentifierName(typeInfo.PrimitiveName), ConvertByRefToBasicPointer(typeInfo).PrimitiveName, description, CheckForCommentsRight(fieldDecl)));
                 }
             }
 

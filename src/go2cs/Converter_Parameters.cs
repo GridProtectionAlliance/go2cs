@@ -83,16 +83,15 @@ namespace go2cs
                     if (string.IsNullOrWhiteSpace(identifier))
                         identifier = $"_p{parameterDeclarations.parameters.Count}";
 
-                    if (typeInfo.IsPointer)
+                    if (typeInfo.IsByRefPointer)
                     {
-                        // Prefix pointers with underscore for unique parameter name propagation
+                        // Prefix by-ref pointers with underscore for unique parameter name propagation
                         // into function context wrapper that will contain ref parameters
                         string byRefIdentifier = $"_{identifier}";
 
                         if (i == identifiers.Length - 1 && hasVariadicParameter)
                         {
-                            parameterDeclarations.parameters.Add($"params {typeInfo.PrimitiveName}[] {byRefIdentifier}");
-                            parameterDeclarations.byRefParams.Add($"params {typeInfo.PrimitiveName}[] {identifier}");
+                            parameterDeclarations.parameters.Add($"params {ConvertByRefToBasicPointer(typeInfo).PrimitiveName}[] {identifier}");
                         }
                         else
                         {
@@ -114,28 +113,16 @@ namespace go2cs
                 string identifier = $"_p{parameterDeclarations.parameters.Count}";
 
                 // Unnamed variadic parameter
-                if (typeInfo.IsPointer)
-                {
-                    // Prefix pointers with underscore for unique parameter name propagation
-                    // into function context wrapper that will contain ref parameters
-                    string byRefIdentifier = $"_{identifier}";
-
-                    parameterDeclarations.parameters.Add($"params {typeInfo.PrimitiveName}[] {byRefIdentifier}");
-                    parameterDeclarations.byRefParams.Add($"params {typeInfo.PrimitiveName}[] {identifier}");
-                }
-                else
-                {
-                    parameterDeclarations.parameters.Add($"params {typeInfo.PrimitiveName}[] {identifier}");
-                }
+                parameterDeclarations.parameters.Add($"params {ConvertByRefToBasicPointer(typeInfo).PrimitiveName}[] {identifier}");
             }
             else
             {
                 string identifier = $"_p{parameterDeclarations.parameters.Count}";
 
                 // Unnamed parameter
-                if (typeInfo.IsPointer)
+                if (typeInfo.IsByRefPointer)
                 {
-                    // Prefix pointers with underscore for unique parameter name propagation
+                    // Prefix by-ref pointers with underscore for unique parameter name propagation
                     // into function context wrapper that will contain ref parameters
                     string byRefIdentifier = $"_{identifier}";
 
