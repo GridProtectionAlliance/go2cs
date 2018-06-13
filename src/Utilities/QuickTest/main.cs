@@ -1,8 +1,8 @@
-﻿using static go.BuiltInFunctions;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using static go.BuiltInFunctions;
 
 namespace go
 {
@@ -17,6 +17,13 @@ namespace go
             Main5();
             Main6();
             Main7();
+            ref int value = ref Main8();
+
+            Console.WriteLine("Ref int out1 = {0}", value);
+
+            value = Main9().Value;
+
+            Console.WriteLine("Ref int out2 = {0}", value);
 
             Console.ReadLine();
         }
@@ -24,6 +31,14 @@ namespace go
         public interface Abser
         {
             double Abs();
+        }
+
+        public partial struct ColorList
+        {
+            public long Total;
+            public string Color;
+            public Ptr<ColorList> Next;
+            public Ptr<Ptr<ColorList>> NextNext;
         }
 
         public partial struct MyError
@@ -46,7 +61,6 @@ namespace go
                 this.What = What;
             }
         }
-
 
         public partial struct MyCustomError
         {
@@ -216,10 +230,10 @@ namespace go
             Vertex v = new Vertex { X = 3, Y = 4 };
 
             ab = Abser_cast(f);
-            ab = (Abser<MyFloat>)f;
-            ab = Abser_cast(v);
+            //ab = (Abser<MyFloat>)f;
+            //ab = Abser_cast(v);
 
-            Console.WriteLine(ab.Abs());
+            //Console.WriteLine(ab.Abs());
         }
 
         public static double Abs(this MyFloat f)
@@ -396,7 +410,7 @@ namespace go
         //    return (message, err);
         //});
 
-        private unsafe static void Main7()
+        private static void Main7()
         {
             int i = 42, j = 2701;
 
@@ -409,13 +423,69 @@ namespace go
             *p = *p / 37;
             Console.WriteLine(j);
 
-
             Vertex v = new Vertex {X = 1, Y = 2};
             Vertex* pv = &v;
 
             pv->X = 12;
 
             (*pv).X = 99;
+
+            PrintVertex(ref v);
+        }
+
+        private static ref int Main8()
+        {
+            Ref<int> i = new Ref<int>(42), j = new Ref<int>(2701);
+
+            ref int p = ref i.Value;
+            Console.WriteLine(p);
+            p = 21;
+            Console.WriteLine(i);
+
+            p = ref j.Value;
+            p = p / 37;
+            Console.WriteLine(j);
+
+            Ref<Vertex> v = new Ref<Vertex>(new Vertex { X = 1, Y = 2 });
+            ref Vertex pv = ref v.Value;
+
+            pv.X = 12;
+
+            pv.X = 99;
+
+            PrintVertex(ref v.Value);
+
+            return ref i.Value;
+        }
+
+        private static Ref<int> Main9()
+        {
+            Ref<int> i = new Ref<int>(42), j = new Ref<int>(2701);
+
+            Ptr<int> p = new Ptr<int>(i);
+            Console.WriteLine(p);
+            p.DerefValue = 21;
+            Console.WriteLine(i);
+
+            p.Value = j;
+            p.DerefValue = p.DerefValue / 37;
+            Console.WriteLine(j);
+
+            Ref<Vertex> v = new Ref<Vertex>(new Vertex { X = 1, Y = 2 });
+            Ptr<Vertex> pv = new Ptr<Vertex>(v);
+
+            pv.DerefValue.X = 12;
+
+            pv.DerefValue.X = 99;
+
+            PrintVertex(ref v.Value);
+
+            return i;
+        }
+
+        public static void PrintVertex(ref Vertex v)
+        {
+            Console.WriteLine("Value of vertex X = {0}\n", v.X);
         }
     }
 }
