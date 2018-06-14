@@ -230,10 +230,10 @@ namespace go
             Vertex v = new Vertex { X = 3, Y = 4 };
 
             ab = Abser_cast(f);
-            //ab = (Abser<MyFloat>)f;
-            //ab = Abser_cast(v);
+            ab = (Abser<MyFloat>)f;
+            ab = Abser_cast(v);
 
-            //Console.WriteLine(ab.Abs());
+            Console.WriteLine(ab.Abs());
         }
 
         public static double Abs(this MyFloat f)

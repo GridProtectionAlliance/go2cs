@@ -48,8 +48,6 @@ using go;
             static <#=InterfaceName#>()
             {
                 Type targetType = typeof(T);
-                Delegate extensionMethod;
-                bool isByRef;
 <#        
                 foreach (var decl in Functions)
                 {

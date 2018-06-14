@@ -32,19 +32,15 @@ namespace go
             static Abser()
             {
                 Type targetType = typeof(T);
-                Delegate extensionMethod;
-                bool isByRef;
 
-                extensionMethod = targetType.GetExtensionDelegateSearchingPromotions<PromotedStructAttribute>("Abs", out isByRef);
+                s_AbsByRef = targetType.GetExtensionDelegateSearchingPromotions<PromotedStructAttribute>("Abs", typeof(AbsByRef)) as AbsByRef;
+
+                if ((object)s_AbsByRef == null)
+                    s_AbsByVal = targetType.GetExtensionDelegateSearchingPromotions<PromotedStructAttribute>("Abs", typeof(AbsByVal)) as AbsByVal;
 
                 // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
-                if ((object)extensionMethod == null)
+                if ((object)s_AbsByRef == null && (object)s_AbsByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement Abser.Abs function");
-
-                if (isByRef)
-                    s_AbsByRef = extensionMethod as AbsByRef;
-                else
-                    s_AbsByVal = extensionMethod as AbsByVal;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
