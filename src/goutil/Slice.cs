@@ -26,6 +26,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using static go.BuiltInFunctions;
 
@@ -162,7 +163,7 @@ namespace go
             System.Array.Copy(m_array, m_low, array, arrayIndex, m_length);
         }
 
-        public override string ToString() => $"[{string.Join(" ", this)}]";
+        public override string ToString() => $"[{string.Join(" ", this.Take(5))}{(Length > 5 ? " ..." : "")}]";
 
         public override int GetHashCode() => (object)m_array == null ? 0 : m_array.GetHashCode() ^ m_low ^ m_length;
 
