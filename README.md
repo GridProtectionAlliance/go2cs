@@ -96,13 +96,17 @@ Note that code converted from Go to C# will also target .NET 4.7.1 and compile u
 
 * Each Go package is converted into static C# partial classes, e.g.: `public static partial class fmt_package`. Using a static partial class allows all functions within separate files to be available with a single import, e.g.: `using fmt = go.fmt_package;`.
 
-* So that Go packages are readily usable in C# applications, all converted code is in a root `go` namespace. Package paths are also converted to namespaces, so a Go import like `import "unicode/utf8"` becomes a C# using like `using utf8 = go.unicode.utf8_package;`.
+* So that Go packages are more readily usable in C# applications, all converted code is in a root `go` namespace. Package paths are also converted to namespaces, so a Go import like `import "unicode/utf8"` becomes a C# using like `using utf8 = go.unicode.utf8_package;`.
 
 * All imported Go packages are converted into [shared projects](https://docs.microsoft.com/en-us/xamarin/cross-platform/app-fundamentals/shared-projects?tabs=vswin) and added as a reference to the main project so that a single executable is created, i.e., packages are not compiled into external DLL dependencies.
 
 * Go projects that contain a `main` function are converted into a standard C# project. The conversion process will automatically reference the needed shared projects, per defined encountered `import` statements, recursively. In this manner a single executable with no external dependencies, besides .NET runtime, is created - just like its original Go counterpart.
 
-* Conversion of pointer types will use the C# `ref` keyword where possible. When this strategy does not work, a regular pointer will be required -- because of this imported packages are marked as `unsafe` to allow pointers.
+* Go types are converted to C# `struct` types and used on the stack to optimize memory use and reduce the need for garbage collection. The `struct` types can be wrapped by C# `class` types that reference the type so that heap-allocated instances of the type can exist as needed.
+
+* Conversion of pointer types will use the C# `ref` keyword where possible. When this strategy does not work, a heap allocated instance of the base type will be created (see [`Ref<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/Ref.cs#L37)) with an associated pointer to the heap allocated instance (see [`Ptr<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/Ptr.cs#L37), literally a reference to the reference). 
+
+> Normal C# `unsafe` pointers do not always work since with C# (1)  pointer types in structures cannot not refer to structures that contain heap-allocated elements (e.g., arrays or slices that reference an array) as this would prevent pointer arithmetic for ambiguously sized elements, and (2) returning standard pointers to stack-allocated structures from a function is not allowed, instead you need to allocate the structure on the heap by creating a reference-type wrapper and then safely return a pointer to the reference.
 
 * Conversion of Go slices is based on the [`Slice<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/Slice.cs) structure defined in the [`goutils`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/goutil) shared project. For example, the following Go code using slice operations:
 
@@ -110,28 +114,28 @@ Note that code converted from Go to C# will also target .NET 4.7.1 and compile u
 package main
 
 import (
-	"fmt"
-	"strings"
+    "fmt"
+    "strings"
 )
 
 func main() {
-  	// Create a tic-tac-toe board.
-  	board := [][]string{
-    		[]string{"_", "_", "_"},
-    		[]string{"_", "_", "_"},
-    		[]string{"_", "_", "_"},
-  	}
+    // Create a tic-tac-toe board.
+    board := [][]string{
+            []string{"_", "_", "_"},
+            []string{"_", "_", "_"},
+            []string{"_", "_", "_"},
+    }
 
-  	// The players take turns.
-  	board[0][0] = "X"
-  	board[2][2] = "O"
-  	board[1][2] = "X"
-  	board[1][0] = "O"
-  	board[0][2] = "X"
+    // The players take turns.
+    board[0][0] = "X"
+    board[2][2] = "O"
+    board[1][2] = "X"
+    board[1][0] = "O"
+    board[0][2] = "X"
 
-  	for i := 0; i < len(board); i++ {
+    for i := 0; i < len(board); i++ {
         fmt.Printf("%s\n", strings.Join(board[i], " "))
-  	}
+    }
 }
 ```
 
@@ -141,35 +145,37 @@ would be converted to C# as:
 using fmt = go.fmt_package;
 using strings = go.strings_package;
 
-using static goutil.BuiltInFunctions;
-using goutil;
+using static go.BuiltInFunctions;
 
-private static partial class main_package
+namespace go
 {
-    private static void Main()
+    public static partial class main_package
     {
-        // Create a tic-tac-toe board.
-        var board = new Slice<Slice<string>>(new[] {
-            new Slice<string>(new[] {"_", "_", "_"}),
-            new Slice<string>(new[] {"_", "_", "_"}),
-            new Slice<string>(new[] {"_", "_", "_"}),
-        });
+        private static void Main()
+        {
+            // Create a tic-tac-toe board.
+            var board = new Slice<Slice<string>>(new[] {
+                new Slice<string>(new[] {"_", "_", "_"}),
+                new Slice<string>(new[] {"_", "_", "_"}),
+                new Slice<string>(new[] {"_", "_", "_"}),
+            });
 
-        // The players take turns.
-        board[0][0] = "X";
-        board[2][2] = "O";
-        board[1][2] = "X";
-        board[1][0] = "O";
-        board[0][2] = "X";
+            // The players take turns.
+            board[0][0] = "X";
+            board[2][2] = "O";
+            board[1][2] = "X";
+            board[1][0] = "O";
+            board[0][2] = "X";
 
-        for (var i = 0; i < len(board); i++) {
-            fmt.Printf("%s\n", strings.Join(board[i], " "));
+            for (var i = 0; i < len(board); i++) {
+                fmt.Printf("%s\n", strings.Join(board[i], " "));
+            }
         }
     }
 }
 ```
 
-* Function conversions are wrapped in a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/GoFunc.cs#L47) to support the [defer](https://golang.org/ref/spec#Defer_statements) call stack and [panic](https://golang.org/pkg/builtin/#panic) / [recover](https://golang.org/pkg/builtin/#recover) exception handling. Currently functions are always wrapped, see [optimizations](#optimizations) section below.
+* Function conversions are wrapped in a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/GoFunc.cs#L62) to support the [defer](https://golang.org/ref/spec#Defer_statements) call stack and [panic](https://golang.org/pkg/builtin/#panic) / [recover](https://golang.org/pkg/builtin/#recover) exception handling. Currently functions are always wrapped, see [optimizations](#optimizations) section below.
 
 * Conversion always tries to target managed code, this way code is more portable. If there is no possible way for managed code to accomplish a specific task, an option always exists to create a [native interop library](http://www.mono-project.com/docs/advanced/pinvoke/) that works on multiple platforms, i.e., importing code from a `.dll`/`.so`/`.dylib`. Even so, the philosophy is to always attempt to use managed code, i.e., not to lean towards native code libraries, regardless of possible performance implications. Simple first.
 
@@ -178,18 +184,17 @@ Example excerpt of converted code from the Go [`fmt`](https://github.com/golang/
 using strconv = go.strconv_package;
 using utf8 = go.unicode.utf8_package;
 
-using static goutil.BuiltInFunctions;
-using goutil;
+using static go.BuiltInFunctions;
 
 namespace go
 {
-    public static unsafe partial class fmt_package
+    public static partial class fmt_package
     {
         private const string ldigits = "0123456789abcdefx";
         private const string udigits = "0123456789ABCDEFX";
 
         private struct fmt {
-            public buffer* buf;
+            public Ptr<buffer> buf;
 
             public fmtFlags fmtFlags;
 
@@ -201,9 +206,10 @@ namespace go
             public fixed byte intbuf[68];
         }
 
-        private static void clearFlags(ref this fmt _this) => func(ref _this, (ref fmt f, Defer defer, Panic panic, Recover recover) => {
+        private static void clearFlags(ref this fmt _this)
+        {
             f.fmtFlags = new fmtFlags();
-        });
+        }
     }
 }
 ```

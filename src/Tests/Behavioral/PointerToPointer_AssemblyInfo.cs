@@ -18,11 +18,11 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("Release Build")]
 #endif
 
-[assembly: AssemblyTitle("InterfaceCasting")]
-[assembly: AssemblyDescription("InterfaceCasting - auto-converted with go2cs")]
+[assembly: AssemblyTitle("PointerToPointer")]
+[assembly: AssemblyDescription("PointerToPointer - auto-converted with go2cs")]
 
 // Other configuration attributes.
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(false)]
-[assembly: Guid("8d59ba14-30a0-4da2-b0a0-ab9ca1eace76")]
+[assembly: Guid("7cc10bc0-9820-40cf-b7f6-36d659b16b6b")]
 [assembly: NeutralResourcesLanguage("en-US")]

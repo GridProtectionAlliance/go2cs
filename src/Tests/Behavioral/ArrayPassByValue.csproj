@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8fe02748-4270-4d43-a8d9-49c37c36caa1}</ProjectGuid>
+    <ProjectGuid>{aaa5e9d7-6013-4dee-b1f6-4e11dbefcf70}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>ArrayPassByValue</AssemblyName>
@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -54,6 +54,7 @@
     <Compile Include="StructPromotion_PersonStruct.cs" />
     <Compile Include="StructPromotion_EmployeeStruct.cs" />
     <Compile Include="StructPromotion_RecordStruct.cs" />
+    <Compile Include="StructWithPointer_ColorListStruct.cs" />
     <Compile Include="ArrayPassByValue_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

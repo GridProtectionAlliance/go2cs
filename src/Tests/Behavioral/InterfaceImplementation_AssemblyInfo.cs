@@ -24,5 +24,5 @@ using System.Runtime.InteropServices;
 // Other configuration attributes.
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(false)]
-[assembly: Guid("e5900889-e3d4-4f34-b747-478304acb43e")]
+[assembly: Guid("2adb2d03-564a-4d75-9f2f-786f81849db9")]
 [assembly: NeutralResourcesLanguage("en-US")]

@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 07 01:54:02 UTC
+// package main -- go2cs converted at 2018 June 16 19:06:54 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\SortArrayType.go
 
 using fmt = go.fmt_package;
@@ -8,7 +8,7 @@ using static go.BuiltInFunctions;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         public partial struct Person
         {
@@ -20,9 +20,21 @@ namespace go
         public partial struct PeopleByShoeSize // Slice<Person>
         {
         }
-        returnlen(p)
-        p[i],p[j]=p[j],p[i]
-        return(p[i].ShoeSize<p[j].ShoeSize)
+
+        public static long Len(this PeopleByShoeSize p) => func((defer, panic, recover) =>
+        {
+            returnlen(p)
+        });
+
+        public static long Swap(this PeopleByShoeSize p, long i, long j) => func((defer, panic, recover) =>
+        {
+            p[i],p[j]=p[j],p[i]
+        });
+
+        public static bool Less(this PeopleByShoeSize p, long i, long j) => func((defer, panic, recover) =>
+        {
+            return(p[i].ShoeSize<p[j].ShoeSize)
+        });
 
         private static bool Main() => func((defer, panic, recover) =>
         {

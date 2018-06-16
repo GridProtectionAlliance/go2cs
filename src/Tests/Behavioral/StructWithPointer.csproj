@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{69ebb782-bf3d-4dbb-b014-b10103c2815d}</ProjectGuid>
+    <ProjectGuid>{844214d8-096d-408a-b148-6b847445cd68}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>StructPromotion</AssemblyName>
+    <AssemblyName>StructWithPointer</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -50,12 +50,12 @@
     <Compile Include="InterfaceInheritance_VInterface.cs" />
     <Compile Include="SortArrayType_PersonStruct.cs" />
     <Compile Include="SortArrayType_PeopleByShoeSizeStructOf(Slice(Person)).cs" />
-    <Compile Include="StructPromotion.cs" />
     <Compile Include="StructPromotion_PersonStruct.cs" />
     <Compile Include="StructPromotion_EmployeeStruct.cs" />
     <Compile Include="StructPromotion_RecordStruct.cs" />
+    <Compile Include="StructWithPointer.cs" />
     <Compile Include="StructWithPointer_ColorListStruct.cs" />
-    <Compile Include="StructPromotion_AssemblyInfo.cs" />
+    <Compile Include="StructWithPointer_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

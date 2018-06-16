@@ -1,21 +1,21 @@
-// package main -- go2cs converted at 2018 June 06 01:27:10 UTC
+// package main -- go2cs converted at 2018 June 16 17:46:03 UTC
 // Original source: C:\Projects\go2cs\src\Examples\StructPromoted.go
 
 using fmt = go.fmt_package;
 
 using static go.BuiltInFunctions;
-using System;
 using System.ComponentModel;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         public partial struct DoDad
         {
             public long I;
             public string O;
-            public string["2"]["2"]["2"]["2"] a;        }
+            public string["2"]["2"]["2"]["2"] a;
+        }
 
         public partial struct Vertex
         {
@@ -23,7 +23,8 @@ namespace go
             public long X;
             [Description("Hi")]
             public long Y;
-            public DoDad DoDad;        }
+            public DoDad DoDad;
+        }
 
         private static void Main() => func((defer, panic, recover) =>
         {

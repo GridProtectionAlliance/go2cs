@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 07 01:54:03 UTC
+// package main -- go2cs converted at 2018 June 16 19:06:54 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructPromotion.go
 
 using fmt = go.fmt_package;
@@ -7,20 +7,28 @@ using static go.BuiltInFunctions;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         public partial struct Person
         {
             public string name;
             public int age;
         }
-        returnp.age>=18
+
+        public static bool IsAdult(this Person p) => func((defer, panic, recover) =>
+        {
+            returnp.age>=18
+        });
 
         public partial struct Employee
         {
             public string position;
         }
-        returne.position=="manager"
+
+        public static bool IsManager(this Employee e) => func((defer, panic, recover) =>
+        {
+            returne.position=="manager"
+        });
 
         public partial struct Record
         {

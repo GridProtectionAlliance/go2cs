@@ -71,7 +71,13 @@ namespace go
         }
 
         [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static Abser Abser_cast<T>(T target) => (Abser<T>)target;
+        public static Abser Abser_cast<T>(T target)
+        {
+            if (typeof(Abser).IsAssignableFrom(typeof(T)))
+                return target as Abser;
+
+            return (Abser<T>)target;
+        }
     }
 }
 

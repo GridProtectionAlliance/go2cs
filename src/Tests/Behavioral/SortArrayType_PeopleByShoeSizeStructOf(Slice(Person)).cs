@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 07 01:54:02 UTC
+//     Generated on 2018 June 16 19:06:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System.CodeDom.Compiler;
@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
         public partial struct PeopleByShoeSize

@@ -31,10 +31,9 @@ namespace go2cs.Templates
             
             #line default
             #line hidden
-            this.Write("\r\n                extensionMethod = targetType.GetExtensionMethodSearchingPromoti" +
-                    "ons<PromotedStructAttribute>(\"");
+            this.Write("\r\n\r\n                extensionMethod = targetType.GetExtensionMethod(\"");
             
-            #line 4 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 5 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
@@ -42,49 +41,49 @@ namespace go2cs.Templates
             this.Write("\");\r\n\r\n                if ((object)extensionMethod != null)\r\n                {\r\n " +
                     "                   s_");
             
-            #line 8 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 9 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef = extensionMethod.CreateStaticDelegate(typeof(");
             
-            #line 8 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 9 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef)) as ");
             
-            #line 8 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 9 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef;\r\n\r\n                    if ((object)s_");
             
-            #line 10 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 11 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef == null)\r\n                        s_");
             
-            #line 11 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 12 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByVal = extensionMethod.CreateStaticDelegate(typeof(");
             
-            #line 11 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 12 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByVal)) as ");
             
-            #line 11 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 12 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
@@ -93,14 +92,14 @@ namespace go2cs.Templates
                     "ile time error in Go, so it\'s not an expected exception if Go code compiles\r\n   " +
                     "             if ((object)s_");
             
-            #line 15 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 16 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef == null && (object)s_");
             
-            #line 15 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 16 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
@@ -108,14 +107,14 @@ namespace go2cs.Templates
             this.Write("ByVal == null)\r\n                    throw new NotImplementedException($\"{targetTy" +
                     "pe.Name} does not implement ");
             
-            #line 16 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 17 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
             this.Write(".");
             
-            #line 16 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 17 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
@@ -124,7 +123,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 16 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+        #line 17 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
 
 // Template Parameters
 public string FunctionName;

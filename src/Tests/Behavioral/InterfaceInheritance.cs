@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 07 01:54:02 UTC
+// package main -- go2cs converted at 2018 June 16 19:06:53 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceInheritance.go
 
 using fmt = go.fmt_package;
@@ -8,21 +8,37 @@ using System.Collections.Generic;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         public partial struct T1
         {
             public string name;
         }
 
+        public static void M(this T1 t) => func((defer, panic, recover) =>
+        {
 
+        });
+
+        public static void N(this T1 t) => func((defer, panic, recover) =>
+        {
+
+        });
 
         public partial struct T2
         {
             public string name;
         }
 
+        public static void M(this T2 t) => func((defer, panic, recover) =>
+        {
 
+        });
+
+        public static void N(this T2 t) => func((defer, panic, recover) =>
+        {
+
+        });
 
         public partial interface I
         {

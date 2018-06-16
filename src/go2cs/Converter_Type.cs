@@ -123,15 +123,18 @@ namespace go2cs
                 while (type[count] == '*')
                     count++;
 
-                string depth = new string('*', count - (typeInfo.IsByRefPointer ? 1 : 0));
+                count = count - (typeInfo.IsByRefPointer ? 1 : 0);
+
+                string prefix = string.Join("", Enumerable.Range(0, count).Select(i => "Ptr<"));
+                string suffix = new string('>', count);
 
                 typeInfo = ConvertByRefToBasicPointer(typeInfo);
 
                 m_types[context.Parent.Parent] = new GoTypeInfo
                 {
                     Name = type,
-                    PrimitiveName = $"{typeInfo.PrimitiveName}{depth}",
-                    FrameworkName = $"{typeInfo.FrameworkName}{depth}",
+                    PrimitiveName = $"{prefix}{typeInfo.PrimitiveName}{suffix}",
+                    FrameworkName = $"{prefix}{typeInfo.FrameworkName}{suffix}",
                     IsPointer = true,
                     IsByRefPointer = false,
                     TypeClass = GoTypeClass.Simple
@@ -162,12 +165,12 @@ namespace go2cs
             string[] parts = primitiveName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length == 2)
-                primitiveName = $"{parts[1]}*";
+                primitiveName = $"Ptr<{parts[1]}>";
 
             parts = frameworkName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length == 2)
-                frameworkName = $"{parts[1]}*";
+                frameworkName = $"Ptr<{parts[1]}>";
 
             return new GoTypeInfo
             {

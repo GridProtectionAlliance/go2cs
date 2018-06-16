@@ -4,17 +4,18 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 07 01:54:02 UTC
+//     Generated on 2018 June 16 19:06:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
         [PromotedInterface(typeof(Animal))]
@@ -30,6 +31,7 @@ namespace go
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public string Type() => s_TypeByRef?.Invoke(ref m_target) ?? s_TypeByVal(m_target);
+
             private delegate string SwimByVal(T value);
             private delegate string SwimByRef(ref T value);
 
@@ -43,29 +45,35 @@ namespace go
             static Animal()
             {
                 Type targetType = typeof(T);
-                Delegate extensionMethod;
-                bool isByRef;
+                MethodInfo extensionMethod;
 
-                extensionMethod = targetType.GetExtensionDelegateSearchingPromotions<PromotedStructAttribute>("Type", out isByRef);
+                extensionMethod = targetType.GetExtensionMethod("Type");
+
+                if ((object)extensionMethod != null)
+                {
+                    s_TypeByRef = extensionMethod.CreateStaticDelegate(typeof(TypeByRef)) as TypeByRef;
+
+                    if ((object)s_TypeByRef == null)
+                        s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
+                }
 
                 // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
-                if ((object)extensionMethod == null)
+                if ((object)s_TypeByRef == null && (object)s_TypeByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement Animal.Type function");
 
-                if (isByRef)
-                    s_TypeByRef = extensionMethod as TypeByRef;
-                else
-                    s_TypeByVal = extensionMethod as TypeByVal;
-                extensionMethod = targetType.GetExtensionDelegateSearchingPromotions<PromotedStructAttribute>("Swim", out isByRef);
+                extensionMethod = targetType.GetExtensionMethod("Swim");
+
+                if ((object)extensionMethod != null)
+                {
+                    s_SwimByRef = extensionMethod.CreateStaticDelegate(typeof(SwimByRef)) as SwimByRef;
+
+                    if ((object)s_SwimByRef == null)
+                        s_SwimByVal = extensionMethod.CreateStaticDelegate(typeof(SwimByVal)) as SwimByVal;
+                }
 
                 // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
-                if ((object)extensionMethod == null)
+                if ((object)s_SwimByRef == null && (object)s_SwimByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement Animal.Swim function");
-
-                if (isByRef)
-                    s_SwimByRef = extensionMethod as SwimByRef;
-                else
-                    s_SwimByVal = extensionMethod as SwimByVal;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
@@ -86,7 +94,13 @@ namespace go
         }
 
         [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static Animal Animal_cast<T>(T target) => (Animal<T>)target;
+        public static Animal Animal_cast<T>(T target)
+        {
+            if (typeof(Animal).IsAssignableFrom(typeof(T)))
+                return target as Animal;
+
+            return (Animal<T>)target;
+        }
     }
 }
 
@@ -94,7 +108,7 @@ namespace go
 {
     public partial class NilType
     {
-        // Enable comparisons between nil and Abser interface
+        // Enable comparisons between nil and Animal interface
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(go.main_package.Animal value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
 

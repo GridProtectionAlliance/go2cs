@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 07 01:54:01 UTC
+// package main -- go2cs converted at 2018 June 16 19:06:53 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue.go
 
 using fmt = go.fmt_package;
@@ -7,7 +7,7 @@ using static go.BuiltInFunctions;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         private static void Main() => func((defer, panic, recover) =>
         {
@@ -20,7 +20,7 @@ namespace go
             fmt.Println(a[0],a[1])a[0]="Goodbye"fmt.Println(a[0],a[1])
         });
 
-        private static void test2(object a) => func((defer, panic, recover) =>
+        private static void test2(ref string["2"]["2"] _a) => func(ref _a, (ref string["2"]["2"] a, Defer defer, Panic panic, Recover recover) =>
         {
             fmt.Println(a[0],a[1])a[0]="Goodbye"fmt.Println(a[0],a[1])
         });

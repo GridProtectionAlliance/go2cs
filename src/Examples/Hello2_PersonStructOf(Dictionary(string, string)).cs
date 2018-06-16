@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 16 19:06:54 UTC
+//     Generated on 2018 June 16 17:46:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System.CodeDom.Compiler;
@@ -17,23 +17,18 @@ namespace go
         [GeneratedCode("go2cs", "0.1.1.0")]
         public partial struct Person
         {
-            public Person(NilType _)
-            {
-                // Field instance values
-                //public DateTime When;
-                //public string What = ""; <- string initialized to empty
-                // Inherited interface initializations (set to null / default)
-                // Inherited structure initializations
-            }
+            // Value of the Person struct
+            private readonly Dictionary<string, string> m_value;
 
-            // Only include constructor if struct contains fields
-            //public Person(params)
-            //{
-            //    this.Field = Field,
-            //    // Inherited interface initializations
-            //    // Inherited structure initializations
-            //}
+            public Person(Dictionary<string, string> value) => m_value = value;
 
+            // Enable implicit conversions between Dictionary<string, string> and Person struct
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator Person(Dictionary<string, string> value) => new Person(value);
+            
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator Dictionary<string, string>(Person value) => value.m_value;
+            
             // Enable comparisons between nil and Person struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(Person value, NilType nil) => value.Equals(default(Person));

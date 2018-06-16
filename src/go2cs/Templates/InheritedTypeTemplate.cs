@@ -66,7 +66,7 @@ if (!NamespacePrefix.Equals("go")) {
             
             #line default
             #line hidden
-            this.Write("\r\n    public static unsafe partial class ");
+            this.Write("\r\n    public static partial class ");
             
             #line 20 "C:\Projects\go2cs\src\go2cs\Templates\InheritedTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));

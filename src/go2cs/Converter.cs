@@ -21,13 +21,13 @@
 //
 //******************************************************************************************************
 
+using Antlr4.Runtime;
+using go2cs.Templates;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Antlr4.Runtime;
-using go2cs.Templates;
 using static go2cs.Common;
 
 #pragma warning disable SCS0018 // Path traversal
@@ -40,9 +40,6 @@ namespace go2cs
         public const string ClassSuffix = "_package";
         public const string StandardLibrary = "GoStandardLibrary";
         private const string UsingsMarker = ">>MARKER:USINGS<<";
-
-        // Consider only marking classes as unsafe when pointers are encountered (per package)
-        //private const string UnsafeMarker = ">>MARKER:UNSAFE<<";
 
         private readonly StringBuilder m_targetFile = new StringBuilder();
 

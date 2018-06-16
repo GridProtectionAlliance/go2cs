@@ -16,7 +16,7 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  06/13/2018 - K. Ritchie Carroll
+//  06/13/2018 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
@@ -36,19 +36,23 @@ namespace go
     /// </remarks>
     public class Ptr<T> : Ref<Ref<T>>
     {
-        public ref T DerefValue => ref Value.Value;
+        public ref T Deref => ref Value.Value;
 
         public Ptr()
         {
         }
 
+        public Ptr(T value) => Value = new Ref<T>(value);
+
+        public Ptr(ref T value) => Value = new Ref<T>(ref value);
+
         public Ptr(Ref<T> value) => Value = value;
 
         public Ptr(ref Ref<T> value) => Value = value;
 
-        public Ptr(T value) => Value = new Ref<T>(value);
+        public Ptr(Ptr<T> value) => Value = value.Value;
 
-        public Ptr(ref T value) => Value = new Ref<T>(ref value);
+        public Ptr(ref Ptr<T> value) => Value = value.Value;
 
         public override string ToString() => $"->{base.ToString()}";
     }

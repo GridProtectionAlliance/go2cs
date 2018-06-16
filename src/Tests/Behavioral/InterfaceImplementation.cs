@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 07 01:54:02 UTC
+// package main -- go2cs converted at 2018 June 16 19:06:53 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceImplementation.go
 
 using fmt = go.fmt_package;
@@ -7,7 +7,7 @@ using static go.BuiltInFunctions;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         public partial interface Animal
         {
@@ -31,9 +31,25 @@ namespace go
         {
             f:=new(Frog)d:=new(Dog)zoo:=[...]Animal{f,d}for_,a:=rangezoo{fmt.Println(a.Type(),"can",a.Swim())}
         });
-        return"Frog"
-        return"Kick"
-        return"Paddle"
-        return"Doggie"
+
+        public static string Type(this ref Frog _f) => func(ref _f, (ref Frog f, Defer defer, Panic panic, Recover recover) =>
+        {
+            return"Frog"
+        });
+
+        public static string Swim(this ref Frog _f) => func(ref _f, (ref Frog f, Defer defer, Panic panic, Recover recover) =>
+        {
+            return"Kick"
+        });
+
+        public static string Swim(this ref Dog _d) => func(ref _d, (ref Dog d, Defer defer, Panic panic, Recover recover) =>
+        {
+            return"Paddle"
+        });
+
+        public static string Type(this ref Dog _d) => func(ref _d, (ref Dog d, Defer defer, Panic panic, Recover recover) =>
+        {
+            return"Doggie"
+        });
     }
 }

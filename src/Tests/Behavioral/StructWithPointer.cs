@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 June 08 14:02:11 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructWIthPointer.go
+// package main -- go2cs converted at 2018 June 16 19:06:54 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructWithPointer.go
 
 using fmt = go.fmt_package;
 
@@ -7,14 +7,14 @@ using static go.BuiltInFunctions;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         public partial struct ColorList
         {
             public long Total;
             public string Color;
-            public ColorList* Next;
-            public ColorList** NextNext;
+            public Ptr<ColorList> Next;
+            public Ptr<Ptr<ColorList>> NextNext;
         }
 
         private static void Main() => func((defer, panic, recover) =>

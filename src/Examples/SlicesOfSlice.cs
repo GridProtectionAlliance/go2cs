@@ -1,15 +1,14 @@
-// package main -- go2cs converted at 2018 June 06 01:27:10 UTC
+// package main -- go2cs converted at 2018 June 16 17:46:03 UTC
 // Original source: C:\Projects\go2cs\src\Examples\SlicesOfSlice.go
 
 using fmt = go.fmt_package;
 using strings = go.strings_package;
 
 using static go.BuiltInFunctions;
-using System;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         private static void Main() => func((defer, panic, recover) =>
         {

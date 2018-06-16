@@ -5,7 +5,7 @@
 // Package utf8 implements functions and constants to support text encoded in
 // UTF-8. It includes functions to translate between runes and UTF-8 byte sequences.
 
-// package main -- go2cs converted at 2018 June 06 01:27:08 UTC
+// package main -- go2cs converted at 2018 June 16 17:46:02 UTC
 // Original source: C:\Projects\go2cs\src\Examples\Hello2.go
 
 // Package comments
@@ -17,14 +17,13 @@ using another = go.another_package;
 using noy = go.test.and.two.noy_package;
 
 using static go.BuiltInFunctions;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         // The conditions RuneError==unicode.ReplacementChar and
         // MaxRune==unicode.MaxRune are verified in the tests.
@@ -44,14 +43,12 @@ namespace go
 
 
 
-        public partial struct Person
+        public partial struct Person // Dictionary<string, string>
         {
-            // Redeclares Go map[string]string type - see "Hello2_PersonStructOf(map[string]string).cs"
         }
 
-        public partial struct Job
+        public partial struct Job // Dictionary<string, string>
         {
-            // Redeclares Go map[string]string type - see "Hello2_JobStructOf(map[string]string).cs"
         }
 
         private partial struct span
@@ -61,18 +58,21 @@ namespace go
             [Description("end field")]
             public long end;
             [Description("another field")]
-            public long another;        }
+            public long another;
+        }
 
         public partial struct User
         {
             public long Id;
-            public string Name;        }
+            public string Name;
+        }
 
         public partial struct Employee
         {
             public Title User;
             public Department @string;
-            public string @string;        }
+            public string @string;
+        }
 
         /* comment before function */
         private static void Main() => func((defer, panic, recover) =>
@@ -111,7 +111,8 @@ namespace go
             private partial struct span
             {
                 public long start;
-                public long end;            }
+                public long end;
+            }
             typespanstruct{startintendint}spans:=make([]span,0,32)wasField:=falsefromIndex:=0ifwasField{spans=append(spans,span{fromIndex,len(s)})}a:=make([]string,len(spans))returna
         });
 

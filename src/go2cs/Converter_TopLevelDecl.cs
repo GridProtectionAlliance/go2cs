@@ -58,7 +58,7 @@ namespace go2cs
                 m_targetFile.AppendLine(m_namespaceHeader);
 
                 // Begin class
-                m_targetFile.AppendLine($"{Spacing()}public static unsafe partial class {m_package}{ClassSuffix}");
+                m_targetFile.AppendLine($"{Spacing()}public static partial class {m_package}{ClassSuffix}");
                 m_targetFile.AppendLine($"{Spacing()}{{");
 
                 // Check for comments after initial declaration

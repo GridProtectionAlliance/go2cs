@@ -1,7 +1,8 @@
 ﻿<# // This template creates the function initializations in a <PackageName>_<InterfaceName>Interface.cs file #>
 <#@ template language="C#" #>
 
-                extensionMethod = targetType.GetExtensionMethodSearchingPromotions<PromotedStructAttribute>("<#=FunctionName#>");
+
+                extensionMethod = targetType.GetExtensionMethod("<#=FunctionName#>");
 
                 if ((object)extensionMethod != null)
                 {

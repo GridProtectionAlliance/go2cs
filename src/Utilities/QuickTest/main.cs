@@ -464,19 +464,19 @@ namespace go
 
             Ptr<int> p = new Ptr<int>(i);
             Console.WriteLine(p);
-            p.DerefValue = 21;
+            p.Deref = 21;
             Console.WriteLine(i);
 
             p.Value = j;
-            p.DerefValue = p.DerefValue / 37;
+            p.Deref = p.Deref / 37;
             Console.WriteLine(j);
 
             Ref<Vertex> v = new Ref<Vertex>(new Vertex { X = 1, Y = 2 });
             Ptr<Vertex> pv = new Ptr<Vertex>(v);
 
-            pv.DerefValue.X = 12;
+            pv.Deref.X = 12;
 
-            pv.DerefValue.X = 99;
+            pv.Deref.X = 99;
 
             PrintVertex(ref v.Value);
 

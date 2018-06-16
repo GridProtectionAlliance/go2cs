@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 07 01:54:01 UTC
+// package main -- go2cs converted at 2018 June 16 19:06:53 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\ImportOptions.go
 
 using fmt = go.fmt_package;
@@ -11,7 +11,7 @@ using static go.BuiltInFunctions;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         private static void Main() => func((defer, panic, recover) =>
         {

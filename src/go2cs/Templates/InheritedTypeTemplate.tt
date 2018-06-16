@@ -17,7 +17,7 @@ using go;
 <#}#>
 
 <#=NamespaceHeader#>
-    public static unsafe partial class <#=PackageName#>_package
+    public static partial class <#=PackageName#>_package
     {
         [<#=GeneratedCodeAttribute#>]
         <#=Scope#> partial struct <#=StructName#>

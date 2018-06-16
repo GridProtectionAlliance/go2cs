@@ -4,17 +4,18 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 07 01:54:02 UTC
+//     Generated on 2018 June 16 19:06:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
         [PromotedInterface(typeof(V))]
@@ -35,19 +36,21 @@ namespace go
             static V()
             {
                 Type targetType = typeof(T);
-                Delegate extensionMethod;
-                bool isByRef;
+                MethodInfo extensionMethod;
 
-                extensionMethod = targetType.GetExtensionDelegateSearchingPromotions<PromotedStructAttribute>("N", out isByRef);
+                extensionMethod = targetType.GetExtensionMethod("N");
+
+                if ((object)extensionMethod != null)
+                {
+                    s_NByRef = extensionMethod.CreateStaticDelegate(typeof(NByRef)) as NByRef;
+
+                    if ((object)s_NByRef == null)
+                        s_NByVal = extensionMethod.CreateStaticDelegate(typeof(NByVal)) as NByVal;
+                }
 
                 // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
-                if ((object)extensionMethod == null)
+                if ((object)s_NByRef == null && (object)s_NByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement V.N function");
-
-                if (isByRef)
-                    s_NByRef = extensionMethod as NByRef;
-                else
-                    s_NByVal = extensionMethod as NByVal;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
@@ -68,7 +71,13 @@ namespace go
         }
 
         [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static V V_cast<T>(T target) => (V<T>)target;
+        public static V V_cast<T>(T target)
+        {
+            if (typeof(V).IsAssignableFrom(typeof(T)))
+                return target as V;
+
+            return (V<T>)target;
+        }
     }
 }
 
@@ -76,7 +85,7 @@ namespace go
 {
     public partial class NilType
     {
-        // Enable comparisons between nil and Abser interface
+        // Enable comparisons between nil and V interface
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(go.main_package.V value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
 

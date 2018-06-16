@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 08 13:56:38 UTC
+// package main -- go2cs converted at 2018 June 16 19:06:54 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\PointerToPointer.go
 
 using fmt = go.fmt_package;
@@ -7,7 +7,7 @@ using static go.BuiltInFunctions;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         private static void Main() => func((defer, panic, recover) =>
         {
@@ -19,7 +19,7 @@ namespace go
             fmt.Printf("Value available at *ptr = %d\n",*ptr)
         });
 
-        public static void PrintValPtr2Ptr(long** pptr) => func((defer, panic, recover) =>
+        public static void PrintValPtr2Ptr(Ptr<Ptr<long>> pptr) => func((defer, panic, recover) =>
         {
             fmt.Printf("Value available at **pptr = %d\n",**pptr)
         });

@@ -1,21 +1,23 @@
-// package main -- go2cs converted at 2018 June 06 01:27:09 UTC
+// package main -- go2cs converted at 2018 June 16 17:46:03 UTC
 // Original source: C:\Projects\go2cs\src\Examples\Methods2.go
 
 using fmt = go.fmt_package;
 using math = go.math_package;
 
 using static go.BuiltInFunctions;
-using System;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
-        public partial struct MyFloat
+        public partial struct MyFloat // double
         {
-            // Redeclares Go float64 type - see "Methods2_MyFloatStructOf(float64).cs"
         }
-        iff<0{returnfloat64(-f)}returnfloat64(f)
+
+        public static double Abs(this MyFloat f) => func((defer, panic, recover) =>
+        {
+            iff<0{returnfloat64(-f)}returnfloat64(f)
+        });
 
         private static double Main() => func((defer, panic, recover) =>
         {

@@ -21,14 +21,13 @@ using go;
 <#}#>
 
 <#=NamespaceHeader#>
-    public static unsafe partial class <#=PackageName#>_package
+    public static partial class <#=PackageName#>_package
     {
         [<#=GeneratedCodeAttribute#>]
         [PromotedInterface(typeof(<#=InterfaceName#>))]
         <#=Scope#> struct <#=InterfaceName#><T> : <#=InterfaceName#>
         {
-            private T m_target;
-<#
+            private T m_target;<#
         
             foreach (var decl in Functions)
             {
@@ -49,8 +48,8 @@ using go;
             static <#=InterfaceName#>()
             {
                 Type targetType = typeof(T);
-                MethodInfo extensionMethod;
-<#        
+                MethodInfo extensionMethod;<#
+                
                 foreach (var decl in Functions)
                 {
                     #><#=new InterfaceFuncInitTemplate
@@ -81,7 +80,13 @@ using go;
         }
 
         [<#=GeneratedCodeAttribute#>, MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        <#=Scope#> static <#=InterfaceName#> <#=InterfaceName#>_cast<T>(T target) => (<#=InterfaceName#><T>)target;
+        <#=Scope#> static <#=InterfaceName#> <#=InterfaceName#>_cast<T>(T target)
+        {
+            if (typeof(<#=InterfaceName#>).IsAssignableFrom(typeof(T)))
+                return target as <#=InterfaceName#>;
+
+            return (<#=InterfaceName#><T>)target;
+        }
     }
 <#=NamespaceFooter#>
 
@@ -89,7 +94,7 @@ namespace go
 {
     public partial class NilType
     {
-        // Enable comparisons between nil and Abser interface
+        // Enable comparisons between nil and <#=InterfaceName#> interface
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(<#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
 
