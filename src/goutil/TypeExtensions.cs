@@ -41,6 +41,7 @@ namespace go
         {
             List<Type> types = new List<Type>();
 
+            // TODO: Not all assemblies may be loaded when this type is initialized - may need to refresh this list
             foreach (Assembly item in AppDomain.CurrentDomain.GetAssemblies())
                 types.AddRange(item.GetTypes());
 
@@ -73,59 +74,17 @@ namespace go
         }
 
         /// <summary>
-        /// Attempts to create a callable delegate for the specified extension method, <paramref name="methodName"/>, for <paramref name="targetType"/>.
+        /// Attempts to find the specified extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> or any of its promotions.
         /// </summary>
         /// <param name="targetType">Target <see cref="Type"/> to search.</param>
         /// <param name="methodName">Name of extension method to find.</param>
-        /// <param name="delegateType">Specific delegate type to apply.</param>
-        /// <returns>Callable delegate referencing extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
-        public static Delegate GetExtensionDelegate(this Type targetType, string methodName, Type delegateType)
-        {
-            return targetType.GetExtensionDelegate(methodName, out bool _, delegateType);
-        }
-
-        /// <summary>
-        /// Attempts to create a callable delegate for the specified extension method, <paramref name="methodName"/>, for <paramref name="targetType"/>.
-        /// </summary>
-        /// <param name="targetType">Target <see cref="Type"/> to search.</param>
-        /// <param name="methodName">Name of extension method to find.</param>
-        /// <param name="isByRef">Determines if extension target is accessed by reference.</param>
-        /// <param name="delegateType">Specific delegate type to apply; otherwise, defaults to an auto-derived Func or Action delegate.</param>
-        /// <returns>Callable delegate referencing extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
-        public static Delegate GetExtensionDelegate(this Type targetType, string methodName, out bool isByRef, Type delegateType = null)
-        {
-            isByRef = false;
-            return targetType.GetExtensionMethod(methodName)?.CreateStaticDelegate(delegateType, out isByRef);
-        }
-
-        /// <summary>
-        /// Attempts to create a callable delegate for the specified extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> or any of its promotions.
-        /// </summary>
-        /// <param name="targetType">Target <see cref="Type"/> to search.</param>
-        /// <param name="methodName">Name of extension method to find.</param>
-        /// <param name="delegateType">Specific delegate type to apply.</param>
-        /// <returns>Callable delegate referencing extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
+        /// <returns>Method metadata of extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
         /// <typeparam name="TPromotedAttribute">Promoted type attribute.</typeparam>
-        public static Delegate GetExtensionDelegateSearchingPromotions<TPromotedAttribute>(this Type targetType, string methodName, Type delegateType) where TPromotedAttribute : PromotedTypeAttributeBase
+        public static MethodInfo GetExtensionMethodSearchingPromotions<TPromotedAttribute>(this Type targetType, string methodName) where TPromotedAttribute : PromotedTypeAttributeBase
         {
-            return targetType.GetExtensionDelegateSearchingPromotions<TPromotedAttribute>(methodName, out bool _, delegateType);
-        }
+            MethodInfo method = targetType.GetExtensionMethod(methodName);
 
-        /// <summary>
-        /// Attempts to create a callable delegate for the specified extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> or any of its promotions.
-        /// </summary>
-        /// <param name="targetType">Target <see cref="Type"/> to search.</param>
-        /// <param name="methodName">Name of extension method to find.</param>
-        /// <param name="isByRef">Determines if extension target is accessed by reference.</param>
-        /// <param name="delegateType">Specific delegate type to apply; otherwise, defaults to an auto-derived Func or Action delegate.</param>
-        /// <returns>Callable delegate referencing extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
-        /// <typeparam name="TPromotedAttribute">Promoted type attribute.</typeparam>
-        public static Delegate GetExtensionDelegateSearchingPromotions<TPromotedAttribute>(this Type targetType, string methodName, out bool isByRef, Type delegateType = null) where TPromotedAttribute : PromotedTypeAttributeBase
-        {
-            isByRef = false;
-            Delegate extensionMethod = targetType.GetExtensionMethod(methodName)?.CreateStaticDelegate(delegateType, out isByRef);
-
-            if ((object)extensionMethod == null)
+            if ((object)method == null)
             {
                 object[] customAttributes = targetType.GetCustomAttributes(typeof(TPromotedAttribute), true);
 
@@ -133,19 +92,46 @@ namespace go
                 {
                     foreach (TPromotedAttribute attribute in customAttributes.Cast<TPromotedAttribute>())
                     {
-                        extensionMethod = attribute.PromotedType.GetExtensionDelegateSearchingPromotions<TPromotedAttribute>(methodName, out isByRef, delegateType);
+                        method = attribute.PromotedType.GetExtensionMethodSearchingPromotions<TPromotedAttribute>(methodName);
 
-                        if ((object)extensionMethod != null)
+                        if ((object)method != null)
                             break;
                     }
                 }
             }
 
-            return extensionMethod;
+            return method;
         }
 
-        // Creates a delegate for the given static method metadata.
-        private static Delegate CreateStaticDelegate(this MethodInfo methodInfo, Type delegateType, out bool isByRef)
+        /// <summary>
+        /// Creates a delegate for the given static method metadata.
+        /// </summary>
+        /// <param name="methodInfo">Method metadata of extension method.</param>
+        /// <param name="delegateType">Specific delegate type to apply; otherwise, defaults to an auto-derived Func or Action delegate.</param>
+        /// <returns>Callable delegate referencing extension method in <paramref name="methodInfo"/> or <c>null</c> if specified delegate signature does not match.</returns>
+        public static Delegate CreateStaticDelegate(this MethodInfo methodInfo, Type delegateType = null)
+        {
+            if ((object)delegateType == null)
+                return methodInfo.CreateStaticDelegate(null, out bool _);
+
+            try
+            {
+                return Delegate.CreateDelegate(delegateType, methodInfo);
+            }
+            catch (ArgumentException)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Creates a delegate for the given static method metadata.
+        /// </summary>
+        /// <param name="methodInfo">Method metadata of extension method.</param>
+        /// <param name="delegateType">Specific delegate type to apply; set to <c>null</c> to use an auto-derived Func or Action delegate.</param>
+        /// <param name="isByRef">Determines if extension target is accessed by reference.</param>
+        /// <returns>Callable delegate referencing extension method in <paramref name="methodInfo"/> or <c>null</c> if specified delegate signature does not match.</returns>
+        public static Delegate CreateStaticDelegate(this MethodInfo methodInfo, Type delegateType, out bool isByRef)
         {
             Func<Type[], Type> getMethodType;
             List<Type> types = methodInfo.GetParameters().Select(paramInfo => paramInfo.ParameterType).ToList();
@@ -176,7 +162,7 @@ namespace go
             catch (ArgumentException)
             {
                 return null;
-            }            
+            }
         }
     }
 }

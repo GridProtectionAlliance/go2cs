@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.BuiltInFunctions;
 
@@ -89,18 +90,17 @@ namespace go
             static MyCustomError()
             {
                 Type targetType = typeof(MyCustomError);
-                Delegate extensionMethod;
-                bool isByRef;
+                MethodInfo method;
 
                 // Any existing defined extensions will override interface reference calls
-                extensionMethod = targetType.GetExtensionDelegateSearchingPromotions<PromotedStructAttribute>("Abs", out isByRef);
+                method = targetType.GetExtensionMethodSearchingPromotions<PromotedStructAttribute>("Abs");
 
-                if (extensionMethod != null)
+                if (method != null)
                 {
-                    if (isByRef)
-                        s_AbsByRef = extensionMethod as AbsByRef;
-                    else
-                        s_AbsByVal = extensionMethod as AbsByVal;
+                    s_AbsByRef = method.CreateStaticDelegate(typeof(AbsByRef)) as AbsByRef;
+                
+                    if (s_AbsByRef == null)
+                        s_AbsByVal = method.CreateStaticDelegate(typeof(AbsByVal)) as AbsByVal;
                 }
             }
 
