@@ -168,7 +168,7 @@ namespace go
         // It prints into a buffer that must be set up separately.
         private struct fmt
         {
-            public buffer* buf;
+            public Ptr<buffer> buf;
 
             public fmtFlags fmtFlags;
 
@@ -191,7 +191,7 @@ namespace go
 
             fmt f = new fmt();
 
-            val(ref *f.buf);
+            val(ref f.buf.Deref);
 
             f.clearFlags();
 

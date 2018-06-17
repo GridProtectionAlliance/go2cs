@@ -38,7 +38,7 @@ namespace go
                 Type targetType = typeof(T);
                 MethodInfo extensionMethod;
 
-                extensionMethod = targetType.GetExtensionMethodSearchingPromotions<PromotedStructAttribute>("Abs");
+                extensionMethod = targetType.GetExtensionMethod("Abs");
 
                 if ((object)extensionMethod != null)
                 {

@@ -37,15 +37,15 @@ namespace go2cs
         private readonly ParseTreeValues<(string parameters, string result)> m_signatures = new ParseTreeValues<(string, string)>();
         private string m_result;
 
+        public override void EnterSignature(GolangParser.SignatureContext context)
+        {
+            m_result = null;
+        }
+
         public override void ExitSignature(GolangParser.SignatureContext context)
         {
             m_parameters.TryGetValue(context.parameters(), out string parameters);
             m_signatures[context] = (parameters, m_result ?? "void");
-        }
-
-        public override void EnterResult(GolangParser.ResultContext context)
-        {
-            m_result = null;
         }
 
         public override void ExitResult(GolangParser.ResultContext context)
