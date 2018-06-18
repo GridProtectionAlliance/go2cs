@@ -39,13 +39,13 @@ namespace go2cs
             
             if (exitCode == 0)
             {
-                Console.WriteLine($"Converted {Converter.TotalProcessedFiles:N0} Go files to C# with {Converter.TotalWarnings:N0} total warnings");
+                Console.WriteLine($"Converted {ScannerBase.TotalProcessedFiles:N0} Go files to C# with {ScannerBase.TotalWarnings:N0} total warnings");
 
-                if ((!options.OverwriteExistingFiles || !options.OverwriteExistingPackages) && Converter.TotalSkippedFiles > 0)
-                    Console.WriteLine($"Skipped {Converter.TotalSkippedFiles:N0} already converted files (-o or -i option not set)");
+                if ((!options.OverwriteExistingFiles || !options.OverwriteExistingPackages) && ScannerBase.TotalSkippedFiles > 0)
+                    Console.WriteLine($"Skipped {ScannerBase.TotalSkippedFiles:N0} already converted files (-o or -i option not set)");
 
-                if (!options.ConvertStandardLibrary && Converter.TotalSkippedPackages > 0)
-                    Console.WriteLine($"Skipped conversion of {Converter.TotalSkippedPackages:N0} standard library packages (-s option not set)");
+                if (!options.ConvertStandardLibrary && ScannerBase.TotalSkippedPackages > 0)
+                    Console.WriteLine($"Skipped conversion of {ScannerBase.TotalSkippedPackages:N0} standard library packages (-s option not set)");
 
                 Console.WriteLine($"Processing time: {DateTime.UtcNow - startTime}");
             }
@@ -59,6 +59,7 @@ namespace go2cs
         {
 #if DEBUG
             Common.RestoreGoUtilSources(options.TargetGoSrcPath);
+            PreScanner.Scan(options);
             Converter.Convert(options);
             Converter.WriteProjectFiles(options);
             return 0;
@@ -68,6 +69,7 @@ namespace go2cs
             try
             {
                 Common.RestoreGoUtilSources(options.TargetGoSrcPath);
+                PreScanner.Scan(options);
                 Converter.Convert(options);
                 Converter.WriteProjectFiles(options);
             }

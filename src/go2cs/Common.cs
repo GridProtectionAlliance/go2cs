@@ -170,6 +170,58 @@ namespace go2cs
             return filePath;
         }
 
+        public static string RemovePathSuffix(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                filePath = "";
+            }
+            else
+            {
+                char suffixChar = filePath[filePath.Length - 1];
+
+                while ((suffixChar == Path.DirectorySeparatorChar || suffixChar == Path.AltDirectorySeparatorChar) && filePath.Length > 0)
+                {
+                    filePath = filePath.Substring(0, filePath.Length - 1);
+
+                    if (filePath.Length > 0)
+                        suffixChar = filePath[filePath.Length - 1];
+                }
+            }
+
+            return filePath;
+        }
+
+        public static string GetDirectoryName(string filePath)
+        {
+            // Test for case where valid path does not end in directory separator, Path.GetDirectoryName assumes
+            // this is a file name - whether is exists or not
+            string directoryName = AddPathSuffix(filePath);
+
+            if (Directory.Exists(directoryName))
+                return directoryName;
+
+            return AddPathSuffix(Path.GetDirectoryName(filePath) ?? filePath);
+        }
+
+        public static string GetLastDirectoryName(string filePath)
+        {
+            if ((object)filePath == null)
+                throw new ArgumentNullException(nameof(filePath));
+
+            int index;
+            char[] dirVolChars = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, Path.VolumeSeparatorChar };
+
+            // Remove file name and trailing directory separator character from the file path
+            filePath = RemovePathSuffix(GetDirectoryName(filePath));
+
+            // Keep going through the file path until all directory separator characters are removed
+            while ((index = filePath.IndexOfAny(dirVolChars)) > -1)
+                filePath = filePath.Substring(index + 1);
+
+            return filePath;
+        }
+
         public static bool PathHasFiles(string filePath, string searchPattern)
         {
             return Directory.Exists(filePath) && Directory.EnumerateFiles(filePath, searchPattern, SearchOption.TopDirectoryOnly).Any();

@@ -21,12 +21,12 @@
 //
 //******************************************************************************************************
 
+using CommandLine;
+using CommandLine.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using CommandLine;
-using CommandLine.Text;
 using static go2cs.Common;
 
 namespace go2cs
@@ -82,6 +82,12 @@ namespace go2cs
             get;
         }
 
+        [Option('m', Required = false, Default = false, HelpText = "Set to force update of pre-scan metadata.")]
+        public bool ForceMetadataUpdate
+        {
+            get;
+        }
+
         [Option('g', Required = false, Default = DefaultTargetGoSrcPath, HelpText = "Target path for converted Go standard library source files.")]
         public string TargetGoSrcPath
         {
@@ -108,6 +114,7 @@ namespace go2cs
             string excludeFiles,
             bool convertStandardLibrary,
             bool recurseSubdirectories,
+            bool forceMetadataUpdate,
             string targetGoSrcPath,
             string sourcePath,
             string targetPath)
@@ -125,6 +132,7 @@ namespace go2cs
             ExcludeFiles = excludeFiles;
             ConvertStandardLibrary = convertStandardLibrary;
             RecurseSubdirectories = recurseSubdirectories;
+            ForceMetadataUpdate = forceMetadataUpdate;
             TargetGoSrcPath = AddPathSuffix(Path.GetFullPath(Environment.ExpandEnvironmentVariables(targetGoSrcPath)));
             SourcePath = sourcePath == null ? null : Environment.ExpandEnvironmentVariables(sourcePath);
             TargetPath = targetPath == null ? null : Environment.ExpandEnvironmentVariables(targetPath);
@@ -132,6 +140,7 @@ namespace go2cs
             m_excludeExpression = new Regex(ExcludeFiles, RegexOptions.Compiled | RegexOptions.Singleline);
         }
 
+        // Private constructor only used by examples
         private Options(bool localConvertOnly, string sourcePath, bool convertStandardLibrary = false, bool recurseSubdirectories = false)
         {
             LocalConvertOnly = localConvertOnly;
@@ -141,6 +150,7 @@ namespace go2cs
             ExcludeFiles = null;
             ConvertStandardLibrary = convertStandardLibrary;
             RecurseSubdirectories = recurseSubdirectories;
+            ForceMetadataUpdate = false;
             TargetGoSrcPath = null;
             SourcePath = sourcePath;
             TargetPath = null;
@@ -157,6 +167,7 @@ namespace go2cs
                 options.ExcludeFiles,
                 options.ConvertStandardLibrary,
                 options.RecurseSubdirectories,
+                options.ForceMetadataUpdate,
                 options.TargetGoSrcPath, 
                 sourcePath, 
                 targetPath);

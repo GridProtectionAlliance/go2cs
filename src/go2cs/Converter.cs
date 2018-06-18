@@ -115,7 +115,12 @@ namespace go2cs
         public static void Convert(Options options)
         {
             ResetScanner();
-            Scan(options, options.ShowParseTree, (tokenStream, parser, _options, fileName) => new Converter(tokenStream, parser, _options, fileName));
+            Scan(options, options.ShowParseTree, CreateNewConverter);
+        }
+
+        private static ScannerBase CreateNewConverter(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName)
+        {
+            return new Converter(tokenStream, parser, options, fileName);
         }
 
         public static void WriteProjectFiles(Options options)

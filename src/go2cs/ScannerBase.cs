@@ -21,15 +21,14 @@
 //
 //******************************************************************************************************
 
+using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Antlr4.Runtime;
-using Antlr4.Runtime.Tree;
 using static go2cs.Common;
-
 using CreateNewScannerFunction = System.Func<Antlr4.Runtime.BufferedTokenStream, GolangParser, go2cs.Options, string, go2cs.ScannerBase>;
 using FileNeedsScanFunction = System.Func<string, bool>;
 
@@ -75,7 +74,7 @@ namespace go2cs
         {
             Options = options;
 
-            if (string.IsNullOrWhiteSpace(fileName))
+            if ((object)fileName == null)
                 throw new ArgumentNullException(nameof(fileName));
 
             if (!File.Exists(fileName))
