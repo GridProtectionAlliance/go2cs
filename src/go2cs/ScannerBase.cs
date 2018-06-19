@@ -23,19 +23,22 @@
 
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
+using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using static go2cs.Common;
-using CreateNewScannerFunction = System.Func<Antlr4.Runtime.BufferedTokenStream, GolangParser, go2cs.Options, string, go2cs.ScannerBase>;
-using FileNeedsScanFunction = System.Func<string, bool>;
 
 #pragma warning disable SCS0018 // Path traversal
 
 namespace go2cs
 {
+    public delegate ScannerBase CreateNewScannerFunction(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName);
+    public delegate bool FileNeedsScanFunction(Options options, string fileName, out string message);
+
     public abstract class ScannerBase : GolangBaseListener
     {
         private readonly List<string> m_warnings = new List<string>();
@@ -66,9 +69,13 @@ namespace go2cs
 
         public string TargetFilePath { get; }
 
-        public string PackagePath { get; private set; }
+        public string Package { get; private set; }
+
+        public string PackageImport { get; private set; }
 
         public string[] Warnings => m_warnings.ToArray();
+
+        protected string CurrentImportPath { get; private set; }
 
         protected ScannerBase(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName)
         {
@@ -82,15 +89,13 @@ namespace go2cs
 
             TokenStream = tokenStream;
             Parser = parser;
-            SourceFileName = Path.GetFullPath(fileName);
-            SourceFilePath = Path.GetDirectoryName(SourceFileName) ?? "";
-            TargetFileName = $"{Path.GetFileNameWithoutExtension(SourceFileName)}.cs";
-            TargetFilePath = string.IsNullOrWhiteSpace(options.TargetPath) ? SourceFilePath : Path.GetFullPath(options.TargetPath);
 
-            if (!Directory.Exists(TargetFilePath))
-                Directory.CreateDirectory(TargetFilePath);
+            GetFilePaths(options, fileName, out string sourceFileName, out string sourceFilePath, out string targetFileName, out string targetFilePath);
 
-            TargetFileName = Path.Combine(TargetFilePath, TargetFileName);
+            SourceFileName = sourceFileName;
+            SourceFilePath = sourceFilePath;
+            TargetFileName = targetFileName;
+            TargetFilePath = targetFilePath;
         }
 
         public virtual void Scan(bool showParseTree)
@@ -126,13 +131,61 @@ namespace go2cs
         {
         }
 
+        public override void EnterPackageClause(GolangParser.PackageClauseContext context)
+        {
+            // Go package clause is the first keyword encountered - cache details that
+            // will be written out after imports. C# import statements (i.e., usings)
+            // typically occur before namespace and class definitions
+            Package = SanitizedIdentifier(context.IDENTIFIER().GetText());
+
+            if (Package.Equals("main"))
+            {
+                PackageImport = Package;
+            }
+            else
+            {
+                // Define package import path
+                PackageImport = Path.GetDirectoryName(SourceFileName) ?? Package;
+                PackageImport = PackageImport.Replace(GoRoot, "");
+                PackageImport = PackageImport.Replace(GoPath, "");
+
+                while (PackageImport.StartsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.StartsWith(Path.AltDirectorySeparatorChar.ToString()))
+                    PackageImport = PackageImport.Substring(1);
+
+                while (PackageImport.EndsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
+                    PackageImport = PackageImport.Substring(0, PackageImport.Length - 1);
+
+                int lastSlash;
+
+                if (Path.IsPathRooted(PackageImport))
+                {
+                    // File converted was outside %GOPATH% and %GOROOT%
+                    lastSlash = PackageImport.LastIndexOf('\\');
+
+                    if (lastSlash > -1)
+                        PackageImport = $"{PackageImport.Substring(lastSlash + 1)}";
+                }
+
+                PackageImport = $"{PackageImport.Replace('\\', '/')}";
+
+                lastSlash = PackageImport.LastIndexOf('/');
+                string package = SanitizedIdentifier(lastSlash > -1 ? PackageImport.Substring(lastSlash + 1) : PackageImport);
+
+                if (!package.Equals(Package))
+                {
+                    AddWarning(context, $"Defined package clause \"{Package}\" does not match file path \"{SourceFileName}\"");
+                    PackageImport = lastSlash > -1 ? $"{PackageImport.Substring(0, lastSlash)}.{Package}" : Package;
+                }
+            }
+        }
+
         public override void EnterImportSpec(GolangParser.ImportSpecContext context)
         {
             // Remove quotes from package name
-            PackagePath = RemoveSurrounding(ToStringLiteral(context.importPath().STRING_LIT().GetText()));
+            CurrentImportPath = RemoveSurrounding(ToStringLiteral(context.importPath().STRING_LIT().GetText()));
 
             // Add package to import queue
-            s_importQueue.Add(PackagePath);
+            s_importQueue.Add(CurrentImportPath);
         }
 
         protected static readonly bool IsPosix;
@@ -143,6 +196,8 @@ namespace go2cs
         private static readonly HashSet<string> s_processedFiles;
         private static readonly HashSet<string> s_processedImports;
         private static readonly HashSet<string> s_importQueue;
+        private static string s_currentFolderMetadataFileName;
+        private static FolderMetadata s_currentFolderMetadata;
 
         static ScannerBase()
         {
@@ -196,7 +251,7 @@ namespace go2cs
         protected static void Scan(Options options, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null)
         {
             if ((object)fileNeedsScan == null)
-                fileNeedsScan = _ => true;
+                fileNeedsScan = DefaultFileNeedsScan;
 
             string sourcePath = GetAbsolutePath(options.SourcePath);
 
@@ -242,15 +297,18 @@ namespace go2cs
         protected static void ScanFile(Options options, string fileName, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null)
         {
             if ((object)fileNeedsScan == null)
-                fileNeedsScan = _ => true;
+                fileNeedsScan = DefaultFileNeedsScan;
 
             if (s_processedFiles.Contains(fileName))
                 return;
 
             s_processedFiles.Add(fileName);
 
-            if (!fileNeedsScan(fileName))
+            if (!fileNeedsScan(options, fileName, out string message))
+            {
+                Console.WriteLine(message);
                 return;
+            }
 
             AntlrInputStream inputStream;
 
@@ -349,12 +407,71 @@ namespace go2cs
             }
         }
 
+        protected static void GetFilePaths(Options options, string fileName, out string sourceFileName, out string sourceFilePath, out string targetFileName, out string targetFilePath)
+        {
+            sourceFileName = Path.GetFullPath(fileName);
+            sourceFilePath = Path.GetDirectoryName(sourceFileName) ?? "";
+            targetFileName = $"{Path.GetFileNameWithoutExtension(sourceFileName)}.cs";
+            targetFilePath = string.IsNullOrWhiteSpace(options.TargetPath) ? sourceFilePath : Path.GetFullPath(options.TargetPath);
+
+            if (!Directory.Exists(targetFilePath))
+                Directory.CreateDirectory(targetFilePath);
+
+            targetFileName = Path.Combine(targetFilePath, targetFileName);
+        }
+
+        protected static string GetFolderMetadataFileName(Options options, string fileName)
+        {
+            GetFilePaths(options, fileName, out _, out _, out _, out string targetFilePath);
+            targetFilePath = AddPathSuffix(targetFilePath);
+            string lastDirName = GetLastDirectoryName(targetFilePath);
+            return $"{targetFilePath}{lastDirName}.metadata";
+        }
+
+        protected static FolderMetadata GetFolderMetadata(Options options, string fileName)
+        {
+            string folderMetadataFileName = GetFolderMetadataFileName(options, fileName);
+
+            if (!File.Exists(folderMetadataFileName))
+                return null;
+
+            if (folderMetadataFileName.Equals(s_currentFolderMetadataFileName, StringComparison.OrdinalIgnoreCase) && (object)s_currentFolderMetadata != null)
+                return s_currentFolderMetadata;
+
+            FolderMetadata folderMetadata;
+            BinaryFormatter formatter = new BinaryFormatter();
+
+            try
+            {
+                using (FileStream stream = File.OpenRead(folderMetadataFileName))
+                    folderMetadata = formatter.Deserialize(stream) as FolderMetadata;
+            }
+            catch (Exception ex)
+            {
+                folderMetadata = null;
+
+                if (!folderMetadataFileName.Equals(s_currentFolderMetadataFileName, StringComparison.OrdinalIgnoreCase))
+                    Console.WriteLine($"Failed to load folder metadata from \"{folderMetadataFileName}\": {ex.Message}");
+            }
+
+            s_currentFolderMetadataFileName = folderMetadataFileName;
+            s_currentFolderMetadata = folderMetadata;
+
+            return folderMetadata;
+        }
+
         protected static string GetAbsolutePath(string filePath)
         {
             if (!Path.IsPathRooted(filePath))
                 filePath = Path.Combine(GoPath, filePath);
 
             return filePath;
+        }
+
+        private static bool DefaultFileNeedsScan(Options options, string fileName, out string message)
+        {
+            message = null;
+            return true;
         }
     }
 }

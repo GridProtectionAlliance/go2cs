@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  FunctionSignature.cs - Gbtc
+//  VariableInfo.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,7 +16,7 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  06/06/2018 - J. Ritchie Carroll
+//  06/18/2018 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
@@ -26,14 +26,11 @@ using System;
 namespace go2cs.Metadata
 {
     [Serializable]
-    public class FunctionSignature
+    public class VariableInfo
     {
         public string Name;
-        public ParameterInfo[] Parameters;
-        public string ResultTypeName;
-        public string ResultFullTypeName;
-
-        // Promoted interface type name stored in "ResultTypeName" and "ResultFullTypeName"
-        public bool IsPromoted => string.IsNullOrEmpty(Name);
+        public int Index;
+        public bool FullScope;
+        public bool NeedsHeapAllocation;
     }
 }

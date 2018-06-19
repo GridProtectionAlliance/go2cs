@@ -21,8 +21,11 @@
 //
 //******************************************************************************************************
 
+using System;
+
 namespace go2cs.Metadata
 {
+    [Serializable]
     public class ParameterInfo
     {
         public string Name;

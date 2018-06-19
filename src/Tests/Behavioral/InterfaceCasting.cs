@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 16 19:06:53 UTC
+// package main -- go2cs converted at 2018 June 19 13:39:31 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceCasting.go
 
 using fmt = go.fmt_package;
@@ -25,7 +25,7 @@ namespace go
             returnMyError{"foo"}
         });
 
-        private static error Main() => func((defer, panic, recover) =>
+        private static void Main() => func((defer, panic, recover) =>
         {
             fmt.Printf("%v\n",f())
         });

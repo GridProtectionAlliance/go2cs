@@ -43,14 +43,14 @@ namespace go2cs
                 StringBuilder namespaceHeader = new StringBuilder();
 
                 // Begin namespaces
-                for (int i = 0; i < m_packageNamespaces.Length; i++)
+                for (int i = 0; i < PackageNamespaces.Length; i++)
                 {
-                    namespaceHeader.Append($"namespace {m_packageNamespaces[i]}");
-                    namespaceHeader.Append(i == m_packageNamespaces.Length - 1 ? $"{Environment.NewLine}{{" : $" {{{Environment.NewLine}");
+                    namespaceHeader.Append($"namespace {PackageNamespaces[i]}");
+                    namespaceHeader.Append(i == PackageNamespaces.Length - 1 ? $"{Environment.NewLine}{{" : $" {{{Environment.NewLine}");
                 }
 
                 m_namespaceHeader = namespaceHeader.ToString();
-                m_namespaceFooter = new string('}', m_packageNamespaces.Length);
+                m_namespaceFooter = new string('}', PackageNamespaces.Length);
 
                 // Mark end of using statements so that other usings and type aliases can be added later
                 m_targetFile.AppendLine(UsingsMarker);
@@ -58,7 +58,7 @@ namespace go2cs
                 m_targetFile.AppendLine(m_namespaceHeader);
 
                 // Begin class
-                m_targetFile.AppendLine($"{Spacing()}public static partial class {m_package}{ClassSuffix}");
+                m_targetFile.AppendLine($"{Spacing()}public static partial class {Package}{ClassSuffix}");
                 m_targetFile.AppendLine($"{Spacing()}{{");
 
                 // Check for comments after initial declaration

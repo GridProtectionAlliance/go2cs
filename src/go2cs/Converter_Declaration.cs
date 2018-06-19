@@ -48,10 +48,10 @@ namespace go2cs
                 using (StreamWriter writer = File.CreateText(ancillaryInterfaceFileName))
                     writer.Write(new InterfaceTypeTemplate
                     {
-                        NamespacePrefix = m_packageNamespace,
+                        NamespacePrefix = PackageNamespace,
                         NamespaceHeader = m_namespaceHeader,
                         NamespaceFooter = m_namespaceFooter,
-                        PackageName = m_package,
+                        PackageName = Package,
                         InterfaceName = identifier,
                         Scope = scope,
                         Functions = functions.ToArray()
@@ -59,7 +59,7 @@ namespace go2cs
                     .TransformText());
 
                 // Track file name associated with package
-                AddFileToPackage(m_package, ancillaryInterfaceFileName, m_packageNamespace);
+                AddFileToPackage(Package, ancillaryInterfaceFileName, PackageNamespace);
 
                 m_targetFile.AppendLine($"{Spacing()}{scope} partial interface {identifier}"); // TODO: << add <#=InheritedInterfaces#>
                 m_targetFile.AppendLine($"{Spacing()}{{");
@@ -79,10 +79,10 @@ namespace go2cs
                 using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
                     writer.Write(new StructTypeTemplate
                     {
-                        NamespacePrefix = m_packageNamespace,
+                        NamespacePrefix = PackageNamespace,
                         NamespaceHeader = m_namespaceHeader,
                         NamespaceFooter = m_namespaceFooter,
-                        PackageName = m_package,
+                        PackageName = Package,
                         StructName = identifier,
                         Scope = scope,
                         InheritedInterfaces = new[] { "" }, // TODO <<
@@ -91,7 +91,7 @@ namespace go2cs
                     .TransformText());
 
                 // Track file name associated with package
-                AddFileToPackage(m_package, ancillaryStructFileName, m_packageNamespace);
+                AddFileToPackage(Package, ancillaryStructFileName, PackageNamespace);
 
                 m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier}");
                 m_targetFile.AppendLine($"{Spacing()}{{");
@@ -107,10 +107,10 @@ namespace go2cs
                 using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
                     writer.Write(new InheritedTypeTemplate
                     {
-                        NamespacePrefix = m_packageNamespace,
+                        NamespacePrefix = PackageNamespace,
                         NamespaceHeader = m_namespaceHeader,
                         NamespaceFooter = m_namespaceFooter,
-                        PackageName = m_package,
+                        PackageName = Package,
                         StructName = identifier,
                         Scope = scope,
                         TypeName = typeInfo.PrimitiveName
@@ -118,7 +118,7 @@ namespace go2cs
                     .TransformText());
 
                 // Track file name associated with package
-                AddFileToPackage(m_package, ancillaryInheritedTypeFileName, m_packageNamespace);
+                AddFileToPackage(Package, ancillaryInheritedTypeFileName, PackageNamespace);
 
                 m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // {typeInfo.PrimitiveName}");
                 m_targetFile.AppendLine($"{Spacing()}{{");

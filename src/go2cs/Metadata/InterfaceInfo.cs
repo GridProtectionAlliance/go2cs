@@ -21,8 +21,11 @@
 //
 //******************************************************************************************************
 
+using System;
+
 namespace go2cs.Metadata
 {
+    [Serializable]
     public class InterfaceInfo
     {
         public string Name;

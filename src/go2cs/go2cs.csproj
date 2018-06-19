@@ -48,10 +48,14 @@
     <Compile Include="Arguments.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Metadata\FieldInfo.cs" />
+    <Compile Include="Metadata\FunctionInfo.cs" />
     <Compile Include="Metadata\FunctionSignature.cs" />
     <Compile Include="Metadata\InterfaceInfo.cs" />
+    <Compile Include="Metadata\FolderMetadata.cs" />
     <Compile Include="Metadata\ParameterInfo.cs" />
+    <Compile Include="Metadata\FileMetadata.cs" />
     <Compile Include="Metadata\StructInfo.cs" />
+    <Compile Include="Metadata\VariableInfo.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="PreScanner.cs" />
     <Compile Include="Program.cs" />

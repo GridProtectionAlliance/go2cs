@@ -22,19 +22,25 @@
 //******************************************************************************************************
 
 using Antlr4.Runtime;
+using go2cs.Metadata;
 using System;
+using System.Collections.Generic;
 using System.IO;
-using static go2cs.Common;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace go2cs
 {
     public class PreScanner :ScannerBase
     {
-        public string MetadataFileName { get; }
+        public string FolderMetadataFileName { get; }
+
+        private readonly List<InterfaceInfo> m_interfaces = new List<InterfaceInfo>();
+        private readonly List<StructInfo> m_structs = new List<StructInfo>();
+        private readonly List<FunctionInfo> m_functions = new List<FunctionInfo>();
 
         public PreScanner(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
         {
-            MetadataFileName = GetMetadataFileName(fileName);
+            FolderMetadataFileName = GetFolderMetadataFileName(options, fileName);
         }
 
         public override void Scan(bool _)
@@ -42,8 +48,22 @@ namespace go2cs
             // Base class walks parse tree
             base.Scan(false);
 
-            if (!File.Exists(MetadataFileName))
-                File.Create(MetadataFileName);
+            FolderMetadata folderMetadata = GetFolderMetadata(Options, SourceFileName) ?? new FolderMetadata();
+            FileMetadata fileInfo = folderMetadata.Files.GetOrAdd(SourceFileName, new FileMetadata());
+
+            fileInfo.Package = Package;
+            fileInfo.PackageImport = PackageImport;
+            fileInfo.SourceFileName = SourceFileName;
+            fileInfo.TargetFileName = TargetFileName;
+            fileInfo.Interfaces = m_interfaces.ToArray();
+            fileInfo.Structs = m_structs.ToArray();
+            fileInfo.Functions = m_functions.ToArray();
+            fileInfo.LastUpdate = DateTime.UtcNow;
+
+            BinaryFormatter formatter = new BinaryFormatter();
+
+            using (FileStream stream = File.Create(FolderMetadataFileName))
+                formatter.Serialize(stream, folderMetadata);
         }
 
         protected override void BeforeScan()
@@ -56,11 +76,6 @@ namespace go2cs
             Console.WriteLine("    Completed pre-scan.");
         }
 
-        protected override void SkippingScan()
-        {
-            Console.WriteLine($"Metadata for \"{SourceFileName}\" is up to date - skipping pre-scan.");
-        }
-
         protected override void SkippingImport(string import)
         {
             Console.WriteLine($"Skipping pre-scan for Go standard library import package \"{import}\".");
@@ -69,8 +84,11 @@ namespace go2cs
 
         public static void Scan(Options options)
         {
+            Console.WriteLine("Starting code pre-scan to update metadata...");
+            Console.WriteLine();
+
             ResetScanner();
-            Scan(options, false, CreateNewPreScanner, fileName => options.ForceMetadataUpdate || MetadataOutOfDate(fileName));
+            Scan(options, false, CreateNewPreScanner, MetadataOutOfDate);
         }
 
         private static ScannerBase CreateNewPreScanner(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName)
@@ -78,21 +96,23 @@ namespace go2cs
             return new PreScanner(tokenStream, parser, options, fileName);
         }
 
-        private static bool MetadataOutOfDate(string fileName)
+        private static bool MetadataOutOfDate(Options options, string fileName, out string message)
         {
-            string metadataFileName = GetMetadataFileName(fileName);
+            message = null;
 
-            if (!File.Exists(metadataFileName))
+            if (options.ForceMetadataUpdate)
                 return true;
 
-            return File.GetLastWriteTimeUtc(fileName) > File.GetLastWriteTimeUtc(metadataFileName);
-        }
+            FolderMetadata folderMetadata = GetFolderMetadata(options, fileName);
 
-        private static string GetMetadataFileName(string fileName)
-        {
-            string sourceFilePath = AddPathSuffix(Path.GetDirectoryName(fileName));
-            string lastDirName = GetLastDirectoryName(sourceFilePath);
-            return $"{sourceFilePath}{lastDirName}.metadata";
+            if ((object)folderMetadata == null || !folderMetadata.Files.TryGetValue(fileName, out FileMetadata fileMetadata))
+                return true;
+
+            if (File.GetLastWriteTimeUtc(fileName) > fileMetadata.LastUpdate)
+                return true;
+
+            message = $"Metadata for \"{fileName}\" is up to date.{Environment.NewLine}";
+            return false;
         }
     }
 }

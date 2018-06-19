@@ -21,8 +21,6 @@
 //
 //******************************************************************************************************
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using static go2cs.Common;
 
@@ -32,16 +30,16 @@ namespace go2cs
     {
         public override void EnterImportSpec(GolangParser.ImportSpecContext context)
         {
-            // Base class parses package path
+            // Base class parses current import package path
             base.EnterImportSpec(context);
 
             string alternateName = SanitizedIdentifier(context.IDENTIFIER()?.GetText());
             bool useStatic = (object)alternateName == null && context.ChildCount > 1 && context.GetChild(0).GetText().Equals(".");
 
-            int lastSlash = PackagePath.LastIndexOf('/');
-            string packageName = SanitizedIdentifier(lastSlash > -1 ? PackagePath.Substring(lastSlash + 1) : PackagePath);
+            int lastSlash = CurrentImportPath.LastIndexOf('/');
+            string packageName = SanitizedIdentifier(lastSlash > -1 ? CurrentImportPath.Substring(lastSlash + 1) : CurrentImportPath);
 
-            string targetUsing = $"{RootNamespace}.{string.Join(".", PackagePath.Split('/').Select(SanitizedIdentifier))}{ClassSuffix}";
+            string targetUsing = $"{RootNamespace}.{string.Join(".", CurrentImportPath.Split('/').Select(SanitizedIdentifier))}{ClassSuffix}";
 
             if (useStatic)
                 m_targetFile.Append($"using static {targetUsing};");

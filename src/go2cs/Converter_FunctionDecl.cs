@@ -64,7 +64,7 @@ namespace go2cs
                 m_currentFunction = "Main";
                 
                 // Track file names that contain main function in main package
-                if (m_package.Equals("main"))
+                if (Package.Equals("main"))
                     s_mainPackageFiles.Add(TargetFileName);
             }
 

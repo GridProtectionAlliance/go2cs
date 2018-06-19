@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 16 19:06:53 UTC
+// package main -- go2cs converted at 2018 June 19 13:39:31 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceImplementation.go
 
 using fmt = go.fmt_package;
@@ -27,7 +27,7 @@ namespace go
             public string Color;
         }
 
-        private static string Main() => func((defer, panic, recover) =>
+        private static void Main() => func((defer, panic, recover) =>
         {
             f:=new(Frog)d:=new(Dog)zoo:=[...]Animal{f,d}for_,a:=rangezoo{fmt.Println(a.Type(),"can",a.Swim())}
         });

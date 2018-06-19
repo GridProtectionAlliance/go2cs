@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 16 19:06:54 UTC
+// package main -- go2cs converted at 2018 June 19 13:39:31 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\PointerToPointer.go
 
 using fmt = go.fmt_package;

@@ -23,7 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using static go2cs.Common;
 
@@ -31,74 +30,27 @@ namespace go2cs
 {
     public partial class Converter
     {
-        private string m_package;
-        private string m_packageImport;
-        private string m_packageUsing;
-        private string m_packageNamespace;
-        private string[] m_packageNamespaces;
         private readonly HashSet<string> m_requiredUsings = new HashSet<string>(StringComparer.Ordinal);
 
-        public string Package => m_package;
+        public string PackageUsing { get; private set; }
 
-        public string PackageImport => m_packageImport;
+        public string PackageNamespace { get; private set; }
 
-        public string PackageUsing => m_packageUsing;
+        public string[] PackageNamespaces { get; private set; }
 
         public override void EnterPackageClause(GolangParser.PackageClauseContext context)
         {
-            // Go package clause is the first keyword encountered - cache details and comments
-            // that will be written out after imports. C# import statements (i.e., usings)
-            // typically occur before namespace and class definitions
-            m_package = SanitizedIdentifier(context.IDENTIFIER().GetText());
+            // Basic package info is parsed by base class
+            base.EnterPackageClause(context);
 
-            if (m_package.Equals("main"))
-            {
-                m_packageImport = m_package;
-            }
-            else
-            {
-                // Define package import path
-                m_packageImport = Path.GetDirectoryName(SourceFileName) ?? m_package;
-                m_packageImport = m_packageImport.Replace(GoRoot, "");
-                m_packageImport = m_packageImport.Replace(GoPath, "");
-
-                while (m_packageImport.StartsWith(Path.DirectorySeparatorChar.ToString()) || m_packageImport.StartsWith(Path.AltDirectorySeparatorChar.ToString()))
-                    m_packageImport = m_packageImport.Substring(1);
-
-                while (m_packageImport.EndsWith(Path.DirectorySeparatorChar.ToString()) || m_packageImport.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
-                    m_packageImport = m_packageImport.Substring(0, m_packageImport.Length - 1);
-
-                int lastSlash;
-
-                if (Path.IsPathRooted(m_packageImport))
-                {
-                    // File converted was outside %GOPATH% and %GOROOT%
-                    lastSlash = m_packageImport.LastIndexOf('\\');
-
-                    if (lastSlash > -1)
-                        m_packageImport = $"{m_packageImport.Substring(lastSlash + 1)}";
-                }
-
-                m_packageImport = $"{m_packageImport.Replace('\\', '/')}";
-
-                lastSlash = m_packageImport.LastIndexOf('/');
-                string package = SanitizedIdentifier(lastSlash > -1 ? m_packageImport.Substring(lastSlash + 1) : m_packageImport);
-
-                if (!package.Equals(m_package))
-                {
-                    AddWarning(context, $"Defined package clause \"{m_package}\" does not match file path \"{SourceFileName}\"");
-                    m_packageImport = lastSlash > -1 ? $"{m_packageImport.Substring(0, lastSlash)}.{m_package}" : m_package;
-                }
-            }
-
-            string[] paths = m_packageImport.Split('/').Select(SanitizedIdentifier).ToArray();
+            string[] paths = PackageImport.Split('/').Select(SanitizedIdentifier).ToArray();
             string packageNamespace = $"{RootNamespace}.{string.Join(".", paths)}";
 
-            m_packageUsing = $"{m_package} = {packageNamespace}{ClassSuffix}";
-            m_packageNamespace = packageNamespace.Substring(0, packageNamespace.LastIndexOf('.'));
+            PackageUsing = $"{Package} = {packageNamespace}{ClassSuffix}";
+            PackageNamespace = packageNamespace.Substring(0, packageNamespace.LastIndexOf('.'));
 
             // Track file name associated with package
-            AddFileToPackage(m_package, TargetFileName, m_packageNamespace);
+            AddFileToPackage(Package, TargetFileName, PackageNamespace);
 
             // Define namespaces
             List<string> packageNamespaces = new List<string> { RootNamespace };
@@ -109,7 +61,7 @@ namespace go2cs
                 packageNamespaces.RemoveAt(packageNamespaces.Count - 1);
             }
 
-            m_packageNamespaces = packageNamespaces.ToArray();
+            PackageNamespaces = packageNamespaces.ToArray();
 
             string headerLevelComments = CheckForCommentsLeft(context);
             string packageLevelComments = CheckForCommentsRight(context).TrimStart();
@@ -122,10 +74,10 @@ namespace go2cs
                     m_targetFile.AppendLine();
             }
 
-            m_targetFile.AppendLine($"// package {m_package} -- go2cs converted at {DateTime.UtcNow:yyyy MMMM dd HH:mm:ss} UTC");
+            m_targetFile.AppendLine($"// package {Package} -- go2cs converted at {DateTime.UtcNow:yyyy MMMM dd HH:mm:ss} UTC");
 
-            if (!m_packageImport.Equals("main"))
-                m_targetFile.AppendLine($"// import \"{m_packageImport}\" ==> using {m_packageUsing}");
+            if (!PackageImport.Equals("main"))
+                m_targetFile.AppendLine($"// import \"{PackageImport}\" ==> using {PackageUsing}");
 
             m_targetFile.AppendLine($"// Original source: {SourceFileName}");
             m_targetFile.AppendLine();
