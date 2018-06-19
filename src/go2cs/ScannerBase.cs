@@ -69,10 +69,6 @@ namespace go2cs
 
         public string TargetFilePath { get; }
 
-        public string Package { get; private set; }
-
-        public string PackageImport { get; private set; }
-
         public string[] Warnings => m_warnings.ToArray();
 
         protected string CurrentImportPath { get; private set; }
@@ -129,54 +125,6 @@ namespace go2cs
 
         protected virtual void SkippingImport(string import)
         {
-        }
-
-        public override void EnterPackageClause(GolangParser.PackageClauseContext context)
-        {
-            // Go package clause is the first keyword encountered - cache details that
-            // will be written out after imports. C# import statements (i.e., usings)
-            // typically occur before namespace and class definitions
-            Package = SanitizedIdentifier(context.IDENTIFIER().GetText());
-
-            if (Package.Equals("main"))
-            {
-                PackageImport = Package;
-            }
-            else
-            {
-                // Define package import path
-                PackageImport = Path.GetDirectoryName(SourceFileName) ?? Package;
-                PackageImport = PackageImport.Replace(GoRoot, "");
-                PackageImport = PackageImport.Replace(GoPath, "");
-
-                while (PackageImport.StartsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.StartsWith(Path.AltDirectorySeparatorChar.ToString()))
-                    PackageImport = PackageImport.Substring(1);
-
-                while (PackageImport.EndsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
-                    PackageImport = PackageImport.Substring(0, PackageImport.Length - 1);
-
-                int lastSlash;
-
-                if (Path.IsPathRooted(PackageImport))
-                {
-                    // File converted was outside %GOPATH% and %GOROOT%
-                    lastSlash = PackageImport.LastIndexOf('\\');
-
-                    if (lastSlash > -1)
-                        PackageImport = $"{PackageImport.Substring(lastSlash + 1)}";
-                }
-
-                PackageImport = $"{PackageImport.Replace('\\', '/')}";
-
-                lastSlash = PackageImport.LastIndexOf('/');
-                string package = SanitizedIdentifier(lastSlash > -1 ? PackageImport.Substring(lastSlash + 1) : PackageImport);
-
-                if (!package.Equals(Package))
-                {
-                    AddWarning(context, $"Defined package clause \"{Package}\" does not match file path \"{SourceFileName}\"");
-                    PackageImport = lastSlash > -1 ? $"{PackageImport.Substring(0, lastSlash)}.{Package}" : Package;
-                }
-            }
         }
 
         public override void EnterImportSpec(GolangParser.ImportSpecContext context)

@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using Antlr4.Runtime;
+using go2cs.Metadata;
 using go2cs.Templates;
 using System;
 using System.Collections.Generic;
@@ -45,7 +46,17 @@ namespace go2cs
 
         public Converter(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
         {
+            FolderMetadata folderMetadata = GetFolderMetadata(Options, SourceFileName);
+
+            if ((object)folderMetadata == null || !folderMetadata.Files.TryGetValue(fileName, out FileMetadata metadata))
+                throw new InvalidOperationException($"Failed to load metadata for \"{fileName}\" - file conversion cancelled.");
+
+            Metadata = metadata;
+            Package = metadata.Package;
+            PackageImport = metadata.PackageImport;
         }
+
+        public FileMetadata Metadata { get; }
 
         public override void Scan(bool showParseTree)
         {
@@ -70,7 +81,7 @@ namespace go2cs
 
             // Insert required usings
             if (index > -1 && m_requiredUsings.Count > 0)
-                targetFile = targetFile.Insert(index, $"{Environment.NewLine}{string.Join(Environment.NewLine, m_requiredUsings.Select(usingStmt => $"using {usingStmt};"))}{Environment.NewLine}");
+                targetFile = targetFile.Insert(index, $"{Environment.NewLine}{string.Join(Environment.NewLine, m_requiredUsings.Select(usingType => $"using {usingType};"))}{Environment.NewLine}");
 
             // Remove code markers
             targetFile = targetFile.Replace(UsingsMarker, "");

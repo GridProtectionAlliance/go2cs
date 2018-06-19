@@ -30,7 +30,6 @@ namespace go2cs.Metadata
     {
         public string Name;
         public int Index;
-        public bool FullScope;
         public bool NeedsHeapAllocation;
     }
 }

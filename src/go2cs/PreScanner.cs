@@ -27,13 +27,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using static go2cs.Common;
 
 namespace go2cs
 {
     public class PreScanner :ScannerBase
     {
-        public string FolderMetadataFileName { get; }
-
         private readonly List<InterfaceInfo> m_interfaces = new List<InterfaceInfo>();
         private readonly List<StructInfo> m_structs = new List<StructInfo>();
         private readonly List<FunctionInfo> m_functions = new List<FunctionInfo>();
@@ -42,6 +41,12 @@ namespace go2cs
         {
             FolderMetadataFileName = GetFolderMetadataFileName(options, fileName);
         }
+
+        public string FolderMetadataFileName { get; }
+
+        public string Package { get; private set; }
+
+        public string PackageImport { get; private set; }
 
         public override void Scan(bool _)
         {
@@ -65,6 +70,50 @@ namespace go2cs
             using (FileStream stream = File.Create(FolderMetadataFileName))
                 formatter.Serialize(stream, folderMetadata);
         }
+        public override void EnterPackageClause(GolangParser.PackageClauseContext context)
+        {
+            Package = SanitizedIdentifier(context.IDENTIFIER().GetText());
+
+            if (Package.Equals("main"))
+            {
+                PackageImport = Package;
+            }
+            else
+            {
+                // Define package import path
+                PackageImport = Path.GetDirectoryName(SourceFileName) ?? Package;
+                PackageImport = PackageImport.Replace(GoRoot, "");
+                PackageImport = PackageImport.Replace(GoPath, "");
+
+                while (PackageImport.StartsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.StartsWith(Path.AltDirectorySeparatorChar.ToString()))
+                    PackageImport = PackageImport.Substring(1);
+
+                while (PackageImport.EndsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
+                    PackageImport = PackageImport.Substring(0, PackageImport.Length - 1);
+
+                int lastSlash;
+
+                if (Path.IsPathRooted(PackageImport))
+                {
+                    // File converted was outside %GOPATH% and %GOROOT%
+                    lastSlash = PackageImport.LastIndexOf('\\');
+
+                    if (lastSlash > -1)
+                        PackageImport = $"{PackageImport.Substring(lastSlash + 1)}";
+                }
+
+                PackageImport = $"{PackageImport.Replace('\\', '/')}";
+
+                lastSlash = PackageImport.LastIndexOf('/');
+                string package = SanitizedIdentifier(lastSlash > -1 ? PackageImport.Substring(lastSlash + 1) : PackageImport);
+
+                if (!package.Equals(Package))
+                {
+                    AddWarning(context, $"Defined package clause \"{Package}\" does not match file path \"{SourceFileName}\"");
+                    PackageImport = lastSlash > -1 ? $"{PackageImport.Substring(0, lastSlash)}.{Package}" : Package;
+                }
+            }
+        }
 
         protected override void BeforeScan()
         {
@@ -73,7 +122,7 @@ namespace go2cs
 
         protected override void AfterScan()
         {
-            Console.WriteLine("    Completed pre-scan.");
+            Console.WriteLine("    Finished.");
         }
 
         protected override void SkippingImport(string import)
@@ -84,7 +133,7 @@ namespace go2cs
 
         public static void Scan(Options options)
         {
-            Console.WriteLine("Starting code pre-scan to update metadata...");
+            Console.WriteLine("Starting Go code pre-scan to update metadata...");
             Console.WriteLine();
 
             ResetScanner();

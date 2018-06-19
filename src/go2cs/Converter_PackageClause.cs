@@ -32,6 +32,10 @@ namespace go2cs
     {
         private readonly HashSet<string> m_requiredUsings = new HashSet<string>(StringComparer.Ordinal);
 
+        public string Package { get; }
+
+        public string PackageImport { get; }
+
         public string PackageUsing { get; private set; }
 
         public string PackageNamespace { get; private set; }
@@ -40,9 +44,9 @@ namespace go2cs
 
         public override void EnterPackageClause(GolangParser.PackageClauseContext context)
         {
-            // Basic package info is parsed by base class
-            base.EnterPackageClause(context);
-
+            // Go package clause is the first keyword encountered - cache details that
+            // will be written out after imports. C# import statements (i.e., usings)
+            // typically occur before namespace and class definitions
             string[] paths = PackageImport.Split('/').Select(SanitizedIdentifier).ToArray();
             string packageNamespace = $"{RootNamespace}.{string.Join(".", paths)}";
 

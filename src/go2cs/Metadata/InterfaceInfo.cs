@@ -31,6 +31,5 @@ namespace go2cs.Metadata
         public string Name;
         public string FullName;
         public FunctionSignature[] Signatures;
-        public InterfaceInfo[] InheritedInterfaces;
     }
 }
