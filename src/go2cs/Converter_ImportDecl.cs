@@ -28,6 +28,10 @@ namespace go2cs
 {
     public partial class Converter
     {
+        private bool m_firstImportSpec = true;
+        private string m_lastImportSpecComment;
+        private string m_lastEolImportSpecComment;
+
         public override void EnterImportSpec(GolangParser.ImportSpecContext context)
         {
             // Base class parses current import package path
@@ -41,6 +45,15 @@ namespace go2cs
 
             string targetUsing = $"{RootNamespace}.{string.Join(".", CurrentImportPath.Split('/').Select(SanitizedIdentifier))}{ClassSuffix}";
 
+            if (!m_firstImportSpec)
+            {
+                if (!string.IsNullOrEmpty(m_lastImportSpecComment))
+                    m_targetFile.Append(m_lastImportSpecComment);
+
+                if (!m_wroteCommentWithLineFeed)
+                    m_targetFile.AppendLine();
+            }
+
             if (useStatic)
                 m_targetFile.Append($"using static {targetUsing};");
             else if (alternateName?.Equals("_") ?? false)
@@ -48,10 +61,25 @@ namespace go2cs
             else
                 m_targetFile.Append($"using {alternateName ?? packageName} = {targetUsing};");
 
-            m_targetFile.Append(CheckForCommentsRight(context));
+            m_lastImportSpecComment = CheckForCommentsRight(context);
+            m_lastEolImportSpecComment = CheckForEndOfLineComment(context);
 
-            if (!m_wroteCommentWithLineFeed)
-                m_targetFile.AppendLine();
+            // Check for comments on lines in-between imports
+            if (!m_lastImportSpecComment.Equals(m_lastEolImportSpecComment))
+            {
+                if (m_lastImportSpecComment.StartsWith(m_lastEolImportSpecComment))
+                    m_lastImportSpecComment = m_lastImportSpecComment.Substring(m_lastEolImportSpecComment.Length);
+            }
+
+            if (!string.IsNullOrEmpty(m_lastEolImportSpecComment))
+                m_targetFile.Append(m_lastEolImportSpecComment);
+        }
+
+        public override void ExitImportSpec(GolangParser.ImportSpecContext context)
+        {
+            // There can be only one... first import spec
+            if (m_firstImportSpec)
+                m_firstImportSpec = false;
         }
     }
 }

@@ -61,12 +61,20 @@ namespace go2cs
                 m_targetFile.AppendLine($"{Spacing()}public static partial class {Package}{ClassSuffix}");
                 m_targetFile.AppendLine($"{Spacing()}{{");
 
-                // Check for comments after initial declaration
+                // Check for comments before initial declaration
                 string initialDeclComments = CheckForCommentsLeft(context);
 
-                // Write any initial declaration comments created during Converter_ImportDecl visit 
+                // Write any initial declaration comments post any final EOL comments in Converter_ImportDecl visit 
                 if (!string.IsNullOrWhiteSpace(initialDeclComments))
-                    m_targetFile.Append(FixForwardSpacing(initialDeclComments, 1));
+                {
+                    if (!initialDeclComments.Equals(m_lastEolImportSpecComment))
+                    {
+                        if (initialDeclComments.StartsWith(m_lastEolImportSpecComment))
+                            initialDeclComments = initialDeclComments.Substring(m_lastEolImportSpecComment.Length);
+
+                        m_targetFile.Append(FixForwardSpacing(initialDeclComments.TrimStart(), 1));
+                    }
+                }
 
                 // End class and namespace "}" occur as a last step in Convert() method
                 m_indentLevel++;

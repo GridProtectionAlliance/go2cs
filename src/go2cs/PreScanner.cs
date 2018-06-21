@@ -37,16 +37,16 @@ namespace go2cs
         private readonly List<StructInfo> m_structs = new List<StructInfo>();
         private readonly List<FunctionInfo> m_functions = new List<FunctionInfo>();
 
-        public PreScanner(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
-        {
-            FolderMetadataFileName = GetFolderMetadataFileName(options, fileName);
-        }
-
         public string FolderMetadataFileName { get; }
 
         public string Package { get; private set; }
 
         public string PackageImport { get; private set; }
+
+        public PreScanner(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
+        {
+            FolderMetadataFileName = GetFolderMetadataFileName(options, fileName);
+        }
 
         public override void Scan(bool _)
         {
@@ -161,6 +161,7 @@ namespace go2cs
                 return true;
 
             message = $"Metadata for \"{fileName}\" is up to date.{Environment.NewLine}";
+
             return false;
         }
     }

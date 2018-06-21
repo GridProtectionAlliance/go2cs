@@ -68,7 +68,7 @@ namespace go2cs
             PackageNamespaces = packageNamespaces.ToArray();
 
             string headerLevelComments = CheckForCommentsLeft(context);
-            string packageLevelComments = CheckForCommentsRight(context).TrimStart();
+            string packageLevelComments = CheckForCommentsRight(context);
 
             if (!string.IsNullOrWhiteSpace(headerLevelComments))
             {
@@ -87,7 +87,7 @@ namespace go2cs
             m_targetFile.AppendLine();
 
             if (!string.IsNullOrWhiteSpace(packageLevelComments))
-                m_targetFile.Append(packageLevelComments);
+                m_targetFile.Append(packageLevelComments.TrimStart());
 
             // Add commonly required using statements
             m_requiredUsings.Add("static go.BuiltInFunctions");

@@ -44,6 +44,8 @@ namespace go2cs
 
         private readonly StringBuilder m_targetFile = new StringBuilder();
 
+        public FileMetadata Metadata { get; }
+
         public Converter(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
         {
             FolderMetadata folderMetadata = GetFolderMetadata(Options, SourceFileName);
@@ -55,8 +57,6 @@ namespace go2cs
             Package = metadata.Package;
             PackageImport = metadata.PackageImport;
         }
-
-        public FileMetadata Metadata { get; }
 
         public override void Scan(bool showParseTree)
         {

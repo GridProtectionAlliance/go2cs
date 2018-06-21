@@ -21,11 +21,11 @@
 //
 //******************************************************************************************************
 
+using Antlr4.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Antlr4.Runtime;
 
 namespace go2cs
 {
@@ -81,6 +81,33 @@ namespace go2cs
             return CheckForComments(indentLevel, context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight);
         }
 
+        private string CheckForEndOfLineComment(ParserRuleContext context)
+        {
+            StringBuilder comments = new StringBuilder();
+            IList<IToken> lineCommentChannel = TokenStream.GetHiddenTokensToRight(context.Stop.TokenIndex, GolangLexer.LineCommentChannel);
+
+            if (lineCommentChannel?.Count > 0)
+            {
+                foreach (IToken token in lineCommentChannel)
+                {
+                    string commentText = token.Text;
+
+                    if (commentText.Trim().StartsWith("//"))
+                    {
+                        if (!CommentOnNewLine(lineCommentChannel, token))
+                        {
+                            string[] lines = commentText.Split(NewLineDelimeters, StringSplitOptions.RemoveEmptyEntries);
+
+                            if (lines.Length > 0)
+                                comments.Append(lines[0]);
+                        }
+                    }
+                }
+            }
+
+            return comments.ToString();
+        }
+
         private string CheckForComments(int indentLevel, int tokenIndex, Func<int, int, IList<IToken>> getHiddenTokens)
         {
             StringBuilder comments = new StringBuilder();
@@ -115,7 +142,7 @@ namespace go2cs
 
                     if (commentText.Trim().StartsWith("//"))
                     {
-                        if (CommentOnNewLine(hiddenChannel, token))
+                        if (CommentOnNewLine(lineCommentChannel, token))
                             comments.Append(FixForwardSpacing(commentText, 0, indentLevel, false));
                         else
                             comments.Append(commentText);
