@@ -86,6 +86,7 @@ Note that code converted from Go to C# will also target .NET 4.7.1 and compile u
 | -e | (Default: $.^) Regular expression to exclude certain files from conversion, e.g., "^.+\_test\\.go$". Defaults to exclude none. |
 | -s | (Default: false) Set to convert needed packages from Go standard library files found in "%GOROOT%\\src". |
 | -r | (Default: false) Set to recursively convert source files in subdirectories when a Go source path is specified. |
+| -m | (Default: false) Set to force update of pre-scan metadata. |
 | -g | (Default: %GOPATH%\\src\\go2cs) Target path for converted Go standard library source files. |
 | --help | Display this help screen. |
 | --version | Display version information. |   
