@@ -52,7 +52,14 @@ namespace go2cs
 
         public override void EnterExpression(GolangParser.ExpressionContext context)
         {
-            Expressions[context] = ToStringLiteral(context.GetText().Replace("&^", "& ~"));
+            string expression = context.GetText();
+
+            if (expression.StartsWith("\""))
+                Expressions[context] = $"\"{ToStringLiteral(RemoveSurrounding(expression))}\"";
+            else if (expression.StartsWith("`"))
+                Expressions[context] = $"\"{ToStringLiteral(RemoveSurrounding(expression, "`", "`"))}\"";
+            else
+                Expressions[context] = expression;
         }
 
         public override void ExitExpression(GolangParser.ExpressionContext context)
@@ -67,6 +74,7 @@ namespace go2cs
 
         public override void ExitPrimaryExpr(GolangParser.PrimaryExprContext context)
         {
+            // TODO: At some point in the expression tree, replace "&^" with "& ~"
         }
 
         public override void ExitBasicLit(GolangParser.BasicLitContext context)

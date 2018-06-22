@@ -65,7 +65,8 @@ namespace go2cs
                 receiverParameters = new List<ParameterInfo>();
 
             if (!Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> functionParameters) || (object)functionParameters == null)
-                functionParameters = new List<ParameterInfo>();
+                if (!Parameters.TryGetValue(context.function()?.signature()?.parameters(), out functionParameters) || (object)functionParameters == null)
+                    functionParameters = new List<ParameterInfo>();
 
             IEnumerable<ParameterInfo> parameters = receiverParameters.Concat(functionParameters);
 

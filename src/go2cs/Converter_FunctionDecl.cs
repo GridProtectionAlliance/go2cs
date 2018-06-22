@@ -84,7 +84,8 @@ namespace go2cs
             IndentLevel--;
 
             if (!Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) || (object)parameters == null)
-                parameters = new List<ParameterInfo>();
+                if (!Parameters.TryGetValue(context.function()?.signature()?.parameters(), out parameters) || (object)parameters == null)
+                    parameters = new List<ParameterInfo>();
 
             string functionSignature = FunctionSignature.Generate(m_originalFunctionName, parameters);
 
@@ -101,7 +102,7 @@ namespace go2cs
             bool hasRecover = m_currentFunction.HasRecover;
             bool useExectionContext = hasDefer || hasPanic || hasRecover;
             Signature signature = function.Signature;
-            string parametersSignature = signature.GenerateParametersSignature(useExectionContext);
+            string parametersSignature = $"({signature.GenerateParametersSignature(useExectionContext)})";
             string resultSignature = signature.GenerateResultSignature();
 
             // Replace function markers
