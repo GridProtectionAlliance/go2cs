@@ -83,10 +83,10 @@ namespace go2cs
             bool hasDefer = m_currentFunction.HasDefer;
             bool hasPanic = m_currentFunction.HasPanic;
             bool hasRecover = m_currentFunction.HasRecover;
-            bool useExectionContext = hasDefer || hasPanic || hasRecover;
+            bool useFuncExecutionContext = hasDefer || hasPanic || hasRecover;
             Signature signature = method.Signature;
-            string receiverParametersSignature = method.GenerateReceiverParametersSignature(useExectionContext);
-            string parametersSignature = signature.GenerateParametersSignature(useExectionContext);
+            string receiverParametersSignature = method.GenerateReceiverParametersSignature(useFuncExecutionContext);
+            string parametersSignature = signature.GenerateParametersSignature(useFuncExecutionContext);
             string resultSignature = signature.GenerateResultSignature();
 
             if (signature.Parameters.Length == 0)
@@ -98,7 +98,7 @@ namespace go2cs
             m_targetFile.Replace(m_functionResultTypeMarker, resultSignature);
             m_targetFile.Replace(m_functionParametersMarker, parametersSignature);
 
-            if (useExectionContext)
+            if (useFuncExecutionContext)
             {
                 List<string> funcExecContextByRefParams = new List<string>(method.GetByRefReceiverParameters(false));
 
@@ -127,7 +127,7 @@ namespace go2cs
             m_originalFunctionName = null;
             m_inFunction = false;
 
-            if (useExectionContext)
+            if (useFuncExecutionContext)
                 m_targetFile.AppendLine($"{Spacing()}}});");
             else
                 m_targetFile.AppendLine($"{Spacing()}}}");

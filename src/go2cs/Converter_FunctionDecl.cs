@@ -100,16 +100,16 @@ namespace go2cs
             bool hasDefer = m_currentFunction.HasDefer;
             bool hasPanic = m_currentFunction.HasPanic;
             bool hasRecover = m_currentFunction.HasRecover;
-            bool useExectionContext = hasDefer || hasPanic || hasRecover;
+            bool useFuncExecutionContext = hasDefer || hasPanic || hasRecover;
             Signature signature = function.Signature;
-            string parametersSignature = $"({signature.GenerateParametersSignature(useExectionContext)})";
+            string parametersSignature = $"({signature.GenerateParametersSignature(useFuncExecutionContext)})";
             string resultSignature = signature.GenerateResultSignature();
 
             // Replace function markers
             m_targetFile.Replace(m_functionResultTypeMarker, resultSignature);
             m_targetFile.Replace(m_functionParametersMarker, parametersSignature);
 
-            if (useExectionContext)
+            if (useFuncExecutionContext)
             {
                 string[] funcExecContextByRefParams = signature.GetByRefParameters(false).ToArray();
 
@@ -134,7 +134,7 @@ namespace go2cs
             m_originalFunctionName = null;
             m_inFunction = false;
 
-            if (useExectionContext)
+            if (useFuncExecutionContext)
                 m_targetFile.AppendLine($"{Spacing()}}});");
             else
                 m_targetFile.AppendLine($"{Spacing()}}}");
