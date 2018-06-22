@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  Converter_IdentifierList.cs - Gbtc
+//  ScannerBase_IdentifierList.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace go2cs
 {
-    public partial class Converter
+    public partial class ScannerBase
     {
         // Stack handlers:
         //  constDecl (required)
@@ -35,7 +35,7 @@ namespace go2cs
         //  rangeClause (optional)
         //  parameterDecl (optional)
         //  fieldDecl (optional)
-        private readonly ParseTreeValues<string[]> m_identifiers = new ParseTreeValues<string[]>();
+        protected readonly ParseTreeValues<string[]> Identifiers = new ParseTreeValues<string[]>();
 
         public override void EnterIdentifierList(GolangParser.IdentifierListContext context)
         {
@@ -44,7 +44,7 @@ namespace go2cs
             for (int i = 0; i < context.IDENTIFIER().Length; i++)
                 identifers.Add(context.IDENTIFIER(i).GetText());
 
-            m_identifiers[context] = identifers.ToArray();
+            Identifiers[context] = identifers.ToArray();
         }
     }
 }

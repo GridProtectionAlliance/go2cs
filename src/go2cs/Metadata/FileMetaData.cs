@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.Collections.Generic;
 
 namespace go2cs.Metadata
 {
@@ -32,9 +33,9 @@ namespace go2cs.Metadata
         public string PackageImport;
         public string SourceFileName;
         public string TargetFileName;
-        public InterfaceInfo[] Interfaces;
-        public StructInfo[] Structs;
-        public FunctionInfo[] Functions;
+        public Dictionary<string, InterfaceInfo> Interfaces;
+        public Dictionary<string, StructInfo> Structs;
+        public Dictionary<string, FunctionInfo> Functions;
         public DateTime LastUpdate;
     }
 }

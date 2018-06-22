@@ -21,8 +21,10 @@
 //
 //******************************************************************************************************
 
+using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static go2cs.Common;
 
 namespace go2cs
@@ -34,34 +36,25 @@ namespace go2cs
         public const string FunctionExecContextMarker = ">>MARKER:FUNCTION_{0}_EXEC_CONTEXT<<";
 
         private bool m_inFunction;
-        private string m_currentFunction;
+        private FunctionInfo m_currentFunction;
+        private string m_originalFunctionName;
+        private string m_currentFunctionName;
         private string m_functionResultTypeMarker;
         private string m_functionParametersMarker;
         private string m_functionExecContextMarker;
-        private bool m_hasDefer;
-        private bool m_hasPanic;
-        private bool m_hasRecover;
-
-        private bool RequiresExecutionContext => m_hasDefer || m_hasPanic || m_hasRecover;
 
         public override void EnterFunctionDecl(GolangParser.FunctionDeclContext context)
         {
             m_inFunction = true; // May need to scope certain objects, like consts, to current function
-            m_currentFunction = context.IDENTIFIER().GetText();
+            m_originalFunctionName = context.IDENTIFIER().GetText();
+            m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
 
-            string scope = char.IsUpper(m_currentFunction[0]) ? "public" : "private";
-
-            m_currentFunction = SanitizedIdentifier(m_currentFunction);
-
-            // TODO: Auto-discover if these methods are actually used in the function
-            m_hasDefer = true;
-            m_hasPanic = true;
-            m_hasRecover = true;
+            string scope = char.IsUpper(m_originalFunctionName[0]) ? "public" : "private";
 
             // Handle Go "main" function as a special case, in C# this should be "Main"
-            if (m_currentFunction.Equals("main"))
+            if (m_currentFunctionName.Equals("main"))
             {
-                m_currentFunction = "Main";
+                m_currentFunctionName = "Main";
                 
                 // Track file names that contain main function in main package
                 if (Package.Equals("main"))
@@ -70,9 +63,9 @@ namespace go2cs
 
             // Function signature containing result type and parameters have not been visited yet,
             // so we mark their desired positions and replace once the visit has occurred
-            m_functionResultTypeMarker = string.Format(FunctionResultTypeMarker, m_currentFunction);
-            m_functionParametersMarker = string.Format(FunctionParametersMarker, m_currentFunction);
-            m_functionExecContextMarker = string.Format(FunctionExecContextMarker, m_currentFunction);
+            m_functionResultTypeMarker = string.Format(FunctionResultTypeMarker, m_currentFunctionName);
+            m_functionParametersMarker = string.Format(FunctionParametersMarker, m_currentFunctionName);
+            m_functionExecContextMarker = string.Format(FunctionExecContextMarker, m_currentFunctionName);
 
             if (!m_firstTopLevelDeclaration)
                 m_targetFile.AppendLine();
@@ -80,45 +73,54 @@ namespace go2cs
             if (!string.IsNullOrWhiteSpace(m_nextDeclComments))
                 m_targetFile.Append(FixForwardSpacing(m_nextDeclComments));
 
-            m_targetFile.AppendLine($"{Spacing()}{scope} static {m_functionResultTypeMarker} {m_currentFunction}{m_functionParametersMarker}{m_functionExecContextMarker}");
+            m_targetFile.AppendLine($"{Spacing()}{scope} static {m_functionResultTypeMarker} {m_currentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
             m_targetFile.AppendLine($"{Spacing()}{{");
 
-            m_indentLevel++;
+            IndentLevel++;
         }
 
         public override void ExitFunctionDecl(GolangParser.FunctionDeclContext context)
         {
-            m_indentLevel--;
+            IndentLevel--;
 
-            if (!m_signatures.TryGetValue(context.signature(), out (string parameters, string result) signature))
-                m_signatures.TryGetValue(context.function().signature(), out signature);
+            if (!Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) || (object)parameters == null)
+                parameters = new List<ParameterInfo>();
+
+            string functionSignature = FunctionSignature.Generate(m_originalFunctionName, parameters);
+
+            if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))
+                throw new InvalidOperationException($"Failed to find metadata for method function \"{functionSignature}\".");
+
+            FunctionSignature function = m_currentFunction.Signature;
+
+            if ((object)function == null)
+                throw new InvalidOperationException($"Failed to find signature metadata for function \"{m_currentFunctionName}\".");
+
+            bool hasDefer = m_currentFunction.HasDefer;
+            bool hasPanic = m_currentFunction.HasPanic;
+            bool hasRecover = m_currentFunction.HasRecover;
+            bool useExectionContext = hasDefer || hasPanic || hasRecover;
+            Signature signature = function.Signature;
+            string parametersSignature = signature.GenerateParametersSignature(useExectionContext);
+            string resultSignature = signature.GenerateResultSignature();
 
             // Replace function markers
-            m_targetFile.Replace(m_functionResultTypeMarker, signature.result);
-            m_targetFile.Replace(m_functionParametersMarker, signature.parameters);
+            m_targetFile.Replace(m_functionResultTypeMarker, resultSignature);
+            m_targetFile.Replace(m_functionParametersMarker, parametersSignature);
 
-            if (RequiresExecutionContext)
+            if (useExectionContext)
             {
-                if (!m_parameterDeclarations.TryGetValue(context.signature()?.parameters().parameterList(), out (List<string> parameters, List<string> byRefParams) parameterDeclarations))
-                    m_parameterDeclarations.TryGetValue(context.function().signature().parameters().parameterList(), out parameterDeclarations);
+                string[] funcExecContextByRefParams = signature.GetByRefParameters(false).ToArray();
 
-                if (parameterDeclarations.byRefParams?.Count > 0)
+                if (funcExecContextByRefParams.Length > 0)
                 {
-                    List<string> byRefParams = new List<string>();
+                    string[] lambdaByRefParameters = signature.GetByRefParameters(true).ToArray();
 
-                    foreach (string byRefParam in parameterDeclarations.byRefParams)
-                    {
-                        string[] parts = byRefParam.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-
-                        if (parts.Length == 3)
-                            byRefParams.Add($"ref _{parts[2]}");
-                    }
-
-                    m_targetFile.Replace(m_functionExecContextMarker, $" => func({string.Join(", ", byRefParams)}, ({string.Join(", ", parameterDeclarations.byRefParams)}, Defer {(m_hasDefer ? "defer" : "_")}, Panic {(m_hasPanic ? "panic" : "_")}, Recover {(m_hasRecover ? "recover" : "_")}) =>");
+                    m_targetFile.Replace(m_functionExecContextMarker, $" => func({string.Join(", ", funcExecContextByRefParams)}, ({string.Join(", ", lambdaByRefParameters)}, Defer {(hasDefer ? "defer" : "_")}, Panic {(hasPanic ? "panic" : "_")}, Recover {(hasRecover ? "recover" : "_")}) =>");
                 }
                 else
                 {
-                    m_targetFile.Replace(m_functionExecContextMarker, $" => func(({(m_hasDefer ? "defer" : "_")}, {(m_hasPanic ? "panic" : "_")}, {(m_hasRecover ? "recover" : "_")}) =>");
+                    m_targetFile.Replace(m_functionExecContextMarker, $" => func(({(hasDefer ? "defer" : "_")}, {(hasPanic ? "panic" : "_")}, {(hasRecover ? "recover" : "_")}) =>");
                 }
             }
             else
@@ -127,9 +129,11 @@ namespace go2cs
             }
 
             m_currentFunction = null;
+            m_currentFunctionName = null;
+            m_originalFunctionName = null;
             m_inFunction = false;
 
-            if (RequiresExecutionContext)
+            if (useExectionContext)
                 m_targetFile.AppendLine($"{Spacing()}}});");
             else
                 m_targetFile.AppendLine($"{Spacing()}}}");

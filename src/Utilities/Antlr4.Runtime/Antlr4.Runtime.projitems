@@ -161,7 +161,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Sharpen\Compat\Funcs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sharpen\Compat\IStructuralComparable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sharpen\Compat\IStructuralEquatable.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Sharpen\Compat\SerializableAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sharpen\Compat\SplitOrderedList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sharpen\Compat\Tuple.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sharpen\Compat\Tuples.cs" />

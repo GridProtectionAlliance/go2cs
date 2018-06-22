@@ -80,8 +80,8 @@ namespace go2cs
             int index = targetFile.IndexOf(UsingsMarker, StringComparison.Ordinal);
 
             // Insert required usings
-            if (index > -1 && m_requiredUsings.Count > 0)
-                targetFile = targetFile.Insert(index, $"{Environment.NewLine}{string.Join(Environment.NewLine, m_requiredUsings.Select(usingType => $"using {usingType};"))}{Environment.NewLine}");
+            if (index > -1 && RequiredUsings.Count > 0)
+                targetFile = targetFile.Insert(index, $"{Environment.NewLine}{string.Join(Environment.NewLine, RequiredUsings.Select(usingType => $"using {usingType};"))}{Environment.NewLine}");
 
             // Remove code markers
             targetFile = targetFile.Replace(UsingsMarker, "");

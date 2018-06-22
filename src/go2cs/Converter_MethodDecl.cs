@@ -16,13 +16,15 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  05/03/2018 - rcarroll
+//  05/03/2018 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
+using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static go2cs.Common;
 
 namespace go2cs
@@ -32,22 +34,16 @@ namespace go2cs
         public override void EnterMethodDecl(GolangParser.MethodDeclContext context)
         {
             m_inFunction = true; // May need to scope certain objects, like consts, to current function
-            m_currentFunction = context.IDENTIFIER().GetText();
+            m_originalFunctionName = context.IDENTIFIER().GetText();
+            m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
 
-            string scope = char.IsUpper(m_currentFunction[0]) ? "public" : "private";
-
-            m_currentFunction = SanitizedIdentifier(m_currentFunction);
-            
-            // TODO: Auto-discover if these methods are actually used in the function
-            m_hasDefer = true;
-            m_hasPanic = true;
-            m_hasRecover = true;
+            string scope = char.IsUpper(m_originalFunctionName[0]) ? "public" : "private";
 
             // Function signature containing result type and parameters have not been visited yet,
             // so we mark their desired positions and replace once the visit has occurred
-            m_functionResultTypeMarker = string.Format(FunctionResultTypeMarker, m_currentFunction);
-            m_functionParametersMarker = string.Format(FunctionParametersMarker, m_currentFunction);
-            m_functionExecContextMarker = string.Format(FunctionExecContextMarker, m_currentFunction);
+            m_functionResultTypeMarker = string.Format(FunctionResultTypeMarker, m_currentFunctionName);
+            m_functionParametersMarker = string.Format(FunctionParametersMarker, m_currentFunctionName);
+            m_functionExecContextMarker = string.Format(FunctionExecContextMarker, m_currentFunctionName);
 
             if (!m_firstTopLevelDeclaration)
                 m_targetFile.AppendLine();
@@ -55,57 +51,69 @@ namespace go2cs
             if (!string.IsNullOrWhiteSpace(m_nextDeclComments))
                 m_targetFile.Append(FixForwardSpacing(m_nextDeclComments));
 
-            m_targetFile.AppendLine($"{Spacing()}{scope} static {m_functionResultTypeMarker} {m_currentFunction}{m_functionParametersMarker}{m_functionExecContextMarker}");
+            m_targetFile.AppendLine($"{Spacing()}{scope} static {m_functionResultTypeMarker} {m_currentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
             m_targetFile.AppendLine($"{Spacing()}{{");
 
-            m_indentLevel++;
+            IndentLevel++;
         }
 
         public override void ExitMethodDecl(GolangParser.MethodDeclContext context)
         {
-            m_indentLevel--;
+            IndentLevel--;
 
-            if (!m_signatures.TryGetValue(context.signature(), out (string parameters, string result) signature))
-                m_signatures.TryGetValue(context.function().signature(), out signature);
+            if (!Parameters.TryGetValue(context.receiver()?.parameters(), out List<ParameterInfo> receiverParameters) || (object)receiverParameters == null)
+                receiverParameters = new List<ParameterInfo>();
 
-            if (m_parameterDeclarations.TryGetValue(context.receiver().parameters().parameterList(), out (List<string> parameters, List<string> byRefParams) receiverDeclarations))
+            if (!Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> functionParameters) || (object)functionParameters == null)
+                functionParameters = new List<ParameterInfo>();
+
+            IEnumerable<ParameterInfo> parameters = receiverParameters.Concat(functionParameters);
+
+            string functionSignature = FunctionSignature.Generate(m_originalFunctionName, parameters);
+
+            if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))
+                throw new InvalidOperationException($"Failed to find metadata for method function \"{functionSignature}\".");
+
+            MethodSignature method = m_currentFunction.Signature as MethodSignature;
+
+            if ((object)method == null)
+                throw new InvalidOperationException($"Failed to find signature metadata for method function \"{m_currentFunctionName}\".");
+
+            bool hasDefer = m_currentFunction.HasDefer;
+            bool hasPanic = m_currentFunction.HasPanic;
+            bool hasRecover = m_currentFunction.HasRecover;
+            bool useExectionContext = hasDefer || hasPanic || hasRecover;
+            Signature signature = method.Signature;
+            string receiverParametersSignature = method.GenerateReceiverParametersSignature(useExectionContext);
+            string parametersSignature = signature.GenerateParametersSignature(useExectionContext);
+            string resultSignature = signature.GenerateResultSignature();
+
+            if (signature.Parameters.Length == 0)
+                parametersSignature = $"({receiverParametersSignature})";
+            else
+                parametersSignature = $"({receiverParametersSignature}, {parametersSignature}";
+
+            // Replace function markers
+            m_targetFile.Replace(m_functionResultTypeMarker, resultSignature);
+            m_targetFile.Replace(m_functionParametersMarker, parametersSignature);
+
+            if (useExectionContext)
             {
-                string parameters = signature.parameters.Substring(1);
-                string receiverParameters = $"this {string.Join(", ", receiverDeclarations.parameters)}";
+                List<string> funcExecContextByRefParams = new List<string>(method.GetByRefReceiverParameters(false));
 
-                if (parameters.Equals(")"))
-                    signature.parameters = $"({receiverParameters})";
-                else
-                    signature.parameters = $"({receiverParameters}, {parameters}";
-            }
+                funcExecContextByRefParams.AddRange(signature.GetByRefParameters(false));
 
-            if (RequiresExecutionContext)
-            {
-                if (!m_parameterDeclarations.TryGetValue(context.signature()?.parameters().parameterList(), out (List<string> parameters, List<string> byRefParams) parameterDeclarations))
-                    m_parameterDeclarations.TryGetValue(context.function().signature().parameters().parameterList(), out parameterDeclarations);
-
-                List<string> combinedByRefParameters = new List<string>(receiverDeclarations.byRefParams ?? new List<string>());
-
-                if ((object)parameterDeclarations.byRefParams != null)
-                    combinedByRefParameters.AddRange(parameterDeclarations.byRefParams);
-
-                if (combinedByRefParameters.Count > 0)
+                if (funcExecContextByRefParams.Count > 0)
                 {
-                    List<string> byRefParams = new List<string>();
+                    List<string> lambdaByRefParameters = new List<string>(method.GetByRefReceiverParameters(true));
 
-                    foreach (string byRefParam in combinedByRefParameters)
-                    {
-                        string[] parts = byRefParam.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                    lambdaByRefParameters.AddRange(signature.GetByRefParameters(true));
 
-                        if (parts.Length == 3)
-                            byRefParams.Add($"ref _{parts[2]}");
-                    }
-
-                    m_targetFile.Replace(m_functionExecContextMarker, $" => func({string.Join(", ", byRefParams)}, ({string.Join(", ", combinedByRefParameters)}, Defer {(m_hasDefer ? "defer" : "_")}, Panic {(m_hasPanic ? "panic" : "_")}, Recover {(m_hasRecover ? "recover" : "_")}) =>");
+                    m_targetFile.Replace(m_functionExecContextMarker, $" => func({string.Join(", ", funcExecContextByRefParams)}, ({string.Join(", ", lambdaByRefParameters)}, Defer {(hasDefer ? "defer" : "_")}, Panic {(hasPanic ? "panic" : "_")}, Recover {(hasRecover ? "recover" : "_")}) =>");
                 }
                 else
                 {
-                    m_targetFile.Replace(m_functionExecContextMarker, $" => func(({(m_hasDefer ? "defer" : "_")}, {(m_hasPanic ? "panic" : "_")}, {(m_hasRecover ? "recover" : "_")}) =>");
+                    m_targetFile.Replace(m_functionExecContextMarker, $" => func(({(hasDefer ? "defer" : "_")}, {(hasPanic ? "panic" : "_")}, {(hasRecover ? "recover" : "_")}) =>");
                 }
             }
             else
@@ -113,14 +121,12 @@ namespace go2cs
                 m_targetFile.Replace(m_functionExecContextMarker, "");
             }
 
-            // Replace function markers
-            m_targetFile.Replace(m_functionResultTypeMarker, signature.result);
-            m_targetFile.Replace(m_functionParametersMarker, signature.parameters);
-
             m_currentFunction = null;
+            m_currentFunctionName = null;
+            m_originalFunctionName = null;
             m_inFunction = false;
 
-            if (RequiresExecutionContext)
+            if (useExectionContext)
                 m_targetFile.AppendLine($"{Spacing()}}});");
             else
                 m_targetFile.AppendLine($"{Spacing()}}}");

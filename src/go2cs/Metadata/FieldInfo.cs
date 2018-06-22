@@ -29,12 +29,9 @@ namespace go2cs.Metadata
     public class FieldInfo
     {
         public string Name;
-        public string TypeName;
-        public string FullTypeName;
-
-        public bool IsPromoted => string.IsNullOrEmpty(Name);
-
-        public bool IsPromotedStruct;
-        public bool IsPromotedInterface;
+        public TypeInfo Type;
+        public string Description;
+        public string Comments;
+        public bool IsPromoted;
     }
 }

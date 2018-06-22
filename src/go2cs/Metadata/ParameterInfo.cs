@@ -29,7 +29,7 @@ namespace go2cs.Metadata
     public class ParameterInfo
     {
         public string Name;
-        public string TypeName;
-        public string FullTypeName;
+        public TypeInfo Type;
+        public bool IsVariadic;  // is params parameter
     }
 }

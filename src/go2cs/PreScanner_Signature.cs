@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  Converter_Signature.cs - Gbtc
+//  PreScanner_Signature.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -21,12 +21,12 @@
 //
 //******************************************************************************************************
 
-using System;
-using static go2cs.Common;
+using go2cs.Metadata;
+using System.Collections.Generic;
 
 namespace go2cs
 {
-    public partial class Converter
+    public partial class PreScanner
     {
         // Stack handlers:
         //  functionDecl (optional)
@@ -34,18 +34,27 @@ namespace go2cs
         //  methodDecl (optional)
         //  methodSpec (optional)
         //  functionType (required)
-        private readonly ParseTreeValues<(string parameters, string result)> m_signatures = new ParseTreeValues<(string, string)>();
-        private string m_result;
+        private readonly ParseTreeValues<Signature> m_signatures = new ParseTreeValues<Signature>();
+        private List<ParameterInfo> m_result;
 
         public override void EnterSignature(GolangParser.SignatureContext context)
         {
-            m_result = null;
+            m_result = new List<ParameterInfo>(new[] { new ParameterInfo
+            {
+                Name = "",
+                Type = TypeInfo.VoidType,
+                IsVariadic = false
+            }});
         }
 
         public override void ExitSignature(GolangParser.SignatureContext context)
         {
-            m_parameters.TryGetValue(context.parameters(), out string parameters);
-            m_signatures[context] = (parameters, m_result ?? "void");
+            Parameters.TryGetValue(context.parameters(), out List<ParameterInfo> parameters);
+            m_signatures[context] = new Signature
+            {
+                Parameters = parameters?.ToArray() ?? new ParameterInfo[0],
+                Result = m_result.ToArray(),
+            };
         }
 
         public override void ExitResult(GolangParser.ResultContext context)
@@ -53,35 +62,18 @@ namespace go2cs
             //result
             //  : parameters
             //  | type
-            if (!m_parameters.TryGetValue(context.parameters(), out m_result))
-                if (m_types.TryGetValue(context.type(), out GoTypeInfo typeInfo))
-                    m_result = typeInfo.PrimitiveName;
-
-            if (string.IsNullOrWhiteSpace(m_result))
-                m_result = "void";
-        }
-
-        private string ExtractFunctionSignature(string parameters)
-        {
-            parameters = RemoveSurrounding(parameters, "(", ")");
-
-            if (string.IsNullOrWhiteSpace(parameters))
-                return "";
-
-            string[] parameterItems = parameters.Split(',');
-            string[] signatureItems = new string[parameterItems.Length];
-
-            for (int i = 0; i < parameterItems.Length; i++)
+            if (!Parameters.TryGetValue(context.parameters(), out m_result))
             {
-                string[] parts = parameterItems[i].Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
-
-                if (parts.Length == 2)
-                    signatureItems[i] = parts[0];
-                else
-                    signatureItems[i] = parameterItems[i];
+                if (Types.TryGetValue(context.type(), out TypeInfo typeInfo))
+                {
+                    m_result = new List<ParameterInfo>(new[] { new ParameterInfo
+                    {
+                        Name = "",
+                        Type = typeInfo,
+                        IsVariadic = false
+                    }});
+                }
             }
-
-            return string.Join(", ", signatureItems);
         }
     }
 }

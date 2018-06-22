@@ -30,8 +30,6 @@ namespace go2cs
 {
     public partial class Converter
     {
-        private readonly HashSet<string> m_requiredUsings = new HashSet<string>(StringComparer.Ordinal);
-
         public string Package { get; }
 
         public string PackageImport { get; }
@@ -90,7 +88,7 @@ namespace go2cs
                 m_targetFile.Append(packageLevelComments.TrimStart());
 
             // Add commonly required using statements
-            m_requiredUsings.Add("static go.BuiltInFunctions");
+            RequiredUsings.Add("static go.BuiltInFunctions");
         }
     }
 }

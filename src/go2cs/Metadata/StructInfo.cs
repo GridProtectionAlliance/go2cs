@@ -29,7 +29,6 @@ namespace go2cs.Metadata
     public class StructInfo
     {
         public string Name;
-        public string FullName;
         public FieldInfo[] Fields;
     }
 }

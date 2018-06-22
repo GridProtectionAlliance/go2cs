@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  VariableInfo.cs - Gbtc
+//  IFunctionContext.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,20 +16,29 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  06/18/2018 - J. Ritchie Carroll
+//  06/21/2018 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using System;
+using Antlr4.Runtime.Tree;
 
-namespace go2cs.Metadata
+public partial class GolangParser
 {
-    [Serializable]
-    public class VariableInfo
+    public interface IFunctionContext
     {
-        public string Name;
-        public TypeInfo Type;
-        public bool HeapAllocated;
+        ITerminalNode IDENTIFIER();
+
+        FunctionContext function();
+
+        SignatureContext signature();
+    }
+
+    public partial class FunctionDeclContext : IFunctionContext
+    {
+    }
+
+    public partial class MethodDeclContext : IFunctionContext
+    {
     }
 }

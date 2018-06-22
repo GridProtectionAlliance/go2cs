@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  Converter_Expression.cs - Gbtc
+//  ScannerBase_Expression.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -25,8 +25,8 @@ using System.Diagnostics;
 using static go2cs.Common;
 
 namespace go2cs
-{   
-    public partial class Converter
+{
+    public partial class ScannerBase
     {
         // Stack handlers:
         //  expressionList (required)
@@ -48,11 +48,11 @@ namespace go2cs
         //  slice (optional)
         //  expression (optional)
         //  conversion (required)
-        private readonly ParseTreeValues<string> m_expressions = new ParseTreeValues<string>();
+        protected readonly ParseTreeValues<string> Expressions = new ParseTreeValues<string>();
 
         public override void EnterExpression(GolangParser.ExpressionContext context)
         {
-            m_expressions[context] = ToStringLiteral(context.GetText().Replace("&^", "& ~"));
+            Expressions[context] = ToStringLiteral(context.GetText().Replace("&^", "& ~"));
         }
 
         public override void ExitExpression(GolangParser.ExpressionContext context)

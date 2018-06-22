@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  Converter_Comments.cs - Gbtc
+//  ScannerBase_Comments.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -29,17 +29,17 @@ using System.Text;
 
 namespace go2cs
 {
-    public partial class Converter
+    public partial class ScannerBase
     {
         public const int BaseSpacing = 4;
 
-        private int m_indentLevel;
-        private bool m_wroteCommentWithLineFeed;
+        protected int IndentLevel;
+        protected bool WroteCommentWithLineFeed;
 
-        private string Spacing(int offsetLevel = 0, int indentLevel = -1)
+        protected string Spacing(int offsetLevel = 0, int indentLevel = -1)
         {
             if (indentLevel < 0)
-                indentLevel = m_indentLevel;
+                indentLevel = IndentLevel;
 
             indentLevel += offsetLevel;
 
@@ -49,10 +49,10 @@ namespace go2cs
             return new string(' ', BaseSpacing * indentLevel);
         }
 
-        private string FixForwardSpacing(string source, int offsetLevel = 0, int indentLevel = -1, bool autoTrim = true)
+        protected string FixForwardSpacing(string source, int offsetLevel = 0, int indentLevel = -1, bool autoTrim = true)
         {
             if (indentLevel < 0)
-                indentLevel = m_indentLevel;
+                indentLevel = IndentLevel;
 
             indentLevel += offsetLevel;
 
@@ -61,27 +61,27 @@ namespace go2cs
             return string.Join(Environment.NewLine, lines.Select(line => string.IsNullOrWhiteSpace(line) ? "" : $"{forwardSpacing}{(autoTrim? line.Trim() : line)}"));
         }
 
-        private string CheckForCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
+        protected string CheckForCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
         {
             if (indentLevel < 0)
-                indentLevel = m_indentLevel;
+                indentLevel = IndentLevel;
 
             indentLevel += offsetLevel;
 
             return CheckForComments(indentLevel, context.Start.TokenIndex, TokenStream.GetHiddenTokensToLeft);
         }
 
-        private string CheckForCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
+        protected string CheckForCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
         {
             if (indentLevel < 0)
-                indentLevel = m_indentLevel;
+                indentLevel = IndentLevel;
 
             indentLevel += offsetLevel;
 
             return CheckForComments(indentLevel, context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight);
         }
 
-        private string CheckForEndOfLineComment(ParserRuleContext context)
+        protected string CheckForEndOfLineComment(ParserRuleContext context)
         {
             StringBuilder comments = new StringBuilder();
             IList<IToken> lineCommentChannel = TokenStream.GetHiddenTokensToRight(context.Stop.TokenIndex, GolangLexer.LineCommentChannel);
@@ -114,7 +114,7 @@ namespace go2cs
             IList<IToken> hiddenChannel = getHiddenTokens(tokenIndex, TokenConstants.HiddenChannel);
             IList<IToken> lineCommentChannel = getHiddenTokens(tokenIndex, GolangLexer.LineCommentChannel);
 
-            m_wroteCommentWithLineFeed = false;
+            WroteCommentWithLineFeed = false;
 
             if (hiddenChannel?.Count > 0)
             {
@@ -129,7 +129,7 @@ namespace go2cs
                         else
                             comments.Append(hiddenText);
 
-                        m_wroteCommentWithLineFeed = hiddenText.EndsWith("\r") || hiddenText.EndsWith("\n");
+                        WroteCommentWithLineFeed = hiddenText.EndsWith("\r") || hiddenText.EndsWith("\n");
                     }
                 }
             }
@@ -147,7 +147,7 @@ namespace go2cs
                         else
                             comments.Append(commentText);
 
-                        m_wroteCommentWithLineFeed = true;
+                        WroteCommentWithLineFeed = true;
                     }
                 }
             }

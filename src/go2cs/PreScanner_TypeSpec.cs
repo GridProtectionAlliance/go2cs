@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  VariableInfo.cs - Gbtc
+//  PreScanner_TypeSpec.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,20 +16,38 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  06/18/2018 - J. Ritchie Carroll
+//  06/21/2018 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using System;
+using go2cs.Metadata;
+using System.Collections.Generic;
 
-namespace go2cs.Metadata
+namespace go2cs
 {
-    [Serializable]
-    public class VariableInfo
+    public partial class PreScanner
     {
-        public string Name;
-        public TypeInfo Type;
-        public bool HeapAllocated;
+        public override void ExitTypeSpec(GolangParser.TypeSpecContext context)
+        {
+            string identifier = context.IDENTIFIER().GetText();
+
+            if (m_interfaceMethods.TryGetValue(context.type()?.typeLit()?.interfaceType(), out List<FunctionSignature> methods))
+            {
+                m_interfaces.Add(identifier, new InterfaceInfo
+                {
+                    Name = identifier,
+                    Methods = methods.ToArray()
+                });
+            }
+            else if (m_structFields.TryGetValue(context.type()?.typeLit()?.structType(), out List<FieldInfo> fields))
+            {
+                m_structs.Add(identifier, new StructInfo
+                {
+                    Name = identifier,
+                    Fields = fields.ToArray()
+                });
+            }
+        }
     }
 }

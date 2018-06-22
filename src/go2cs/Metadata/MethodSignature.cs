@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  FunctionSignature.cs - Gbtc
+//  MethodSignature.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,7 +16,7 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  06/06/2018 - J. Ritchie Carroll
+//  06/21/2018 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
@@ -28,20 +28,40 @@ using System.Linq;
 namespace go2cs.Metadata
 {
     [Serializable]
-    public class FunctionSignature
+    public class MethodSignature : FunctionSignature
     {
-        public string Name;
-        public Signature Signature;
-        public bool IsPromoted;
+        public ParameterInfo[] ReceiverParameters;
 
-        public virtual string Generate()
-        {
-            return Generate(Name, Signature.Parameters);
+        public MethodSignature()
+        {            
         }
 
-        public static string Generate(string functionName, IEnumerable<ParameterInfo> parameters)
+        public MethodSignature(FunctionSignature functionSignature)
         {
-            return $"{functionName}({string.Join(",", parameters.Select(parameter => parameter.Type.PrimitiveName))})";
+            Name = functionSignature.Name;
+            Signature = functionSignature.Signature;
+            IsPromoted = functionSignature.IsPromoted;
+        }
+
+        public override string Generate()
+        {
+            IEnumerable<ParameterInfo> parameters = ReceiverParameters.Concat(Signature.Parameters);
+            return Generate(Name, parameters);
+        }
+
+        public string GenerateReceiverParametersSignature(bool prefixByRef)
+        {
+            return $"this {string.Join(", ", GetReceiverParameters(prefixByRef))}";
+        }
+
+        public IEnumerable<String> GetReceiverParameters(bool prefixByRef)
+        {
+            return ReceiverParameters.Select(parameter => $"{parameter.Type.PrimitiveName} {(prefixByRef && parameter.Type.IsByRefPointer ? "_" : "")}{parameter.Name}");
+        }
+
+        public IEnumerable<String> GetByRefReceiverParameters(bool includeType)
+        {
+            return ReceiverParameters.Where(parameter => parameter.Type.IsByRefPointer).Select(parameter => $"{(includeType ? $"{parameter.Type.PrimitiveName} " : "_")}{parameter.Name}");
         }
     }
 }

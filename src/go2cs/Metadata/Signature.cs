@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  FunctionInfo.cs - Gbtc
+//  Signature.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,23 +16,49 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  06/18/2018 - J. Ritchie Carroll
+//  06/21/2018 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace go2cs.Metadata
 {
     [Serializable]
-    public class FunctionInfo
+    public class Signature
     {
-        public FunctionSignature Signature;
-        public Dictionary<string, VariableInfo> Variables;
-        public bool HasDefer;
-        public bool HasPanic;
-        public bool HasRecover;
+        public ParameterInfo[] Parameters;
+        public ParameterInfo[] Result;
+
+        public string GenerateParameterTypeList() => string.Join(", ", Parameters.Select(parameter => parameter.Type.PrimitiveName));
+
+        public string GenerateParametersSignature(bool prefixByRef)
+        {
+            return string.Join(", ", GetParameters(prefixByRef));
+        }
+
+        public IEnumerable<String> GetParameters(bool prefixByRef)
+        {
+            return Parameters.Select(parameter => $"{parameter.Type.PrimitiveName} {(prefixByRef && parameter.Type.IsByRefPointer ? "_" : "")}{parameter.Name}");
+        }
+
+        public IEnumerable<String> GetByRefParameters(bool includeType)
+        {
+            return Parameters.Where(parameter => parameter.Type.IsByRefPointer).Select(parameter => $"{(includeType ? $"{parameter.Type.PrimitiveName} " : "_")}{parameter.Name}");
+        }
+
+        public string GenerateResultSignature()
+        {
+            if (Result.Length == 0)
+                return "void";
+
+            if (Result.Length > 1)
+                return $"({string.Join(", ", Result.Select(parameter => parameter.Type.PrimitiveName))})";
+
+            return Result[0].Type.PrimitiveName;
+        }
     }
 }

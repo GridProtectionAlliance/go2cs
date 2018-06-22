@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  Converter_ExpressionList.cs - Gbtc
+//  ScannerBase_ExpressionList.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -22,11 +22,10 @@
 //******************************************************************************************************
 
 using System.Collections.Generic;
-using Antlr4.Runtime.Tree;
 
 namespace go2cs
 {
-    public partial class Converter
+    public partial class ScannerBase
     {
         // Stack handlers:
         //  constSpec (optional)
@@ -38,7 +37,7 @@ namespace go2cs
         //  recvStmt (optional)
         //  rangeClause (optional)
         //  arguments (optional)
-        private readonly ParseTreeValues<string[]> m_expressionLists = new ParseTreeValues<string[]>();
+        protected readonly ParseTreeValues<string[]> ExpressionLists = new ParseTreeValues<string[]>();
 
         public override void ExitExpressionList(GolangParser.ExpressionListContext context)
         {
@@ -46,13 +45,13 @@ namespace go2cs
 
             for (int i = 0; i < context.expression().Length; i++)
             {
-                m_expressions.TryGetValue(context.GetChild(i), out string expression);
+                Expressions.TryGetValue(context.GetChild(i), out string expression);
                 expressions.Add(expression);
             }
 
             expressions.Reverse();
 
-            m_expressionLists[context] = expressions.ToArray();
+            ExpressionLists[context] = expressions.ToArray();
         }
     }
 }

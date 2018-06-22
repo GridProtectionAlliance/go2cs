@@ -39,9 +39,11 @@ namespace go2cs
     public delegate ScannerBase CreateNewScannerFunction(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName);
     public delegate bool FileNeedsScanFunction(Options options, string fileName, out string message);
 
-    public abstract class ScannerBase : GolangBaseListener
+    public abstract partial class ScannerBase : GolangBaseListener
     {
         private readonly List<string> m_warnings = new List<string>();
+
+        protected readonly HashSet<string> RequiredUsings = new HashSet<string>(StringComparer.Ordinal);
 
         protected sealed class ParserErrorListener : IAntlrErrorListener<IToken>
         {
@@ -406,6 +408,45 @@ namespace go2cs
             s_currentFolderMetadata = folderMetadata;
 
             return folderMetadata;
+        }
+
+        protected static string GetValidIdentifierName(string identifier)
+        {
+            int lastDotIndex = identifier.LastIndexOf('.');
+
+            if (lastDotIndex > 0)
+                identifier = identifier.Substring(lastDotIndex + 1);
+
+            return SanitizedIdentifier(identifier);
+        }
+
+        protected TypeInfo ConvertByRefToBasicPointer(TypeInfo typeInfo)
+        {
+            if (!typeInfo.IsByRefPointer)
+                return typeInfo;
+
+            string primitiveName = typeInfo.PrimitiveName;
+            string frameworkName = typeInfo.FrameworkName;
+
+            string[] parts = primitiveName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 2)
+                primitiveName = $"Ptr<{parts[1]}>";
+
+            parts = frameworkName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 2)
+                frameworkName = $"Ptr<{parts[1]}>";
+
+            return new TypeInfo
+            {
+                Name = typeInfo.Name,
+                PrimitiveName = primitiveName,
+                FrameworkName = frameworkName,
+                IsPointer = true,
+                IsByRefPointer = false,
+                TypeClass = TypeClass.Simple
+            };
         }
 
         protected static string GetAbsolutePath(string filePath)

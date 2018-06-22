@@ -50,7 +50,7 @@ namespace go2cs
                 if (!string.IsNullOrEmpty(m_lastImportSpecComment))
                     m_targetFile.Append(m_lastImportSpecComment);
 
-                if (!m_wroteCommentWithLineFeed)
+                if (!WroteCommentWithLineFeed)
                     m_targetFile.AppendLine();
             }
 

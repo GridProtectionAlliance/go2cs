@@ -27,21 +27,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using static go2cs.Common;
 
 namespace go2cs
 {
-    public class PreScanner :ScannerBase
+    public partial class PreScanner :ScannerBase
     {
-        private readonly List<InterfaceInfo> m_interfaces = new List<InterfaceInfo>();
-        private readonly List<StructInfo> m_structs = new List<StructInfo>();
-        private readonly List<FunctionInfo> m_functions = new List<FunctionInfo>();
+        private readonly Dictionary<string, InterfaceInfo> m_interfaces = new Dictionary<string, InterfaceInfo>(StringComparer.Ordinal);
+        private readonly Dictionary<string, StructInfo> m_structs = new Dictionary<string, StructInfo>(StringComparer.Ordinal);
+        private readonly Dictionary<string, FunctionInfo> m_functions = new Dictionary<string, FunctionInfo>(StringComparer.Ordinal);
 
         public string FolderMetadataFileName { get; }
-
-        public string Package { get; private set; }
-
-        public string PackageImport { get; private set; }
 
         public PreScanner(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
         {
@@ -60,59 +55,15 @@ namespace go2cs
             fileInfo.PackageImport = PackageImport;
             fileInfo.SourceFileName = SourceFileName;
             fileInfo.TargetFileName = TargetFileName;
-            fileInfo.Interfaces = m_interfaces.ToArray();
-            fileInfo.Structs = m_structs.ToArray();
-            fileInfo.Functions = m_functions.ToArray();
+            fileInfo.Interfaces = m_interfaces;
+            fileInfo.Structs = m_structs;
+            fileInfo.Functions = m_functions;
             fileInfo.LastUpdate = DateTime.UtcNow;
 
             BinaryFormatter formatter = new BinaryFormatter();
 
             using (FileStream stream = File.Create(FolderMetadataFileName))
                 formatter.Serialize(stream, folderMetadata);
-        }
-        public override void EnterPackageClause(GolangParser.PackageClauseContext context)
-        {
-            Package = SanitizedIdentifier(context.IDENTIFIER().GetText());
-
-            if (Package.Equals("main"))
-            {
-                PackageImport = Package;
-            }
-            else
-            {
-                // Define package import path
-                PackageImport = Path.GetDirectoryName(SourceFileName) ?? Package;
-                PackageImport = PackageImport.Replace(GoRoot, "");
-                PackageImport = PackageImport.Replace(GoPath, "");
-
-                while (PackageImport.StartsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.StartsWith(Path.AltDirectorySeparatorChar.ToString()))
-                    PackageImport = PackageImport.Substring(1);
-
-                while (PackageImport.EndsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
-                    PackageImport = PackageImport.Substring(0, PackageImport.Length - 1);
-
-                int lastSlash;
-
-                if (Path.IsPathRooted(PackageImport))
-                {
-                    // File converted was outside %GOPATH% and %GOROOT%
-                    lastSlash = PackageImport.LastIndexOf('\\');
-
-                    if (lastSlash > -1)
-                        PackageImport = $"{PackageImport.Substring(lastSlash + 1)}";
-                }
-
-                PackageImport = $"{PackageImport.Replace('\\', '/')}";
-
-                lastSlash = PackageImport.LastIndexOf('/');
-                string package = SanitizedIdentifier(lastSlash > -1 ? PackageImport.Substring(lastSlash + 1) : PackageImport);
-
-                if (!package.Equals(Package))
-                {
-                    AddWarning(context, $"Defined package clause \"{Package}\" does not match file path \"{SourceFileName}\"");
-                    PackageImport = lastSlash > -1 ? $"{PackageImport.Substring(0, lastSlash)}.{Package}" : Package;
-                }
-            }
         }
 
         protected override void BeforeScan()

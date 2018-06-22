@@ -36,7 +36,7 @@ namespace go2cs
         // TopLevelDecl is visited once per each encountered Declaration, FunctionDecl or MethodDecl
         public override void EnterTopLevelDecl(GolangParser.TopLevelDeclContext context)
         {
-            m_indentLevel++;
+            IndentLevel++;
 
             if (m_firstTopLevelDeclaration)
             {
@@ -77,7 +77,7 @@ namespace go2cs
                 }
 
                 // End class and namespace "}" occur as a last step in Convert() method
-                m_indentLevel++;
+                IndentLevel++;
             }
         }
 
@@ -88,7 +88,7 @@ namespace go2cs
                 m_firstTopLevelDeclaration = false;
 
             m_nextDeclComments = CheckForCommentsRight(context);
-            m_indentLevel--;
+            IndentLevel--;
         }
     }
 }

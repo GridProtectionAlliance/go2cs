@@ -29,7 +29,6 @@ namespace go2cs.Metadata
     public class InterfaceInfo
     {
         public string Name;
-        public string FullName;
-        public FunctionSignature[] Signatures;
+        public FunctionSignature[] Methods;
     }
 }

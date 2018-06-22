@@ -36,11 +36,12 @@ namespace go2cs
             m_iota = 0;
         }
 
+        // TODO: This needs work - likely need expression evaluator
         public override void ExitConstSpec(GolangParser.ConstSpecContext context)
         {
-            m_identifiers.TryGetValue(context.identifierList(), out string[] identifiers);
+            Identifiers.TryGetValue(context.identifierList(), out string[] identifiers);
 
-            m_expressionLists.TryGetValue(context.expressionList(), out string[] expressions);
+            ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions);
 
             if (identifiers == null)
                 throw new DataMisalignedException("No identifier specified in constant expression.");
@@ -60,7 +61,7 @@ namespace go2cs
                 if (typeContext == null)
                     type = DerviveType(expression, lastType) ?? "double";
                 else
-                    type = m_types[typeContext].PrimitiveName;
+                    type = "object"; // m_types[typeContext].PrimitiveName;
 
                 lastType = type;
 
@@ -85,7 +86,7 @@ namespace go2cs
 
                 m_targetFile.Append(CheckForCommentsRight(context));
 
-                if (!m_wroteCommentWithLineFeed)
+                if (!WroteCommentWithLineFeed)
                     m_targetFile.AppendLine();
 
                 m_iota++;
@@ -126,7 +127,7 @@ namespace go2cs
 
             if (expression.Contains("i(") || expression.Contains("complex("))
             {
-                m_requiredUsings.Add("System.Numerics");
+                RequiredUsings.Add("System.Numerics");
                 return "Complex";
             }
 

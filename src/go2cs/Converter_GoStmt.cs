@@ -27,8 +27,8 @@ namespace go2cs
     {
         public override void ExitGoStmt(GolangParser.GoStmtContext context)
         {
-            m_expressions.TryGetValue(context.expression(), out string expression);
-            m_requiredUsings.Add("System.Threading");
+            Expressions.TryGetValue(context.expression(), out string expression);
+            RequiredUsings.Add("System.Threading");
             m_targetFile.Append($"{Spacing()}ThreadPool.QueueUserWorkItem(state => {expression});");
         }
     }
