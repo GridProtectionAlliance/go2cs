@@ -22,6 +22,8 @@
 //******************************************************************************************************
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace go2cs.Metadata
 {
@@ -30,5 +32,20 @@ namespace go2cs.Metadata
     {
         public string Name;
         public FunctionSignature[] Methods;
+
+        public IEnumerable<FunctionSignature> GetInheritedInterfaces()
+        {
+            return Methods.Where(method => method.IsPromoted);
+        }
+
+        public IEnumerable<string> GetInheritedInterfaceNames()
+        {
+            return GetInheritedInterfaces().Select(method => method.Name);
+        }
+
+        public string GenerateInheritedInterfaceList()
+        {
+            return string.Join(", ", GetInheritedInterfaceNames());
+        }
     }
 }

@@ -6,15 +6,19 @@ type Person struct {
     name string
     age int32
 }
+
 func (p Person) IsAdult() bool {
     return p.age >= 18
 }
+
 type Employee struct {
     position string
 }
+
 func (e Employee) IsManager() bool {
     return e.position == "manager"
 }
+
 type Record struct {
     Person
     Employee

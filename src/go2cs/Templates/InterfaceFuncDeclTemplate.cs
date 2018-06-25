@@ -140,7 +140,7 @@ namespace go2cs.Templates
             this.Write("ByRef?.Invoke(ref m_target");
             
             #line 12 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(NamedParameters));
+            this.Write(this.ToStringHelper.ToStringWithCulture(ParameterNames));
             
             #line default
             #line hidden
@@ -154,7 +154,7 @@ namespace go2cs.Templates
             this.Write("ByVal(m_target");
             
             #line 12 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncDeclTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(NamedParameters));
+            this.Write(this.ToStringHelper.ToStringWithCulture(ParameterNames));
             
             #line default
             #line hidden
@@ -168,7 +168,7 @@ namespace go2cs.Templates
 public string FunctionName;
 public string Scope;
 public string ParameterSignature; // e.g.: "double p0, string p1"
-public string NamedParameters;    // (comma prefixed), e.g.: ", p0, p1" -- do not prefix for 0 parameters
+public string ParameterNames;     // (comma prefixed), e.g.: ", p0, p1" -- do not prefix for 0 parameters
 public string ParameterTypes;     // (comma prefixed), e.g.: ", double, string" -- do not prefix for 0 parameters
 public string ResultType;
 

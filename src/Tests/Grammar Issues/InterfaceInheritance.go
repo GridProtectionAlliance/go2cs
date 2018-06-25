@@ -27,9 +27,9 @@ type I interface {
 type V interface {
     I
     fmt.Stringer
-    error
     N()
- }
+    error
+}
 
 func main() {
     m := make(map[I]int)

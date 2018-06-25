@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7cc10bc0-9820-40cf-b7f6-36d659b16b6b}</ProjectGuid>
+    <ProjectGuid>{5b82927c-9ec8-4a53-aaca-2eba065773e9}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>PointerToPointer</AssemblyName>
+    <AssemblyName>LambdaFunctions</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -43,8 +43,8 @@
     <Compile Include="InterfaceImplementation_AnimalInterface.cs" />
     <Compile Include="InterfaceInheritance_IInterface.cs" />
     <Compile Include="InterfaceInheritance_VInterface.cs" />
-    <Compile Include="PointerToPointer.cs" />
-    <Compile Include="PointerToPointer_AssemblyInfo.cs" />
+    <Compile Include="LambdaFunctions.cs" />
+    <Compile Include="LambdaFunctions_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

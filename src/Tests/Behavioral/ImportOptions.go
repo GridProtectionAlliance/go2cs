@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     _ "math"
+    _ "path/file"
     . "math/rand"
     "os"
     implicit "text/tabwriter"

@@ -51,7 +51,7 @@ namespace go2cs
 
             string scope = char.IsUpper(m_originalFunctionName[0]) ? "public" : "private";
 
-            // Handle Go "main" function as a special case, in C# this should be "Main"
+            // Handle Go "main" function as a special case, in C# this should be capitalized "Main"
             if (m_currentFunctionName.Equals("main"))
             {
                 m_currentFunctionName = "Main";

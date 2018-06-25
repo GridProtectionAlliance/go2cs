@@ -9,12 +9,12 @@
             private static readonly <#=FunctionName#>ByRef s_<#=FunctionName#>ByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            <#=Scope#> <#=ResultType#> <#=FunctionName#>(<#=ParameterSignature#>) => s_<#=FunctionName#>ByRef?.Invoke(ref m_target<#=NamedParameters#>) ?? s_<#=FunctionName#>ByVal(m_target<#=NamedParameters#>);<#+
+            <#=Scope#> <#=ResultType#> <#=FunctionName#>(<#=ParameterSignature#>) => s_<#=FunctionName#>ByRef?.Invoke(ref m_target<#=ParameterNames#>) ?? s_<#=FunctionName#>ByVal(m_target<#=ParameterNames#>);<#+
 // Template Parameters
 public string FunctionName;
 public string Scope;
 public string ParameterSignature; // e.g.: "double p0, string p1"
-public string NamedParameters;    // (comma prefixed), e.g.: ", p0, p1" -- do not prefix for 0 parameters
+public string ParameterNames;     // (comma prefixed), e.g.: ", p0, p1" -- do not prefix for 0 parameters
 public string ParameterTypes;     // (comma prefixed), e.g.: ", double, string" -- do not prefix for 0 parameters
 public string ResultType;
 

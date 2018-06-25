@@ -83,8 +83,7 @@ namespace go2cs
 
                 if (string.IsNullOrEmpty(identifier))
                 {
-                    if (Types.TryGetValue(methodSpec, out TypeInfo typeInfo))
-                    {
+                    if (Types.TryGetValue(methodSpec, out TypeInfo typeInfo)){
                         methods.Add(new FunctionSignature
                         {
                             Name = GetValidIdentifierName(typeInfo.PrimitiveName),

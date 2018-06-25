@@ -34,6 +34,18 @@ namespace go
     public static class BuiltInFunctions
     {
         /// <summary>
+        /// The error built-in interface type is the conventional interface for representing an
+        /// error condition, with the nil value representing no error.
+        /// </summary>
+        public interface error
+        {
+            /// <summary>
+            /// Get string that represents an error.
+            /// </summary>
+            string Error();
+        }
+
+        /// <summary>
         /// Predeclared identifier representing the untyped integer ordinal number of the current
         /// const specification in a (usually parenthesized) const declaration.
         /// It is zero-indexed.

@@ -40,21 +40,10 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InterfaceCasting_MyErrorStruct.cs" />
     <Compile Include="InterfaceImplementation_AnimalInterface.cs" />
-    <Compile Include="InterfaceImplementation_DogStruct.cs" />
-    <Compile Include="InterfaceImplementation_FrogStruct.cs" />
-    <Compile Include="InterfaceInheritance_T1Struct.cs" />
-    <Compile Include="InterfaceInheritance_T2Struct.cs" />
     <Compile Include="InterfaceInheritance_IInterface.cs" />
     <Compile Include="InterfaceInheritance_VInterface.cs" />
-    <Compile Include="SortArrayType_PersonStruct.cs" />
-    <Compile Include="SortArrayType_PeopleByShoeSizeStructOf(Slice(Person)).cs" />
     <Compile Include="StructPromotion.cs" />
-    <Compile Include="StructPromotion_PersonStruct.cs" />
-    <Compile Include="StructPromotion_EmployeeStruct.cs" />
-    <Compile Include="StructPromotion_RecordStruct.cs" />
-    <Compile Include="StructWithPointer_ColorListStruct.cs" />
     <Compile Include="StructPromotion_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

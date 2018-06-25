@@ -261,7 +261,7 @@ public string Scope;
 public string[] InheritedInterfaces;
 public string[] PromotedStructs;
 
-public string GetInheritedInterfaceList()
+private string GetInheritedInterfaceList()
 {
     string inheritedInterfaceList = string.Join(", ", InheritedInterfaces);
 

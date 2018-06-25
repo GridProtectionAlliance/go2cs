@@ -21,9 +21,12 @@
 //
 //******************************************************************************************************
 
+using go2cs.Metadata;
+using go2cs.Templates;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using static go2cs.Common;
 
 namespace go2cs
@@ -32,49 +35,64 @@ namespace go2cs
     {
         public override void ExitTypeSpec(GolangParser.TypeSpecContext context)
         {
-            string identifier = context.IDENTIFIER().GetText();
-            string scope = char.IsUpper(identifier[0]) ? "public" : "private";
+            string originalIdentifier = context.IDENTIFIER().GetText();
+            string scope = char.IsUpper(originalIdentifier[0]) ? "public" : "private";
             string target = Path.GetFileNameWithoutExtension(TargetFileName);
 
             //ParseTreeValues<string> m_structFields = new ParseTreeValues<string>();
             //ParseTreeValues<List<(string functionName, string parameterSignature, string namedParameters, string parameterTypes, string resultType)>> m_interfaceMethods = new ParseTreeValues<List<(string, string, string, string, string)>>();
 
-            identifier = SanitizedIdentifier(identifier);
+            string identifier = SanitizedIdentifier(originalIdentifier);
 
             if (!m_firstTopLevelDeclaration)
                 m_targetFile.AppendLine();
 
             // TODO: Load needed info from metadata...
 
+            if (Metadata.Interfaces.TryGetValue(originalIdentifier, out InterfaceInfo interfaceInfo))
+            {
+                string ancillaryInterfaceFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}Interface.cs");
+
+                FunctionSignature[] functions = interfaceInfo.Methods.Where(function => !function.IsPromoted).ToArray();
+
+
+
+                using (StreamWriter writer = File.CreateText(ancillaryInterfaceFileName))
+                    writer.Write(new InterfaceTypeTemplate
+                    {
+                        NamespacePrefix = PackageNamespace,
+                        NamespaceHeader = m_namespaceHeader,
+                        NamespaceFooter = m_namespaceFooter,
+                        PackageName = Package,
+                        InterfaceName = identifier,
+                        Scope = scope,
+                        Interface = interfaceInfo,
+                        Functions = functions
+                    }
+                    .TransformText());
+
+                // Track file name associated with package
+                AddFileToPackage(Package, ancillaryInterfaceFileName, PackageNamespace);
+
+                string inheritedInterfaces = interfaceInfo.GenerateInheritedInterfaceList();
+
+                if (inheritedInterfaces.Length > 0)
+                    inheritedInterfaces = $" : {inheritedInterfaces}";
+
+                m_targetFile.AppendLine($"{Spacing()}{scope} partial interface {identifier}{inheritedInterfaces}");
+                m_targetFile.AppendLine($"{Spacing()}{{");
+
+                foreach (FunctionSignature function in functions)
+                {
+                    m_targetFile.AppendLine($"{Spacing(1)}{function.Signature.GenerateResultSignature()} {SanitizedIdentifier(function.Name)}({function.Signature.GenerateParametersSignature(false)});");
+                }
+
+                m_targetFile.AppendLine($"{Spacing()}}}");
+            }
+
             //if (m_interfaceMethods.TryGetValue(context.type()?.typeLit()?.interfaceType(), out List<(string functionName, string parameterSignature, string namedParameters, string parameterTypes, string resultType)> functions))
             //{
-            //    string ancillaryInterfaceFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}Interface.cs");
 
-            //    using (StreamWriter writer = File.CreateText(ancillaryInterfaceFileName))
-            //        writer.Write(new InterfaceTypeTemplate
-            //        {
-            //            NamespacePrefix = PackageNamespace,
-            //            NamespaceHeader = m_namespaceHeader,
-            //            NamespaceFooter = m_namespaceFooter,
-            //            PackageName = Package,
-            //            InterfaceName = identifier,
-            //            Scope = scope,
-            //            Functions = functions.ToArray()
-            //        }
-            //        .TransformText());
-
-            //    // Track file name associated with package
-            //    AddFileToPackage(Package, ancillaryInterfaceFileName, PackageNamespace);
-
-            //    m_targetFile.AppendLine($"{Spacing()}{scope} partial interface {identifier}"); // TODO: << add <#=InheritedInterfaces#>
-            //    m_targetFile.AppendLine($"{Spacing()}{{");
-
-            //    foreach (var function in functions)
-            //    {
-            //        m_targetFile.AppendLine($"{Spacing(1)}public {function.resultType} {function.functionName}({function.parameterSignature});");
-            //    }
-
-            //    m_targetFile.AppendLine($"{Spacing()}}}");
             //}
             //else if (m_structFields.TryGetValue(context.type()?.typeLit()?.structType(), out string fields))
             //{

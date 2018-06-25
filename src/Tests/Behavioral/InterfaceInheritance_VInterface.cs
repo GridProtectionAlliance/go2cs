@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 19 13:39:31 UTC
+//     Generated on 2018 June 25 16:32:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,14 @@ namespace go
 {
     public static partial class main_package
     {
+        [GeneratedCode("go2cs", "0.1.1.0")]
+        [PromotedInterface(typeof(I))]
+        [PromotedInterface(typeof(Stringer))]
+        [PromotedInterface(typeof(error))]        
+        public partial interface V
+        {
+        }
+
         [GeneratedCode("go2cs", "0.1.1.0")]
         [PromotedInterface(typeof(V))]
         public struct V<T> : V
