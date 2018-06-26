@@ -37,8 +37,6 @@ namespace go2cs
 {
     public partial class Converter : ScannerBase
     {
-        public const string RootNamespace = "go";
-        public const string ClassSuffix = "_package";
         public const string StandardLibrary = "GoStandardLibrary";
         private const string UsingsMarker = ">>MARKER:USINGS<<";
 
@@ -60,7 +58,7 @@ namespace go2cs
             Metadata = metadata;
             Package = metadata.Package;
             PackageImport = metadata.PackageImport;
-            ImportAliases = new Dictionary<string, (string, string)>(StringComparer.Ordinal);
+            ImportAliases = metadata.ImportAliases;
             ImportMetadata = new Dictionary<string, FolderMetadata>(StringComparer.Ordinal);
         }
 

@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  InterfaceInfo.cs - Gbtc
+//  PreScanner_ImportDecl.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,41 +16,41 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  06/06/2018 - J. Ritchie Carroll
+//  05/03/2018 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
+using static go2cs.Common;
 
-namespace go2cs.Metadata
+namespace go2cs
 {
-    [Serializable]
-    public class InterfaceInfo
+    public partial class PreScanner
     {
-        public string Name;
-        public FunctionSignature[] Methods;
-
-        public IEnumerable<FunctionSignature> GetLocalMethods()
+        public override void EnterImportSpec(GolangParser.ImportSpecContext context)
         {
-            return Methods.Where(method => !method.IsPromoted);
-        }
+            // Base class parses current import package path
+            base.EnterImportSpec(context);
 
-        public IEnumerable<FunctionSignature> GetInheritedInterfaces()
-        {
-            return Methods.Where(method => method.IsPromoted);
-        }
+            string alternateName = SanitizedIdentifier(context.IDENTIFIER()?.GetText());
+            bool useStatic = (object)alternateName == null && context.ChildCount > 1 && context.GetChild(0).GetText().Equals(".");
 
-        public IEnumerable<string> GetInheritedInterfaceNames()
-        {
-            return GetInheritedInterfaces().Select(method => method.Name);
-        }
+            int lastSlash = CurrentImportPath.LastIndexOf('/');
+            string packageName = SanitizedIdentifier(lastSlash > -1 ? CurrentImportPath.Substring(lastSlash + 1) : CurrentImportPath);
 
-        public string GenerateInheritedInterfaceList()
-        {
-            return string.Join(", ", GetInheritedInterfaceNames());
+            string targetUsing = $"{RootNamespace}.{string.Join(".", CurrentImportPath.Split('/').Select(SanitizedIdentifier))}{ClassSuffix}";
+
+            string alias;
+
+            if (useStatic)
+                alias = $"static {targetUsing}";
+            else if (alternateName?.Equals("_") ?? false)
+                alias = $"_{packageName}_";
+            else
+                alias = alternateName ?? packageName;
+
+            m_importAliases[alias] = (CurrentImportPath, targetUsing);
         }
     }
 }

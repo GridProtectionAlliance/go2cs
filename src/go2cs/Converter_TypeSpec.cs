@@ -23,6 +23,7 @@
 
 using go2cs.Metadata;
 using go2cs.Templates;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -50,10 +51,11 @@ namespace go2cs
             {
                 string ancillaryInterfaceFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}Interface.cs");
 
-                List<FunctionSignature> functions = interfaceInfo.GetStandardMethods().ToList();
+                FunctionSignature[] localMethods = interfaceInfo.GetLocalMethods().ToArray();
+                List<FunctionSignature> allMethods = localMethods.ToList();
                 List<string> inheritedTypeNames = new List<string>();
 
-                RecurseInheritedInterfaces(interfaceInfo, functions, inheritedTypeNames);
+                RecurseInheritedInterfaces(context, originalIdentifier, interfaceInfo, allMethods, inheritedTypeNames);
 
                 using (StreamWriter writer = File.CreateText(ancillaryInterfaceFileName))
                     writer.Write(new InterfaceTypeTemplate
@@ -66,7 +68,7 @@ namespace go2cs
                         Scope = scope,
                         Interface = interfaceInfo,
                         InheritedTypeNames = inheritedTypeNames,
-                        Functions = functions
+                        Functions = allMethods
                     }
                     .TransformText());
 
@@ -81,7 +83,7 @@ namespace go2cs
                 m_targetFile.AppendLine($"{Spacing()}{scope} partial interface {identifier}{inheritedInterfaces}");
                 m_targetFile.AppendLine($"{Spacing()}{{");
 
-                foreach (FunctionSignature function in functions)
+                foreach (FunctionSignature function in localMethods)
                 {
                     m_targetFile.AppendLine($"{Spacing(1)}{function.Signature.GenerateResultSignature()} {SanitizedIdentifier(function.Name)}({function.Signature.GenerateParametersSignature(false)});");
                 }
@@ -173,15 +175,19 @@ namespace go2cs
             //    m_targetFile.AppendLine($"{Spacing()}}}");
             //}
         }
-        private void RecurseInheritedInterfaces(InterfaceInfo interfaceInfo, List<FunctionSignature> functions, List<string> inheritedTypeNames)
+        private void RecurseInheritedInterfaces(GolangParser.TypeSpecContext context, string identifier, InterfaceInfo interfaceInfo, List<FunctionSignature> functions, List<string> inheritedTypeNames)
         {
             foreach (string interfaceName in interfaceInfo.GetInheritedInterfaceNames())
             {
                 if (TryFindInheritedInterfaceInfo(interfaceName, out InterfaceInfo inheritedInferfaceInfo, out string fullName))
                 {
                     inheritedTypeNames?.Add(fullName);
-                    functions.AddRange(inheritedInferfaceInfo.GetStandardMethods());
-                    RecurseInheritedInterfaces(inheritedInferfaceInfo, functions, null);
+                    functions.AddRange(inheritedInferfaceInfo.GetLocalMethods());
+                    RecurseInheritedInterfaces(context, identifier, inheritedInferfaceInfo, functions, null);
+                }
+                else
+                {
+                    AddWarning(context, $"Failed to find metadata for promoted interface \"{interfaceName}\" declared in \"{identifier}\" interface type.");
                 }
             }
         }
@@ -190,6 +196,38 @@ namespace go2cs
         {
             interfaceInfo = default;
             fullName = default;
+
+            // Handle built-in error interface as a special case  - this is currently the only built-in interface
+            if (interfaceName.Equals("error", StringComparison.Ordinal))
+            {
+                interfaceInfo = new InterfaceInfo
+                {
+                    Name = "error",
+                    Methods = new[] { new FunctionSignature
+                    {
+                        Name = "Error",
+                        Signature = new Signature
+                        {
+                            Parameters = new ParameterInfo[0],
+                            Result = new[] { new ParameterInfo
+                            {
+                                Name = "",
+                                Type = new TypeInfo
+                                {
+                                    Name = "string",
+                                    PrimitiveName = ConvertToPrimitiveType("string"),
+                                    FrameworkName = ConvertToFrameworkType("string"),
+                                    TypeClass = TypeClass.Simple
+                                }
+                            }}
+                        }
+                    }}
+                };
+
+                fullName = "go.BuiltInFunctions.error";
+
+                return true;
+            }
 
             if (Metadata.Interfaces.TryGetValue(interfaceName, out interfaceInfo))
             {

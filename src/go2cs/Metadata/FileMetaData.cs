@@ -33,6 +33,7 @@ namespace go2cs.Metadata
         public string PackageImport;
         public string SourceFileName;
         public string TargetFileName;
+        public Dictionary<string, (string targetImport, string targetUsing)> ImportAliases;
         public Dictionary<string, InterfaceInfo> Interfaces;
         public Dictionary<string, StructInfo> Structs;
         public Dictionary<string, FunctionInfo> Functions;

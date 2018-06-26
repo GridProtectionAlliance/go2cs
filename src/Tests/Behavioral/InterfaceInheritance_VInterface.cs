@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 25 20:56:12 UTC
+//     Generated on 2018 June 26 10:56:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,7 +18,8 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        [PromotedInterface(typeof(go.main_package.I))]        
+        [PromotedInterface(typeof(go.main_package.I))]
+        [PromotedInterface(typeof(go.BuiltInFunctions.error))]        
         public partial interface V
         {
         }
@@ -46,6 +47,15 @@ namespace go
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void M() => s_MByRef?.Invoke(ref m_target) ?? s_MByVal(m_target);
+
+            private delegate string ErrorByVal(T value);
+            private delegate string ErrorByRef(ref T value);
+
+            private static readonly ErrorByVal s_ErrorByVal;
+            private static readonly ErrorByRef s_ErrorByRef;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public string Error() => s_ErrorByRef?.Invoke(ref m_target) ?? s_ErrorByVal(m_target);
 
             [DebuggerStepperBoundary]
             static V()
@@ -80,6 +90,20 @@ namespace go
                 // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_MByRef == null && (object)s_MByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement V.M function");
+
+                extensionMethod = targetType.GetExtensionMethod("Error");
+
+                if ((object)extensionMethod != null)
+                {
+                    s_ErrorByRef = extensionMethod.CreateStaticDelegate(typeof(ErrorByRef)) as ErrorByRef;
+
+                    if ((object)s_ErrorByRef == null)
+                        s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
+                }
+
+                // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
+                if ((object)s_ErrorByRef == null && (object)s_ErrorByVal == null)
+                    throw new NotImplementedException($"{targetType.Name} does not implement V.Error function");
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

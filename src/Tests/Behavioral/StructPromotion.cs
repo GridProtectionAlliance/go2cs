@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 June 25 19:10:12 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructPromotion.go
+// package main -- go2cs converted at 2018 June 26 10:56:13 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructPromotion.go
 
 using fmt = go.fmt_package;
 using static go.BuiltInFunctions;

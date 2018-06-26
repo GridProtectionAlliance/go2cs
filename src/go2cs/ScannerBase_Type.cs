@@ -212,7 +212,7 @@ namespace go2cs
             };
         }
 
-        private string ConvertToPrimitiveType(string type)
+        protected string ConvertToPrimitiveType(string type)
         {
             switch (type)
             {
@@ -249,12 +249,14 @@ namespace go2cs
                     return "Complex";
                 case "Type":
                     return "object";
+                case "string":
+                    return "string";
                 default:
                     return $"{type}";
             }
         }
 
-        private string ConvertToFrameworkType(string type)
+        protected string ConvertToFrameworkType(string type)
         {
             switch (type)
             {
@@ -290,6 +292,8 @@ namespace go2cs
                     return "System.Numerics.Complex";
                 case "Type":
                     return "System.Object";
+                case "string":
+                    return "System.String";
                 default:
                     return $"{type}";
             }

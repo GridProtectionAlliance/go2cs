@@ -21,11 +21,9 @@
 //
 //******************************************************************************************************
 
-using System;
-using System.IO;
-using System.Linq;
 using go2cs.Metadata;
-using static go2cs.Common;
+using System;
+using System.Collections.Generic;
 
 namespace go2cs
 {
@@ -35,73 +33,32 @@ namespace go2cs
         private string m_lastImportSpecComment;
         private string m_lastEolImportSpecComment = "";
 
+        public override void ExitImportDecl(GolangParser.ImportDeclContext context)
+        {
+            foreach (KeyValuePair<string, (string targetImport, string targetUsing)> import in ImportAliases)
+            {
+                string alias = import.Key;
+                string targetUsing = import.Value.targetUsing;
+                string targetImport = import.Value.targetImport;
+
+                if (alias.StartsWith("static", StringComparison.Ordinal))
+                    m_targetFile.Append($"using {alias};");
+                else
+                    m_targetFile.Append($"using {alias} = {targetUsing};");
+
+                FolderMetadata metadata = LoadImportMetadata(Options, targetImport, out string warning);
+
+                if ((object)metadata == null)
+                    AddWarning(context, warning);
+                else
+                    ImportMetadata[targetImport] = metadata;
+            }
+        }
+
         public override void EnterImportSpec(GolangParser.ImportSpecContext context)
         {
             // Base class parses current import package path
             base.EnterImportSpec(context);
-
-            string alternateName = SanitizedIdentifier(context.IDENTIFIER()?.GetText());
-            bool useStatic = (object)alternateName == null && context.ChildCount > 1 && context.GetChild(0).GetText().Equals(".");
-
-            int lastSlash = CurrentImportPath.LastIndexOf('/');
-            string packageName = SanitizedIdentifier(lastSlash > -1 ? CurrentImportPath.Substring(lastSlash + 1) : CurrentImportPath);
-
-            string targetUsing = $"{RootNamespace}.{string.Join(".", CurrentImportPath.Split('/').Select(SanitizedIdentifier))}{ClassSuffix}";
-
-            if (!m_firstImportSpec)
-            {
-                if (!string.IsNullOrEmpty(m_lastImportSpecComment))
-                    m_targetFile.Append(m_lastImportSpecComment);
-
-                if (!WroteCommentWithLineFeed)
-                    m_targetFile.AppendLine();
-            }
-
-            string alias;
-
-            if (useStatic)
-            {
-                alias = targetUsing;
-                m_targetFile.Append($"using static {targetUsing};");
-            }
-            else if (alternateName?.Equals("_") ?? false)
-            {
-                alias = $"_{packageName}_";
-                m_targetFile.Append($"using {alias} = {targetUsing};");
-            }
-            else
-            {
-                alias = alternateName ?? packageName;
-                m_targetFile.Append($"using {alias} = {targetUsing};");
-            }
-
-            ImportAliases[alias] = (CurrentImportPath, targetUsing);
-
-            string importPath = $"{AddPathSuffix(CurrentImportPath.Replace("/", "\\"))}{packageName}.go";
-            string goRootImport = Path.Combine(Options.TargetGoSrcPath, importPath);
-            string goPathImport = Path.Combine(GoPath, importPath);
-            FolderMetadata goRootImportMetadata = GetFolderMetadata(Options, goRootImport);
-            
-            if ((object)goRootImportMetadata != null)
-            {
-                ImportMetadata[targetUsing] = goRootImportMetadata;
-            }
-            else
-            {
-                FolderMetadata goPathImportMetadata = GetFolderMetadata(Options, goPathImport);
-
-                if ((object)goPathImportMetadata != null)
-                {
-                    ImportMetadata[targetUsing] = goPathImportMetadata;
-                }
-                else
-                {
-                    Console.WriteLine($"WARNING: Failed to locate package metadata for \"{CurrentImportPath}\" import at either:");
-                    Console.WriteLine($"    {GetFolderMetadataFileName(Options, goRootImport)} (from -g target Go source path)");
-                    Console.WriteLine($"    {GetFolderMetadataFileName(Options, goPathImport)} (from %GOPATH%)");
-                    Console.WriteLine();
-                }
-            }
 
             m_lastImportSpecComment = CheckForCommentsRight(context);
             m_lastEolImportSpecComment = CheckForEndOfLineComment(context);

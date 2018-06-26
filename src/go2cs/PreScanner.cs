@@ -26,12 +26,14 @@ using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace go2cs
 {
     public partial class PreScanner :ScannerBase
     {
+        private readonly Dictionary<string, (string targetImport, string targetUsing)> m_importAliases = new Dictionary<string, (string targetImport, string targetUsing)>(StringComparer.Ordinal);
         private readonly Dictionary<string, InterfaceInfo> m_interfaces = new Dictionary<string, InterfaceInfo>(StringComparer.Ordinal);
         private readonly Dictionary<string, StructInfo> m_structs = new Dictionary<string, StructInfo>(StringComparer.Ordinal);
         private readonly Dictionary<string, FunctionInfo> m_functions = new Dictionary<string, FunctionInfo>(StringComparer.Ordinal);
@@ -49,16 +51,17 @@ namespace go2cs
             base.Scan(false);
 
             FolderMetadata folderMetadata = GetFolderMetadata(Options, SourceFileName) ?? new FolderMetadata();
-            FileMetadata fileInfo = folderMetadata.Files.GetOrAdd(SourceFileName, new FileMetadata());
+            FileMetadata fileMetadata = folderMetadata.Files.GetOrAdd(SourceFileName, new FileMetadata());
 
-            fileInfo.Package = Package;
-            fileInfo.PackageImport = PackageImport;
-            fileInfo.SourceFileName = SourceFileName;
-            fileInfo.TargetFileName = TargetFileName;
-            fileInfo.Interfaces = m_interfaces;
-            fileInfo.Structs = m_structs;
-            fileInfo.Functions = m_functions;
-            fileInfo.LastUpdate = DateTime.UtcNow;
+            fileMetadata.Package = Package;
+            fileMetadata.PackageImport = PackageImport;
+            fileMetadata.SourceFileName = SourceFileName;
+            fileMetadata.TargetFileName = TargetFileName;
+            fileMetadata.ImportAliases = m_importAliases;
+            fileMetadata.Interfaces = m_interfaces;
+            fileMetadata.Structs = m_structs;
+            fileMetadata.Functions = m_functions;
+            fileMetadata.LastUpdate = DateTime.UtcNow;
 
             BinaryFormatter formatter = new BinaryFormatter();
 
@@ -88,7 +91,7 @@ namespace go2cs
             Console.WriteLine();
 
             ResetScanner();
-            Scan(options, false, CreateNewPreScanner, MetadataOutOfDate);
+            Scan(options, false, CreateNewPreScanner, MetadataOutOfDate, HandleSkippedScan);
         }
 
         private static ScannerBase CreateNewPreScanner(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName)
@@ -114,6 +117,22 @@ namespace go2cs
             message = $"Metadata for \"{fileName}\" is up to date.{Environment.NewLine}";
 
             return false;
+        }
+
+        private static void HandleSkippedScan(Options options, string fileName, bool showParseTree)
+        {
+            if (options.LocalConvertOnly)
+                return;
+
+            // Check meta-data status for imports
+            GetFilePaths(options, fileName, out string sourceFileName, out string _, out string _, out string _);
+            FolderMetadata folderMetadata = GetFolderMetadata(options, sourceFileName);
+
+            if ((object)folderMetadata != null && folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata fileMetadata))
+            {
+                ImportQueue.UnionWith(fileMetadata.ImportAliases.Select(import => import.Value.targetImport));
+                ScanImports(CreateNewPreScanner(null, null, options, fileName), showParseTree, CreateNewPreScanner, MetadataOutOfDate, HandleSkippedScan);
+            }
         }
     }
 }

@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Arguments.cs" />
     <Compile Include="Common.cs" />
+    <Compile Include="PreScanner_ImportDecl.cs" />
     <Compile Include="Metadata\MethodSignature.cs" />
     <Compile Include="Metadata\Signature.cs" />
     <Compile Include="Parser\IFunctionContext.cs" />

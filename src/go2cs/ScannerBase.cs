@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using System.Text.RegularExpressions;
 using static go2cs.Common;
 
@@ -38,9 +39,13 @@ namespace go2cs
 {
     public delegate ScannerBase CreateNewScannerFunction(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName);
     public delegate bool FileNeedsScanFunction(Options options, string fileName, out string message);
+    public delegate void HandleSkippedFileScan(Options options, string fileName, bool showParseTree);
 
     public abstract partial class ScannerBase : GolangBaseListener
     {
+        public const string RootNamespace = "go";
+        public const string ClassSuffix = "_package";
+
         private readonly List<string> m_warnings = new List<string>();
 
         protected readonly HashSet<string> RequiredUsings = new HashSet<string>(StringComparer.Ordinal);
@@ -135,17 +140,17 @@ namespace go2cs
             CurrentImportPath = RemoveSurrounding(ToStringLiteral(context.importPath().STRING_LIT().GetText()));
 
             // Add package to import queue
-            s_importQueue.Add(CurrentImportPath);
+            ImportQueue.Add(CurrentImportPath);
         }
 
         protected static readonly bool IsPosix;
         protected static readonly string GoRoot;
         protected static readonly string GoPath;
         protected static readonly string[] NewLineDelimeters;
+        protected static readonly HashSet<string> ImportQueue;
 
         private static readonly HashSet<string> s_processedFiles;
         private static readonly HashSet<string> s_processedImports;
-        private static readonly HashSet<string> s_importQueue;
         private static string s_currentFolderMetadataFileName;
         private static FolderMetadata s_currentFolderMetadata;
 
@@ -177,7 +182,7 @@ namespace go2cs
 
             s_processedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             s_processedImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            s_importQueue = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            ImportQueue = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
 
         public static int TotalProcessedFiles => s_processedFiles.Count;
@@ -192,13 +197,13 @@ namespace go2cs
         {
             s_processedFiles.Clear();
             s_processedImports.Clear();
-            s_importQueue.Clear();
+            ImportQueue.Clear();
             TotalSkippedFiles = 0;
             TotalSkippedPackages = 0;
             TotalWarnings = 0;
         }
 
-        protected static void Scan(Options options, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null)
+        protected static void Scan(Options options, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null, HandleSkippedFileScan handleSkippedScan = null)
         {
             if ((object)fileNeedsScan == null)
                 fileNeedsScan = DefaultFileNeedsScan;
@@ -210,9 +215,9 @@ namespace go2cs
                 string filePath = Path.GetDirectoryName(sourcePath) ?? "";
 
                 if (filePath.StartsWith(GoRoot, StringComparison.OrdinalIgnoreCase))
-                    ScanFile(Options.Clone(options, options.OverwriteExistingFiles, sourcePath, Path.Combine(options.TargetGoSrcPath, filePath.Substring(GoRoot.Length))), sourcePath, showParseTree, createNewScanner, fileNeedsScan);
+                    ScanFile(Options.Clone(options, options.OverwriteExistingFiles, sourcePath, Path.Combine(options.TargetGoSrcPath, filePath.Substring(GoRoot.Length))), sourcePath, showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
                 else
-                    ScanFile(options, sourcePath, showParseTree, createNewScanner, fileNeedsScan);
+                    ScanFile(options, sourcePath, showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
             }
             else if (Directory.Exists(sourcePath))
             {
@@ -222,7 +227,7 @@ namespace go2cs
                 foreach (string fileName in Directory.EnumerateFiles(sourcePath, "*.go", SearchOption.TopDirectoryOnly))
                 {
                     if (scanFileMatch(fileName))
-                        ScanFile(options, fileName, showParseTree, createNewScanner, fileNeedsScan);
+                        ScanFile(options, fileName, showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
                 }
 
                 if (options.RecurseSubdirectories)
@@ -234,7 +239,7 @@ namespace go2cs
                         if (!string.IsNullOrEmpty(targetDirectory))
                             targetDirectory = Path.Combine(targetDirectory, subDirectory.Substring(sourcePath.Length));
 
-                        Scan(Options.Clone(options, options.OverwriteExistingPackages, subDirectory, targetDirectory), showParseTree, createNewScanner, fileNeedsScan);
+                        Scan(Options.Clone(options, options.OverwriteExistingPackages, subDirectory, targetDirectory), showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
                     }
                 }
             }
@@ -244,7 +249,7 @@ namespace go2cs
             }
         }
 
-        protected static void ScanFile(Options options, string fileName, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null)
+        protected static void ScanFile(Options options, string fileName, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null, HandleSkippedFileScan handleSkippedScan = null)
         {
             if ((object)fileNeedsScan == null)
                 fileNeedsScan = DefaultFileNeedsScan;
@@ -257,6 +262,7 @@ namespace go2cs
             if (!fileNeedsScan(options, fileName, out string message))
             {
                 Console.WriteLine(message);
+                handleSkippedScan?.Invoke(options, fileName, showParseTree);                
                 return;
             }
 
@@ -302,12 +308,12 @@ namespace go2cs
             Console.WriteLine();
 
             if (!options.LocalConvertOnly)
-                ScanImports(scanner, showParseTree, createNewScanner, fileNeedsScan);
+                ScanImports(scanner, showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
         }
 
-        private static void ScanImports(ScannerBase scanner, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan)
+        protected static void ScanImports(ScannerBase scanner, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan, HandleSkippedFileScan handleSkippedScan)
         {
-            string[] imports = s_importQueue.ToArray();
+            string[] imports = ImportQueue.ToArray();
             Options options = scanner.Options;
 
             foreach (string import in imports)
@@ -328,7 +334,7 @@ namespace go2cs
 
                     if (options.ConvertStandardLibrary)
                     {
-                        Scan(Options.Clone(options, options.OverwriteExistingPackages, goRootImport, targetPath), showParseTree, createNewScanner, fileNeedsScan);
+                        Scan(Options.Clone(options, options.OverwriteExistingPackages, goRootImport, targetPath), showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
                     }
                     else
                     {
@@ -345,7 +351,7 @@ namespace go2cs
                     if (!string.IsNullOrEmpty(options.TargetPath))
                         targetPath = Path.Combine(options.TargetPath, importPath);
 
-                    Scan(Options.Clone(options, options.OverwriteExistingPackages, goPathImport, targetPath), showParseTree, createNewScanner, fileNeedsScan);
+                    Scan(Options.Clone(options, options.OverwriteExistingPackages, goPathImport, targetPath), showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
                 }
                 else
                 {
@@ -408,6 +414,36 @@ namespace go2cs
             s_currentFolderMetadata = folderMetadata;
 
             return folderMetadata;
+        }
+
+        protected static FolderMetadata LoadImportMetadata(Options options, string targetImport, out string warning)
+        {
+            int lastSlash = targetImport.LastIndexOf('/');
+            string packageName = SanitizedIdentifier(lastSlash > -1 ? targetImport.Substring(lastSlash + 1) : targetImport);
+            string importPath = $"{AddPathSuffix(targetImport.Replace("/", "\\"))}{packageName}.go";
+            string goRootImport = Path.Combine(options.TargetGoSrcPath, importPath);
+            string goPathImport = Path.Combine(GoPath, importPath);
+            FolderMetadata metadata;
+            warning = default;
+
+            metadata = GetFolderMetadata(options, goRootImport);
+
+            if ((object)metadata != null)
+                return metadata;
+
+            metadata = GetFolderMetadata(options, goPathImport);
+
+            if ((object)metadata != null)
+                return metadata;
+
+            StringBuilder loadWarning = new StringBuilder();
+
+            loadWarning.AppendLine($"WARNING: Failed to locate package metadata for \"{targetImport}\" import at either:");
+            loadWarning.AppendLine($"    {GetFolderMetadataFileName(options, goRootImport)} (from -g target Go source path)");
+            loadWarning.AppendLine($"    {GetFolderMetadataFileName(options, goPathImport)} (from %GOPATH%)");
+
+            warning = loadWarning.ToString();
+            return null;
         }
 
         protected static string GetValidIdentifierName(string identifier)

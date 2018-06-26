@@ -1,8 +1,7 @@
-// package main -- go2cs converted at 2018 June 25 19:10:12 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\SortArrayType.go
+// package main -- go2cs converted at 2018 June 26 10:56:13 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\SortArrayType.go
 
-using fmt = go.fmt_package;
-using sort = go.sort_package;
+using fmt = go.fmt_package;using sort = go.sort_package;using fmt = go.fmt_package;using sort = go.sort_package;
 using static go.BuiltInFunctions;
 
 namespace go

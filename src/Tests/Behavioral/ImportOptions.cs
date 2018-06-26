@@ -1,12 +1,7 @@
-// package main -- go2cs converted at 2018 June 25 19:10:12 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\ImportOptions.go
+// package main -- go2cs converted at 2018 June 26 10:56:12 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\ImportOptions.go
 
-using fmt = go.fmt_package;
-using _math_ = go.math_package;
-using _file_ = go.path.file_package;
-using static go.math.rand_package;
-using os = go.os_package;
-using @implicit = go.text.tabwriter_package;
+using fmt = go.fmt_package;using _math_ = go.math_package;using _file_ = go.path.file_package;using static go.math.rand_package;using os = go.os_package;using @implicit = go.text.tabwriter_package;
 using static go.BuiltInFunctions;
 
 namespace go
