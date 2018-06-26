@@ -39,13 +39,20 @@ namespace go2cs
             
             if (exitCode == 0)
             {
-                Console.WriteLine($"Converted {ScannerBase.TotalProcessedFiles:N0} Go files to C# with {ScannerBase.TotalWarnings:N0} total warnings");
+                Console.WriteLine($"Conversion complete for: go2cs {string.Join(" ", args)}");
+                Console.WriteLine();
+                Console.WriteLine($"Updated {PreScanner.TotalMetadataUpdates:N0} metadata files, {PreScanner.TotalUpToDateMetadata:N0} already up-to-date");
 
-                if ((!options.OverwriteExistingFiles || !options.OverwriteExistingPackages) && ScannerBase.TotalSkippedFiles > 0)
-                    Console.WriteLine($"Skipped {ScannerBase.TotalSkippedFiles:N0} already converted files (-o or -i option not set)");
+                if (!options.OnlyUpdateMetadata)
+                {
+                    Console.WriteLine($"Converted {ScannerBase.TotalProcessedFiles:N0} Go files to C# with {ScannerBase.TotalWarnings:N0} total warnings");
 
-                if (!options.ConvertStandardLibrary && ScannerBase.TotalSkippedPackages > 0)
-                    Console.WriteLine($"Skipped conversion of {ScannerBase.TotalSkippedPackages:N0} standard library packages (-s option not set)");
+                    if ((!options.OverwriteExistingFiles || !options.OverwriteExistingPackages) && ScannerBase.TotalSkippedFiles > 0)
+                        Console.WriteLine($"Skipped {ScannerBase.TotalSkippedFiles:N0} already converted files (-o or -i option not set)");
+
+                    if (!options.ConvertStandardLibrary && ScannerBase.TotalSkippedPackages > 0)
+                        Console.WriteLine($"Skipped conversion of {ScannerBase.TotalSkippedPackages:N0} standard library packages (-s option not set)");
+                }
 
                 Console.WriteLine($"Processing time: {DateTime.UtcNow - startTime}");
             }
@@ -61,7 +68,6 @@ namespace go2cs
             Common.RestoreGoUtilSources(options.TargetGoSrcPath);
             PreScanner.Scan(options);
             Converter.Convert(options);
-            Converter.WriteProjectFiles(options);
             return 0;
 #else
             int exitCode = 0;
@@ -71,7 +77,6 @@ namespace go2cs
                 Common.RestoreGoUtilSources(options.TargetGoSrcPath);
                 PreScanner.Scan(options);
                 Converter.Convert(options);
-                Converter.WriteProjectFiles(options);
             }
             catch (TypeInitializationException ex)
             {

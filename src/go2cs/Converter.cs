@@ -129,8 +129,12 @@ namespace go2cs
 
         public static void Convert(Options options)
         {
+            if (options.OnlyUpdateMetadata)
+                return;
+
             ResetScanner();
             Scan(options, options.ShowParseTree, CreateNewConverter);
+            WriteProjectFiles(options);
         }
 
         private static ScannerBase CreateNewConverter(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName)
@@ -138,7 +142,7 @@ namespace go2cs
             return new Converter(tokenStream, parser, options, fileName);
         }
 
-        public static void WriteProjectFiles(Options options)
+        private static void WriteProjectFiles(Options options)
         {
             // Map of package names to list of package path and file names
             Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData;

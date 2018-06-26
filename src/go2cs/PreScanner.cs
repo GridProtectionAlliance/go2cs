@@ -29,8 +29,17 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 
+#pragma warning disable SCS0018 // Path traversal
+
 namespace go2cs
 {
+    /// <summary>
+    /// Pre-scanner is used to create meta-data dictionaries of Go source code.
+    /// </summary>
+    /// <remarks>
+    /// A full pre-scan of source code is needed in order to properly handle promotions within
+    /// interfaces and structures.
+    /// </remarks>
     public partial class PreScanner :ScannerBase
     {
         private readonly Dictionary<string, (string targetImport, string targetUsing)> m_importAliases = new Dictionary<string, (string targetImport, string targetUsing)>(StringComparer.Ordinal);
@@ -85,6 +94,10 @@ namespace go2cs
             Console.WriteLine();
         }
 
+        public static int TotalUpToDateMetadata { get; private set; }
+
+        public static int TotalMetadataUpdates { get; private set; }
+
         public static void Scan(Options options)
         {
             Console.WriteLine("Starting Go code pre-scan to update metadata...");
@@ -92,6 +105,8 @@ namespace go2cs
 
             ResetScanner();
             Scan(options, false, CreateNewPreScanner, MetadataOutOfDate, HandleSkippedScan);
+
+            TotalUpToDateMetadata = TotalProcessedFiles - TotalMetadataUpdates;
         }
 
         private static ScannerBase CreateNewPreScanner(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName)
@@ -102,6 +117,7 @@ namespace go2cs
         private static bool MetadataOutOfDate(Options options, string fileName, out string message)
         {
             message = null;
+            TotalMetadataUpdates++;
 
             if (options.ForceMetadataUpdate)
                 return true;
@@ -115,6 +131,7 @@ namespace go2cs
                 return true;
 
             message = $"Metadata for \"{fileName}\" is up to date.{Environment.NewLine}";
+            TotalMetadataUpdates--;
 
             return false;
         }

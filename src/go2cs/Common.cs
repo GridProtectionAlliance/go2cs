@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //******************************************************************************************************
+// ReSharper disable UnusedMember.Global
 
 using System;
 using System.CodeDom;
@@ -31,6 +32,9 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
+
+#pragma warning disable SCS0006 // Weak hash
+#pragma warning disable SCS0018 // Path traversal
 
 namespace go2cs
 {
@@ -50,6 +54,8 @@ namespace go2cs
 
         private static readonly CodeGeneratorOptions s_generatorOptions;
 
+        private static readonly char[] s_dirVolChars;
+
         static Common()
         {
             EntryAssembly = Assembly.GetEntryAssembly();
@@ -68,6 +74,7 @@ namespace go2cs
 
             s_provider = CodeDomProvider.CreateProvider("CSharp");
             s_generatorOptions = new CodeGeneratorOptions { IndentString = "    " };
+            s_dirVolChars = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, Path.VolumeSeparatorChar };
         }
 
         public static void RestoreGoUtilSources(string targetPath)
@@ -210,13 +217,12 @@ namespace go2cs
                 throw new ArgumentNullException(nameof(filePath));
 
             int index;
-            char[] dirVolChars = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, Path.VolumeSeparatorChar };
 
             // Remove file name and trailing directory separator character from the file path
             filePath = RemovePathSuffix(GetDirectoryName(filePath));
 
             // Keep going through the file path until all directory separator characters are removed
-            while ((index = filePath.IndexOfAny(dirVolChars)) > -1)
+            while ((index = filePath.IndexOfAny(s_dirVolChars)) > -1)
                 filePath = filePath.Substring(index + 1);
 
             return filePath;

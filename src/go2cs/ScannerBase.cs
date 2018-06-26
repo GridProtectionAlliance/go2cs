@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //******************************************************************************************************
+// ReSharper disable UnusedMember.Global
 
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
@@ -34,6 +35,7 @@ using System.Text.RegularExpressions;
 using static go2cs.Common;
 
 #pragma warning disable SCS0018 // Path traversal
+#pragma warning disable SCS0028 // Deserialization
 
 namespace go2cs
 {
@@ -185,7 +187,7 @@ namespace go2cs
             ImportQueue = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public static int TotalProcessedFiles => s_processedFiles.Count;
+        public static int TotalProcessedFiles => s_processedFiles.Count - TotalSkippedFiles;
 
         public static int TotalSkippedFiles { get; private set; }
 
@@ -368,7 +370,7 @@ namespace go2cs
             sourceFileName = Path.GetFullPath(fileName);
             sourceFilePath = Path.GetDirectoryName(sourceFileName) ?? "";
             targetFileName = $"{Path.GetFileNameWithoutExtension(sourceFileName)}.cs";
-            targetFilePath = string.IsNullOrWhiteSpace(options.TargetPath) ? sourceFilePath : Path.GetFullPath(options.TargetPath);
+            targetFilePath = string.IsNullOrWhiteSpace(options.TargetPath) || sourceFilePath.StartsWith(options.TargetGoSrcPath) ? sourceFilePath : Path.GetFullPath(options.TargetPath);
 
             if (!Directory.Exists(targetFilePath))
                 Directory.CreateDirectory(targetFilePath);
@@ -419,7 +421,7 @@ namespace go2cs
         protected static FolderMetadata LoadImportMetadata(Options options, string targetImport, out string warning)
         {
             int lastSlash = targetImport.LastIndexOf('/');
-            string packageName = SanitizedIdentifier(lastSlash > -1 ? targetImport.Substring(lastSlash + 1) : targetImport);
+            string packageName = lastSlash > -1 ? targetImport.Substring(lastSlash + 1) : targetImport;
             string importPath = $"{AddPathSuffix(targetImport.Replace("/", "\\"))}{packageName}.go";
             string goRootImport = Path.Combine(options.TargetGoSrcPath, importPath);
             string goPathImport = Path.Combine(GoPath, importPath);
@@ -439,7 +441,7 @@ namespace go2cs
             StringBuilder loadWarning = new StringBuilder();
 
             loadWarning.AppendLine($"WARNING: Failed to locate package metadata for \"{targetImport}\" import at either:");
-            loadWarning.AppendLine($"    {GetFolderMetadataFileName(options, goRootImport)} (from -g target Go source path)");
+            loadWarning.AppendLine($"    {GetFolderMetadataFileName(options, goRootImport)} (from -g Go source target path)");
             loadWarning.AppendLine($"    {GetFolderMetadataFileName(options, goPathImport)} (from %GOPATH%)");
 
             warning = loadWarning.ToString();

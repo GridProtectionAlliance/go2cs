@@ -88,6 +88,12 @@ namespace go2cs
             get;
         }
 
+        [Option('u', Required = false, Default = false, HelpText = "Set to only update pre-scan metadata and skip conversion operations.")]
+        public bool OnlyUpdateMetadata
+        {
+            get;
+        }
+
         [Option('g', Required = false, Default = DefaultTargetGoSrcPath, HelpText = "Target path for converted Go standard library source files.")]
         public string TargetGoSrcPath
         {
@@ -115,6 +121,7 @@ namespace go2cs
             bool convertStandardLibrary,
             bool recurseSubdirectories,
             bool forceMetadataUpdate,
+            bool onlyUpdateMetadata,
             string targetGoSrcPath,
             string sourcePath,
             string targetPath)
@@ -133,6 +140,7 @@ namespace go2cs
             ConvertStandardLibrary = convertStandardLibrary;
             RecurseSubdirectories = recurseSubdirectories;
             ForceMetadataUpdate = forceMetadataUpdate;
+            OnlyUpdateMetadata = onlyUpdateMetadata;
             TargetGoSrcPath = AddPathSuffix(Path.GetFullPath(Environment.ExpandEnvironmentVariables(targetGoSrcPath)));
             SourcePath = sourcePath == null ? null : Environment.ExpandEnvironmentVariables(sourcePath);
             TargetPath = targetPath == null ? null : Environment.ExpandEnvironmentVariables(targetPath);
@@ -151,6 +159,7 @@ namespace go2cs
             ConvertStandardLibrary = convertStandardLibrary;
             RecurseSubdirectories = recurseSubdirectories;
             ForceMetadataUpdate = false;
+            OnlyUpdateMetadata = false;
             TargetGoSrcPath = null;
             SourcePath = sourcePath;
             TargetPath = null;
@@ -168,6 +177,7 @@ namespace go2cs
                 options.ConvertStandardLibrary,
                 options.RecurseSubdirectories,
                 options.ForceMetadataUpdate,
+                options.OnlyUpdateMetadata,
                 options.TargetGoSrcPath, 
                 sourcePath, 
                 targetPath);
