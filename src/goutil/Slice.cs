@@ -22,6 +22,8 @@
 //          Copyright (c) Microsoft Corporation.  All rights reserved.
 //
 //******************************************************************************************************
+// ReSharper disable CheckNamespace
+// ReSharper disable UnusedMember.Global
 
 using System;
 using System.Collections;

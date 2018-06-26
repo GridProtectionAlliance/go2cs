@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //******************************************************************************************************
+// ReSharper disable CheckNamespace
 
 using System.Runtime.CompilerServices;
 

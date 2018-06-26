@@ -20,6 +20,9 @@
 //       Generated original version of source code.
 //
 //******************************************************************************************************
+// ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedMember.Global
 
 using System;
 using System.Diagnostics;
