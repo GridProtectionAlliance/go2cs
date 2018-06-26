@@ -92,7 +92,7 @@ namespace go2cs
             if (signature.Parameters.Length == 0)
                 parametersSignature = $"({receiverParametersSignature})";
             else
-                parametersSignature = $"({receiverParametersSignature}, {parametersSignature}";
+                parametersSignature = $"({receiverParametersSignature}, {parametersSignature})";
 
             // Replace function markers
             m_targetFile.Replace(m_functionResultTypeMarker, resultSignature);
