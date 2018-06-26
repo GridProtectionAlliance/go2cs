@@ -40,11 +40,10 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InterfaceImplementation_AnimalInterface.cs" />
     <Compile Include="InterfaceInheritance.cs" />
     <Compile Include="InterfaceInheritance_IInterface.cs" />
     <Compile Include="InterfaceInheritance_VInterface.cs" />
-    <Compile Include="InterfaceInheritance_AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

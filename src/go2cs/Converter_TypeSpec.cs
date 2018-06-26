@@ -197,35 +197,11 @@ namespace go2cs
             interfaceInfo = default;
             fullName = default;
 
-            // Handle built-in error interface as a special case  - this is currently the only built-in interface
+            // Handle built-in error interface as a special case
             if (interfaceName.Equals("error", StringComparison.Ordinal))
             {
-                interfaceInfo = new InterfaceInfo
-                {
-                    Name = "error",
-                    Methods = new[] { new FunctionSignature
-                    {
-                        Name = "Error",
-                        Signature = new Signature
-                        {
-                            Parameters = new ParameterInfo[0],
-                            Result = new[] { new ParameterInfo
-                            {
-                                Name = "",
-                                Type = new TypeInfo
-                                {
-                                    Name = "string",
-                                    PrimitiveName = ConvertToPrimitiveType("string"),
-                                    FrameworkName = ConvertToFrameworkType("string"),
-                                    TypeClass = TypeClass.Simple
-                                }
-                            }}
-                        }
-                    }}
-                };
-
+                interfaceInfo = InterfaceInfo.error();
                 fullName = "go.BuiltInFunctions.error";
-
                 return true;
             }
 
@@ -233,6 +209,26 @@ namespace go2cs
             {
                 fullName = $"{GetPackageNamespace(PackageImport)}.{SanitizedIdentifier(interfaceName)}";
                 return true;
+            }
+
+            string[] qualifiedIdentifierParts = interfaceName.Split('.');
+
+            if (qualifiedIdentifierParts.Length == 2)
+            {
+                string alias = qualifiedIdentifierParts[0];
+                string identifier = qualifiedIdentifierParts[1];
+
+                if (ImportAliases.TryGetValue(alias, out (string targetImport, string targetUsing) import))
+                {
+                    if (ImportMetadata.TryGetValue(import.targetImport, out FolderMetadata folderMetadata))
+                    {
+                        if (TryFindIntefaceInfo(folderMetadata, identifier, out FileMetadata fileMetadata, out interfaceInfo))
+                        {
+                            fullName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{SanitizedIdentifier(identifier)}";
+                            return true;
+                        }
+                    }
+                }
             }
 
             foreach (KeyValuePair<string, FolderMetadata> importMetadata in ImportMetadata)

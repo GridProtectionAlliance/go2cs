@@ -24,6 +24,8 @@
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using static go2cs.Common;
 
 namespace go2cs
 {
@@ -33,15 +35,29 @@ namespace go2cs
         private string m_lastImportSpecComment;
         private string m_lastEolImportSpecComment = "";
 
-        public override void ExitImportDecl(GolangParser.ImportDeclContext context)
+        public override void EnterImportSpec(GolangParser.ImportSpecContext context)
         {
-            foreach (KeyValuePair<string, (string targetImport, string targetUsing)> import in ImportAliases)
-            {
-                string alias = import.Key;
-                string targetUsing = import.Value.targetUsing;
-                string targetImport = import.Value.targetImport;
+            // Base class parses current import package path
+            base.EnterImportSpec(context);
 
-                if (alias.StartsWith("static", StringComparison.Ordinal))
+            if (!m_firstImportSpec)
+            {
+                if (!string.IsNullOrEmpty(m_lastImportSpecComment))
+                    m_targetFile.Append(m_lastImportSpecComment);
+
+                if (!WroteCommentWithLineFeed)
+                    m_targetFile.AppendLine();
+            }
+
+            KeyValuePair<string, (string targetImport, string targetUsing)> importAlias = ImportAliases.FirstOrDefault(import => import.Value.targetImport.Equals(CurrentImportPath));
+
+            if (!string.IsNullOrEmpty(importAlias.Key))
+            {
+                string alias = importAlias.Key;
+                string targetUsing = importAlias.Value.targetUsing;
+                string targetImport = importAlias.Value.targetImport;
+
+                if (alias.StartsWith("static ", StringComparison.Ordinal))
                     m_targetFile.Append($"using {alias};");
                 else
                     m_targetFile.Append($"using {alias} = {targetUsing};");
@@ -53,12 +69,11 @@ namespace go2cs
                 else
                     ImportMetadata[targetImport] = metadata;
             }
-        }
-
-        public override void EnterImportSpec(GolangParser.ImportSpecContext context)
-        {
-            // Base class parses current import package path
-            base.EnterImportSpec(context);
+            else
+            {
+                m_targetFile.Append($"//using {RootNamespace}.{string.Join(".", CurrentImportPath.Split('/').Select(SanitizedIdentifier))}{ClassSuffix}; // ?? metadata not found");
+                AddWarning(context, $"Could not find import metadata for \"{CurrentImportPath}\"");
+            }
 
             m_lastImportSpecComment = CheckForCommentsRight(context);
             m_lastEolImportSpecComment = CheckForEndOfLineComment(context);

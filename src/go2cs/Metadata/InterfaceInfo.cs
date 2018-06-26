@@ -45,12 +45,46 @@ namespace go2cs.Metadata
 
         public IEnumerable<string> GetInheritedInterfaceNames()
         {
-            return GetInheritedInterfaces().Select(method => method.Name);
+            return GetInheritedInterfaces().Select(method => method.Signature.Result[0].Type.PrimitiveName);
         }
 
         public string GenerateInheritedInterfaceList()
         {
             return string.Join(", ", GetInheritedInterfaceNames());
+        }
+
+        public static InterfaceInfo error()
+        {
+            // Built-in error interface is a special case, this is currently the only built-in interface
+            return new InterfaceInfo
+            {
+                Name = "error",
+                Methods = new[]
+                {
+                    new FunctionSignature
+                    {
+                        Name = "Error",
+                        Signature = new Signature
+                        {
+                            Parameters = new ParameterInfo[0],
+                            Result = new[]
+                            {
+                                new ParameterInfo
+                                {
+                                    Name = "",
+                                    Type = new TypeInfo
+                                    {
+                                        Name = "string",
+                                        PrimitiveName = "string",
+                                        FrameworkName = "System.String",
+                                        TypeClass = TypeClass.Simple
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
         }
     }
 }

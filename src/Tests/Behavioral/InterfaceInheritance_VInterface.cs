@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 26 10:56:13 UTC
+//     Generated on 2018 June 26 17:29:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ namespace go
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
         [PromotedInterface(typeof(go.main_package.I))]
+        [PromotedInterface(typeof(go.fmt_package.Stringer))]
         [PromotedInterface(typeof(go.BuiltInFunctions.error))]        
         public partial interface V
         {
@@ -48,6 +49,15 @@ namespace go
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void M() => s_MByRef?.Invoke(ref m_target) ?? s_MByVal(m_target);
 
+            private delegate string StringByVal(T value);
+            private delegate string StringByRef(ref T value);
+
+            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByRef s_StringByRef;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public string String() => s_StringByRef?.Invoke(ref m_target) ?? s_StringByVal(m_target);
+
             private delegate string ErrorByVal(T value);
             private delegate string ErrorByRef(ref T value);
 
@@ -73,7 +83,7 @@ namespace go
                         s_NByVal = extensionMethod.CreateStaticDelegate(typeof(NByVal)) as NByVal;
                 }
 
-                // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
+                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_NByRef == null && (object)s_NByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement V.N function");
 
@@ -87,9 +97,23 @@ namespace go
                         s_MByVal = extensionMethod.CreateStaticDelegate(typeof(MByVal)) as MByVal;
                 }
 
-                // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
+                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_MByRef == null && (object)s_MByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement V.M function");
+
+                extensionMethod = targetType.GetExtensionMethod("String");
+
+                if ((object)extensionMethod != null)
+                {
+                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+
+                    if ((object)s_StringByRef == null)
+                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
+                }
+
+                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
+                if ((object)s_StringByRef == null && (object)s_StringByVal == null)
+                    throw new NotImplementedException($"{targetType.Name} does not implement V.String function");
 
                 extensionMethod = targetType.GetExtensionMethod("Error");
 
@@ -101,7 +125,7 @@ namespace go
                         s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
                 }
 
-                // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
+                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_ErrorByRef == null && (object)s_ErrorByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement V.Error function");
             }

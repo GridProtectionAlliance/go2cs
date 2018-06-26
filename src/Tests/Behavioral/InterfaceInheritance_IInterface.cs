@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 26 10:56:13 UTC
+//     Generated on 2018 June 26 17:29:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace go
                         s_MByVal = extensionMethod.CreateStaticDelegate(typeof(MByVal)) as MByVal;
                 }
 
-                // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
+                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_MByRef == null && (object)s_MByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement I.M function");
             }

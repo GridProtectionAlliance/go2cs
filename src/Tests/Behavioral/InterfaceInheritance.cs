@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 June 26 10:56:13 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceInheritance.go
+// package main -- go2cs converted at 2018 June 26 17:29:46 UTC
+// Original source: D:\Projects\go2cs\src\Tests\Behavioral\InterfaceInheritance.go
 
 using fmt = go.fmt_package;
 using static go.BuiltInFunctions;
@@ -56,7 +56,7 @@ namespace go
             void M();
         }
 
-        public partial interface V : I, Stringer, error
+        public partial interface V : I, fmt.Stringer, error
         {
             void N();
         }
