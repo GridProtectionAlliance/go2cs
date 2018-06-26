@@ -41,8 +41,16 @@ namespace go2cs
 {
     public delegate ScannerBase CreateNewScannerFunction(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName);
     public delegate bool FileNeedsScanFunction(Options options, string fileName, out string message);
-    public delegate void HandleSkippedFileScan(Options options, string fileName, bool showParseTree);
+    public delegate void SkippedFileScanFunction(Options options, string fileName, bool showParseTree);
 
+    /// <summary>
+    /// Represents common Antlr scanning functionality.
+    /// </summary>
+    /// <remarks>
+    /// A full source code pre-scan is needed in order to be aware of promotions in structures and
+    /// interfaces. This base class represents the common scanning code that is used by both the
+    /// <see cref="PreScanner"/> and <see cref="Converter"/> classes.
+    /// </remarks>
     public abstract partial class ScannerBase : GolangBaseListener
     {
         public const string RootNamespace = "go";
@@ -136,15 +144,6 @@ namespace go2cs
         {
         }
 
-        public override void EnterImportSpec(GolangParser.ImportSpecContext context)
-        {
-            // Remove quotes from package name
-            CurrentImportPath = RemoveSurrounding(ToStringLiteral(context.importPath().STRING_LIT().GetText()));
-
-            // Add package to import queue
-            ImportQueue.Add(CurrentImportPath);
-        }
-
         protected static readonly bool IsPosix;
         protected static readonly string GoRoot;
         protected static readonly string GoPath;
@@ -205,7 +204,7 @@ namespace go2cs
             TotalWarnings = 0;
         }
 
-        protected static void Scan(Options options, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null, HandleSkippedFileScan handleSkippedScan = null)
+        protected static void Scan(Options options, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null, SkippedFileScanFunction handleSkippedScan = null)
         {
             if ((object)fileNeedsScan == null)
                 fileNeedsScan = DefaultFileNeedsScan;
@@ -251,7 +250,7 @@ namespace go2cs
             }
         }
 
-        protected static void ScanFile(Options options, string fileName, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null, HandleSkippedFileScan handleSkippedScan = null)
+        protected static void ScanFile(Options options, string fileName, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null, SkippedFileScanFunction handleSkippedScan = null)
         {
             if ((object)fileNeedsScan == null)
                 fileNeedsScan = DefaultFileNeedsScan;
@@ -313,7 +312,7 @@ namespace go2cs
                 ScanImports(scanner, showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
         }
 
-        protected static void ScanImports(ScannerBase scanner, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan, HandleSkippedFileScan handleSkippedScan)
+        protected static void ScanImports(ScannerBase scanner, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null, SkippedFileScanFunction handleSkippedScan = null)
         {
             string[] imports = ImportQueue.ToArray();
             Options options = scanner.Options;

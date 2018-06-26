@@ -1,0 +1,25 @@
+﻿<# // This template creates the function declarations in a <PackageName>_<StructName>Struct.cs file #>
+<#@ template language="C#" #>
+
+
+            // <#=PromotedField#>.<#=FunctionName#> function promotion
+            private delegate <#=ResultType#> <#=FunctionName#>ByVal(T value<#=PrefixedParameterSignature#>);
+            private delegate <#=ResultType#> <#=FunctionName#>ByRef(ref T value<#=PrefixedParameterSignature#>);
+
+            private static readonly <#=FunctionName#>ByVal s_<#=FunctionName#>ByVal;
+            private static readonly <#=FunctionName#>ByRef s_<#=FunctionName#>ByRef;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            <#=Scope#> <#=ResultType#> <#=FunctionName#>(<#=ParameterSignature#>) => s_<#=FunctionName#>ByRef?.Invoke(ref this<#=ParameterNames#>) ?? s_<#=FunctionName#>ByVal?.Invoke(this<#=ParameterNames#>) ?? <#=PromotedField#>?.<#=FunctionName#>(<#=UnprefixedParameterNames#>) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);<#+
+// Template Parameters
+public string PromotedField;
+public string FunctionName;
+public string Scope;
+public string ParameterSignature; // e.g.: "double p0, string p1"
+public string ParameterNames;     // (comma prefixed), e.g.: ", p0, p1" -- do not prefix for 0 parameters
+public string ParameterTypes;     // (comma prefixed), e.g.: ", double, string" -- do not prefix for 0 parameters
+public string ResultType;
+
+private string PrefixedParameterSignature => string.IsNullOrEmpty(ParameterSignature) ? "" : $", {ParameterSignature}";
+private string UnprefixedParameterNames => string.IsNullOrEmpty(ParameterNames) ? "" : ParameterNames.Substring(2);
+#>

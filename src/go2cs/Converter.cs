@@ -35,6 +35,9 @@ using static go2cs.Common;
 
 namespace go2cs
 {
+    /// <summary>
+    /// Represents a converter used to convert Go source code to C#.
+    /// </summary>
     public partial class Converter : ScannerBase
     {
         public const string StandardLibrary = "GoStandardLibrary";
@@ -102,7 +105,7 @@ namespace go2cs
         protected override void AfterScan()
         {
             if (!PackageImport.Equals("main"))
-                Console.WriteLine($"    import \"{PackageImport}\" ==> using {PackageUsing}");
+                Console.WriteLine($"        import \"{PackageImport}\" ==> using {PackageUsing}");
 
             Console.WriteLine("    Finished.");
         }

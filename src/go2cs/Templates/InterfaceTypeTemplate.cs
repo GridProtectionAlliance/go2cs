@@ -88,9 +88,9 @@ if (!NamespacePrefix.Equals("go")) {
             
             #line 28 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
 
-        foreach (string inheritedInterface in InheritedTypeNames)
+        foreach (string inheritedTypeName in InheritedTypeNames)
         {
-            if (!string.IsNullOrEmpty(inheritedInterface))
+            if (!string.IsNullOrEmpty(inheritedTypeName))
             {
         
             
@@ -99,7 +99,7 @@ if (!NamespacePrefix.Equals("go")) {
             this.Write("\r\n        [PromotedInterface(typeof(");
             
             #line 35 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(inheritedInterface));
+            this.Write(this.ToStringHelper.ToStringWithCulture(inheritedTypeName));
             
             #line default
             #line hidden

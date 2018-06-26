@@ -63,20 +63,17 @@ namespace go
             }
         }
 
-        public partial struct MyCustomError
-        {
-            public string Message;
-
-            public Abser Abser;
-
-            public MyError MyError;
-        }
-
-        [PromotedInterface(typeof(Abser))]
         [PromotedStruct(typeof(MyError))]
         public partial struct MyCustomError : Abser
         {
-            // Abser interface promotion
+            public string Message;
+        }
+
+        [PromotedInterface(typeof(Abser))]
+        public partial struct MyCustomError
+        {
+            public Abser Abser;
+
             private delegate double AbsByVal(MyCustomError value);
             private delegate double AbsByRef(ref MyCustomError value);
 
@@ -85,6 +82,15 @@ namespace go
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public double Abs() => s_AbsByRef?.Invoke(ref this) ?? s_AbsByVal?.Invoke(this) ?? Abser?.Abs() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+
+            // MyError structure promotion
+            private readonly Ref<MyError> _MyErrorRef;
+
+            public ref MyError MyError => ref _MyErrorRef.Value;
+
+            public ref DateTime When => ref _MyErrorRef.Value.When;
+
+            public ref string What => ref _MyErrorRef.Value.What;
 
             [DebuggerStepperBoundary]
             static MyCustomError()
@@ -104,32 +110,19 @@ namespace go
                 }
             }
 
-            // MyError structure promotion
-            public DateTime When
-            {
-                get => MyError.When;
-                set => MyError.When = value;
-            }
-
-            public string What
-            {
-                get => MyError.What;
-                set => MyError.What = value;
-            }
-
             // Constructors
             public MyCustomError(NilType _)
             {
                 this.Message = "";
                 this.Abser = null;
-                this.MyError = new MyError(nil);
+                this._MyErrorRef = new Ref<MyError>(new MyError(nil));
             }
 
             public MyCustomError(string Message, Abser Abser, MyError MyError)
             {
                 this.Message = Message;
                 this.Abser = Abser;
-                this.MyError = MyError;
+                this._MyErrorRef = new Ref<MyError>(MyError);
             }
         }
 

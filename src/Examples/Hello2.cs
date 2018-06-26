@@ -5,8 +5,8 @@
 // Package utf8 implements functions and constants to support text encoded in
 // UTF-8. It includes functions to translate between runes and UTF-8 byte sequences.
 
-// package main -- go2cs converted at 2018 June 16 17:46:02 UTC
-// Original source: C:\Projects\go2cs\src\Examples\Hello2.go
+// package main -- go2cs converted at 2018 June 26 19:23:09 UTC
+// Original source: D:\Projects\go2cs\src\Examples\Hello2.go
 
 // Package comments
 
@@ -15,11 +15,10 @@ using fmt = go.fmt_package; /* comment after import */
 using rand = go.math.rand_package; // comment after import 2
 using another = go.another_package;
 using noy = go.test.and.two.noy_package;
-
 using static go.BuiltInFunctions;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading;
+using System;
 
 namespace go
 {
@@ -43,78 +42,47 @@ namespace go
 
 
 
-        public partial struct Person // Dictionary<string, string>
-        {
-        }
 
-        public partial struct Job // Dictionary<string, string>
-        {
-        }
 
-        private partial struct span
-        {
-            [Description("start field")]
-            public long start;
-            [Description("end field")]
-            public long end;
-            [Description("another field")]
-            public long another;
-        }
 
-        public partial struct User
-        {
-            public long Id;
-            public string Name;
-        }
 
-        public partial struct Employee
-        {
-            public Title User;
-            public Department @string;
-            public string @string;
-        }
 
         /* comment before function */
-        private static void Main() => func((defer, panic, recover) =>
+        private static void Main()
         {
-            ThreadPool.QueueUserWorkItem(state => "DoIt(\"Yup!\")");            fmt.Println("Hello, 世界")test(12)goDoIt("Yup!")fmt.Println("My favorite number is",rand.Intn(10))fmt.Println("My second favorite number is",rand.Intn(10))
-        });
+            ThreadPool.QueueUserWorkItem(state => DoIt("Yup!"));            fmt.Println("Hello, 世界")test(12)goDoIt("Yup!")fmt.Println("My favorite number is",rand.Intn(10))fmt.Println("My second favorite number is",rand.Intn(10))
+        }
 
         /* comment after function
         Hello!
         */
         // Test function
-        private static void test(long a, short b, Slice<byte> c) => func((defer, panic, recover) =>
+        private static void test(long a, short b, Slice<byte> c)
         {
             fmt.Println(a)
-        });
+        }
 
-        private static (message @string, err error) noComment(string ya, long andAnother, string _p2) => func((defer, panic, recover) =>
+        private static (message, err) noComment(string ya, long andAnother, string _p0)
         {
 
-        });
+        }
 
         /* comment - another */
-        public static long DoIt(string b, params long[] _p1) => func((defer, panic, recover) =>
+        public static long DoIt(string b, long _p0)
         {
             fmt.Println(b)return0
-        });
+        }
 
         // FieldsFunc splits the string s at each run of Unicode code points c satisfying f(c)
         // and returns an array of slices of s. If all code points in s satisfy f(c) or the
         // string is empty, an empty slice is returned.
         // FieldsFunc makes no guarantees about the order in which it calls f(c).
         // If f does not return consistent results for a given c, FieldsFunc may crash.
-        public static Slice<string> FieldsFunc(string s, Func<char, bool> f) => func((defer, panic, recover) =>
+        public static Slice<string> FieldsFunc(string s, Func<char, bool> f)
         {
 
-            private partial struct span
-            {
-                public long start;
-                public long end;
-            }
             typespanstruct{startintendint}spans:=make([]span,0,32)wasField:=falsefromIndex:=0ifwasField{spans=append(spans,span{fromIndex,len(s)})}a:=make([]string,len(spans))returna
-        });
+        }
 
         /* last comment
 

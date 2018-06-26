@@ -34,7 +34,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 namespace go2cs
 {
     /// <summary>
-    /// Pre-scanner is used to create meta-data dictionaries of Go source code.
+    /// Represents a pre-scanner used to create meta-data dictionaries of Go source code.
     /// </summary>
     /// <remarks>
     /// A full pre-scan of source code is needed in order to properly handle promotions within

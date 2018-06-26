@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 16 17:46:03 UTC
+//     Generated on 2018 June 26 19:23:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,11 @@ namespace go
 {
     public static partial class main_package
     {
+        [GeneratedCode("go2cs", "0.1.1.0")]        
+        public partial interface Abser
+        {
+        }
+
         [GeneratedCode("go2cs", "0.1.1.0")]
         [PromotedInterface(typeof(Abser))]
         public struct Abser<T> : Abser
@@ -38,7 +43,7 @@ namespace go
                 Type targetType = typeof(T);
                 MethodInfo extensionMethod;
 
-                extensionMethod = targetType.GetExtensionMethodSearchingPromotions<PromotedStructAttribute>("Abs");
+                extensionMethod = targetType.GetExtensionMethod("Abs");
 
                 if ((object)extensionMethod != null)
                 {
@@ -48,7 +53,7 @@ namespace go
                         s_AbsByVal = extensionMethod.CreateStaticDelegate(typeof(AbsByVal)) as AbsByVal;
                 }
 
-                // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
+                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_AbsByRef == null && (object)s_AbsByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement Abser.Abs function");
             }
@@ -71,7 +76,13 @@ namespace go
         }
 
         [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static Abser Abser_cast<T>(T target) => (Abser<T>)target;
+        public static Abser Abser_cast<T>(T target)
+        {
+            if (typeof(Abser).IsAssignableFrom(typeof(T)))
+                return target as Abser;
+
+            return (Abser<T>)target;
+        }
     }
 }
 

@@ -45,17 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Arguments.cs" />
-    <Compile Include="Common.cs" />
-    <Compile Include="PreScanner_ImportDecl.cs" />
     <Compile Include="Metadata\MethodSignature.cs" />
     <Compile Include="Metadata\Signature.cs" />
-    <Compile Include="Parser\IFunctionContext.cs" />
-    <Compile Include="PreScanner_FunctionDecl.cs" />
-    <Compile Include="ScannerBase_Type.cs" />
-    <Compile Include="PreScanner_TypeSpec.cs" />
-    <Compile Include="PreScanner_PackageClause.cs" />
-    <Compile Include="PreScanner_Type.cs" />
     <Compile Include="Metadata\TypeInfo.cs" />
     <Compile Include="Metadata\FieldInfo.cs" />
     <Compile Include="Metadata\FunctionInfo.cs" />
@@ -66,32 +57,41 @@
     <Compile Include="Metadata\FileMetadata.cs" />
     <Compile Include="Metadata\StructInfo.cs" />
     <Compile Include="Metadata\VariableInfo.cs" />
-    <Compile Include="Options.cs" />
-    <Compile Include="PreScanner.cs" />
-    <Compile Include="Program.cs" />
-    <Content Include="go2cs.ico" />
-    <Compile Include="Converter.cs" />
-    <Compile Include="ScannerBase_Comments.cs" />
-    <Compile Include="Converter_ConstDecl.cs" />
-    <Compile Include="Converter_TypeSpec.cs" />
-    <Compile Include="ScannerBase_Expression.cs" />
-    <Compile Include="ScannerBase_ExpressionList.cs" />
-    <Compile Include="Converter_FunctionDecl.cs" />
-    <Compile Include="Converter_GoStmt.cs" />
-    <Compile Include="ScannerBase_IdentifierList.cs" />
-    <Compile Include="Converter_ImportDecl.cs" />
-    <Compile Include="Converter_MethodDecl.cs" />
-    <Compile Include="Converter_PackageClause.cs" />
-    <Compile Include="ScannerBase_Parameters.cs" />
-    <Compile Include="ScannerBase_Signature.cs" />
-    <Compile Include="Converter_TopLevelDecl.cs" />
-    <Compile Include="DictionaryExtensions.cs" />
+    <Compile Include="Parser\IFunctionContext.cs" />
     <Compile Include="Parser\GolangBaseListener.cs" />
     <Compile Include="Parser\GolangLexer.cs" />
     <Compile Include="Parser\GolangListener.cs" />
     <Compile Include="Parser\GolangParser.cs" />
-    <Compile Include="ParseTreeValues.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Arguments.cs" />
+    <Compile Include="Common.cs" />
+    <Compile Include="Converter.cs" />
+    <Compile Include="Converter_ConstDecl.cs" />
+    <Compile Include="Converter_FunctionDecl.cs" />
+    <Compile Include="Converter_GoStmt.cs" />
+    <Compile Include="Converter_ImportDecl.cs" />
+    <Compile Include="Converter_MethodDecl.cs" />
+    <Compile Include="Converter_PackageClause.cs" />
+    <Compile Include="Converter_TopLevelDecl.cs" />
+    <Compile Include="Converter_TypeSpec.cs" />
+    <Compile Include="DictionaryExtensions.cs" />
+    <Compile Include="Options.cs" />
+    <Compile Include="ParseTreeValues.cs" />
+    <Compile Include="PreScanner.cs" />
+    <Compile Include="PreScanner_ImportDecl.cs" />
+    <Compile Include="PreScanner_FunctionDecl.cs" />
+    <Compile Include="PreScanner_PackageClause.cs" />
+    <Compile Include="PreScanner_Type.cs" />
+    <Compile Include="PreScanner_TypeSpec.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="ScannerBase_Comments.cs" />
+    <Compile Include="ScannerBase_Expression.cs" />
+    <Compile Include="ScannerBase_ExpressionList.cs" />
+    <Compile Include="ScannerBase_IdentifierList.cs" />
+    <Compile Include="ScannerBase_ImportDecl.cs" />
+    <Compile Include="ScannerBase_Parameters.cs" />
+    <Compile Include="ScannerBase_Signature.cs" />
+    <Compile Include="ScannerBase_Type.cs" />
     <Content Include="goutil\README.txt" />
     <Content Include="Parser\README.txt" />
     <None Include="Parser\CompileGrammar.bat" />
@@ -150,19 +150,37 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>InheritedTypeTemplate.tt</DependentUpon>
     </Compile>
+    <Content Include="Templates\StructFuncDeclTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>StructFuncDeclTemplate.cs</LastGenOutput>
+    </Content>
     <Content Include="Templates\InterfaceFuncDeclTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>InterfaceFuncDeclTemplate.cs</LastGenOutput>
     </Content>
+    <Compile Include="Templates\StructFuncDeclTemplate.cs">
+      <DependentUpon>StructFuncDeclTemplate.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Templates\InterfaceFuncDeclTemplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>InterfaceFuncDeclTemplate.tt</DependentUpon>
     </Compile>
+    <Content Include="Templates\StructFuncInitTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>StructFuncInitTemplate.cs</LastGenOutput>
+    </Content>
     <Content Include="Templates\InterfaceFuncInitTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>InterfaceFuncInitTemplate.cs</LastGenOutput>
     </Content>
+    <Compile Include="Templates\StructFuncInitTemplate.cs">
+      <DependentUpon>StructFuncInitTemplate.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Templates\InterfaceFuncInitTemplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

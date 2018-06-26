@@ -29,6 +29,8 @@ using System.IO;
 using System.Linq;
 using static go2cs.Common;
 
+#pragma warning disable SCS0018 // Path traversal
+
 namespace go2cs
 {
     public partial class Converter
@@ -38,10 +40,6 @@ namespace go2cs
             string originalIdentifier = context.IDENTIFIER().GetText();
             string scope = char.IsUpper(originalIdentifier[0]) ? "public" : "private";
             string target = Path.GetFileNameWithoutExtension(TargetFileName);
-
-            //ParseTreeValues<string> m_structFields = new ParseTreeValues<string>();
-            //ParseTreeValues<List<(string functionName, string parameterSignature, string namedParameters, string parameterTypes, string resultType)>> m_interfaceMethods = new ParseTreeValues<List<(string, string, string, string, string)>>();
-
             string identifier = SanitizedIdentifier(originalIdentifier);
 
             if (!m_firstTopLevelDeclaration)
@@ -58,19 +56,21 @@ namespace go2cs
                 RecurseInheritedInterfaces(context, originalIdentifier, interfaceInfo, allMethods, inheritedTypeNames);
 
                 using (StreamWriter writer = File.CreateText(ancillaryInterfaceFileName))
+                {
                     writer.Write(new InterfaceTypeTemplate
-                    {
-                        NamespacePrefix = PackageNamespace,
-                        NamespaceHeader = m_namespaceHeader,
-                        NamespaceFooter = m_namespaceFooter,
-                        PackageName = Package,
-                        InterfaceName = identifier,
-                        Scope = scope,
-                        Interface = interfaceInfo,
-                        InheritedTypeNames = inheritedTypeNames,
-                        Functions = allMethods
-                    }
-                    .TransformText());
+                        {
+                            NamespacePrefix = PackageNamespace,
+                            NamespaceHeader = m_namespaceHeader,
+                            NamespaceFooter = m_namespaceFooter,
+                            PackageName = Package,
+                            InterfaceName = identifier,
+                            Scope = scope,
+                            Interface = interfaceInfo,
+                            InheritedTypeNames = inheritedTypeNames,
+                            Functions = allMethods
+                        }
+                        .TransformText());
+                }
 
                 // Track file name associated with package
                 AddFileToPackage(Package, ancillaryInterfaceFileName, PackageNamespace);

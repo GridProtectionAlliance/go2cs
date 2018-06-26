@@ -40,22 +40,8 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Hello_UserStruct.cs" />
-    <Compile Include="Hello_MyFloatStructOf(double).cs" />
-    <Compile Include="Hello_AccountStruct.cs" />
-    <Compile Include="Hello2_PersonStructOf(Dictionary(string, string)).cs" />
-    <Compile Include="Hello2_JobStructOf(Dictionary(string, string)).cs" />
-    <Compile Include="Hello2_spanStruct.cs" />
-    <Compile Include="Hello2_UserStruct.cs" />
-    <Compile Include="Hello2_EmployeeStruct.cs" />
     <Compile Include="Interfaces_AbserInterface.cs" />
-    <Compile Include="Interfaces_MyFloatStructOf(double).cs" />
-    <Compile Include="Interfaces_VertexStruct.cs" />
-    <Compile Include="Methods2_MyFloatStructOf(double).cs" />
-    <Compile Include="MethodsPointers_VertexStruct.cs" />
     <Compile Include="SlicesOfSlice.cs" />
-    <Compile Include="StructPromoted_DoDadStruct.cs" />
-    <Compile Include="StructPromoted_VertexStruct.cs" />
     <Compile Include="SlicesOfSlice_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -26,13 +26,13 @@ using go;
     public static partial class <#=PackageName#>_package
     {
         [<#=GeneratedCodeAttribute#>]<#
-        foreach (string inheritedInterface in InheritedTypeNames)
+        foreach (string inheritedTypeName in InheritedTypeNames)
         {
-            if (!string.IsNullOrEmpty(inheritedInterface))
+            if (!string.IsNullOrEmpty(inheritedTypeName))
             {
         #>
 
-        [PromotedInterface(typeof(<#=inheritedInterface#>))]<#
+        [PromotedInterface(typeof(<#=inheritedTypeName#>))]<#
             }
         }
         #>

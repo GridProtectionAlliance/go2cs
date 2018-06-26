@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 16 01:56:02 UTC
+//     Generated on 2018 June 26 19:23:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,10 +15,9 @@ using System.Runtime.CompilerServices;
 
 namespace go
 {
-    public static unsafe partial class main_package
+    public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        [PromotedInterface(typeof(Abser))]
         public struct Abser<T> : Abser
         {
             private T m_target;
@@ -48,7 +47,7 @@ namespace go
                         s_AbsByVal = extensionMethod.CreateStaticDelegate(typeof(AbsByVal)) as AbsByVal;
                 }
 
-                // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
+                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_AbsByRef == null && (object)s_AbsByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement Abser.Abs function");
             }
