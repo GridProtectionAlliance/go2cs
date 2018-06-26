@@ -82,7 +82,7 @@
     <Compile Include="Converter_MethodDecl.cs" />
     <Compile Include="Converter_PackageClause.cs" />
     <Compile Include="ScannerBase_Parameters.cs" />
-    <Compile Include="PreScanner_Signature.cs" />
+    <Compile Include="ScannerBase_Signature.cs" />
     <Compile Include="Converter_TopLevelDecl.cs" />
     <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="Parser\GolangBaseListener.cs" />

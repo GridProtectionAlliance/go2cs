@@ -33,6 +33,11 @@ namespace go2cs.Metadata
         public string Name;
         public FunctionSignature[] Methods;
 
+        public IEnumerable<FunctionSignature> GetStandardMethods()
+        {
+            return Methods.Where(method => !method.IsPromoted);
+        }
+
         public IEnumerable<FunctionSignature> GetInheritedInterfaces()
         {
             return Methods.Where(method => method.IsPromoted);

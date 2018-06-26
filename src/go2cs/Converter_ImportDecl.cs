@@ -21,7 +21,10 @@
 //
 //******************************************************************************************************
 
+using System;
+using System.IO;
 using System.Linq;
+using go2cs.Metadata;
 using static go2cs.Common;
 
 namespace go2cs
@@ -30,7 +33,7 @@ namespace go2cs
     {
         private bool m_firstImportSpec = true;
         private string m_lastImportSpecComment;
-        private string m_lastEolImportSpecComment;
+        private string m_lastEolImportSpecComment = "";
 
         public override void EnterImportSpec(GolangParser.ImportSpecContext context)
         {
@@ -54,12 +57,51 @@ namespace go2cs
                     m_targetFile.AppendLine();
             }
 
+            string alias;
+
             if (useStatic)
+            {
+                alias = targetUsing;
                 m_targetFile.Append($"using static {targetUsing};");
+            }
             else if (alternateName?.Equals("_") ?? false)
-                m_targetFile.Append($"using _{packageName}_ = {targetUsing};");
+            {
+                alias = $"_{packageName}_";
+                m_targetFile.Append($"using {alias} = {targetUsing};");
+            }
             else
-                m_targetFile.Append($"using {alternateName ?? packageName} = {targetUsing};");
+            {
+                alias = alternateName ?? packageName;
+                m_targetFile.Append($"using {alias} = {targetUsing};");
+            }
+
+            ImportAliases[alias] = (CurrentImportPath, targetUsing);
+
+            string importPath = $"{AddPathSuffix(CurrentImportPath.Replace("/", "\\"))}{packageName}.go";
+            string goRootImport = Path.Combine(Options.TargetGoSrcPath, importPath);
+            string goPathImport = Path.Combine(GoPath, importPath);
+            FolderMetadata goRootImportMetadata = GetFolderMetadata(Options, goRootImport);
+            
+            if ((object)goRootImportMetadata != null)
+            {
+                ImportMetadata[targetUsing] = goRootImportMetadata;
+            }
+            else
+            {
+                FolderMetadata goPathImportMetadata = GetFolderMetadata(Options, goPathImport);
+
+                if ((object)goPathImportMetadata != null)
+                {
+                    ImportMetadata[targetUsing] = goPathImportMetadata;
+                }
+                else
+                {
+                    Console.WriteLine($"WARNING: Failed to locate package metadata for \"{CurrentImportPath}\" import at either:");
+                    Console.WriteLine($"    {GetFolderMetadataFileName(Options, goRootImport)} (from -g target Go source path)");
+                    Console.WriteLine($"    {GetFolderMetadataFileName(Options, goPathImport)} (from %GOPATH%)");
+                    Console.WriteLine();
+                }
+            }
 
             m_lastImportSpecComment = CheckForCommentsRight(context);
             m_lastEolImportSpecComment = CheckForEndOfLineComment(context);

@@ -1,5 +1,6 @@
 ﻿<# // This template creates a <PackageName>_<InterfaceName>Interface.cs file #>
 <#@ template language="C#" inherits="TemplateBase" #>
+<#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="go2cs.Metadata" #>
 <#@ output extension=".cs" #>
@@ -25,7 +26,7 @@ using go;
     public static partial class <#=PackageName#>_package
     {
         [<#=GeneratedCodeAttribute#>]<#
-        foreach (string inheritedInterface in Interface.GetInheritedInterfaceNames())
+        foreach (string inheritedInterface in InheritedTypeNames)
         {
             if (!string.IsNullOrEmpty(inheritedInterface))
             {
@@ -133,7 +134,8 @@ public string PackageName;
 public string InterfaceName;
 public string Scope;
 public InterfaceInfo Interface;
-public FunctionSignature[] Functions;
+public IEnumerable<string> InheritedTypeNames;
+public IEnumerable<FunctionSignature> Functions;
 
 private string GetParameterNames(FunctionSignature function)
 {

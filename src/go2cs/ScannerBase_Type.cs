@@ -182,6 +182,36 @@ namespace go2cs
             //m_types.TryGetValue(context.elementType().type(), out GoTypeInfo typeInfo);
         }
 
+        public override void ExitFunctionType(GolangParser.FunctionTypeContext context)
+        {
+            Signatures.TryGetValue(context.signature(), out Signature signature);
+
+            string typeList = signature.GenerateParameterTypeList();
+            string resultSignature = signature.GenerateResultSignature();
+            string primitiveName, frameworkName;
+
+            RequiredUsings.Add("System");
+
+            if (resultSignature == "void")
+            {
+                primitiveName = $"Action<{typeList}>";
+                frameworkName = $"System.Action<{typeList}>";
+            }
+            else
+            {
+                primitiveName = $"Func<{typeList}, {resultSignature}>";
+                frameworkName = $"System.Func<{typeList}, {resultSignature}>";
+            }
+
+            Types[context.Parent.Parent] = new TypeInfo
+            {
+                Name = context.GetText(),
+                PrimitiveName = primitiveName,
+                FrameworkName = frameworkName,
+                TypeClass = TypeClass.Function
+            };
+        }
+
         private string ConvertToPrimitiveType(string type)
         {
             switch (type)

@@ -420,6 +420,17 @@ namespace go2cs
             return SanitizedIdentifier(identifier);
         }
 
+        protected string GetUniqueIdentifier<T>(IDictionary<string, T> source, string identifier)
+        {
+            int count = 0;
+            string uniqueIdentifier = identifier;
+
+            while (source.ContainsKey(uniqueIdentifier))
+                uniqueIdentifier = $"{identifier}@@{++count}";
+
+            return uniqueIdentifier;
+        }
+
         protected TypeInfo ConvertByRefToBasicPointer(TypeInfo typeInfo)
         {
             if (!typeInfo.IsByRefPointer)

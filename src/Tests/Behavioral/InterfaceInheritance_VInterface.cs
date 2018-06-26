@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 25 16:32:20 UTC
+//     Generated on 2018 June 25 20:56:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,9 +18,7 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        [PromotedInterface(typeof(I))]
-        [PromotedInterface(typeof(Stringer))]
-        [PromotedInterface(typeof(error))]        
+        [PromotedInterface(typeof(go.main_package.I))]        
         public partial interface V
         {
         }
@@ -39,6 +37,15 @@ namespace go
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void N() => s_NByRef?.Invoke(ref m_target) ?? s_NByVal(m_target);
+
+            private delegate void MByVal(T value);
+            private delegate void MByRef(ref T value);
+
+            private static readonly MByVal s_MByVal;
+            private static readonly MByRef s_MByRef;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void M() => s_MByRef?.Invoke(ref m_target) ?? s_MByVal(m_target);
 
             [DebuggerStepperBoundary]
             static V()
@@ -59,6 +66,20 @@ namespace go
                 // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_NByRef == null && (object)s_NByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement V.N function");
+
+                extensionMethod = targetType.GetExtensionMethod("M");
+
+                if ((object)extensionMethod != null)
+                {
+                    s_MByRef = extensionMethod.CreateStaticDelegate(typeof(MByRef)) as MByRef;
+
+                    if ((object)s_MByRef == null)
+                        s_MByVal = extensionMethod.CreateStaticDelegate(typeof(MByVal)) as MByVal;
+                }
+
+                // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
+                if ((object)s_MByRef == null && (object)s_MByVal == null)
+                    throw new NotImplementedException($"{targetType.Name} does not implement V.M function");
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

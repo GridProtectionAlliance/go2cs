@@ -46,16 +46,22 @@ namespace go2cs
 
         public FileMetadata Metadata { get; }
 
+        public Dictionary<string, (string targetImport, string targetUsing)> ImportAliases { get; }
+
+        public Dictionary<string, FolderMetadata> ImportMetadata { get; }
+
         public Converter(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
         {
             FolderMetadata folderMetadata = GetFolderMetadata(Options, SourceFileName);
 
             if ((object)folderMetadata == null || !folderMetadata.Files.TryGetValue(fileName, out FileMetadata metadata))
-                throw new InvalidOperationException($"Failed to load metadata for \"{fileName}\" - file conversion cancelled.");
+                throw new InvalidOperationException($"Failed to load metadata for \"{fileName}\" - file conversion canceled.");
 
             Metadata = metadata;
             Package = metadata.Package;
             PackageImport = metadata.PackageImport;
+            ImportAliases = new Dictionary<string, (string, string)>(StringComparer.Ordinal);
+            ImportMetadata = new Dictionary<string, FolderMetadata>(StringComparer.Ordinal);
         }
 
         public override void Scan(bool showParseTree)
@@ -339,6 +345,12 @@ namespace go2cs
             if (!File.Exists(sharedProjectFile) || GetMD5HashFromFile(sharedProjectFile) != GetMD5HashFromString(sharedProjectFileContent))
                 using (StreamWriter writer = File.CreateText(sharedProjectFile))
                     writer.Write(sharedProjectFileContent);
+        }
+
+        private string GetPackageNamespace(string packageImport)
+        {
+            string[] paths = packageImport.Split('/').Select(SanitizedIdentifier).ToArray();
+            return $"{RootNamespace}.{string.Join(".", paths)}{ClassSuffix}";
         }
 
         private static void AddFileToPackage(string package, string fileName, string nameSpace)

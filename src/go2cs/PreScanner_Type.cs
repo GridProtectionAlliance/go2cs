@@ -106,7 +106,7 @@ namespace go2cs
                 }
                 else
                 {
-                    if (m_signatures.TryGetValue(methodSpec.signature(), out Signature signature))
+                    if (Signatures.TryGetValue(methodSpec.signature(), out Signature signature))
                     {
                         methods.Add(new FunctionSignature
                         {
@@ -119,36 +119,6 @@ namespace go2cs
             }
 
             m_interfaceMethods[context] = methods;
-        }
-
-        public override void ExitFunctionType(GolangParser.FunctionTypeContext context)
-        {
-            m_signatures.TryGetValue(context.signature(), out Signature signature);
-
-            string typeList = signature.GenerateParameterTypeList();
-            string resultSignature = signature.GenerateResultSignature();
-            string primitiveName, frameworkName;
-
-            RequiredUsings.Add("System");
-
-            if (resultSignature == "void")
-            {
-                primitiveName = $"Action<{typeList}>";
-                frameworkName = $"System.Action<{typeList}>";
-            }
-            else
-            {
-                primitiveName = $"Func<{typeList}, {resultSignature}>";
-                frameworkName = $"System.Func<{typeList}, {resultSignature}>";
-            }
-
-            Types[context.Parent.Parent] = new TypeInfo
-            {
-                Name = context.GetText(),
-                PrimitiveName = primitiveName,
-                FrameworkName = frameworkName,
-                TypeClass = TypeClass.Function
-            };
         }
     }
 }

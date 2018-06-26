@@ -23,7 +23,6 @@
 
 using go2cs.Metadata;
 using go2cs.Templates;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -47,15 +46,14 @@ namespace go2cs
             if (!m_firstTopLevelDeclaration)
                 m_targetFile.AppendLine();
 
-            // TODO: Load needed info from metadata...
-
             if (Metadata.Interfaces.TryGetValue(originalIdentifier, out InterfaceInfo interfaceInfo))
             {
                 string ancillaryInterfaceFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}Interface.cs");
 
-                FunctionSignature[] functions = interfaceInfo.Methods.Where(function => !function.IsPromoted).ToArray();
+                List<FunctionSignature> functions = interfaceInfo.GetStandardMethods().ToList();
+                List<string> inheritedTypeNames = new List<string>();
 
-
+                RecurseInheritedInterfaces(interfaceInfo, functions, inheritedTypeNames);
 
                 using (StreamWriter writer = File.CreateText(ancillaryInterfaceFileName))
                     writer.Write(new InterfaceTypeTemplate
@@ -67,6 +65,7 @@ namespace go2cs
                         InterfaceName = identifier,
                         Scope = scope,
                         Interface = interfaceInfo,
+                        InheritedTypeNames = inheritedTypeNames,
                         Functions = functions
                     }
                     .TransformText());
@@ -174,32 +173,57 @@ namespace go2cs
             //    m_targetFile.AppendLine($"{Spacing()}}}");
             //}
         }
-
-        private void ExtractParameterLists(string parameters, out string namedParameters, out string parameterTypes)
+        private void RecurseInheritedInterfaces(InterfaceInfo interfaceInfo, List<FunctionSignature> functions, List<string> inheritedTypeNames)
         {
-            if (string.IsNullOrWhiteSpace(parameters))
+            foreach (string interfaceName in interfaceInfo.GetInheritedInterfaceNames())
             {
-                namedParameters = "";
-                parameterTypes = "";
-                return;
+                if (TryFindInheritedInterfaceInfo(interfaceName, out InterfaceInfo inheritedInferfaceInfo, out string fullName))
+                {
+                    inheritedTypeNames?.Add(fullName);
+                    functions.AddRange(inheritedInferfaceInfo.GetStandardMethods());
+                    RecurseInheritedInterfaces(inheritedInferfaceInfo, functions, null);
+                }
+            }
+        }
+
+        private bool TryFindInheritedInterfaceInfo(string interfaceName, out InterfaceInfo interfaceInfo, out string fullName)
+        {
+            interfaceInfo = default;
+            fullName = default;
+
+            if (Metadata.Interfaces.TryGetValue(interfaceName, out interfaceInfo))
+            {
+                fullName = $"{GetPackageNamespace(PackageImport)}.{SanitizedIdentifier(interfaceName)}";
+                return true;
             }
 
-            List<string> names = new List<string>();
-            List<string> types = new List<string>();
-
-            foreach (string declaration in parameters.Split(','))
+            foreach (KeyValuePair<string, FolderMetadata> importMetadata in ImportMetadata)
             {
-                string[] parts = declaration.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (parts.Length == 2)
+                if (TryFindIntefaceInfo(importMetadata.Value, interfaceName, out FileMetadata fileMetadata, out interfaceInfo))
                 {
-                    types.Add(parts[0].Trim());
-                    names.Add(parts[1].Trim());
+                    fullName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{SanitizedIdentifier(interfaceName)}";
+                    return true;
                 }
             }
 
-            namedParameters = $", {string.Join(", ", names)}";
-            parameterTypes = $", {string.Join(", ", types)}";
+            return false;
+        }
+
+        private bool TryFindIntefaceInfo(FolderMetadata folderMetadata, string interfaceName, out FileMetadata interfaceFileMetadata, out InterfaceInfo interfaceInfo)
+        {
+            interfaceInfo = default;
+            interfaceFileMetadata = null;
+
+            foreach (FileMetadata fileMetadata in folderMetadata.Files.Values)
+            {
+                if (fileMetadata.Interfaces.TryGetValue(interfaceName, out interfaceInfo))
+                {
+                    interfaceFileMetadata = fileMetadata;
+                    break;
+                }
+            }
+
+            return interfaceFileMetadata != null;
         }
     }
 }

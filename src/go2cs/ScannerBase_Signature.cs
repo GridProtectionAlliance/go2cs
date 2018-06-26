@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  PreScanner_Signature.cs - Gbtc
+//  ScannerBase_Signature.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -26,7 +26,7 @@ using System.Collections.Generic;
 
 namespace go2cs
 {
-    public partial class PreScanner
+    public partial class ScannerBase
     {
         // Stack handlers:
         //  functionDecl (optional)
@@ -34,12 +34,12 @@ namespace go2cs
         //  methodDecl (optional)
         //  methodSpec (optional)
         //  functionType (required)
-        private readonly ParseTreeValues<Signature> m_signatures = new ParseTreeValues<Signature>();
-        private List<ParameterInfo> m_result;
+        protected readonly ParseTreeValues<Signature> Signatures = new ParseTreeValues<Signature>();
+        protected List<ParameterInfo> Result;
 
         public override void EnterSignature(GolangParser.SignatureContext context)
         {
-            m_result = new List<ParameterInfo>(new[] { new ParameterInfo
+            Result = new List<ParameterInfo>(new[] { new ParameterInfo
             {
                 Name = "",
                 Type = TypeInfo.VoidType,
@@ -50,10 +50,10 @@ namespace go2cs
         public override void ExitSignature(GolangParser.SignatureContext context)
         {
             Parameters.TryGetValue(context.parameters(), out List<ParameterInfo> parameters);
-            m_signatures[context] = new Signature
+            Signatures[context] = new Signature
             {
                 Parameters = parameters?.ToArray() ?? new ParameterInfo[0],
-                Result = m_result.ToArray(),
+                Result = Result?.ToArray() ?? new ParameterInfo[0]
             };
         }
 
@@ -62,11 +62,11 @@ namespace go2cs
             //result
             //  : parameters
             //  | type
-            if (!Parameters.TryGetValue(context.parameters(), out m_result))
+            if (!Parameters.TryGetValue(context.parameters(), out Result))
             {
                 if (Types.TryGetValue(context.type(), out TypeInfo typeInfo))
                 {
-                    m_result = new List<ParameterInfo>(new[] { new ParameterInfo
+                    Result = new List<ParameterInfo>(new[] { new ParameterInfo
                     {
                         Name = "",
                         Type = typeInfo,

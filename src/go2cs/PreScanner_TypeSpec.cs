@@ -34,7 +34,7 @@ namespace go2cs
 
             if (m_interfaceMethods.TryGetValue(context.type()?.typeLit()?.interfaceType(), out List<FunctionSignature> methods))
             {
-                m_interfaces.Add(identifier, new InterfaceInfo
+                m_interfaces.Add(GetUniqueIdentifier(m_interfaces, identifier), new InterfaceInfo
                 {
                     Name = identifier,
                     Methods = methods.ToArray()
@@ -42,7 +42,7 @@ namespace go2cs
             }
             else if (m_structFields.TryGetValue(context.type()?.typeLit()?.structType(), out List<FieldInfo> fields))
             {
-                m_structs.Add(identifier, new StructInfo
+                m_structs.Add(GetUniqueIdentifier(m_structs, identifier), new StructInfo
                 {
                     Name = identifier,
                     Fields = fields.ToArray()

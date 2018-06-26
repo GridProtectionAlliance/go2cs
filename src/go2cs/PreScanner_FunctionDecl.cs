@@ -46,8 +46,8 @@ namespace go2cs
         {
             string identifer = context.IDENTIFIER().GetText();
 
-            if (!m_signatures.TryGetValue(context.signature(), out Signature signature))
-                m_signatures.TryGetValue(context.function().signature(), out signature);
+            if (!Signatures.TryGetValue(context.signature(), out Signature signature))
+                Signatures.TryGetValue(context.function().signature(), out signature);
 
             return new FunctionInfo
             {
@@ -78,7 +78,7 @@ namespace go2cs
         {
             FunctionInfo functionInfo = ExitMethod(context);
 
-            m_functions.Add(functionInfo.Signature.Generate(), functionInfo);
+            m_functions.Add(GetUniqueIdentifier(m_functions, functionInfo.Signature.Generate()), functionInfo);
         }
 
         public override void ExitMethodDecl(GolangParser.MethodDeclContext context)
@@ -93,7 +93,7 @@ namespace go2cs
                 };
             }
 
-            m_functions.Add(functionInfo.Signature.Generate(), functionInfo);
+            m_functions.Add(GetUniqueIdentifier(m_functions, functionInfo.Signature.Generate()), functionInfo);
         }
 
         public override void ExitVarSpec(GolangParser.VarSpecContext context)
@@ -107,12 +107,17 @@ namespace go2cs
                 {
                     for (int i = 0; i < identifiers.Length; i++)
                     {
-                        m_variables.Add(identifiers[i], new VariableInfo
+                        string identifier = identifiers[i];
+
+                        if (expressions.Length > i)
                         {
-                            Name = identifiers[i],
-                            Type = typeInfo,
-                            HeapAllocated = expressions[i].StartsWith("&")
-                        });
+                            m_variables.Add(GetUniqueIdentifier(m_variables, identifiers[i]), new VariableInfo
+                            {
+                                Name = identifier,
+                                Type = typeInfo,
+                                HeapAllocated = expressions[i]?.StartsWith("&") ?? false
+                            });
+                        }
                     }
                 }
             }
@@ -126,12 +131,17 @@ namespace go2cs
                 {
                     for (int i = 0; i < identifiers.Length; i++)
                     {
-                        m_variables.Add(identifiers[i], new VariableInfo
+                        string identifier = identifiers[i];
+
+                        if (expressions.Length > i)
                         {
-                            Name = identifiers[i],
-                            Type = TypeInfo.VarType,
-                            HeapAllocated = expressions[i].StartsWith("&")
-                        });
+                            m_variables.Add(GetUniqueIdentifier(m_variables, identifiers[i]), new VariableInfo
+                            {
+                                Name = identifier,
+                                Type = TypeInfo.VarType,
+                                HeapAllocated = expressions[i]?.StartsWith("&") ?? false
+                            });
+                        }
                     }
                 }
             }
