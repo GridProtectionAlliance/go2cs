@@ -39,9 +39,9 @@ namespace go
     {
         private static readonly Type[] s_types;
 
-        private class TypePrecedenceComparer : Comparer<Type>
+        private sealed class TypePrecedenceComparer : Comparer<Type>
         {
-            private Type m_targetType;
+            private readonly Type m_targetType;
 
             public TypePrecedenceComparer(Type targetType) => m_targetType = targetType;
 
@@ -52,15 +52,53 @@ namespace go
 
             private int RelationDistance(Type type)
             {
-                int count = 0;
+                if ((object)type == null)
+                    return int.MaxValue;
 
-                while (type != m_targetType && type != typeof(object))
+                int distance = 0;
+
+                while (!IsDirectEquivalent(type))
                 {
                     type = type.BaseType;
-                    count++;
+                    distance++;
+
+                    if ((object)type == null || type == typeof(object))
+                    {
+                        // No direct relation exists
+                        distance = int.MaxValue;
+                        break;
+                    }
                 }
 
-                return count;
+                return distance;
+            }
+
+            private bool IsDirectEquivalent(Type type)
+            {
+                if (m_targetType.IsInterface)
+                {
+                    if (type.IsInterface)
+                        return type.ImplementsInterface(m_targetType) || m_targetType.ImplementsInterface(type);
+
+                    foreach (Type interfaceType in type.GetInterfaces())
+                    {
+                        if (interfaceType == m_targetType || interfaceType.ImplementsInterface(m_targetType))
+                            return true;
+                    }
+
+                    return false;
+                }
+
+                if (!type.IsInterface)
+                    return type == m_targetType;
+
+                foreach (Type interfaceType in m_targetType.GetInterfaces())
+                {
+                    if (interfaceType == type || interfaceType.ImplementsInterface(type))
+                        return true;
+                }
+
+                return false;
             }
         }
 
@@ -76,18 +114,45 @@ namespace go
         }
 
         /// <summary>
+        /// Determines if <paramref name="targetType"/> implements specified <paramref name="interfaceType"/>.
+        /// </summary>
+        /// <param name="targetType">Target type to test.</param>
+        /// <param name="interfaceType">Interface to search.</param>
+        /// <returns>
+        /// <c>true</c> if <paramref name="targetType"/> implements specified <paramref name="interfaceType"/>;
+        /// otherwise, <c>false</c>.
+        /// </returns>
+        public static bool ImplementsInterface(this Type targetType, Type interfaceType)
+        {
+            if (!interfaceType.IsInterface)
+                return false;
+
+            while ((object)targetType != null)
+            {
+                foreach (Type targetInterface in targetType.GetInterfaces())
+                {
+                    if (targetInterface == interfaceType || targetInterface.ImplementsInterface(interfaceType))
+                        return true;
+                }
+
+                targetType = targetType.BaseType;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Gets the type of the extension target.
         /// </summary>
         /// <param name="methodInfo">Method info.</param>
-        /// <returns>Type of the extension target.</returns>
+        /// <returns>
+        /// Type of the extension target, i.e., type of the first parameter; otherwise, <c>void</c>
+        /// if <paramref name="methodInfo"/> is <c>null</c> or defines no parameters.
+        /// </returns>
         public static Type GetExtensionTargetType(this MethodInfo methodInfo)
         {
-            ParameterInfo[] parameters = methodInfo.GetParameters();
-
-            if (parameters.Length > 0)
-                return parameters[0].ParameterType;
-
-            return typeof(void);
+            ParameterInfo[] parameters = methodInfo?.GetParameters();
+            return parameters?.Length > 0 ? parameters[0].ParameterType : typeof(void);
         }
 
         /// <summary>
@@ -105,18 +170,19 @@ namespace go
         }
 
         /// <summary>
-        /// Attempts to find the specified extension method, <paramref name="methodName"/>, for <paramref name="targetType"/>.
+        /// Attempts to find the best precedence-wise matching extension method called <paramref name="methodName"/> for the <paramref name="targetType"/>.
         /// </summary>
         /// <param name="targetType">Target <see cref="Type"/> to search.</param>
         /// <param name="methodName">Name of extension method to find.</param>
         /// <returns>Method metadata of extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
         public static MethodInfo GetExtensionMethod(this Type targetType, string methodName)
         {
-            return targetType.GetExtensionMethods().OrderBy(GetExtensionTargetType, new TypePrecedenceComparer(targetType)).FirstOrDefault(methodInfo => methodInfo.Name == methodName);
+            return targetType.GetExtensionMethods().Where(methodInfo => methodInfo.Name == methodName).OrderBy(GetExtensionTargetType, new TypePrecedenceComparer(targetType)).FirstOrDefault();
         }
 
         /// <summary>
-        /// Attempts to find the specified extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> or any of its promotions.
+        /// Attempts to find the best precedence-wise matching extension method called <paramref name="methodName"/> for the <paramref name="targetType"/> or
+        /// for any of its promotions, see <see cref="PromotedStructAttribute"/>.
         /// </summary>
         /// <param name="targetType">Target <see cref="Type"/> to search.</param>
         /// <param name="methodName">Name of extension method to find.</param>
