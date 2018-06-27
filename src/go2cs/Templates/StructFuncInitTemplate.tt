@@ -2,7 +2,7 @@
 <#@ template language="C#" #>
 
 
-                extensionMethod = targetType.GetExtensionMethodSearchingPromotions<PromotedStructAttribute>("<#=FunctionName#>");
+                extensionMethod = targetType.GetExtensionMethodSearchingPromotions("<#=FunctionName#>");
 
                 if ((object)extensionMethod != null)
                 {

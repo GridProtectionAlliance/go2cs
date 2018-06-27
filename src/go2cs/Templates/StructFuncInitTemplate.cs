@@ -32,7 +32,7 @@ namespace go2cs.Templates
             #line default
             #line hidden
             this.Write("\r\n\r\n                extensionMethod = targetType.GetExtensionMethodSearchingPromo" +
-                    "tions<PromotedStructAttribute>(\"");
+                    "tions(\"");
             
             #line 5 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));

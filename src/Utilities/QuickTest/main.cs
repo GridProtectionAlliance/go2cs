@@ -63,16 +63,19 @@ namespace go
             }
         }
 
-        [PromotedStruct(typeof(MyError))]
         public partial struct MyCustomError : Abser
         {
             public string Message;
-        }
 
-        public partial struct MyCustomError
-        {
             public Abser Abser;
 
+            public ref MyError MyError => ref MyError_Val;
+        }
+
+        [PromotedStruct(typeof(MyError))]
+        public partial struct MyCustomError
+        {
+            // Abser.Abs function promotion
             private delegate double AbsByVal(MyCustomError value);
             private delegate double AbsByRef(ref MyCustomError value);
 
@@ -83,13 +86,13 @@ namespace go
             public double Abs() => s_AbsByRef?.Invoke(ref this) ?? s_AbsByVal?.Invoke(this) ?? Abser?.Abs() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // MyError structure promotion
-            private readonly Ref<MyError> _MyErrorRef;
+            private readonly Ref<MyError> m_MyErrorRef;
 
-            public ref MyError MyError => ref _MyErrorRef.Value;
+            private ref MyError MyError_Val => ref m_MyErrorRef.Value;
 
-            public ref DateTime When => ref _MyErrorRef.Value.When;
+            public ref DateTime When => ref m_MyErrorRef.Value.When;
 
-            public ref string What => ref _MyErrorRef.Value.What;
+            public ref string What => ref m_MyErrorRef.Value.What;
 
             [DebuggerStepperBoundary]
             static MyCustomError()
@@ -114,14 +117,14 @@ namespace go
             {
                 this.Message = "";
                 this.Abser = null;
-                this._MyErrorRef = new Ref<MyError>(new MyError(nil));
+                this.m_MyErrorRef = new Ref<MyError>(new MyError(nil));
             }
 
             public MyCustomError(string Message, Abser Abser, MyError MyError)
             {
                 this.Message = Message;
                 this.Abser = Abser;
-                this._MyErrorRef = new Ref<MyError>(MyError);
+                this.m_MyErrorRef = new Ref<MyError>(MyError);
             }
         }
 

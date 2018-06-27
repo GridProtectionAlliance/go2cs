@@ -48,6 +48,21 @@ namespace go2cs.Metadata
         public bool IsByRefPointer;
         public bool IsSlice;            // Slice<T>
 
+        public TypeInfo Clone()
+        {
+            return new TypeInfo
+            {
+                Name = Name,
+                PrimitiveName = PrimitiveName,
+                FrameworkName = FrameworkName,
+                TypeClass = TypeClass,
+                IsArray = IsArray,
+                IsPointer = IsPointer,
+                IsByRefPointer = IsByRefPointer,
+                IsSlice = IsSlice
+            };
+        }
+
         public static readonly TypeInfo ObjectType = new TypeInfo
         {
             Name = "object",

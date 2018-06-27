@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using static go2cs.Common;
 
 #pragma warning disable SCS0018 // Path traversal
@@ -49,27 +50,25 @@ namespace go2cs
             {
                 string ancillaryInterfaceFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}Interface.cs");
 
-                FunctionSignature[] localMethods = interfaceInfo.GetLocalMethods().ToArray();
-                List<FunctionSignature> allMethods = localMethods.ToList();
-                List<string> inheritedTypeNames = new List<string>();
+                FunctionSignature[] localFunctions = interfaceInfo.GetLocalMethods().ToArray();
+                List<FunctionSignature> allFunctions = localFunctions.ToList();
 
-                RecurseInheritedInterfaces(context, originalIdentifier, interfaceInfo, allMethods, inheritedTypeNames);
+                RecurseInheritedInterfaces(context, originalIdentifier, interfaceInfo, allFunctions);
 
                 using (StreamWriter writer = File.CreateText(ancillaryInterfaceFileName))
                 {
                     writer.Write(new InterfaceTypeTemplate
-                        {
-                            NamespacePrefix = PackageNamespace,
-                            NamespaceHeader = m_namespaceHeader,
-                            NamespaceFooter = m_namespaceFooter,
-                            PackageName = Package,
-                            InterfaceName = identifier,
-                            Scope = scope,
-                            Interface = interfaceInfo,
-                            InheritedTypeNames = inheritedTypeNames,
-                            Functions = allMethods
-                        }
-                        .TransformText());
+                    {
+                        NamespacePrefix = PackageNamespace,
+                        NamespaceHeader = m_namespaceHeader,
+                        NamespaceFooter = m_namespaceFooter,
+                        PackageName = Package,
+                        InterfaceName = identifier,
+                        Scope = scope,
+                        Interface = interfaceInfo,
+                        Functions = allFunctions
+                    }
+                    .TransformText());
                 }
 
                 // Track file name associated with package
@@ -80,12 +79,95 @@ namespace go2cs
                 if (inheritedInterfaces.Length > 0)
                     inheritedInterfaces = $" : {inheritedInterfaces}";
 
-                m_targetFile.AppendLine($"{Spacing()}{scope} partial interface {identifier}{inheritedInterfaces}");
+                m_targetFile.AppendLine($"{Spacing()}{scope} interface {identifier}{inheritedInterfaces}");
                 m_targetFile.AppendLine($"{Spacing()}{{");
 
-                foreach (FunctionSignature function in localMethods)
+                foreach (FunctionSignature function in localFunctions)
                 {
                     m_targetFile.AppendLine($"{Spacing(1)}{function.Signature.GenerateResultSignature()} {SanitizedIdentifier(function.Name)}({function.Signature.GenerateParametersSignature(false)});");
+                }
+
+                m_targetFile.AppendLine($"{Spacing()}}}");
+            }
+            else if (Metadata.Structs.TryGetValue(originalIdentifier, out StructInfo structInfo))
+            {
+                // Handle struct type declaration
+                string ancillaryStructFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}Struct.cs");
+
+                Dictionary<string, List<FunctionSignature>> promotedFunctions = new Dictionary<string, List<FunctionSignature>>(StringComparer.Ordinal);
+                HashSet<string> inheritedTypeNames = new HashSet<string>(StringComparer.Ordinal);
+
+                RecurseInheritedInterfaces(context, originalIdentifier, structInfo, promotedFunctions, inheritedTypeNames);
+
+                HashSet<string> promotedStructs = new HashSet<string>(structInfo.GetAnonymousFieldNames(), StringComparer.Ordinal);
+                promotedStructs.ExceptWith(inheritedTypeNames);
+
+                //    using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
+                //        writer.Write(new StructTypeTemplate
+                //        {
+                //            NamespacePrefix = PackageNamespace,
+                //            NamespaceHeader = m_namespaceHeader,
+                //            NamespaceFooter = m_namespaceFooter,
+                //            PackageName = Package,
+                //            StructName = identifier,
+                //            Scope = scope,
+                //            InheritedInterfaces = new[] { "" }, // TODO <<
+                //            PromotedStructs = new[] { "" }     // TODO <<
+                //        }
+                //        .TransformText());
+
+                // Track file name associated with package
+                AddFileToPackage(Package, ancillaryStructFileName, PackageNamespace);
+
+                List<FieldInfo> fields = new List<FieldInfo>();
+
+                foreach (FieldInfo field in structInfo.Fields)
+                {
+                    if (field.IsPromoted && !inheritedTypeNames.Contains(field.Name))
+                    {
+                        FieldInfo promotedStruct = field.Clone();
+
+                        promotedStruct.Type.Name = $"ref {promotedStruct.Type.Name}";
+                        promotedStruct.Name = $"{promotedStruct.Name} => ref {promotedStruct.Name}Val";
+
+                        fields.Add(promotedStruct);
+                    }
+                    else
+                    {
+                        fields.Add(field);
+                    }
+                }
+
+                // TODO: Move to ancillary structure template
+                foreach (string promotedStruct in promotedStructs)
+                {
+                    m_targetFile.AppendLine($"{Spacing()}[PromotedStruct(typeof({promotedStruct}))]");
+                }
+
+                m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier}{GetInheritedTypeList(inheritedTypeNames)}");
+                m_targetFile.AppendLine($"{Spacing()}{{");
+
+                foreach (FieldInfo field in fields)
+                {
+                    StringBuilder fieldDecl = new StringBuilder();
+
+                    if (!string.IsNullOrWhiteSpace(field.Description))
+                    {
+                        string description = field.Description.Trim();
+
+                        if (description.Length > 2)
+                        {
+                            RequiredUsings.Add("System.ComponentModel");
+                            fieldDecl.AppendLine($"{Spacing(1)}[Description({description})]");
+                        }
+                    }
+
+                    fieldDecl.Append($"{Spacing(1)}public {field.Type.PrimitiveName} {field.Name};");
+
+                    if (!string.IsNullOrEmpty(field.Comments))
+                        fieldDecl.Append(field.Comments);
+
+                    m_targetFile.Append(fieldDecl);
                 }
 
                 m_targetFile.AppendLine($"{Spacing()}}}");
@@ -98,55 +180,9 @@ namespace go2cs
             //else if (m_structFields.TryGetValue(context.type()?.typeLit()?.structType(), out string fields))
             //{
 
-            //string getStructureField((string fieldName, string fieldType, string description, string comment) field)
-            //{
-            //    StringBuilder fieldDecl = new StringBuilder();
-
-            //    if (!string.IsNullOrWhiteSpace(field.description))
-            //    {
-            //        string description = field.description.Trim();
-
-            //        if (description.Length > 2)
-            //        {
-            //            RequiredUsings.Add("System.ComponentModel");
-            //            fieldDecl.AppendLine($"{Spacing(1)}[Description({description})]");
-            //        }
-            //    }
-
-            //    fieldDecl.Append($"{Spacing(1)}public {field.fieldType} {field.fieldName};");
-
-            //    if (!string.IsNullOrEmpty(field.comment))
-            //        fieldDecl.Append(field.comment);
-
-            //    return fieldDecl.ToString();
-            //}
 
             //m_structFields[context] = string.Join(Environment.NewLine, fields.Select(getStructureField));
 
-            //    // Handle struct type declaration
-            //    string ancillaryStructFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}Struct.cs");
-
-            //    using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
-            //        writer.Write(new StructTypeTemplate
-            //        {
-            //            NamespacePrefix = PackageNamespace,
-            //            NamespaceHeader = m_namespaceHeader,
-            //            NamespaceFooter = m_namespaceFooter,
-            //            PackageName = Package,
-            //            StructName = identifier,
-            //            Scope = scope,
-            //            InheritedInterfaces = new[] { "" }, // TODO <<
-            //            PromotedStructs = new[] { "" }     // TODO <<
-            //        }
-            //        .TransformText());
-
-            //    // Track file name associated with package
-            //    AddFileToPackage(Package, ancillaryStructFileName, PackageNamespace);
-
-            //    m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier}");
-            //    m_targetFile.AppendLine($"{Spacing()}{{");
-            //    m_targetFile.AppendLine(fields);
-            //    m_targetFile.AppendLine($"{Spacing()}}}");
             //}
             //else if (m_types.TryGetValue(context.type(), out GoTypeInfo typeInfo))
             //{
@@ -175,15 +211,16 @@ namespace go2cs
             //    m_targetFile.AppendLine($"{Spacing()}}}");
             //}
         }
-        private void RecurseInheritedInterfaces(GolangParser.TypeSpecContext context, string identifier, InterfaceInfo interfaceInfo, List<FunctionSignature> functions, List<string> inheritedTypeNames)
+
+        private void RecurseInheritedInterfaces(GolangParser.TypeSpecContext context, string identifier, InterfaceInfo interfaceInfo, List<FunctionSignature> functions, List<string> inheritedTypeNames = null, bool useFullTypeName = false)
         {
             foreach (string interfaceName in interfaceInfo.GetInheritedInterfaceNames())
             {
-                if (TryFindInheritedInterfaceInfo(interfaceName, out InterfaceInfo inheritedInferfaceInfo, out string fullName))
+                if (TryFindInheritedInterfaceInfo(interfaceName, out InterfaceInfo inheritedInferfaceInfo, out string shortTypeName, out string fullTypeName))
                 {
-                    inheritedTypeNames?.Add(fullName);
+                    inheritedTypeNames?.Add(useFullTypeName ? fullTypeName : shortTypeName);
                     functions.AddRange(inheritedInferfaceInfo.GetLocalMethods());
-                    RecurseInheritedInterfaces(context, identifier, inheritedInferfaceInfo, functions, null);
+                    RecurseInheritedInterfaces(context, identifier, inheritedInferfaceInfo, functions);
                 }
                 else
                 {
@@ -192,22 +229,43 @@ namespace go2cs
             }
         }
 
-        private bool TryFindInheritedInterfaceInfo(string interfaceName, out InterfaceInfo interfaceInfo, out string fullName)
+        private void RecurseInheritedInterfaces(GolangParser.TypeSpecContext context, string identifier, StructInfo structInfo, Dictionary<string, List<FunctionSignature>> fieldFunctions, HashSet<string> inheritedTypeNames = null, bool useFullTypeName = false)
+        {
+            foreach (FieldInfo field in structInfo.GetAnonymousFields())
+            {
+                string interfaceName = field.Type.PrimitiveName;
+
+                if (TryFindInheritedInterfaceInfo(interfaceName, out InterfaceInfo inheritedInferfaceInfo, out string shortTypeName, out string fullTypeName))
+                {
+                    inheritedTypeNames?.Add(useFullTypeName ? fullTypeName : shortTypeName);
+                    List<FunctionSignature> functions = fieldFunctions.GetOrAdd(field.Name, name => new List<FunctionSignature>());
+                    functions.AddRange(inheritedInferfaceInfo.GetLocalMethods());
+                    RecurseInheritedInterfaces(context, identifier, inheritedInferfaceInfo, functions);
+                }
+                else
+                {
+                    AddWarning(context, $"Failed to find metadata for promoted interface \"{interfaceName}\" declared in \"{identifier}\" struct type.");
+                }
+            }
+        }
+
+        private bool TryFindInheritedInterfaceInfo(string interfaceName, out InterfaceInfo interfaceInfo, out string shortTypeName, out string fullTypeName)
         {
             interfaceInfo = default;
-            fullName = default;
+            shortTypeName = SanitizedIdentifier(interfaceName);
+            fullTypeName = default;
 
             // Handle built-in error interface as a special case
             if (interfaceName.Equals("error", StringComparison.Ordinal))
             {
                 interfaceInfo = InterfaceInfo.error();
-                fullName = "go.BuiltInFunctions.error";
+                fullTypeName = "go.BuiltInFunctions.error";
                 return true;
             }
 
             if (Metadata.Interfaces.TryGetValue(interfaceName, out interfaceInfo))
             {
-                fullName = $"{GetPackageNamespace(PackageImport)}.{SanitizedIdentifier(interfaceName)}";
+                fullTypeName = $"{GetPackageNamespace(PackageImport)}.{shortTypeName}";
                 return true;
             }
 
@@ -224,7 +282,7 @@ namespace go2cs
                     {
                         if (TryFindIntefaceInfo(folderMetadata, identifier, out FileMetadata fileMetadata, out interfaceInfo))
                         {
-                            fullName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{SanitizedIdentifier(identifier)}";
+                            fullTypeName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{SanitizedIdentifier(identifier)}";
                             return true;
                         }
                     }
@@ -235,7 +293,7 @@ namespace go2cs
             {
                 if (TryFindIntefaceInfo(importMetadata.Value, interfaceName, out FileMetadata fileMetadata, out interfaceInfo))
                 {
-                    fullName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{SanitizedIdentifier(interfaceName)}";
+                    fullTypeName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{shortTypeName}";
                     return true;
                 }
             }
@@ -258,6 +316,14 @@ namespace go2cs
             }
 
             return interfaceFileMetadata != null;
+        }
+
+        private string GetInheritedTypeList(HashSet<string> inheritedTypeNames)
+        {
+            if ((object)inheritedTypeNames == null || inheritedTypeNames.Count == 0)
+                return "";
+
+            return $" : {string.Join(", ", inheritedTypeNames)}";
         }
     }
 }

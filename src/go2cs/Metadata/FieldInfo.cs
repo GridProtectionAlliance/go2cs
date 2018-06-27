@@ -33,5 +33,17 @@ namespace go2cs.Metadata
         public string Description;
         public string Comments;
         public bool IsPromoted;
+
+        public FieldInfo Clone()
+        {
+            return new FieldInfo
+            {
+                Name = Name,
+                Type = Type.Clone(),
+                Description = Description,
+                Comments = Comments,
+                IsPromoted = IsPromoted
+            };
+        }
     }
 }

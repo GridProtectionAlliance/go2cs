@@ -25,24 +25,7 @@ using go;
 <#=NamespaceHeader#>
     public static partial class <#=PackageName#>_package
     {
-        [<#=GeneratedCodeAttribute#>]<#
-        foreach (string inheritedTypeName in InheritedTypeNames)
-        {
-            if (!string.IsNullOrEmpty(inheritedTypeName))
-            {
-        #>
-
-        [PromotedInterface(typeof(<#=inheritedTypeName#>))]<#
-            }
-        }
-        #>
-        
-        <#=Scope#> partial interface <#=InterfaceName#>
-        {
-        }
-
         [<#=GeneratedCodeAttribute#>]
-        [PromotedInterface(typeof(<#=InterfaceName#>))]
         <#=Scope#> struct <#=InterfaceName#><T> : <#=InterfaceName#>
         {
             private T m_target;<#
@@ -134,7 +117,6 @@ public string PackageName;
 public string InterfaceName;
 public string Scope;
 public InterfaceInfo Interface;
-public IEnumerable<string> InheritedTypeNames;
 public IEnumerable<FunctionSignature> Functions;
 
 private string GetParameterNames(FunctionSignature function)

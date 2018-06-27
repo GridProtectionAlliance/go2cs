@@ -22,6 +22,8 @@
 //******************************************************************************************************
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace go2cs.Metadata
 {
@@ -30,5 +32,20 @@ namespace go2cs.Metadata
     {
         public string Name;
         public FieldInfo[] Fields;
+
+        public IEnumerable<FieldInfo> GetLocalFields()
+        {
+            return Fields.Where(field => !field.IsPromoted);
+        }
+
+        public IEnumerable<FieldInfo> GetAnonymousFields()
+        {
+            return Fields.Where(field => field.IsPromoted);
+        }
+
+        public IEnumerable<string> GetAnonymousFieldNames()
+        {
+            return GetAnonymousFields().Select(field => field.Type.PrimitiveName);
+        }
     }
 }

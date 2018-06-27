@@ -22,25 +22,9 @@ using go;
 <#=NamespaceHeader#>
     public static partial class <#=PackageName#>_package
     {
-        [<#=GeneratedCodeAttribute#>]<#
-        foreach (string inheritedTypeName in InheritedTypeNames)
-        {
-            if (!string.IsNullOrEmpty(inheritedTypeName))
-            {
-        #>
-
-        [PromotedInterface(typeof(<#=inheritedTypeName#>))]<#
-            }
-        }#>
-
+        [<#=GeneratedCodeAttribute#>]
         <#=Scope#> partial struct <#=StructName#>
         {<#
-            foreach (string inheritedDeclaration in InheritedDeclarations)
-            {#>
-
-            public <#=inheritedDeclaration#>;<#
-            }
-
             foreach (var decl in Functions)
             {
                 #><#=new StructFuncDeclTemplate
@@ -120,8 +104,6 @@ public string PackageName;
 public string InterfaceName;
 public string StructName;
 public string Scope;
-public IEnumerable<string> InheritedTypeNames;
-public IEnumerable<string> InheritedDeclarations;
 public IEnumerable<(string fieldName, FunctionSignature function)> Functions;
 
 private string GetParameterNames(FunctionSignature function)
