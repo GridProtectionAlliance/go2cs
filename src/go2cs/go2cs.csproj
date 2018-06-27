@@ -117,14 +117,8 @@
     <EmbeddedResource Include="..\goutil\PanicException.cs">
       <Link>goutil\PanicException.cs</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\goutil\PromotedInterfaceAttribute.cs">
-      <Link>goutil\PromotedInterfaceAttribute.cs</Link>
-    </EmbeddedResource>
     <EmbeddedResource Include="..\goutil\PromotedStructAttribute.cs">
       <Link>goutil\PromotedStructAttribute.cs</Link>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\goutil\PromotedTypeAttributeBase.cs">
-      <Link>goutil\PromotedTypeAttributeBase.cs</Link>
     </EmbeddedResource>
     <EmbeddedResource Include="..\goutil\Ptr.cs">
       <Link>goutil\Ptr.cs</Link>

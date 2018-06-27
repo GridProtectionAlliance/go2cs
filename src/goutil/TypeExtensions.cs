@@ -39,6 +39,31 @@ namespace go
     {
         private static readonly Type[] s_types;
 
+        private class TypePrecedenceComparer : Comparer<Type>
+        {
+            private Type m_targetType;
+
+            public TypePrecedenceComparer(Type targetType) => m_targetType = targetType;
+
+            public override int Compare(Type x, Type y)
+            {
+                return Comparer<int>.Default.Compare(RelationDistance(x), RelationDistance(y));
+            }
+
+            private int RelationDistance(Type type)
+            {
+                int count = 0;
+
+                while (type != m_targetType && type != typeof(object))
+                {
+                    type = type.BaseType;
+                    count++;
+                }
+
+                return count;
+            }
+        }
+
         static TypeExtensions()
         {
             List<Type> types = new List<Type>();
@@ -48,6 +73,21 @@ namespace go
                 types.AddRange(item.GetTypes());
 
             s_types = types.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the type of the extension target.
+        /// </summary>
+        /// <param name="methodInfo">Method info.</param>
+        /// <returns>Type of the extension target.</returns>
+        public static Type GetExtensionTargetType(this MethodInfo methodInfo)
+        {
+            ParameterInfo[] parameters = methodInfo.GetParameters();
+
+            if (parameters.Length > 0)
+                return parameters[0].ParameterType;
+
+            return typeof(void);
         }
 
         /// <summary>
@@ -61,7 +101,7 @@ namespace go
                 .Where(type => type.IsSealed && !type.IsGenericType && !type.IsNested)
                 .SelectMany(type => type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                 .Where(methodInfo => methodInfo.IsDefined(typeof(ExtensionAttribute), false))
-                .Where(methodInfo => methodInfo.GetParameters()[0].ParameterType.IsAssignableFrom(targetType));
+                .Where(methodInfo => methodInfo.GetExtensionTargetType().IsAssignableFrom(targetType));
         }
 
         /// <summary>
@@ -72,7 +112,7 @@ namespace go
         /// <returns>Method metadata of extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
         public static MethodInfo GetExtensionMethod(this Type targetType, string methodName)
         {
-            return targetType.GetExtensionMethods().FirstOrDefault(methodInfo => methodInfo.Name == methodName);
+            return targetType.GetExtensionMethods().OrderBy(GetExtensionTargetType, new TypePrecedenceComparer(targetType)).FirstOrDefault(methodInfo => methodInfo.Name == methodName);
         }
 
         /// <summary>
@@ -81,20 +121,19 @@ namespace go
         /// <param name="targetType">Target <see cref="Type"/> to search.</param>
         /// <param name="methodName">Name of extension method to find.</param>
         /// <returns>Method metadata of extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
-        /// <typeparam name="TPromotedAttribute">Promoted type attribute.</typeparam>
-        public static MethodInfo GetExtensionMethodSearchingPromotions<TPromotedAttribute>(this Type targetType, string methodName) where TPromotedAttribute : PromotedTypeAttributeBase
+        public static MethodInfo GetExtensionMethodSearchingPromotions(this Type targetType, string methodName)
         {
             MethodInfo method = targetType.GetExtensionMethod(methodName);
 
             if ((object)method == null)
             {
-                object[] customAttributes = targetType.GetCustomAttributes(typeof(TPromotedAttribute), true);
+                object[] customAttributes = targetType.GetCustomAttributes(typeof(PromotedStructAttribute), true);
 
                 if (customAttributes.Length > 0)
                 {
-                    foreach (TPromotedAttribute attribute in customAttributes.Cast<TPromotedAttribute>())
+                    foreach (PromotedStructAttribute attribute in customAttributes.Cast<PromotedStructAttribute>())
                     {
-                        method = attribute.PromotedType.GetExtensionMethodSearchingPromotions<TPromotedAttribute>(methodName);
+                        method = attribute.PromotedType.GetExtensionMethodSearchingPromotions(methodName);
 
                         if ((object)method != null)
                             break;

@@ -69,7 +69,6 @@ namespace go
             public string Message;
         }
 
-        [PromotedInterface(typeof(Abser))]
         public partial struct MyCustomError
         {
             public Abser Abser;
@@ -99,7 +98,7 @@ namespace go
                 MethodInfo method;
 
                 // Any existing defined extensions will override interface reference calls
-                method = targetType.GetExtensionMethodSearchingPromotions<PromotedStructAttribute>("Abs");
+                method = targetType.GetExtensionMethodSearchingPromotions("Abs");
 
                 if (method != null)
                 {

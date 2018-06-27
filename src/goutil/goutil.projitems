@@ -13,8 +13,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)GoFunc.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NilType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PanicException.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PromotedInterfaceAttribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PromotedTypeAttributeBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PromotedStructAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ptr.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ref.cs" />
