@@ -69,7 +69,7 @@ namespace go
 
             public Abser Abser;
 
-            public ref MyError MyError => ref MyError_Val;
+            public ref MyError MyError => ref MyError_val;
         }
 
         [PromotedStruct(typeof(MyError))]
@@ -88,11 +88,11 @@ namespace go
             // MyError structure promotion
             private readonly Ref<MyError> m_MyErrorRef;
 
-            private ref MyError MyError_Val => ref m_MyErrorRef.Value;
+            private ref MyError MyError_val => ref m_MyErrorRef.Value;
 
             public ref DateTime When => ref m_MyErrorRef.Value.When;
 
-            public ref string What => ref m_MyErrorRef.Value.What;
+            public ref string What => ref m_MyErrorRef.Value.What;            
 
             [DebuggerStepperBoundary]
             static MyCustomError()

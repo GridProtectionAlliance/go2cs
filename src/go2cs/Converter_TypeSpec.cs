@@ -48,6 +48,7 @@ namespace go2cs
 
             if (Metadata.Interfaces.TryGetValue(originalIdentifier, out InterfaceInfo interfaceInfo))
             {
+                // Handle interface type declaration
                 string ancillaryInterfaceFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}Interface.cs");
 
                 FunctionSignature[] localFunctions = interfaceInfo.GetLocalMethods().ToArray();
@@ -102,19 +103,21 @@ namespace go2cs
                 HashSet<string> promotedStructs = new HashSet<string>(structInfo.GetAnonymousFieldNames(), StringComparer.Ordinal);
                 promotedStructs.ExceptWith(inheritedTypeNames);
 
-                //    using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
-                //        writer.Write(new StructTypeTemplate
-                //        {
-                //            NamespacePrefix = PackageNamespace,
-                //            NamespaceHeader = m_namespaceHeader,
-                //            NamespaceFooter = m_namespaceFooter,
-                //            PackageName = Package,
-                //            StructName = identifier,
-                //            Scope = scope,
-                //            InheritedInterfaces = new[] { "" }, // TODO <<
-                //            PromotedStructs = new[] { "" }     // TODO <<
-                //        }
-                //        .TransformText());
+                using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
+                {
+                    writer.Write(new StructTypeTemplate
+                    {
+                        NamespacePrefix = PackageNamespace,
+                        NamespaceHeader = m_namespaceHeader,
+                        NamespaceFooter = m_namespaceFooter,
+                        PackageName = Package,
+                        StructName = identifier,
+                        Scope = scope,
+                        PromotedStructs = promotedStructs,
+                        PromotedFunctions = promotedFunctions
+                    }
+                    .TransformText());
+                }
 
                 // Track file name associated with package
                 AddFileToPackage(Package, ancillaryStructFileName, PackageNamespace);
@@ -128,7 +131,7 @@ namespace go2cs
                         FieldInfo promotedStruct = field.Clone();
 
                         promotedStruct.Type.Name = $"ref {promotedStruct.Type.Name}";
-                        promotedStruct.Name = $"{promotedStruct.Name} => ref {promotedStruct.Name}Val";
+                        promotedStruct.Name = $"{promotedStruct.Name} => ref {promotedStruct.Name}_val";
 
                         fields.Add(promotedStruct);
                     }
@@ -136,12 +139,6 @@ namespace go2cs
                     {
                         fields.Add(field);
                     }
-                }
-
-                // TODO: Move to ancillary structure template
-                foreach (string promotedStruct in promotedStructs)
-                {
-                    m_targetFile.AppendLine($"{Spacing()}[PromotedStruct(typeof({promotedStruct}))]");
                 }
 
                 m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier}{GetInheritedTypeList(inheritedTypeNames)}");

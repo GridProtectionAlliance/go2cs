@@ -13,5 +13,4 @@
                 }<#+
 // Template Parameters
 public string FunctionName;
-public string InterfaceName;
 #>

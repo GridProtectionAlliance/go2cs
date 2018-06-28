@@ -97,7 +97,6 @@ namespace go2cs.Templates
 
 // Template Parameters
 public string FunctionName;
-public string InterfaceName;
 
         
         #line default

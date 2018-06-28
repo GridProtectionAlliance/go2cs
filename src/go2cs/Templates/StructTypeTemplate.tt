@@ -22,44 +22,64 @@ using go;
 <#=NamespaceHeader#>
     public static partial class <#=PackageName#>_package
     {
-        [<#=GeneratedCodeAttribute#>]
+        [<#=GeneratedCodeAttribute#>]<#
+        foreach (string promotedStruct in PromotedStructs)
+        {
+            if (!string.IsNullOrEmpty(promotedStruct))
+            {
+        #>
+
+        [PromotedStruct(typeof(<#=promotedStruct#>))]<#
+            }
+        }#>
         <#=Scope#> partial struct <#=StructName#>
         {<#
-            foreach (var decl in Functions)
+            foreach (KeyValuePair<string, List<FunctionSignature>> kvp in PromotedFunctions)
             {
-                #><#=new StructFuncDeclTemplate
+                foreach (var decl in kvp.Value)
                 {
-                    PromotedField = decl.fieldName,
-                    FunctionName = decl.function.Name,
-                    Scope = "public",
-                    ParameterSignature = decl.function.Signature.GenerateParametersSignature(false),
-                    ParameterNames = GetParameterNames(decl.function),
-                    ParameterTypes = GetParameterTypes(decl.function),
-                    ResultType = decl.function.Signature.GenerateResultSignature()
+                    #><#=new StructFuncDeclTemplate
+                    {
+                        PromotedField = kvp.Key,
+                        FunctionName = decl.Name,
+                        Scope = "public",
+                        ParameterSignature = decl.Signature.GenerateParametersSignature(false),
+                        ParameterNames = GetParameterNames(decl),
+                        ParameterTypes = GetParameterTypes(decl),
+                        ResultType = decl.Signature.GenerateResultSignature()
+                    }
+                    .TransformText()#><#
                 }
-                .TransformText()#><#
-            }#>
+            }
+            
+            if (PromotedFunctions.Count > 0)
+            {
+            #>
             
 
             [DebuggerStepperBoundary]
-            static <#=InterfaceName#>()
+            static <#=StructName#>()
             {
                 Type targetType = typeof(<#=StructName#>);
                 MethodInfo extensionMethod;
                 
                 // Any existing defined extensions will override interface instance reference calls<#
                 
-                foreach (var decl in Functions)
+                foreach (KeyValuePair<string, List<FunctionSignature>> kvp in PromotedFunctions)
                 {
-                    #><#=new StructFuncInitTemplate
+                    foreach (var decl in kvp.Value)
                     {
-                        FunctionName = decl.function.Name,
-                        InterfaceName = InterfaceName
+                        #><#=new StructFuncInitTemplate
+                        {
+                            FunctionName = decl.Name
+                        }
+                        .TransformText()#><#
                     }
-                    .TransformText()#><#
                 }#>
 
-            }
+            }<#
+            
+            }#>
 
             public <#=StructName#>(NilType _)
             {
@@ -101,10 +121,10 @@ public string NamespacePrefix;
 public string NamespaceHeader;
 public string NamespaceFooter;
 public string PackageName;
-public string InterfaceName;
 public string StructName;
 public string Scope;
-public IEnumerable<(string fieldName, FunctionSignature function)> Functions;
+public IEnumerable<string> PromotedStructs;
+public Dictionary<string, List<FunctionSignature>> PromotedFunctions;
 
 private string GetParameterNames(FunctionSignature function)
 {
