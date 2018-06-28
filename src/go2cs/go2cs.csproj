@@ -111,8 +111,14 @@
     <EmbeddedResource Include="..\goutil\GoFunc.cs">
       <Link>goutil\GoFunc.cs</Link>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\GoFunc.cs">
+      <Link>goutil\GoFunc.cs</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\GoString.cs">
+        <Link>goutil\GoString.cs</Link>
+    </EmbeddedResource>
     <EmbeddedResource Include="..\goutil\NilType.cs">
-      <Link>goutil\NilType.cs</Link>
+        <Link>goutil\NilType.cs</Link>
     </EmbeddedResource>
     <EmbeddedResource Include="..\goutil\PanicException.cs">
       <Link>goutil\PanicException.cs</Link>

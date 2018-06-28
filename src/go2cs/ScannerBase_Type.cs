@@ -250,7 +250,7 @@ namespace go2cs
                 case "Type":
                     return "object";
                 case "string":
-                    return "string";
+                    return "GoString";
                 default:
                     return $"{type}";
             }
@@ -293,7 +293,7 @@ namespace go2cs
                 case "Type":
                     return "System.Object";
                 case "string":
-                    return "System.String";
+                    return "go.GoString";
                 default:
                     return $"{type}";
             }
