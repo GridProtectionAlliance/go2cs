@@ -13,11 +13,14 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
+#pragma warning disable CS0660, CS0661
+
 namespace go
 {
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
+
         public struct Abser<T> : Abser
         {
             private T m_target;

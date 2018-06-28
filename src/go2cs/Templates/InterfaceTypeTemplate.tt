@@ -22,6 +22,8 @@ using System.Runtime.CompilerServices;
 using go;
 <#}#>
 
+#pragma warning disable CS0660, CS0661
+
 <#=NamespaceHeader#>
     public static partial class <#=PackageName#>_package
     {
