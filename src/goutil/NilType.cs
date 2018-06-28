@@ -44,6 +44,8 @@ namespace go
                     return true;
                 case ISlice slice:
                     return slice == Default;
+                case GoString gostr:
+                    return gostr == Default;
                 case string str:
                     return str == Default;
                 // TODO: Add map, channel, etc...

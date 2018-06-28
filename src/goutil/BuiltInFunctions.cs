@@ -37,7 +37,7 @@ namespace go
     public static class BuiltInFunctions
     {
         /// <summary>
-        /// The error built-in interface type is the conventional interface for representing an
+        /// The built-in error interface type is the conventional interface for representing an
         /// error condition, with the nil value representing no error.
         /// </summary>
         public interface error
@@ -303,16 +303,7 @@ namespace go
         /// </summary>
         /// <returns>Reference to newly allocated zero value of provided type.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static T @new<T>() where T: new()
-        {
-            T value = new T();
-
-            if (value is string)
-                value = (T)Convert.ChangeType("", typeof(T));
-
-            return value;
-        }
-
+        public static T @new<T>() where T: new() => new T();
 
         /// <summary>
         /// Formats arguments in an implementation-specific way and writes the result to standard-error.

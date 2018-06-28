@@ -148,6 +148,9 @@ namespace go
             if (data1.Length != data2.Length)
                 return false;
 
+            if (data1.Length == 0)
+                return true;
+
             fixed (byte* bytes1 = data1, bytes2 = data2)
             {
                 int len = data1.Length;
