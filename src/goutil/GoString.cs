@@ -84,17 +84,17 @@ namespace go
             Decoder decoder = Encoding.UTF8.GetDecoder();
             byte[] value = Value;
             char[] rune = new char[1];
-            int increment;
+            int byteCount;
 
-            for (int index = 0; index < value.Length; index += increment)
+            for (int index = 0; index < value.Length; index += byteCount)
             {
-                increment = 1;
-                bool completed = Decode(decoder, value, index, 1, rune);
+                byteCount = 1;
+                bool completed = Decode(decoder, value, index, byteCount, rune);
 
                 if (!completed)
                 {
-                    increment = 2;
-                    completed = Decode(decoder, value, index, 2, rune);
+                    byteCount = 2;
+                    completed = Decode(decoder, value, index, byteCount, rune);
                 }
 
                 if (completed)
