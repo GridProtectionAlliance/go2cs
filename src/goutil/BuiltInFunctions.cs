@@ -32,6 +32,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using static System.Math;
 
+#pragma warning disable CS0660, CS0661
+
 namespace go
 {
     public static class BuiltInFunctions
@@ -46,6 +48,48 @@ namespace go
             /// Get string that represents an error.
             /// </summary>
             string Error();
+        }
+
+        /// <summary>
+        /// The rune type is used, by convention, to distinguish character values from integer values.
+        /// It is an alias for int32 and is equivalent to int32 in all ways.
+        /// </summary>
+        public struct rune
+        {
+            // Value of the rune struct
+            private readonly int m_value;
+
+            public rune(int value) => m_value = value;
+
+            // Enable implicit conversions between int and rune struct
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator rune(int value) => new rune(value);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator int(rune value) => value.m_value;
+
+            // Enable implicit conversions between char and rune struct
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator rune(char value) => new rune(value);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator char(rune value) => (char)value.m_value;
+
+            // Enable comparisons between nil and rune struct
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator ==(rune value, NilType nil) => value.Equals(default(rune));
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(rune value, NilType nil) => !(value == nil);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator ==(NilType nil, rune value) => value == nil;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(NilType nil, rune value) => value != nil;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static implicit operator rune(NilType nil) => default;
         }
 
         /// <summary>
