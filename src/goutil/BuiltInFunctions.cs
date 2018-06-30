@@ -51,8 +51,8 @@ namespace go
         }
 
         /// <summary>
-        /// The rune type is used, by convention, to distinguish character values from integer values.
-        /// It is an alias for int32 and is equivalent to int32 in all ways.
+        /// The built-in rune type is used, by convention, to distinguish character values from
+        /// integer values. It is an alias for int32 and is equivalent to int32 in all ways.
         /// </summary>
         public struct rune
         {
