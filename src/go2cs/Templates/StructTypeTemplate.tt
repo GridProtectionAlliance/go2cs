@@ -32,6 +32,7 @@ using go;
         [PromotedStruct(typeof(<#=promotedStruct#>))]<#
             }
         }#>
+
         <#=Scope#> partial struct <#=StructName#>
         {<#
             foreach (KeyValuePair<string, List<FunctionSignature>> kvp in PromotedFunctions)
@@ -49,6 +50,25 @@ using go;
                         ResultType = decl.Signature.GenerateResultSignature()
                     }
                     .TransformText()#><#
+                }
+            }
+
+            foreach (KeyValuePair<string, List<FieldInfo>> kvp in PromotedFields)
+            {
+            #>
+
+            // <#=kvp.Key#> structure promotion
+            private readonly Ref<<#=kvp.Key#>> m_<#=kvp.Key#>Ref;
+
+            private ref <#=kvp.Key#> <#=kvp.Key#>_val => ref m_<#=kvp.Key#>Ref.Value;
+<#
+
+                foreach (var decl in kvp.Value)
+                {
+                #>
+
+            public ref <#=decl.Type.PrimitiveName#> <#=decl.Name#> => ref m_<#=kvp.Key#>Ref.Value.<#=decl.Name#>;
+<#
                 }
             }
             
@@ -81,22 +101,52 @@ using go;
             
             }#>
 
+            // Constructors
             public <#=StructName#>(NilType _)
+            {<#
+            foreach (var decl in StructFields)
             {
-                // Field instance values
-                //public DateTime When;
-                //public string What = ""; <- string initialized to empty
-                // Inherited interface initializations (set to null / default)
-                // Inherited structure initializations
-            }
+                if (IsPromotedStruct(decl))
+                {
+                    // Promoted struct #>
 
-            // Only include constructor if struct contains fields
-            //public <#=StructName#>(params)
-            //{
-            //    this.Field = Field,
-            //    // Inherited interface initializations
-            //    // Inherited structure initializations
-            //}
+                this.m_<#=decl.Name#>Ref = new Ref<<#=decl.Type.PrimitiveName#>>(new <#=decl.Type.PrimitiveName#>(nil));<#
+                }
+                else
+                {
+                    // Promoted interface or normal struct field #>
+
+                this.<#=decl.Name#> = default;<#
+                }
+            }#>
+
+            }<# 
+            
+            if (StructFields.Length > 0)
+            {#>
+
+
+            public <#=StructName#>(<#=string.Join(", ", StructFields.Select(field => $"{field.Type.PrimitiveName} {field.Name}"))#>)
+            {<#
+            foreach (var decl in StructFields)
+            {
+                if (IsPromotedStruct(decl))
+                {
+                    // Promoted struct #>
+
+                this.m_<#=decl.Name#>Ref = new Ref<<#=decl.Type.PrimitiveName#>>(<#=decl.Name#>);<#
+                }
+                else
+                {
+                    // Promoted interface or normal struct field #>
+
+                this.<#=decl.Name#> = <#=decl.Name#>;<#
+                }
+            }#>
+
+            }
+<#
+            }#>
 
             // Enable comparisons between nil and <#=StructName#> struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,8 +173,10 @@ public string NamespaceFooter;
 public string PackageName;
 public string StructName;
 public string Scope;
-public IEnumerable<string> PromotedStructs;
+public FieldInfo[] StructFields;
+public HashSet<string> PromotedStructs;
 public Dictionary<string, List<FunctionSignature>> PromotedFunctions;
+public Dictionary<string, List<FieldInfo>> PromotedFields;
 
 private string GetParameterNames(FunctionSignature function)
 {
@@ -144,5 +196,22 @@ private string GetParameterTypes(FunctionSignature function)
         parameterTypes = ", " + parameterTypes;
 
     return parameterTypes;
+}
+
+private bool IsPromotedStruct(FieldInfo field)
+{
+    if (!field.IsPromoted)
+        return false;
+
+    foreach (string fullTypeName in PromotedStructs)
+    {
+        string[] parts = fullTypeName.Split('.');
+        string typeName = parts[parts.Length - 1];
+
+        if (typeName.Equals(field.Type.PrimitiveName, StringComparison.Ordinal))
+            return true;
+    }
+
+    return false;
 }
 #>

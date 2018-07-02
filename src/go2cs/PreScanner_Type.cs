@@ -21,7 +21,6 @@
 //
 //******************************************************************************************************
 
-using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System.Collections.Generic;
 using static go2cs.Common;

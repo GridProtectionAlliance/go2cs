@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 26 10:56:12 UTC
+//     Generated on 2018 July 02 12:54:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,38 +13,34 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
+#pragma warning disable CS0660, CS0661
+
 namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.1.0")]        
-        public partial interface Animal
-        {
-        }
-
         [GeneratedCode("go2cs", "0.1.1.0")]
-        [PromotedInterface(typeof(Animal))]
         public struct Animal<T> : Animal
         {
             private T m_target;
 
-            private delegate string TypeByVal(T value);
-            private delegate string TypeByRef(ref T value);
+            private delegate GoString TypeByVal(T value);
+            private delegate GoString TypeByRef(ref T value);
 
             private static readonly TypeByVal s_TypeByVal;
             private static readonly TypeByRef s_TypeByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public string Type() => s_TypeByRef?.Invoke(ref m_target) ?? s_TypeByVal(m_target);
+            public GoString Type() => s_TypeByRef?.Invoke(ref m_target) ?? s_TypeByVal(m_target);
 
-            private delegate string SwimByVal(T value);
-            private delegate string SwimByRef(ref T value);
+            private delegate GoString SwimByVal(T value);
+            private delegate GoString SwimByRef(ref T value);
 
             private static readonly SwimByVal s_SwimByVal;
             private static readonly SwimByRef s_SwimByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public string Swim() => s_SwimByRef?.Invoke(ref m_target) ?? s_SwimByVal(m_target);
+            public GoString Swim() => s_SwimByRef?.Invoke(ref m_target) ?? s_SwimByVal(m_target);
 
             [DebuggerStepperBoundary]
             static Animal()
@@ -62,7 +58,7 @@ namespace go
                         s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
                 }
 
-                // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
+                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_TypeByRef == null && (object)s_TypeByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement Animal.Type function");
 
@@ -76,7 +72,7 @@ namespace go
                         s_SwimByVal = extensionMethod.CreateStaticDelegate(typeof(SwimByVal)) as SwimByVal;
                 }
 
-                // This run-time exception is a compile time error in Go, so it's not an expected exception if Go code compiles
+                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_SwimByRef == null && (object)s_SwimByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement Animal.Swim function");
             }

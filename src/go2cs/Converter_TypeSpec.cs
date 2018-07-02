@@ -100,8 +100,10 @@ namespace go2cs
 
                 RecurseInheritedInterfaces(context, originalIdentifier, structInfo, promotedFunctions, inheritedTypeNames);
 
-                HashSet<string> promotedStructs = new HashSet<string>(structInfo.GetAnonymousFieldNames(), StringComparer.Ordinal);
-                promotedStructs.ExceptWith(inheritedTypeNames);
+                Dictionary<string, List<FieldInfo>> promotedFields = new Dictionary<string, List<FieldInfo>>(StringComparer.Ordinal);
+                HashSet<string> promotedStructs = new HashSet<string>(StringComparer.Ordinal);
+
+                SearchPromotedStructFields(context, originalIdentifier, structInfo, promotedFields, promotedStructs);
 
                 using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
                 {
@@ -113,8 +115,10 @@ namespace go2cs
                         PackageName = Package,
                         StructName = identifier,
                         Scope = scope,
+                        StructFields = structInfo.Fields,
                         PromotedStructs = promotedStructs,
-                        PromotedFunctions = promotedFunctions
+                        PromotedFunctions = promotedFunctions,
+                        PromotedFields = promotedFields
                     }
                     .TransformText());
                 }
@@ -130,7 +134,7 @@ namespace go2cs
                     {
                         FieldInfo promotedStruct = field.Clone();
 
-                        promotedStruct.Type.Name = $"ref {promotedStruct.Type.Name}";
+                        promotedStruct.Type.PrimitiveName = $"ref {promotedStruct.Type.Name}";
                         promotedStruct.Name = $"{promotedStruct.Name} => ref {promotedStruct.Name}_val";
 
                         fields.Add(promotedStruct);
@@ -142,7 +146,7 @@ namespace go2cs
                 }
 
                 m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier}{GetInheritedTypeList(inheritedTypeNames)}");
-                m_targetFile.AppendLine($"{Spacing()}{{");
+                m_targetFile.Append($"{Spacing()}{{");
 
                 foreach (FieldInfo field in fields)
                 {
@@ -155,11 +159,11 @@ namespace go2cs
                         if (description.Length > 2)
                         {
                             RequiredUsings.Add("System.ComponentModel");
-                            fieldDecl.AppendLine($"{Spacing(1)}[Description({description})]");
+                            fieldDecl.Append($"{Environment.NewLine}{Spacing(1)}[Description({description})]");
                         }
                     }
 
-                    fieldDecl.Append($"{Spacing(1)}public {field.Type.PrimitiveName} {field.Name};");
+                    fieldDecl.Append($"{Environment.NewLine}{Spacing(1)}public {field.Type.PrimitiveName} {field.Name};");
 
                     if (!string.IsNullOrEmpty(field.Comments))
                         fieldDecl.Append(field.Comments);
@@ -167,7 +171,7 @@ namespace go2cs
                     m_targetFile.Append(fieldDecl);
                 }
 
-                m_targetFile.AppendLine($"{Spacing()}}}");
+                m_targetFile.AppendLine($"{Environment.NewLine}{Spacing()}}}");
             }
 
             //if (m_interfaceMethods.TryGetValue(context.type()?.typeLit()?.interfaceType(), out List<(string functionName, string parameterSignature, string namedParameters, string parameterTypes, string resultType)> functions))
@@ -239,10 +243,6 @@ namespace go2cs
                     functions.AddRange(inheritedInferfaceInfo.GetLocalMethods());
                     RecurseInheritedInterfaces(context, identifier, inheritedInferfaceInfo, functions);
                 }
-                else
-                {
-                    AddWarning(context, $"Failed to find metadata for promoted interface \"{interfaceName}\" declared in \"{identifier}\" struct type.");
-                }
             }
         }
 
@@ -313,6 +313,86 @@ namespace go2cs
             }
 
             return interfaceFileMetadata != null;
+        }
+
+        private void SearchPromotedStructFields(GolangParser.TypeSpecContext context, string identifier, StructInfo structInfo, Dictionary<string, List<FieldInfo>> promotedFields, HashSet<string> promotedStructTypeNames = null, bool useFullTypeName = true)
+        {
+            foreach (FieldInfo field in structInfo.GetAnonymousFields())
+            {
+                string structName = field.Type.PrimitiveName;
+
+                if (TryFindPromotedStructInfo(structName, out StructInfo promotedStructInfo, out string shortTypeName, out string fullTypeName))
+                {
+                    promotedStructTypeNames?.Add(useFullTypeName ? fullTypeName : shortTypeName);
+                    List<FieldInfo> fields = promotedFields.GetOrAdd(field.Name, name => new List<FieldInfo>());
+                    fields.AddRange(promotedStructInfo.GetLocalFields());                   
+                }
+                else
+                {
+                    AddWarning(context, $"Failed to find metadata for promoted struct or interface \"{structName}\" declared in \"{identifier}\" struct type.");
+                }
+            }
+        }
+
+        private bool TryFindPromotedStructInfo(string structName, out StructInfo structInfo, out string shortTypeName, out string fullTypeName)
+        {
+            structInfo = default;
+            shortTypeName = SanitizedIdentifier(structName);
+            fullTypeName = default;
+
+            if (Metadata.Structs.TryGetValue(structName, out structInfo))
+            {
+                fullTypeName = $"{GetPackageNamespace(PackageImport)}.{shortTypeName}";
+                return true;
+            }
+
+            string[] qualifiedIdentifierParts = structName.Split('.');
+
+            if (qualifiedIdentifierParts.Length == 2)
+            {
+                string alias = qualifiedIdentifierParts[0];
+                string identifier = qualifiedIdentifierParts[1];
+
+                if (ImportAliases.TryGetValue(alias, out (string targetImport, string targetUsing) import))
+                {
+                    if (ImportMetadata.TryGetValue(import.targetImport, out FolderMetadata folderMetadata))
+                    {
+                        if (TryFindStructInfo(folderMetadata, identifier, out FileMetadata fileMetadata, out structInfo))
+                        {
+                            fullTypeName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{SanitizedIdentifier(identifier)}";
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<string, FolderMetadata> importMetadata in ImportMetadata)
+            {
+                if (TryFindStructInfo(importMetadata.Value, structName, out FileMetadata fileMetadata, out structInfo))
+                {
+                    fullTypeName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{shortTypeName}";
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool TryFindStructInfo(FolderMetadata folderMetadata, string structName, out FileMetadata structFileMetadata, out StructInfo structInfo)
+        {
+            structInfo = default;
+            structFileMetadata = null;
+
+            foreach (FileMetadata fileMetadata in folderMetadata.Files.Values)
+            {
+                if (fileMetadata.Structs.TryGetValue(structName, out structInfo))
+                {
+                    structFileMetadata = fileMetadata;
+                    break;
+                }
+            }
+
+            return structFileMetadata != null;
         }
 
         private string GetInheritedTypeList(HashSet<string> inheritedTypeNames)

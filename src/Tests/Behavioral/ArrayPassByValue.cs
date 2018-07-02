@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 26 10:56:12 UTC
+// package main -- go2cs converted at 2018 July 02 12:54:32 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue.go
 
 using fmt = go.fmt_package;
@@ -14,17 +14,17 @@ namespace go
         }
 
         // Arrays are passed by value (a full copy)
-        private static void test(string[2][2] a)
+        private static void test(GoString[2][2] a)
         {
             fmt.Println(a[0],a[1])a[0]="Goodbye"fmt.Println(a[0],a[1])
         }
 
-        private static void test2(ref string[2][2] a)
+        private static void test2(ref GoString[2][2] a)
         {
             fmt.Println(a[0],a[1])a[0]="Goodbye"fmt.Println(a[0],a[1])
         }
 
-        private static void test3(Slice<string> a)
+        private static void test3(Slice<GoString> a)
         {
             fmt.Println(a[0],a[1])a[0]="Goodbye"fmt.Println(a[0],a[1])
         }

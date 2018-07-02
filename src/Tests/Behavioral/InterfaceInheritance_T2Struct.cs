@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 21 12:35:18 UTC
+//     Generated on 2018 July 02 12:54:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System.CodeDom.Compiler;
@@ -17,22 +17,16 @@ namespace go
         [GeneratedCode("go2cs", "0.1.1.0")]
         public partial struct T2
         {
+            // Constructors
             public T2(NilType _)
             {
-                // Field instance values
-                //public DateTime When;
-                //public string What = ""; <- string initialized to empty
-                // Inherited interface initializations (set to null / default)
-                // Inherited structure initializations
+                this.name = default;
             }
 
-            // Only include constructor if struct contains fields
-            //public T2(params)
-            //{
-            //    this.Field = Field,
-            //    // Inherited interface initializations
-            //    // Inherited structure initializations
-            //}
+            public T2(GoString name)
+            {
+                this.name = name;
+            }
 
             // Enable comparisons between nil and T2 struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

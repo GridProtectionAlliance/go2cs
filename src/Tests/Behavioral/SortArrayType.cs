@@ -1,13 +1,20 @@
-// package main -- go2cs converted at 2018 June 26 10:56:13 UTC
+// package main -- go2cs converted at 2018 July 02 12:54:33 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\SortArrayType.go
 
-using fmt = go.fmt_package;using sort = go.sort_package;using fmt = go.fmt_package;using sort = go.sort_package;
+using fmt = go.fmt_package;
+using sort = go.sort_package;
 using static go.BuiltInFunctions;
 
 namespace go
 {
     public static partial class main_package
     {
+        public partial struct Person
+        {
+            public GoString Name;
+            public long Age;
+            public single ShoeSize;
+        }
 
 
         public static long Len(this PeopleByShoeSize p)
@@ -15,12 +22,12 @@ namespace go
             returnlen(p)
         }
 
-        public static void Swap(this PeopleByShoeSize p, long i, long j
+        public static void Swap(this PeopleByShoeSize p, long i, long j)
         {
             p[i],p[j]=p[j],p[i]
         }
 
-        public static bool Less(this PeopleByShoeSize p, long i, long j
+        public static bool Less(this PeopleByShoeSize p, long i, long j)
         {
             return(p[i].ShoeSize<p[j].ShoeSize)
         }

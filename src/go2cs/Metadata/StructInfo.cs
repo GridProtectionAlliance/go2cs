@@ -42,10 +42,5 @@ namespace go2cs.Metadata
         {
             return Fields.Where(field => field.IsPromoted);
         }
-
-        public IEnumerable<string> GetAnonymousFieldNames()
-        {
-            return GetAnonymousFields().Select(field => field.Type.PrimitiveName);
-        }
     }
 }

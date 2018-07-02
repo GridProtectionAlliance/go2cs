@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 26 10:56:13 UTC
+// package main -- go2cs converted at 2018 July 02 12:54:33 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\LambdaFunctions.go
 
 using fmt = go.fmt_package;
@@ -10,7 +10,7 @@ namespace go
     public static partial class main_package
     {
 
-        private static string foo()
+        private static GoString foo()
         {
             return"Stringy function"
         }

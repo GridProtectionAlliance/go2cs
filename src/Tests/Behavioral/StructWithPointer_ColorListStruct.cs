@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 21 12:35:18 UTC
+//     Generated on 2018 July 02 12:54:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System.CodeDom.Compiler;
@@ -17,22 +17,22 @@ namespace go
         [GeneratedCode("go2cs", "0.1.1.0")]
         public partial struct ColorList
         {
+            // Constructors
             public ColorList(NilType _)
             {
-                // Field instance values
-                //public DateTime When;
-                //public string What = ""; <- string initialized to empty
-                // Inherited interface initializations (set to null / default)
-                // Inherited structure initializations
+                this.Total = default;
+                this.Color = default;
+                this.Next = default;
+                this.NextNext = default;
             }
 
-            // Only include constructor if struct contains fields
-            //public ColorList(params)
-            //{
-            //    this.Field = Field,
-            //    // Inherited interface initializations
-            //    // Inherited structure initializations
-            //}
+            public ColorList(long Total, GoString Color, Ptr<ColorList> Next, Ptr<Ptr<ColorList>> NextNext)
+            {
+                this.Total = Total;
+                this.Color = Color;
+                this.Next = Next;
+                this.NextNext = NextNext;
+            }
 
             // Enable comparisons between nil and ColorList struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

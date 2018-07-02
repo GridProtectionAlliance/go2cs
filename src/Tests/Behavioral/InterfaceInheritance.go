@@ -27,8 +27,8 @@ type I interface {
 type V interface {
     I
     fmt.Stringer
-    error
     N()
+    error
  }
 
 func main() {

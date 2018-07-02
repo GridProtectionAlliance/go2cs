@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 26 17:29:46 UTC
+//     Generated on 2018 July 02 12:54:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,17 +13,13 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
+#pragma warning disable CS0660, CS0661
+
 namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.1.0")]        
-        public partial interface I
-        {
-        }
-
         [GeneratedCode("go2cs", "0.1.1.0")]
-        [PromotedInterface(typeof(I))]
         public struct I<T> : I
         {
             private T m_target;

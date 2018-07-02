@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 21 12:35:18 UTC
+//     Generated on 2018 July 02 12:54:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System.CodeDom.Compiler;
@@ -15,24 +15,38 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
+        [PromotedStruct(typeof(go.main_package.Person))]
+        [PromotedStruct(typeof(go.main_package.Employee))]
         public partial struct Record
         {
+            // Person structure promotion
+            private readonly Ref<Person> m_PersonRef;
+
+            private ref Person Person_val => ref m_PersonRef.Value;
+
+            public ref GoString name => ref m_PersonRef.Value.name;
+
+            public ref int age => ref m_PersonRef.Value.age;
+
+            // Employee structure promotion
+            private readonly Ref<Employee> m_EmployeeRef;
+
+            private ref Employee Employee_val => ref m_EmployeeRef.Value;
+
+            public ref GoString position => ref m_EmployeeRef.Value.position;
+
+            // Constructors
             public Record(NilType _)
             {
-                // Field instance values
-                //public DateTime When;
-                //public string What = ""; <- string initialized to empty
-                // Inherited interface initializations (set to null / default)
-                // Inherited structure initializations
+                this.m_PersonRef = new Ref<Person>(new Person(nil));
+                this.m_EmployeeRef = new Ref<Employee>(new Employee(nil));
             }
 
-            // Only include constructor if struct contains fields
-            //public Record(params)
-            //{
-            //    this.Field = Field,
-            //    // Inherited interface initializations
-            //    // Inherited structure initializations
-            //}
+            public Record(Person Person, Employee Employee)
+            {
+                this.m_PersonRef = new Ref<Person>(Person);
+                this.m_EmployeeRef = new Ref<Employee>(Employee);
+            }
 
             // Enable comparisons between nil and Record struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 June 26 10:56:13 UTC
+// package main -- go2cs converted at 2018 July 02 12:54:34 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructWithPointer.go
 
 using fmt = go.fmt_package;
@@ -8,6 +8,13 @@ namespace go
 {
     public static partial class main_package
     {
+        public partial struct ColorList
+        {
+            public long Total;
+            public GoString Color;
+            public Ptr<ColorList> Next;
+            public Ptr<Ptr<ColorList>> NextNext;
+        }
 
         private static void Main()
         {
