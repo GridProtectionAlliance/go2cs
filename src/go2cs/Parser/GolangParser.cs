@@ -99,9 +99,9 @@ public partial class GolangParser : Parser {
 
 	private static readonly string[] _LiteralNames = {
 		null, "'package'", "'import'", "'('", "')'", "'.'", "'const'", "'='", 
-		"','", "'type'", "';'", "'func'", "'var'", "'{'", "'}'", "'<-'", "'++'", 
-		"'--'", "'+'", "'-'", "'|'", "'^'", "'*'", "'/'", "'%'", "'<<'", "'>>'", 
-		"'&'", "'&^'", "':='", "':'", "'return'", "'break'", "'continue'", "'goto'", 
+		"','", "'type'", "'func'", "'var'", "'{'", "'}'", "'<-'", "'++'", "'--'", 
+		"'+'", "'-'", "'|'", "'^'", "'*'", "'/'", "'%'", "'<<'", "'>>'", "'&'", 
+		"'&^'", "':='", "';'", "':'", "'return'", "'break'", "'continue'", "'goto'", 
 		"'fallthrough'", "'defer'", "'if'", "'else'", "'switch'", "'case'", "'default'", 
 		"'select'", "'for'", "'range'", "'go'", "'['", "']'", "'interface'", "'map'", 
 		"'chan'", "'...'", "'struct'", "'||'", "'&&'", "'=='", "'!='", "'<'", 
@@ -327,7 +327,7 @@ public partial class GolangParser : Parser {
 			State = 217;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__5) | (1L << T__8) | (1L << T__10) | (1L << T__11))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__5) | (1L << T__8) | (1L << T__9) | (1L << T__10))) != 0)) {
 				{
 				{
 				State = 212; topLevelDecl();
@@ -679,7 +679,7 @@ public partial class GolangParser : Parser {
 				State = 250; typeDecl();
 				}
 				break;
-			case T__11:
+			case T__10:
 				EnterOuterAlt(_localctx, 3);
 				{
 				State = 251; varDecl();
@@ -823,7 +823,7 @@ public partial class GolangParser : Parser {
 				State = 270;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__10) | (1L << T__14) | (1L << T__21) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << IDENTIFIER))) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__9) | (1L << T__13) | (1L << T__20) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << IDENTIFIER))) != 0)) {
 					{
 					State = 269; type();
 					}
@@ -972,6 +972,12 @@ public partial class GolangParser : Parser {
 		public TypeSpecContext typeSpec(int i) {
 			return GetRuleContext<TypeSpecContext>(i);
 		}
+		public EosContext[] eos() {
+			return GetRuleContexts<EosContext>();
+		}
+		public EosContext eos(int i) {
+			return GetRuleContext<EosContext>(i);
+		}
 		public TypeDeclContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -1014,7 +1020,7 @@ public partial class GolangParser : Parser {
 					{
 					{
 					State = 295; typeSpec();
-					State = 296; Match(T__9);
+					State = 296; eos();
 					}
 					}
 					State = 302;
@@ -1112,7 +1118,7 @@ public partial class GolangParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 309; Match(T__10);
+			State = 309; Match(T__9);
 			State = 310; Match(IDENTIFIER);
 			State = 313;
 			ErrorHandler.Sync(this);
@@ -1218,7 +1224,7 @@ public partial class GolangParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 318; Match(T__10);
+			State = 318; Match(T__9);
 			State = 319; receiver();
 			State = 320; Match(IDENTIFIER);
 			State = 323;
@@ -1324,7 +1330,7 @@ public partial class GolangParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 327; Match(T__11);
+			State = 327; Match(T__10);
 			State = 339;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
@@ -1406,9 +1412,9 @@ public partial class GolangParser : Parser {
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case T__2:
-			case T__10:
-			case T__14:
-			case T__21:
+			case T__9:
+			case T__13:
+			case T__20:
 			case T__45:
 			case T__47:
 			case T__48:
@@ -1477,9 +1483,9 @@ public partial class GolangParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 351; Match(T__12);
+			State = 351; Match(T__11);
 			State = 352; statementList();
-			State = 353; Match(T__13);
+			State = 353; Match(T__12);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1532,7 +1538,7 @@ public partial class GolangParser : Parser {
 			State = 360;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__5) | (1L << T__8) | (1L << T__9) | (1L << T__10) | (1L << T__11) | (1L << T__12) | (1L << T__14) | (1L << T__17) | (1L << T__18) | (1L << T__20) | (1L << T__21) | (1L << T__26) | (1L << T__30) | (1L << T__31) | (1L << T__32) | (1L << T__33) | (1L << T__34) | (1L << T__35) | (1L << T__36) | (1L << T__38) | (1L << T__41) | (1L << T__42) | (1L << T__44) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__5) | (1L << T__8) | (1L << T__9) | (1L << T__10) | (1L << T__11) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__19) | (1L << T__20) | (1L << T__25) | (1L << T__28) | (1L << T__30) | (1L << T__31) | (1L << T__32) | (1L << T__33) | (1L << T__34) | (1L << T__35) | (1L << T__36) | (1L << T__38) | (1L << T__41) | (1L << T__42) | (1L << T__44) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
 				{
 				{
 				State = 355; statement();
@@ -1889,7 +1895,7 @@ public partial class GolangParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			State = 390; expression(0);
-			State = 391; Match(T__14);
+			State = 391; Match(T__13);
 			State = 392; expression(0);
 			}
 		}
@@ -1934,7 +1940,7 @@ public partial class GolangParser : Parser {
 			State = 394; expression(0);
 			State = 395;
 			_la = TokenStream.LA(1);
-			if ( !(_la==T__15 || _la==T__16) ) {
+			if ( !(_la==T__14 || _la==T__15) ) {
 			ErrorHandler.RecoverInline(this);
 			}
 			else {
@@ -2029,11 +2035,11 @@ public partial class GolangParser : Parser {
 			State = 402;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__17) | (1L << T__18) | (1L << T__19) | (1L << T__20) | (1L << T__21) | (1L << T__22) | (1L << T__23) | (1L << T__24) | (1L << T__25) | (1L << T__26) | (1L << T__27))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__16) | (1L << T__17) | (1L << T__18) | (1L << T__19) | (1L << T__20) | (1L << T__21) | (1L << T__22) | (1L << T__23) | (1L << T__24) | (1L << T__25) | (1L << T__26))) != 0)) {
 				{
 				State = 401;
 				_la = TokenStream.LA(1);
-				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__17) | (1L << T__18) | (1L << T__19) | (1L << T__20) | (1L << T__21) | (1L << T__22) | (1L << T__23) | (1L << T__24) | (1L << T__25) | (1L << T__26) | (1L << T__27))) != 0)) ) {
+				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__16) | (1L << T__17) | (1L << T__18) | (1L << T__19) | (1L << T__20) | (1L << T__21) | (1L << T__22) | (1L << T__23) | (1L << T__24) | (1L << T__25) | (1L << T__26))) != 0)) ) {
 				ErrorHandler.RecoverInline(this);
 				}
 				else {
@@ -2087,7 +2093,7 @@ public partial class GolangParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			State = 406; identifierList();
-			State = 407; Match(T__28);
+			State = 407; Match(T__27);
 			State = 408; expressionList();
 			}
 		}
@@ -2125,7 +2131,7 @@ public partial class GolangParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 410; Match(T__9);
+			State = 410; Match(T__28);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2487,7 +2493,7 @@ public partial class GolangParser : Parser {
 			case 1:
 				{
 				State = 437; simpleStmt();
-				State = 438; Match(T__9);
+				State = 438; Match(T__28);
 				}
 				break;
 			}
@@ -2507,7 +2513,7 @@ public partial class GolangParser : Parser {
 					State = 445; ifStmt();
 					}
 					break;
-				case T__12:
+				case T__11:
 					{
 					State = 446; block();
 					}
@@ -2629,20 +2635,20 @@ public partial class GolangParser : Parser {
 			case 1:
 				{
 				State = 456; simpleStmt();
-				State = 457; Match(T__9);
+				State = 457; Match(T__28);
 				}
 				break;
 			}
 			State = 462;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__10) | (1L << T__14) | (1L << T__17) | (1L << T__18) | (1L << T__20) | (1L << T__21) | (1L << T__26) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__9) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__19) | (1L << T__20) | (1L << T__25) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
 				{
 				State = 461; expression(0);
 				}
 			}
 
-			State = 464; Match(T__12);
+			State = 464; Match(T__11);
 			State = 468;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
@@ -2656,7 +2662,7 @@ public partial class GolangParser : Parser {
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 471; Match(T__13);
+			State = 471; Match(T__12);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2813,12 +2819,12 @@ public partial class GolangParser : Parser {
 			case 1:
 				{
 				State = 483; simpleStmt();
-				State = 484; Match(T__9);
+				State = 484; Match(T__28);
 				}
 				break;
 			}
 			State = 488; typeSwitchGuard();
-			State = 489; Match(T__12);
+			State = 489; Match(T__11);
 			State = 493;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
@@ -2832,7 +2838,7 @@ public partial class GolangParser : Parser {
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 496; Match(T__13);
+			State = 496; Match(T__12);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2879,7 +2885,7 @@ public partial class GolangParser : Parser {
 			case 1:
 				{
 				State = 498; Match(IDENTIFIER);
-				State = 499; Match(T__28);
+				State = 499; Match(T__27);
 				}
 				break;
 			}
@@ -3090,7 +3096,7 @@ public partial class GolangParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			State = 525; Match(T__41);
-			State = 526; Match(T__12);
+			State = 526; Match(T__11);
 			State = 530;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
@@ -3104,7 +3110,7 @@ public partial class GolangParser : Parser {
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 533; Match(T__13);
+			State = 533; Match(T__12);
 			}
 		}
 		catch (RecognitionException re) {
@@ -3278,7 +3284,7 @@ public partial class GolangParser : Parser {
 			case 2:
 				{
 				State = 550; identifierList();
-				State = 551; Match(T__28);
+				State = 551; Match(T__27);
 				}
 				break;
 			}
@@ -3407,21 +3413,21 @@ public partial class GolangParser : Parser {
 				}
 				break;
 			}
-			State = 568; Match(T__9);
+			State = 568; Match(T__28);
 			State = 570;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__10) | (1L << T__14) | (1L << T__17) | (1L << T__18) | (1L << T__20) | (1L << T__21) | (1L << T__26) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__9) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__19) | (1L << T__20) | (1L << T__25) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
 				{
 				State = 569; expression(0);
 				}
 			}
 
-			State = 572; Match(T__9);
+			State = 572; Match(T__28);
 			State = 574;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__9) | (1L << T__10) | (1L << T__14) | (1L << T__17) | (1L << T__18) | (1L << T__20) | (1L << T__21) | (1L << T__26) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__9) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__19) | (1L << T__20) | (1L << T__25) | (1L << T__28) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
 				{
 				State = 573; simpleStmt();
 				}
@@ -3484,7 +3490,7 @@ public partial class GolangParser : Parser {
 			case 2:
 				{
 				State = 579; identifierList();
-				State = 580; Match(T__28);
+				State = 580; Match(T__27);
 				}
 				break;
 			}
@@ -3583,9 +3589,9 @@ public partial class GolangParser : Parser {
 				State = 590; typeName();
 				}
 				break;
-			case T__10:
-			case T__14:
-			case T__21:
+			case T__9:
+			case T__13:
+			case T__20:
 			case T__45:
 			case T__47:
 			case T__48:
@@ -3933,7 +3939,7 @@ public partial class GolangParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 621; Match(T__21);
+			State = 621; Match(T__20);
 			State = 622; type();
 			}
 		}
@@ -3985,7 +3991,7 @@ public partial class GolangParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			State = 624; Match(T__47);
-			State = 625; Match(T__12);
+			State = 625; Match(T__11);
 			State = 631;
 			ErrorHandler.Sync(this);
 			_alt = Interpreter.AdaptivePredict(TokenStream,53,Context);
@@ -4002,7 +4008,7 @@ public partial class GolangParser : Parser {
 				ErrorHandler.Sync(this);
 				_alt = Interpreter.AdaptivePredict(TokenStream,53,Context);
 			}
-			State = 634; Match(T__13);
+			State = 634; Match(T__12);
 			}
 		}
 		catch (RecognitionException re) {
@@ -4142,12 +4148,12 @@ public partial class GolangParser : Parser {
 			case 2:
 				{
 				State = 647; Match(T__49);
-				State = 648; Match(T__14);
+				State = 648; Match(T__13);
 				}
 				break;
 			case 3:
 				{
-				State = 649; Match(T__14);
+				State = 649; Match(T__13);
 				State = 650; Match(T__49);
 				}
 				break;
@@ -4262,7 +4268,7 @@ public partial class GolangParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 665; Match(T__10);
+			State = 665; Match(T__9);
 			State = 666; signature();
 			}
 		}
@@ -4415,7 +4421,7 @@ public partial class GolangParser : Parser {
 			State = 681;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__10) | (1L << T__14) | (1L << T__21) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__50) | (1L << T__51) | (1L << IDENTIFIER))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__9) | (1L << T__13) | (1L << T__20) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__50) | (1L << T__51) | (1L << IDENTIFIER))) != 0)) {
 				{
 				State = 677; parameterList();
 				State = 679;
@@ -4693,7 +4699,7 @@ public partial class GolangParser : Parser {
 				State = 711; compositeLit();
 				}
 				break;
-			case T__10:
+			case T__9:
 				EnterOuterAlt(_localctx, 3);
 				{
 				State = 712; functionLit();
@@ -5026,11 +5032,11 @@ public partial class GolangParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 739; Match(T__12);
+			State = 739; Match(T__11);
 			State = 744;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__10) | (1L << T__12) | (1L << T__14) | (1L << T__17) | (1L << T__18) | (1L << T__20) | (1L << T__21) | (1L << T__26) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__9) | (1L << T__11) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__19) | (1L << T__20) | (1L << T__25) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
 				{
 				State = 740; elementList();
 				State = 742;
@@ -5045,7 +5051,7 @@ public partial class GolangParser : Parser {
 				}
 			}
 
-			State = 746; Match(T__13);
+			State = 746; Match(T__12);
 			}
 		}
 		catch (RecognitionException re) {
@@ -5265,13 +5271,13 @@ public partial class GolangParser : Parser {
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case T__2:
-			case T__10:
-			case T__14:
+			case T__9:
+			case T__13:
+			case T__16:
 			case T__17:
-			case T__18:
+			case T__19:
 			case T__20:
-			case T__21:
-			case T__26:
+			case T__25:
 			case T__45:
 			case T__47:
 			case T__48:
@@ -5289,7 +5295,7 @@ public partial class GolangParser : Parser {
 				State = 768; expression(0);
 				}
 				break;
-			case T__12:
+			case T__11:
 				EnterOuterAlt(_localctx, 2);
 				{
 				State = 769; literalValue();
@@ -5347,7 +5353,7 @@ public partial class GolangParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			State = 772; Match(T__51);
-			State = 773; Match(T__12);
+			State = 773; Match(T__11);
 			State = 779;
 			ErrorHandler.Sync(this);
 			_alt = Interpreter.AdaptivePredict(TokenStream,73,Context);
@@ -5364,7 +5370,7 @@ public partial class GolangParser : Parser {
 				ErrorHandler.Sync(this);
 				_alt = Interpreter.AdaptivePredict(TokenStream,73,Context);
 			}
-			State = 782; Match(T__13);
+			State = 782; Match(T__12);
 			}
 		}
 		catch (RecognitionException re) {
@@ -5480,9 +5486,9 @@ public partial class GolangParser : Parser {
 			State = 795;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if (_la==T__21) {
+			if (_la==T__20) {
 				{
-				State = 794; Match(T__21);
+				State = 794; Match(T__20);
 				}
 			}
 
@@ -5526,7 +5532,7 @@ public partial class GolangParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 799; Match(T__10);
+			State = 799; Match(T__9);
 			State = 800; function();
 			}
 		}
@@ -5810,7 +5816,7 @@ public partial class GolangParser : Parser {
 				State = 831;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__10) | (1L << T__14) | (1L << T__17) | (1L << T__18) | (1L << T__20) | (1L << T__21) | (1L << T__26) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__9) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__19) | (1L << T__20) | (1L << T__25) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
 					{
 					State = 830; expression(0);
 					}
@@ -5820,7 +5826,7 @@ public partial class GolangParser : Parser {
 				State = 835;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__10) | (1L << T__14) | (1L << T__17) | (1L << T__18) | (1L << T__20) | (1L << T__21) | (1L << T__26) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__9) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__19) | (1L << T__20) | (1L << T__25) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
 					{
 					State = 834; expression(0);
 					}
@@ -5835,7 +5841,7 @@ public partial class GolangParser : Parser {
 				State = 838;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__10) | (1L << T__14) | (1L << T__17) | (1L << T__18) | (1L << T__20) | (1L << T__21) | (1L << T__26) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__9) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__19) | (1L << T__20) | (1L << T__25) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
 					{
 					State = 837; expression(0);
 					}
@@ -5940,7 +5946,7 @@ public partial class GolangParser : Parser {
 			State = 869;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__10) | (1L << T__14) | (1L << T__17) | (1L << T__18) | (1L << T__20) | (1L << T__21) | (1L << T__26) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__2) | (1L << T__9) | (1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__19) | (1L << T__20) | (1L << T__25) | (1L << T__45) | (1L << T__47) | (1L << T__48) | (1L << T__49) | (1L << T__51) | (1L << T__60) | (1L << IDENTIFIER))) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & ((1L << (INT_LIT - 65)) | (1L << (FLOAT_LIT - 65)) | (1L << (IMAGINARY_LIT - 65)) | (1L << (RUNE_LIT - 65)) | (1L << (STRING_LIT - 65)))) != 0)) {
 				{
 				State = 861;
 				ErrorHandler.Sync(this);
@@ -6084,7 +6090,7 @@ public partial class GolangParser : Parser {
 				EnterOuterAlt(_localctx, 2);
 				{
 				State = 878; Match(T__2);
-				State = 879; Match(T__21);
+				State = 879; Match(T__20);
 				State = 880; typeName();
 				State = 881; Match(T__3);
 				}
@@ -6172,7 +6178,7 @@ public partial class GolangParser : Parser {
 					if (!(Precpred(Context, 1))) throw new FailedPredicateException(this, "Precpred(Context, 1)");
 					State = 893;
 					_la = TokenStream.LA(1);
-					if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__17) | (1L << T__18) | (1L << T__19) | (1L << T__20) | (1L << T__21) | (1L << T__22) | (1L << T__23) | (1L << T__24) | (1L << T__25) | (1L << T__26) | (1L << T__27) | (1L << T__52) | (1L << T__53) | (1L << T__54) | (1L << T__55) | (1L << T__56) | (1L << T__57) | (1L << T__58) | (1L << T__59))) != 0)) ) {
+					if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__16) | (1L << T__17) | (1L << T__18) | (1L << T__19) | (1L << T__20) | (1L << T__21) | (1L << T__22) | (1L << T__23) | (1L << T__24) | (1L << T__25) | (1L << T__26) | (1L << T__52) | (1L << T__53) | (1L << T__54) | (1L << T__55) | (1L << T__56) | (1L << T__57) | (1L << T__58) | (1L << T__59))) != 0)) ) {
 					ErrorHandler.RecoverInline(this);
 					}
 					else {
@@ -6242,7 +6248,7 @@ public partial class GolangParser : Parser {
 				{
 				State = 901;
 				_la = TokenStream.LA(1);
-				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__14) | (1L << T__17) | (1L << T__18) | (1L << T__20) | (1L << T__21) | (1L << T__26) | (1L << T__60))) != 0)) ) {
+				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__13) | (1L << T__16) | (1L << T__17) | (1L << T__19) | (1L << T__20) | (1L << T__25) | (1L << T__60))) != 0)) ) {
 				ErrorHandler.RecoverInline(this);
 				}
 				else {
@@ -6349,7 +6355,7 @@ public partial class GolangParser : Parser {
 			case 1:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 913; Match(T__9);
+				State = 913; Match(T__28);
 				}
 				break;
 			case 2:
@@ -6621,10 +6627,10 @@ public partial class GolangParser : Parser {
 		'\x9C', '\x9E', '\xA0', '\xA2', '\xA4', '\xA6', '\xA8', '\xAA', '\xAC', 
 		'\xAE', '\xB0', '\xB2', '\xB4', '\xB6', '\xB8', '\xBA', '\xBC', '\xBE', 
 		'\xC0', '\xC2', '\xC4', '\xC6', '\xC8', '\xCA', '\x2', '\b', '\x4', '\x2', 
-		'\a', '\a', '@', '@', '\x3', '\x2', '\x12', '\x13', '\x3', '\x2', '\x14', 
-		'\x1E', '\x4', '\x2', '\x43', '\x46', 'I', 'I', '\x4', '\x2', '\x14', 
-		'\x1E', '\x37', '>', '\a', '\x2', '\x11', '\x11', '\x14', '\x15', '\x17', 
-		'\x18', '\x1D', '\x1D', '?', '?', '\x2', '\x3C0', '\x2', '\xCC', '\x3', 
+		'\a', '\a', '@', '@', '\x3', '\x2', '\x11', '\x12', '\x3', '\x2', '\x13', 
+		'\x1D', '\x4', '\x2', '\x43', '\x46', 'I', 'I', '\x4', '\x2', '\x13', 
+		'\x1D', '\x37', '>', '\a', '\x2', '\x10', '\x10', '\x13', '\x14', '\x16', 
+		'\x17', '\x1C', '\x1C', '?', '?', '\x2', '\x3C0', '\x2', '\xCC', '\x3', 
 		'\x2', '\x2', '\x2', '\x4', '\xDE', '\x3', '\x2', '\x2', '\x2', '\x6', 
 		'\xE1', '\x3', '\x2', '\x2', '\x2', '\b', '\xF0', '\x3', '\x2', '\x2', 
 		'\x2', '\n', '\xF4', '\x3', '\x2', '\x2', '\x2', '\f', '\xF9', '\x3', 
@@ -6751,29 +6757,29 @@ public partial class GolangParser : Parser {
 		'\x2', '\x2', '\x2', '\x125', '\x123', '\x3', '\x2', '\x2', '\x2', '\x126', 
 		'\x132', '\a', '\v', '\x2', '\x2', '\x127', '\x133', '\x5', '\x1A', '\xE', 
 		'\x2', '\x128', '\x12E', '\a', '\x5', '\x2', '\x2', '\x129', '\x12A', 
-		'\x5', '\x1A', '\xE', '\x2', '\x12A', '\x12B', '\a', '\f', '\x2', '\x2', 
-		'\x12B', '\x12D', '\x3', '\x2', '\x2', '\x2', '\x12C', '\x129', '\x3', 
-		'\x2', '\x2', '\x2', '\x12D', '\x130', '\x3', '\x2', '\x2', '\x2', '\x12E', 
-		'\x12C', '\x3', '\x2', '\x2', '\x2', '\x12E', '\x12F', '\x3', '\x2', '\x2', 
-		'\x2', '\x12F', '\x131', '\x3', '\x2', '\x2', '\x2', '\x130', '\x12E', 
-		'\x3', '\x2', '\x2', '\x2', '\x131', '\x133', '\a', '\x6', '\x2', '\x2', 
-		'\x132', '\x127', '\x3', '\x2', '\x2', '\x2', '\x132', '\x128', '\x3', 
-		'\x2', '\x2', '\x2', '\x133', '\x19', '\x3', '\x2', '\x2', '\x2', '\x134', 
-		'\x135', '\a', '@', '\x2', '\x2', '\x135', '\x136', '\x5', 'p', '\x39', 
-		'\x2', '\x136', '\x1B', '\x3', '\x2', '\x2', '\x2', '\x137', '\x138', 
-		'\a', '\r', '\x2', '\x2', '\x138', '\x13B', '\a', '@', '\x2', '\x2', '\x139', 
+		'\x5', '\x1A', '\xE', '\x2', '\x12A', '\x12B', '\x5', '\xCA', '\x66', 
+		'\x2', '\x12B', '\x12D', '\x3', '\x2', '\x2', '\x2', '\x12C', '\x129', 
+		'\x3', '\x2', '\x2', '\x2', '\x12D', '\x130', '\x3', '\x2', '\x2', '\x2', 
+		'\x12E', '\x12C', '\x3', '\x2', '\x2', '\x2', '\x12E', '\x12F', '\x3', 
+		'\x2', '\x2', '\x2', '\x12F', '\x131', '\x3', '\x2', '\x2', '\x2', '\x130', 
+		'\x12E', '\x3', '\x2', '\x2', '\x2', '\x131', '\x133', '\a', '\x6', '\x2', 
+		'\x2', '\x132', '\x127', '\x3', '\x2', '\x2', '\x2', '\x132', '\x128', 
+		'\x3', '\x2', '\x2', '\x2', '\x133', '\x19', '\x3', '\x2', '\x2', '\x2', 
+		'\x134', '\x135', '\a', '@', '\x2', '\x2', '\x135', '\x136', '\x5', 'p', 
+		'\x39', '\x2', '\x136', '\x1B', '\x3', '\x2', '\x2', '\x2', '\x137', '\x138', 
+		'\a', '\f', '\x2', '\x2', '\x138', '\x13B', '\a', '@', '\x2', '\x2', '\x139', 
 		'\x13C', '\x5', '\x1E', '\x10', '\x2', '\x13A', '\x13C', '\x5', '\x8A', 
 		'\x46', '\x2', '\x13B', '\x139', '\x3', '\x2', '\x2', '\x2', '\x13B', 
 		'\x13A', '\x3', '\x2', '\x2', '\x2', '\x13C', '\x1D', '\x3', '\x2', '\x2', 
 		'\x2', '\x13D', '\x13E', '\x5', '\x8A', '\x46', '\x2', '\x13E', '\x13F', 
 		'\x5', '(', '\x15', '\x2', '\x13F', '\x1F', '\x3', '\x2', '\x2', '\x2', 
-		'\x140', '\x141', '\a', '\r', '\x2', '\x2', '\x141', '\x142', '\x5', '\"', 
+		'\x140', '\x141', '\a', '\f', '\x2', '\x2', '\x141', '\x142', '\x5', '\"', 
 		'\x12', '\x2', '\x142', '\x145', '\a', '@', '\x2', '\x2', '\x143', '\x146', 
 		'\x5', '\x1E', '\x10', '\x2', '\x144', '\x146', '\x5', '\x8A', '\x46', 
 		'\x2', '\x145', '\x143', '\x3', '\x2', '\x2', '\x2', '\x145', '\x144', 
 		'\x3', '\x2', '\x2', '\x2', '\x146', '!', '\x3', '\x2', '\x2', '\x2', 
 		'\x147', '\x148', '\x5', '\x8E', 'H', '\x2', '\x148', '#', '\x3', '\x2', 
-		'\x2', '\x2', '\x149', '\x155', '\a', '\xE', '\x2', '\x2', '\x14A', '\x156', 
+		'\x2', '\x2', '\x149', '\x155', '\a', '\r', '\x2', '\x2', '\x14A', '\x156', 
 		'\x5', '&', '\x14', '\x2', '\x14B', '\x151', '\a', '\x5', '\x2', '\x2', 
 		'\x14C', '\x14D', '\x5', '&', '\x14', '\x2', '\x14D', '\x14E', '\x5', 
 		'\xCA', '\x66', '\x2', '\x14E', '\x150', '\x3', '\x2', '\x2', '\x2', '\x14F', 
@@ -6790,44 +6796,44 @@ public partial class GolangParser : Parser {
 		'\x160', '\x3', '\x2', '\x2', '\x2', '\x15D', '\x15E', '\a', '\t', '\x2', 
 		'\x2', '\x15E', '\x160', '\x5', '\x16', '\f', '\x2', '\x15F', '\x158', 
 		'\x3', '\x2', '\x2', '\x2', '\x15F', '\x15D', '\x3', '\x2', '\x2', '\x2', 
-		'\x160', '\'', '\x3', '\x2', '\x2', '\x2', '\x161', '\x162', '\a', '\xF', 
+		'\x160', '\'', '\x3', '\x2', '\x2', '\x2', '\x161', '\x162', '\a', '\xE', 
 		'\x2', '\x2', '\x162', '\x163', '\x5', '*', '\x16', '\x2', '\x163', '\x164', 
-		'\a', '\x10', '\x2', '\x2', '\x164', ')', '\x3', '\x2', '\x2', '\x2', 
-		'\x165', '\x166', '\x5', ',', '\x17', '\x2', '\x166', '\x167', '\x5', 
-		'\xCA', '\x66', '\x2', '\x167', '\x169', '\x3', '\x2', '\x2', '\x2', '\x168', 
-		'\x165', '\x3', '\x2', '\x2', '\x2', '\x169', '\x16C', '\x3', '\x2', '\x2', 
-		'\x2', '\x16A', '\x168', '\x3', '\x2', '\x2', '\x2', '\x16A', '\x16B', 
-		'\x3', '\x2', '\x2', '\x2', '\x16B', '+', '\x3', '\x2', '\x2', '\x2', 
-		'\x16C', '\x16A', '\x3', '\x2', '\x2', '\x2', '\x16D', '\x17D', '\x5', 
-		'\xE', '\b', '\x2', '\x16E', '\x17D', '\x5', '>', ' ', '\x2', '\x16F', 
-		'\x17D', '\x5', '.', '\x18', '\x2', '\x170', '\x17D', '\x5', 'n', '\x38', 
-		'\x2', '\x171', '\x17D', '\x5', '@', '!', '\x2', '\x172', '\x17D', '\x5', 
-		'\x42', '\"', '\x2', '\x173', '\x17D', '\x5', '\x44', '#', '\x2', '\x174', 
-		'\x17D', '\x5', '\x46', '$', '\x2', '\x175', '\x17D', '\x5', 'H', '%', 
-		'\x2', '\x176', '\x17D', '\x5', '(', '\x15', '\x2', '\x177', '\x17D', 
-		'\x5', 'L', '\'', '\x2', '\x178', '\x17D', '\x5', 'N', '(', '\x2', '\x179', 
-		'\x17D', '\x5', '`', '\x31', '\x2', '\x17A', '\x17D', '\x5', 'h', '\x35', 
-		'\x2', '\x17B', '\x17D', '\x5', 'J', '&', '\x2', '\x17C', '\x16D', '\x3', 
-		'\x2', '\x2', '\x2', '\x17C', '\x16E', '\x3', '\x2', '\x2', '\x2', '\x17C', 
-		'\x16F', '\x3', '\x2', '\x2', '\x2', '\x17C', '\x170', '\x3', '\x2', '\x2', 
-		'\x2', '\x17C', '\x171', '\x3', '\x2', '\x2', '\x2', '\x17C', '\x172', 
-		'\x3', '\x2', '\x2', '\x2', '\x17C', '\x173', '\x3', '\x2', '\x2', '\x2', 
-		'\x17C', '\x174', '\x3', '\x2', '\x2', '\x2', '\x17C', '\x175', '\x3', 
-		'\x2', '\x2', '\x2', '\x17C', '\x176', '\x3', '\x2', '\x2', '\x2', '\x17C', 
-		'\x177', '\x3', '\x2', '\x2', '\x2', '\x17C', '\x178', '\x3', '\x2', '\x2', 
-		'\x2', '\x17C', '\x179', '\x3', '\x2', '\x2', '\x2', '\x17C', '\x17A', 
-		'\x3', '\x2', '\x2', '\x2', '\x17C', '\x17B', '\x3', '\x2', '\x2', '\x2', 
-		'\x17D', '-', '\x3', '\x2', '\x2', '\x2', '\x17E', '\x185', '\x5', '\x32', 
-		'\x1A', '\x2', '\x17F', '\x185', '\x5', '\x30', '\x19', '\x2', '\x180', 
-		'\x185', '\x5', '\x34', '\x1B', '\x2', '\x181', '\x185', '\x5', '\x36', 
-		'\x1C', '\x2', '\x182', '\x185', '\x5', ':', '\x1E', '\x2', '\x183', '\x185', 
+		'\a', '\xF', '\x2', '\x2', '\x164', ')', '\x3', '\x2', '\x2', '\x2', '\x165', 
+		'\x166', '\x5', ',', '\x17', '\x2', '\x166', '\x167', '\x5', '\xCA', '\x66', 
+		'\x2', '\x167', '\x169', '\x3', '\x2', '\x2', '\x2', '\x168', '\x165', 
+		'\x3', '\x2', '\x2', '\x2', '\x169', '\x16C', '\x3', '\x2', '\x2', '\x2', 
+		'\x16A', '\x168', '\x3', '\x2', '\x2', '\x2', '\x16A', '\x16B', '\x3', 
+		'\x2', '\x2', '\x2', '\x16B', '+', '\x3', '\x2', '\x2', '\x2', '\x16C', 
+		'\x16A', '\x3', '\x2', '\x2', '\x2', '\x16D', '\x17D', '\x5', '\xE', '\b', 
+		'\x2', '\x16E', '\x17D', '\x5', '>', ' ', '\x2', '\x16F', '\x17D', '\x5', 
+		'.', '\x18', '\x2', '\x170', '\x17D', '\x5', 'n', '\x38', '\x2', '\x171', 
+		'\x17D', '\x5', '@', '!', '\x2', '\x172', '\x17D', '\x5', '\x42', '\"', 
+		'\x2', '\x173', '\x17D', '\x5', '\x44', '#', '\x2', '\x174', '\x17D', 
+		'\x5', '\x46', '$', '\x2', '\x175', '\x17D', '\x5', 'H', '%', '\x2', '\x176', 
+		'\x17D', '\x5', '(', '\x15', '\x2', '\x177', '\x17D', '\x5', 'L', '\'', 
+		'\x2', '\x178', '\x17D', '\x5', 'N', '(', '\x2', '\x179', '\x17D', '\x5', 
+		'`', '\x31', '\x2', '\x17A', '\x17D', '\x5', 'h', '\x35', '\x2', '\x17B', 
+		'\x17D', '\x5', 'J', '&', '\x2', '\x17C', '\x16D', '\x3', '\x2', '\x2', 
+		'\x2', '\x17C', '\x16E', '\x3', '\x2', '\x2', '\x2', '\x17C', '\x16F', 
+		'\x3', '\x2', '\x2', '\x2', '\x17C', '\x170', '\x3', '\x2', '\x2', '\x2', 
+		'\x17C', '\x171', '\x3', '\x2', '\x2', '\x2', '\x17C', '\x172', '\x3', 
+		'\x2', '\x2', '\x2', '\x17C', '\x173', '\x3', '\x2', '\x2', '\x2', '\x17C', 
+		'\x174', '\x3', '\x2', '\x2', '\x2', '\x17C', '\x175', '\x3', '\x2', '\x2', 
+		'\x2', '\x17C', '\x176', '\x3', '\x2', '\x2', '\x2', '\x17C', '\x177', 
+		'\x3', '\x2', '\x2', '\x2', '\x17C', '\x178', '\x3', '\x2', '\x2', '\x2', 
+		'\x17C', '\x179', '\x3', '\x2', '\x2', '\x2', '\x17C', '\x17A', '\x3', 
+		'\x2', '\x2', '\x2', '\x17C', '\x17B', '\x3', '\x2', '\x2', '\x2', '\x17D', 
+		'-', '\x3', '\x2', '\x2', '\x2', '\x17E', '\x185', '\x5', '\x32', '\x1A', 
+		'\x2', '\x17F', '\x185', '\x5', '\x30', '\x19', '\x2', '\x180', '\x185', 
+		'\x5', '\x34', '\x1B', '\x2', '\x181', '\x185', '\x5', '\x36', '\x1C', 
+		'\x2', '\x182', '\x185', '\x5', ':', '\x1E', '\x2', '\x183', '\x185', 
 		'\x5', '<', '\x1F', '\x2', '\x184', '\x17E', '\x3', '\x2', '\x2', '\x2', 
 		'\x184', '\x17F', '\x3', '\x2', '\x2', '\x2', '\x184', '\x180', '\x3', 
 		'\x2', '\x2', '\x2', '\x184', '\x181', '\x3', '\x2', '\x2', '\x2', '\x184', 
 		'\x182', '\x3', '\x2', '\x2', '\x2', '\x184', '\x183', '\x3', '\x2', '\x2', 
 		'\x2', '\x185', '/', '\x3', '\x2', '\x2', '\x2', '\x186', '\x187', '\x5', 
 		'\xC4', '\x63', '\x2', '\x187', '\x31', '\x3', '\x2', '\x2', '\x2', '\x188', 
-		'\x189', '\x5', '\xC4', '\x63', '\x2', '\x189', '\x18A', '\a', '\x11', 
+		'\x189', '\x5', '\xC4', '\x63', '\x2', '\x189', '\x18A', '\a', '\x10', 
 		'\x2', '\x2', '\x18A', '\x18B', '\x5', '\xC4', '\x63', '\x2', '\x18B', 
 		'\x33', '\x3', '\x2', '\x2', '\x2', '\x18C', '\x18D', '\x5', '\xC4', '\x63', 
 		'\x2', '\x18D', '\x18E', '\t', '\x3', '\x2', '\x2', '\x18E', '\x35', '\x3', 
@@ -6838,9 +6844,9 @@ public partial class GolangParser : Parser {
 		'\x194', '\x195', '\x3', '\x2', '\x2', '\x2', '\x195', '\x196', '\x3', 
 		'\x2', '\x2', '\x2', '\x196', '\x197', '\a', '\t', '\x2', '\x2', '\x197', 
 		'\x39', '\x3', '\x2', '\x2', '\x2', '\x198', '\x199', '\x5', '\x14', '\v', 
-		'\x2', '\x199', '\x19A', '\a', '\x1F', '\x2', '\x2', '\x19A', '\x19B', 
+		'\x2', '\x199', '\x19A', '\a', '\x1E', '\x2', '\x2', '\x19A', '\x19B', 
 		'\x5', '\x16', '\f', '\x2', '\x19B', ';', '\x3', '\x2', '\x2', '\x2', 
-		'\x19C', '\x19D', '\a', '\f', '\x2', '\x2', '\x19D', '=', '\x3', '\x2', 
+		'\x19C', '\x19D', '\a', '\x1F', '\x2', '\x2', '\x19D', '=', '\x3', '\x2', 
 		'\x2', '\x2', '\x19E', '\x19F', '\a', '@', '\x2', '\x2', '\x19F', '\x1A0', 
 		'\a', ' ', '\x2', '\x2', '\x1A0', '\x1A1', '\x5', ',', '\x17', '\x2', 
 		'\x1A1', '?', '\x3', '\x2', '\x2', '\x2', '\x1A2', '\x1A4', '\a', '!', 
@@ -6859,7 +6865,7 @@ public partial class GolangParser : Parser {
 		'\x2', '\x2', '\x1B4', '\x1B5', '\x5', '\xC4', '\x63', '\x2', '\x1B5', 
 		'K', '\x3', '\x2', '\x2', '\x2', '\x1B6', '\x1BA', '\a', '\'', '\x2', 
 		'\x2', '\x1B7', '\x1B8', '\x5', '.', '\x18', '\x2', '\x1B8', '\x1B9', 
-		'\a', '\f', '\x2', '\x2', '\x1B9', '\x1BB', '\x3', '\x2', '\x2', '\x2', 
+		'\a', '\x1F', '\x2', '\x2', '\x1B9', '\x1BB', '\x3', '\x2', '\x2', '\x2', 
 		'\x1BA', '\x1B7', '\x3', '\x2', '\x2', '\x2', '\x1BA', '\x1BB', '\x3', 
 		'\x2', '\x2', '\x2', '\x1BB', '\x1BC', '\x3', '\x2', '\x2', '\x2', '\x1BC', 
 		'\x1BD', '\x5', '\xC4', '\x63', '\x2', '\x1BD', '\x1C3', '\x5', '(', '\x15', 
@@ -6873,17 +6879,17 @@ public partial class GolangParser : Parser {
 		'\x3', '\x2', '\x2', '\x2', '\x1C7', '\x1C6', '\x3', '\x2', '\x2', '\x2', 
 		'\x1C8', 'O', '\x3', '\x2', '\x2', '\x2', '\x1C9', '\x1CD', '\a', ')', 
 		'\x2', '\x2', '\x1CA', '\x1CB', '\x5', '.', '\x18', '\x2', '\x1CB', '\x1CC', 
-		'\a', '\f', '\x2', '\x2', '\x1CC', '\x1CE', '\x3', '\x2', '\x2', '\x2', 
+		'\a', '\x1F', '\x2', '\x2', '\x1CC', '\x1CE', '\x3', '\x2', '\x2', '\x2', 
 		'\x1CD', '\x1CA', '\x3', '\x2', '\x2', '\x2', '\x1CD', '\x1CE', '\x3', 
 		'\x2', '\x2', '\x2', '\x1CE', '\x1D0', '\x3', '\x2', '\x2', '\x2', '\x1CF', 
 		'\x1D1', '\x5', '\xC4', '\x63', '\x2', '\x1D0', '\x1CF', '\x3', '\x2', 
 		'\x2', '\x2', '\x1D0', '\x1D1', '\x3', '\x2', '\x2', '\x2', '\x1D1', '\x1D2', 
-		'\x3', '\x2', '\x2', '\x2', '\x1D2', '\x1D6', '\a', '\xF', '\x2', '\x2', 
+		'\x3', '\x2', '\x2', '\x2', '\x1D2', '\x1D6', '\a', '\xE', '\x2', '\x2', 
 		'\x1D3', '\x1D5', '\x5', 'R', '*', '\x2', '\x1D4', '\x1D3', '\x3', '\x2', 
 		'\x2', '\x2', '\x1D5', '\x1D8', '\x3', '\x2', '\x2', '\x2', '\x1D6', '\x1D4', 
 		'\x3', '\x2', '\x2', '\x2', '\x1D6', '\x1D7', '\x3', '\x2', '\x2', '\x2', 
 		'\x1D7', '\x1D9', '\x3', '\x2', '\x2', '\x2', '\x1D8', '\x1D6', '\x3', 
-		'\x2', '\x2', '\x2', '\x1D9', '\x1DA', '\a', '\x10', '\x2', '\x2', '\x1DA', 
+		'\x2', '\x2', '\x2', '\x1D9', '\x1DA', '\a', '\xF', '\x2', '\x2', '\x1DA', 
 		'Q', '\x3', '\x2', '\x2', '\x2', '\x1DB', '\x1DC', '\x5', 'T', '+', '\x2', 
 		'\x1DC', '\x1DD', '\a', ' ', '\x2', '\x2', '\x1DD', '\x1DE', '\x5', '*', 
 		'\x16', '\x2', '\x1DE', 'S', '\x3', '\x2', '\x2', '\x2', '\x1DF', '\x1E0', 
@@ -6891,18 +6897,18 @@ public partial class GolangParser : Parser {
 		'\x1E1', '\x1E3', '\a', '+', '\x2', '\x2', '\x1E2', '\x1DF', '\x3', '\x2', 
 		'\x2', '\x2', '\x1E2', '\x1E1', '\x3', '\x2', '\x2', '\x2', '\x1E3', 'U', 
 		'\x3', '\x2', '\x2', '\x2', '\x1E4', '\x1E8', '\a', ')', '\x2', '\x2', 
-		'\x1E5', '\x1E6', '\x5', '.', '\x18', '\x2', '\x1E6', '\x1E7', '\a', '\f', 
+		'\x1E5', '\x1E6', '\x5', '.', '\x18', '\x2', '\x1E6', '\x1E7', '\a', '\x1F', 
 		'\x2', '\x2', '\x1E7', '\x1E9', '\x3', '\x2', '\x2', '\x2', '\x1E8', '\x1E5', 
 		'\x3', '\x2', '\x2', '\x2', '\x1E8', '\x1E9', '\x3', '\x2', '\x2', '\x2', 
 		'\x1E9', '\x1EA', '\x3', '\x2', '\x2', '\x2', '\x1EA', '\x1EB', '\x5', 
-		'X', '-', '\x2', '\x1EB', '\x1EF', '\a', '\xF', '\x2', '\x2', '\x1EC', 
+		'X', '-', '\x2', '\x1EB', '\x1EF', '\a', '\xE', '\x2', '\x2', '\x1EC', 
 		'\x1EE', '\x5', 'Z', '.', '\x2', '\x1ED', '\x1EC', '\x3', '\x2', '\x2', 
 		'\x2', '\x1EE', '\x1F1', '\x3', '\x2', '\x2', '\x2', '\x1EF', '\x1ED', 
 		'\x3', '\x2', '\x2', '\x2', '\x1EF', '\x1F0', '\x3', '\x2', '\x2', '\x2', 
 		'\x1F0', '\x1F2', '\x3', '\x2', '\x2', '\x2', '\x1F1', '\x1EF', '\x3', 
-		'\x2', '\x2', '\x2', '\x1F2', '\x1F3', '\a', '\x10', '\x2', '\x2', '\x1F3', 
+		'\x2', '\x2', '\x2', '\x1F2', '\x1F3', '\a', '\xF', '\x2', '\x2', '\x1F3', 
 		'W', '\x3', '\x2', '\x2', '\x2', '\x1F4', '\x1F5', '\a', '@', '\x2', '\x2', 
-		'\x1F5', '\x1F7', '\a', '\x1F', '\x2', '\x2', '\x1F6', '\x1F4', '\x3', 
+		'\x1F5', '\x1F7', '\a', '\x1E', '\x2', '\x2', '\x1F6', '\x1F4', '\x3', 
 		'\x2', '\x2', '\x2', '\x1F6', '\x1F7', '\x3', '\x2', '\x2', '\x2', '\x1F7', 
 		'\x1F8', '\x3', '\x2', '\x2', '\x2', '\x1F8', '\x1F9', '\x5', '\xB4', 
 		'[', '\x2', '\x1F9', '\x1FA', '\a', '\a', '\x2', '\x2', '\x1FA', '\x1FB', 
@@ -6920,12 +6926,12 @@ public partial class GolangParser : Parser {
 		'\x2', '\x2', '\x2', '\x20C', '\x20A', '\x3', '\x2', '\x2', '\x2', '\x20C', 
 		'\x20D', '\x3', '\x2', '\x2', '\x2', '\x20D', '_', '\x3', '\x2', '\x2', 
 		'\x2', '\x20E', '\x20C', '\x3', '\x2', '\x2', '\x2', '\x20F', '\x210', 
-		'\a', ',', '\x2', '\x2', '\x210', '\x214', '\a', '\xF', '\x2', '\x2', 
+		'\a', ',', '\x2', '\x2', '\x210', '\x214', '\a', '\xE', '\x2', '\x2', 
 		'\x211', '\x213', '\x5', '\x62', '\x32', '\x2', '\x212', '\x211', '\x3', 
 		'\x2', '\x2', '\x2', '\x213', '\x216', '\x3', '\x2', '\x2', '\x2', '\x214', 
 		'\x212', '\x3', '\x2', '\x2', '\x2', '\x214', '\x215', '\x3', '\x2', '\x2', 
 		'\x2', '\x215', '\x217', '\x3', '\x2', '\x2', '\x2', '\x216', '\x214', 
-		'\x3', '\x2', '\x2', '\x2', '\x217', '\x218', '\a', '\x10', '\x2', '\x2', 
+		'\x3', '\x2', '\x2', '\x2', '\x217', '\x218', '\a', '\xF', '\x2', '\x2', 
 		'\x218', '\x61', '\x3', '\x2', '\x2', '\x2', '\x219', '\x21A', '\x5', 
 		'\x64', '\x33', '\x2', '\x21A', '\x21B', '\a', ' ', '\x2', '\x2', '\x21B', 
 		'\x21C', '\x5', '*', '\x16', '\x2', '\x21C', '\x63', '\x3', '\x2', '\x2', 
@@ -6938,7 +6944,7 @@ public partial class GolangParser : Parser {
 		'\x3', '\x2', '\x2', '\x2', '\x225', '\x226', '\x5', '\x16', '\f', '\x2', 
 		'\x226', '\x227', '\a', '\t', '\x2', '\x2', '\x227', '\x22C', '\x3', '\x2', 
 		'\x2', '\x2', '\x228', '\x229', '\x5', '\x14', '\v', '\x2', '\x229', '\x22A', 
-		'\a', '\x1F', '\x2', '\x2', '\x22A', '\x22C', '\x3', '\x2', '\x2', '\x2', 
+		'\a', '\x1E', '\x2', '\x2', '\x22A', '\x22C', '\x3', '\x2', '\x2', '\x2', 
 		'\x22B', '\x225', '\x3', '\x2', '\x2', '\x2', '\x22B', '\x228', '\x3', 
 		'\x2', '\x2', '\x2', '\x22B', '\x22C', '\x3', '\x2', '\x2', '\x2', '\x22C', 
 		'\x22D', '\x3', '\x2', '\x2', '\x2', '\x22D', '\x22E', '\x5', '\xC4', 
@@ -6952,33 +6958,33 @@ public partial class GolangParser : Parser {
 		'\x236', 'i', '\x3', '\x2', '\x2', '\x2', '\x237', '\x239', '\x5', '.', 
 		'\x18', '\x2', '\x238', '\x237', '\x3', '\x2', '\x2', '\x2', '\x238', 
 		'\x239', '\x3', '\x2', '\x2', '\x2', '\x239', '\x23A', '\x3', '\x2', '\x2', 
-		'\x2', '\x23A', '\x23C', '\a', '\f', '\x2', '\x2', '\x23B', '\x23D', '\x5', 
-		'\xC4', '\x63', '\x2', '\x23C', '\x23B', '\x3', '\x2', '\x2', '\x2', '\x23C', 
-		'\x23D', '\x3', '\x2', '\x2', '\x2', '\x23D', '\x23E', '\x3', '\x2', '\x2', 
-		'\x2', '\x23E', '\x240', '\a', '\f', '\x2', '\x2', '\x23F', '\x241', '\x5', 
-		'.', '\x18', '\x2', '\x240', '\x23F', '\x3', '\x2', '\x2', '\x2', '\x240', 
-		'\x241', '\x3', '\x2', '\x2', '\x2', '\x241', 'k', '\x3', '\x2', '\x2', 
-		'\x2', '\x242', '\x243', '\x5', '\x16', '\f', '\x2', '\x243', '\x244', 
-		'\a', '\t', '\x2', '\x2', '\x244', '\x249', '\x3', '\x2', '\x2', '\x2', 
-		'\x245', '\x246', '\x5', '\x14', '\v', '\x2', '\x246', '\x247', '\a', 
-		'\x1F', '\x2', '\x2', '\x247', '\x249', '\x3', '\x2', '\x2', '\x2', '\x248', 
-		'\x242', '\x3', '\x2', '\x2', '\x2', '\x248', '\x245', '\x3', '\x2', '\x2', 
-		'\x2', '\x248', '\x249', '\x3', '\x2', '\x2', '\x2', '\x249', '\x24A', 
-		'\x3', '\x2', '\x2', '\x2', '\x24A', '\x24B', '\a', '.', '\x2', '\x2', 
-		'\x24B', '\x24C', '\x5', '\xC4', '\x63', '\x2', '\x24C', 'm', '\x3', '\x2', 
-		'\x2', '\x2', '\x24D', '\x24E', '\a', '/', '\x2', '\x2', '\x24E', '\x24F', 
-		'\x5', '\xC4', '\x63', '\x2', '\x24F', 'o', '\x3', '\x2', '\x2', '\x2', 
-		'\x250', '\x257', '\x5', 'r', ':', '\x2', '\x251', '\x257', '\x5', 't', 
-		';', '\x2', '\x252', '\x253', '\a', '\x5', '\x2', '\x2', '\x253', '\x254', 
-		'\x5', 'p', '\x39', '\x2', '\x254', '\x255', '\a', '\x6', '\x2', '\x2', 
-		'\x255', '\x257', '\x3', '\x2', '\x2', '\x2', '\x256', '\x250', '\x3', 
-		'\x2', '\x2', '\x2', '\x256', '\x251', '\x3', '\x2', '\x2', '\x2', '\x256', 
-		'\x252', '\x3', '\x2', '\x2', '\x2', '\x257', 'q', '\x3', '\x2', '\x2', 
-		'\x2', '\x258', '\x25B', '\a', '@', '\x2', '\x2', '\x259', '\x25B', '\x5', 
-		'\x9C', 'O', '\x2', '\x25A', '\x258', '\x3', '\x2', '\x2', '\x2', '\x25A', 
-		'\x259', '\x3', '\x2', '\x2', '\x2', '\x25B', 's', '\x3', '\x2', '\x2', 
-		'\x2', '\x25C', '\x265', '\x5', 'v', '<', '\x2', '\x25D', '\x265', '\x5', 
-		'\xAC', 'W', '\x2', '\x25E', '\x265', '\x5', '|', '?', '\x2', '\x25F', 
+		'\x2', '\x23A', '\x23C', '\a', '\x1F', '\x2', '\x2', '\x23B', '\x23D', 
+		'\x5', '\xC4', '\x63', '\x2', '\x23C', '\x23B', '\x3', '\x2', '\x2', '\x2', 
+		'\x23C', '\x23D', '\x3', '\x2', '\x2', '\x2', '\x23D', '\x23E', '\x3', 
+		'\x2', '\x2', '\x2', '\x23E', '\x240', '\a', '\x1F', '\x2', '\x2', '\x23F', 
+		'\x241', '\x5', '.', '\x18', '\x2', '\x240', '\x23F', '\x3', '\x2', '\x2', 
+		'\x2', '\x240', '\x241', '\x3', '\x2', '\x2', '\x2', '\x241', 'k', '\x3', 
+		'\x2', '\x2', '\x2', '\x242', '\x243', '\x5', '\x16', '\f', '\x2', '\x243', 
+		'\x244', '\a', '\t', '\x2', '\x2', '\x244', '\x249', '\x3', '\x2', '\x2', 
+		'\x2', '\x245', '\x246', '\x5', '\x14', '\v', '\x2', '\x246', '\x247', 
+		'\a', '\x1E', '\x2', '\x2', '\x247', '\x249', '\x3', '\x2', '\x2', '\x2', 
+		'\x248', '\x242', '\x3', '\x2', '\x2', '\x2', '\x248', '\x245', '\x3', 
+		'\x2', '\x2', '\x2', '\x248', '\x249', '\x3', '\x2', '\x2', '\x2', '\x249', 
+		'\x24A', '\x3', '\x2', '\x2', '\x2', '\x24A', '\x24B', '\a', '.', '\x2', 
+		'\x2', '\x24B', '\x24C', '\x5', '\xC4', '\x63', '\x2', '\x24C', 'm', '\x3', 
+		'\x2', '\x2', '\x2', '\x24D', '\x24E', '\a', '/', '\x2', '\x2', '\x24E', 
+		'\x24F', '\x5', '\xC4', '\x63', '\x2', '\x24F', 'o', '\x3', '\x2', '\x2', 
+		'\x2', '\x250', '\x257', '\x5', 'r', ':', '\x2', '\x251', '\x257', '\x5', 
+		't', ';', '\x2', '\x252', '\x253', '\a', '\x5', '\x2', '\x2', '\x253', 
+		'\x254', '\x5', 'p', '\x39', '\x2', '\x254', '\x255', '\a', '\x6', '\x2', 
+		'\x2', '\x255', '\x257', '\x3', '\x2', '\x2', '\x2', '\x256', '\x250', 
+		'\x3', '\x2', '\x2', '\x2', '\x256', '\x251', '\x3', '\x2', '\x2', '\x2', 
+		'\x256', '\x252', '\x3', '\x2', '\x2', '\x2', '\x257', 'q', '\x3', '\x2', 
+		'\x2', '\x2', '\x258', '\x25B', '\a', '@', '\x2', '\x2', '\x259', '\x25B', 
+		'\x5', '\x9C', 'O', '\x2', '\x25A', '\x258', '\x3', '\x2', '\x2', '\x2', 
+		'\x25A', '\x259', '\x3', '\x2', '\x2', '\x2', '\x25B', 's', '\x3', '\x2', 
+		'\x2', '\x2', '\x25C', '\x265', '\x5', 'v', '<', '\x2', '\x25D', '\x265', 
+		'\x5', '\xAC', 'W', '\x2', '\x25E', '\x265', '\x5', '|', '?', '\x2', '\x25F', 
 		'\x265', '\x5', '\x88', '\x45', '\x2', '\x260', '\x265', '\x5', '~', '@', 
 		'\x2', '\x261', '\x265', '\x5', '\x80', '\x41', '\x2', '\x262', '\x265', 
 		'\x5', '\x82', '\x42', '\x2', '\x263', '\x265', '\x5', '\x84', '\x43', 
@@ -6993,16 +6999,16 @@ public partial class GolangParser : Parser {
 		'\x2', '\x26A', 'w', '\x3', '\x2', '\x2', '\x2', '\x26B', '\x26C', '\x5', 
 		'\xC4', '\x63', '\x2', '\x26C', 'y', '\x3', '\x2', '\x2', '\x2', '\x26D', 
 		'\x26E', '\x5', 'p', '\x39', '\x2', '\x26E', '{', '\x3', '\x2', '\x2', 
-		'\x2', '\x26F', '\x270', '\a', '\x18', '\x2', '\x2', '\x270', '\x271', 
+		'\x2', '\x26F', '\x270', '\a', '\x17', '\x2', '\x2', '\x270', '\x271', 
 		'\x5', 'p', '\x39', '\x2', '\x271', '}', '\x3', '\x2', '\x2', '\x2', '\x272', 
-		'\x273', '\a', '\x32', '\x2', '\x2', '\x273', '\x279', '\a', '\xF', '\x2', 
+		'\x273', '\a', '\x32', '\x2', '\x2', '\x273', '\x279', '\a', '\xE', '\x2', 
 		'\x2', '\x274', '\x275', '\x5', '\x86', '\x44', '\x2', '\x275', '\x276', 
 		'\x5', '\xCA', '\x66', '\x2', '\x276', '\x278', '\x3', '\x2', '\x2', '\x2', 
 		'\x277', '\x274', '\x3', '\x2', '\x2', '\x2', '\x278', '\x27B', '\x3', 
 		'\x2', '\x2', '\x2', '\x279', '\x277', '\x3', '\x2', '\x2', '\x2', '\x279', 
 		'\x27A', '\x3', '\x2', '\x2', '\x2', '\x27A', '\x27C', '\x3', '\x2', '\x2', 
 		'\x2', '\x27B', '\x279', '\x3', '\x2', '\x2', '\x2', '\x27C', '\x27D', 
-		'\a', '\x10', '\x2', '\x2', '\x27D', '\x7F', '\x3', '\x2', '\x2', '\x2', 
+		'\a', '\xF', '\x2', '\x2', '\x27D', '\x7F', '\x3', '\x2', '\x2', '\x2', 
 		'\x27E', '\x27F', '\a', '\x30', '\x2', '\x2', '\x27F', '\x280', '\a', 
 		'\x31', '\x2', '\x2', '\x280', '\x281', '\x5', 'z', '>', '\x2', '\x281', 
 		'\x81', '\x3', '\x2', '\x2', '\x2', '\x282', '\x283', '\a', '\x33', '\x2', 
@@ -7010,8 +7016,8 @@ public partial class GolangParser : Parser {
 		'\x5', 'p', '\x39', '\x2', '\x285', '\x286', '\a', '\x31', '\x2', '\x2', 
 		'\x286', '\x287', '\x5', 'z', '>', '\x2', '\x287', '\x83', '\x3', '\x2', 
 		'\x2', '\x2', '\x288', '\x28E', '\a', '\x34', '\x2', '\x2', '\x289', '\x28A', 
-		'\a', '\x34', '\x2', '\x2', '\x28A', '\x28E', '\a', '\x11', '\x2', '\x2', 
-		'\x28B', '\x28C', '\a', '\x11', '\x2', '\x2', '\x28C', '\x28E', '\a', 
+		'\a', '\x34', '\x2', '\x2', '\x28A', '\x28E', '\a', '\x10', '\x2', '\x2', 
+		'\x28B', '\x28C', '\a', '\x10', '\x2', '\x2', '\x28C', '\x28E', '\a', 
 		'\x34', '\x2', '\x2', '\x28D', '\x288', '\x3', '\x2', '\x2', '\x2', '\x28D', 
 		'\x289', '\x3', '\x2', '\x2', '\x2', '\x28D', '\x28B', '\x3', '\x2', '\x2', 
 		'\x2', '\x28E', '\x28F', '\x3', '\x2', '\x2', '\x2', '\x28F', '\x290', 
@@ -7023,7 +7029,7 @@ public partial class GolangParser : Parser {
 		'\x2', '\x2', '\x298', '\x29A', '\x5', '\x8E', 'H', '\x2', '\x299', '\x291', 
 		'\x3', '\x2', '\x2', '\x2', '\x299', '\x296', '\x3', '\x2', '\x2', '\x2', 
 		'\x299', '\x297', '\x3', '\x2', '\x2', '\x2', '\x29A', '\x87', '\x3', 
-		'\x2', '\x2', '\x2', '\x29B', '\x29C', '\a', '\r', '\x2', '\x2', '\x29C', 
+		'\x2', '\x2', '\x2', '\x29B', '\x29C', '\a', '\f', '\x2', '\x2', '\x29C', 
 		'\x29D', '\x5', '\x8A', '\x46', '\x2', '\x29D', '\x89', '\x3', '\x2', 
 		'\x2', '\x2', '\x29E', '\x2A0', '\x5', '\x8E', 'H', '\x2', '\x29F', '\x2A1', 
 		'\x5', '\x8C', 'G', '\x2', '\x2A0', '\x29F', '\x3', '\x2', '\x2', '\x2', 
@@ -7080,13 +7086,13 @@ public partial class GolangParser : Parser {
 		'\x2', '\x2E3', '\x2DC', '\x3', '\x2', '\x2', '\x2', '\x2E3', '\x2E0', 
 		'\x3', '\x2', '\x2', '\x2', '\x2E3', '\x2E1', '\x3', '\x2', '\x2', '\x2', 
 		'\x2E3', '\x2E2', '\x3', '\x2', '\x2', '\x2', '\x2E4', '\xA1', '\x3', 
-		'\x2', '\x2', '\x2', '\x2E5', '\x2EA', '\a', '\xF', '\x2', '\x2', '\x2E6', 
+		'\x2', '\x2', '\x2', '\x2E5', '\x2EA', '\a', '\xE', '\x2', '\x2', '\x2E6', 
 		'\x2E8', '\x5', '\xA4', 'S', '\x2', '\x2E7', '\x2E9', '\a', '\n', '\x2', 
 		'\x2', '\x2E8', '\x2E7', '\x3', '\x2', '\x2', '\x2', '\x2E8', '\x2E9', 
 		'\x3', '\x2', '\x2', '\x2', '\x2E9', '\x2EB', '\x3', '\x2', '\x2', '\x2', 
 		'\x2EA', '\x2E6', '\x3', '\x2', '\x2', '\x2', '\x2EA', '\x2EB', '\x3', 
 		'\x2', '\x2', '\x2', '\x2EB', '\x2EC', '\x3', '\x2', '\x2', '\x2', '\x2EC', 
-		'\x2ED', '\a', '\x10', '\x2', '\x2', '\x2ED', '\xA3', '\x3', '\x2', '\x2', 
+		'\x2ED', '\a', '\xF', '\x2', '\x2', '\x2ED', '\xA3', '\x3', '\x2', '\x2', 
 		'\x2', '\x2EE', '\x2F3', '\x5', '\xA6', 'T', '\x2', '\x2EF', '\x2F0', 
 		'\a', '\n', '\x2', '\x2', '\x2F0', '\x2F2', '\x5', '\xA6', 'T', '\x2', 
 		'\x2F1', '\x2EF', '\x3', '\x2', '\x2', '\x2', '\x2F2', '\x2F5', '\x3', 
@@ -7106,126 +7112,125 @@ public partial class GolangParser : Parser {
 		'\x5', '\xA2', 'R', '\x2', '\x304', '\x302', '\x3', '\x2', '\x2', '\x2', 
 		'\x304', '\x303', '\x3', '\x2', '\x2', '\x2', '\x305', '\xAB', '\x3', 
 		'\x2', '\x2', '\x2', '\x306', '\x307', '\a', '\x36', '\x2', '\x2', '\x307', 
-		'\x30D', '\a', '\xF', '\x2', '\x2', '\x308', '\x309', '\x5', '\xAE', 'X', 
+		'\x30D', '\a', '\xE', '\x2', '\x2', '\x308', '\x309', '\x5', '\xAE', 'X', 
 		'\x2', '\x309', '\x30A', '\x5', '\xCA', '\x66', '\x2', '\x30A', '\x30C', 
 		'\x3', '\x2', '\x2', '\x2', '\x30B', '\x308', '\x3', '\x2', '\x2', '\x2', 
 		'\x30C', '\x30F', '\x3', '\x2', '\x2', '\x2', '\x30D', '\x30B', '\x3', 
 		'\x2', '\x2', '\x2', '\x30D', '\x30E', '\x3', '\x2', '\x2', '\x2', '\x30E', 
 		'\x310', '\x3', '\x2', '\x2', '\x2', '\x30F', '\x30D', '\x3', '\x2', '\x2', 
-		'\x2', '\x310', '\x311', '\a', '\x10', '\x2', '\x2', '\x311', '\xAD', 
-		'\x3', '\x2', '\x2', '\x2', '\x312', '\x313', '\x6', 'X', '\x3', '\x2', 
-		'\x313', '\x314', '\x5', '\x14', '\v', '\x2', '\x314', '\x315', '\x5', 
-		'p', '\x39', '\x2', '\x315', '\x318', '\x3', '\x2', '\x2', '\x2', '\x316', 
-		'\x318', '\x5', '\xB0', 'Y', '\x2', '\x317', '\x312', '\x3', '\x2', '\x2', 
-		'\x2', '\x317', '\x316', '\x3', '\x2', '\x2', '\x2', '\x318', '\x31A', 
-		'\x3', '\x2', '\x2', '\x2', '\x319', '\x31B', '\a', 'I', '\x2', '\x2', 
-		'\x31A', '\x319', '\x3', '\x2', '\x2', '\x2', '\x31A', '\x31B', '\x3', 
-		'\x2', '\x2', '\x2', '\x31B', '\xAF', '\x3', '\x2', '\x2', '\x2', '\x31C', 
-		'\x31E', '\a', '\x18', '\x2', '\x2', '\x31D', '\x31C', '\x3', '\x2', '\x2', 
-		'\x2', '\x31D', '\x31E', '\x3', '\x2', '\x2', '\x2', '\x31E', '\x31F', 
-		'\x3', '\x2', '\x2', '\x2', '\x31F', '\x320', '\x5', 'r', ':', '\x2', 
-		'\x320', '\xB1', '\x3', '\x2', '\x2', '\x2', '\x321', '\x322', '\a', '\r', 
-		'\x2', '\x2', '\x322', '\x323', '\x5', '\x1E', '\x10', '\x2', '\x323', 
-		'\xB3', '\x3', '\x2', '\x2', '\x2', '\x324', '\x325', '\b', '[', '\x1', 
-		'\x2', '\x325', '\x328', '\x5', '\x94', 'K', '\x2', '\x326', '\x328', 
-		'\x5', '\xC8', '\x65', '\x2', '\x327', '\x324', '\x3', '\x2', '\x2', '\x2', 
-		'\x327', '\x326', '\x3', '\x2', '\x2', '\x2', '\x328', '\x335', '\x3', 
-		'\x2', '\x2', '\x2', '\x329', '\x32A', '\f', '\a', '\x2', '\x2', '\x32A', 
-		'\x334', '\x5', '\xB6', '\\', '\x2', '\x32B', '\x32C', '\f', '\x6', '\x2', 
-		'\x2', '\x32C', '\x334', '\x5', '\xB8', ']', '\x2', '\x32D', '\x32E', 
-		'\f', '\x5', '\x2', '\x2', '\x32E', '\x334', '\x5', '\xBA', '^', '\x2', 
-		'\x32F', '\x330', '\f', '\x4', '\x2', '\x2', '\x330', '\x334', '\x5', 
-		'\xBC', '_', '\x2', '\x331', '\x332', '\f', '\x3', '\x2', '\x2', '\x332', 
-		'\x334', '\x5', '\xBE', '`', '\x2', '\x333', '\x329', '\x3', '\x2', '\x2', 
-		'\x2', '\x333', '\x32B', '\x3', '\x2', '\x2', '\x2', '\x333', '\x32D', 
-		'\x3', '\x2', '\x2', '\x2', '\x333', '\x32F', '\x3', '\x2', '\x2', '\x2', 
-		'\x333', '\x331', '\x3', '\x2', '\x2', '\x2', '\x334', '\x337', '\x3', 
-		'\x2', '\x2', '\x2', '\x335', '\x333', '\x3', '\x2', '\x2', '\x2', '\x335', 
-		'\x336', '\x3', '\x2', '\x2', '\x2', '\x336', '\xB5', '\x3', '\x2', '\x2', 
-		'\x2', '\x337', '\x335', '\x3', '\x2', '\x2', '\x2', '\x338', '\x339', 
-		'\a', '\a', '\x2', '\x2', '\x339', '\x33A', '\a', '@', '\x2', '\x2', '\x33A', 
-		'\xB7', '\x3', '\x2', '\x2', '\x2', '\x33B', '\x33C', '\a', '\x30', '\x2', 
-		'\x2', '\x33C', '\x33D', '\x5', '\xC4', '\x63', '\x2', '\x33D', '\x33E', 
-		'\a', '\x31', '\x2', '\x2', '\x33E', '\xB9', '\x3', '\x2', '\x2', '\x2', 
-		'\x33F', '\x34F', '\a', '\x30', '\x2', '\x2', '\x340', '\x342', '\x5', 
-		'\xC4', '\x63', '\x2', '\x341', '\x340', '\x3', '\x2', '\x2', '\x2', '\x341', 
-		'\x342', '\x3', '\x2', '\x2', '\x2', '\x342', '\x343', '\x3', '\x2', '\x2', 
-		'\x2', '\x343', '\x345', '\a', ' ', '\x2', '\x2', '\x344', '\x346', '\x5', 
-		'\xC4', '\x63', '\x2', '\x345', '\x344', '\x3', '\x2', '\x2', '\x2', '\x345', 
-		'\x346', '\x3', '\x2', '\x2', '\x2', '\x346', '\x350', '\x3', '\x2', '\x2', 
-		'\x2', '\x347', '\x349', '\x5', '\xC4', '\x63', '\x2', '\x348', '\x347', 
-		'\x3', '\x2', '\x2', '\x2', '\x348', '\x349', '\x3', '\x2', '\x2', '\x2', 
-		'\x349', '\x34A', '\x3', '\x2', '\x2', '\x2', '\x34A', '\x34B', '\a', 
-		' ', '\x2', '\x2', '\x34B', '\x34C', '\x5', '\xC4', '\x63', '\x2', '\x34C', 
-		'\x34D', '\a', ' ', '\x2', '\x2', '\x34D', '\x34E', '\x5', '\xC4', '\x63', 
-		'\x2', '\x34E', '\x350', '\x3', '\x2', '\x2', '\x2', '\x34F', '\x341', 
-		'\x3', '\x2', '\x2', '\x2', '\x34F', '\x348', '\x3', '\x2', '\x2', '\x2', 
-		'\x350', '\x351', '\x3', '\x2', '\x2', '\x2', '\x351', '\x352', '\a', 
-		'\x31', '\x2', '\x2', '\x352', '\xBB', '\x3', '\x2', '\x2', '\x2', '\x353', 
-		'\x354', '\a', '\a', '\x2', '\x2', '\x354', '\x355', '\a', '\x5', '\x2', 
-		'\x2', '\x355', '\x356', '\x5', 'p', '\x39', '\x2', '\x356', '\x357', 
-		'\a', '\x6', '\x2', '\x2', '\x357', '\xBD', '\x3', '\x2', '\x2', '\x2', 
-		'\x358', '\x367', '\a', '\x5', '\x2', '\x2', '\x359', '\x360', '\x5', 
-		'\x16', '\f', '\x2', '\x35A', '\x35D', '\x5', 'p', '\x39', '\x2', '\x35B', 
-		'\x35C', '\a', '\n', '\x2', '\x2', '\x35C', '\x35E', '\x5', '\x16', '\f', 
-		'\x2', '\x35D', '\x35B', '\x3', '\x2', '\x2', '\x2', '\x35D', '\x35E', 
-		'\x3', '\x2', '\x2', '\x2', '\x35E', '\x360', '\x3', '\x2', '\x2', '\x2', 
-		'\x35F', '\x359', '\x3', '\x2', '\x2', '\x2', '\x35F', '\x35A', '\x3', 
-		'\x2', '\x2', '\x2', '\x360', '\x362', '\x3', '\x2', '\x2', '\x2', '\x361', 
-		'\x363', '\a', '\x35', '\x2', '\x2', '\x362', '\x361', '\x3', '\x2', '\x2', 
-		'\x2', '\x362', '\x363', '\x3', '\x2', '\x2', '\x2', '\x363', '\x365', 
-		'\x3', '\x2', '\x2', '\x2', '\x364', '\x366', '\a', '\n', '\x2', '\x2', 
-		'\x365', '\x364', '\x3', '\x2', '\x2', '\x2', '\x365', '\x366', '\x3', 
-		'\x2', '\x2', '\x2', '\x366', '\x368', '\x3', '\x2', '\x2', '\x2', '\x367', 
-		'\x35F', '\x3', '\x2', '\x2', '\x2', '\x367', '\x368', '\x3', '\x2', '\x2', 
-		'\x2', '\x368', '\x369', '\x3', '\x2', '\x2', '\x2', '\x369', '\x36A', 
-		'\a', '\x6', '\x2', '\x2', '\x36A', '\xBF', '\x3', '\x2', '\x2', '\x2', 
-		'\x36B', '\x36C', '\x5', '\xC2', '\x62', '\x2', '\x36C', '\x36D', '\a', 
-		'\a', '\x2', '\x2', '\x36D', '\x36E', '\a', '@', '\x2', '\x2', '\x36E', 
-		'\xC1', '\x3', '\x2', '\x2', '\x2', '\x36F', '\x37A', '\x5', 'r', ':', 
-		'\x2', '\x370', '\x371', '\a', '\x5', '\x2', '\x2', '\x371', '\x372', 
-		'\a', '\x18', '\x2', '\x2', '\x372', '\x373', '\x5', 'r', ':', '\x2', 
-		'\x373', '\x374', '\a', '\x6', '\x2', '\x2', '\x374', '\x37A', '\x3', 
-		'\x2', '\x2', '\x2', '\x375', '\x376', '\a', '\x5', '\x2', '\x2', '\x376', 
-		'\x377', '\x5', '\xC2', '\x62', '\x2', '\x377', '\x378', '\a', '\x6', 
-		'\x2', '\x2', '\x378', '\x37A', '\x3', '\x2', '\x2', '\x2', '\x379', '\x36F', 
-		'\x3', '\x2', '\x2', '\x2', '\x379', '\x370', '\x3', '\x2', '\x2', '\x2', 
-		'\x379', '\x375', '\x3', '\x2', '\x2', '\x2', '\x37A', '\xC3', '\x3', 
-		'\x2', '\x2', '\x2', '\x37B', '\x37C', '\b', '\x63', '\x1', '\x2', '\x37C', 
-		'\x37D', '\x5', '\xC6', '\x64', '\x2', '\x37D', '\x383', '\x3', '\x2', 
-		'\x2', '\x2', '\x37E', '\x37F', '\f', '\x3', '\x2', '\x2', '\x37F', '\x380', 
-		'\t', '\x6', '\x2', '\x2', '\x380', '\x382', '\x5', '\xC4', '\x63', '\x4', 
-		'\x381', '\x37E', '\x3', '\x2', '\x2', '\x2', '\x382', '\x385', '\x3', 
-		'\x2', '\x2', '\x2', '\x383', '\x381', '\x3', '\x2', '\x2', '\x2', '\x383', 
-		'\x384', '\x3', '\x2', '\x2', '\x2', '\x384', '\xC5', '\x3', '\x2', '\x2', 
-		'\x2', '\x385', '\x383', '\x3', '\x2', '\x2', '\x2', '\x386', '\x38A', 
-		'\x5', '\xB4', '[', '\x2', '\x387', '\x388', '\t', '\a', '\x2', '\x2', 
-		'\x388', '\x38A', '\x5', '\xC6', '\x64', '\x2', '\x389', '\x386', '\x3', 
-		'\x2', '\x2', '\x2', '\x389', '\x387', '\x3', '\x2', '\x2', '\x2', '\x38A', 
-		'\xC7', '\x3', '\x2', '\x2', '\x2', '\x38B', '\x38C', '\x5', 'p', '\x39', 
-		'\x2', '\x38C', '\x38D', '\a', '\x5', '\x2', '\x2', '\x38D', '\x38F', 
-		'\x5', '\xC4', '\x63', '\x2', '\x38E', '\x390', '\a', '\n', '\x2', '\x2', 
-		'\x38F', '\x38E', '\x3', '\x2', '\x2', '\x2', '\x38F', '\x390', '\x3', 
-		'\x2', '\x2', '\x2', '\x390', '\x391', '\x3', '\x2', '\x2', '\x2', '\x391', 
-		'\x392', '\a', '\x6', '\x2', '\x2', '\x392', '\xC9', '\x3', '\x2', '\x2', 
-		'\x2', '\x393', '\x398', '\a', '\f', '\x2', '\x2', '\x394', '\x398', '\a', 
-		'\x2', '\x2', '\x3', '\x395', '\x398', '\x6', '\x66', '\n', '\x2', '\x396', 
-		'\x398', '\x6', '\x66', '\v', '\x2', '\x397', '\x393', '\x3', '\x2', '\x2', 
-		'\x2', '\x397', '\x394', '\x3', '\x2', '\x2', '\x2', '\x397', '\x395', 
-		'\x3', '\x2', '\x2', '\x2', '\x397', '\x396', '\x3', '\x2', '\x2', '\x2', 
-		'\x398', '\xCB', '\x3', '\x2', '\x2', '\x2', '`', '\xD3', '\xDB', '\xE9', 
-		'\xED', '\xF0', '\xF9', '\xFE', '\x108', '\x10C', '\x110', '\x114', '\x11B', 
-		'\x123', '\x12E', '\x132', '\x13B', '\x145', '\x151', '\x155', '\x15B', 
-		'\x15F', '\x16A', '\x17C', '\x184', '\x194', '\x1A4', '\x1A8', '\x1AC', 
-		'\x1BA', '\x1C1', '\x1C3', '\x1C7', '\x1CD', '\x1D0', '\x1D6', '\x1E2', 
-		'\x1E8', '\x1EF', '\x1F6', '\x205', '\x20C', '\x214', '\x220', '\x223', 
-		'\x22B', '\x233', '\x238', '\x23C', '\x240', '\x248', '\x256', '\x25A', 
-		'\x264', '\x279', '\x28D', '\x299', '\x2A0', '\x2A4', '\x2A9', '\x2AB', 
-		'\x2B4', '\x2B8', '\x2BB', '\x2C6', '\x2CB', '\x2D1', '\x2E3', '\x2E8', 
-		'\x2EA', '\x2F3', '\x2F9', '\x300', '\x304', '\x30D', '\x317', '\x31A', 
-		'\x31D', '\x327', '\x333', '\x335', '\x341', '\x345', '\x348', '\x34F', 
-		'\x35D', '\x35F', '\x362', '\x365', '\x367', '\x379', '\x383', '\x389', 
-		'\x38F', '\x397',
+		'\x2', '\x310', '\x311', '\a', '\xF', '\x2', '\x2', '\x311', '\xAD', '\x3', 
+		'\x2', '\x2', '\x2', '\x312', '\x313', '\x6', 'X', '\x3', '\x2', '\x313', 
+		'\x314', '\x5', '\x14', '\v', '\x2', '\x314', '\x315', '\x5', 'p', '\x39', 
+		'\x2', '\x315', '\x318', '\x3', '\x2', '\x2', '\x2', '\x316', '\x318', 
+		'\x5', '\xB0', 'Y', '\x2', '\x317', '\x312', '\x3', '\x2', '\x2', '\x2', 
+		'\x317', '\x316', '\x3', '\x2', '\x2', '\x2', '\x318', '\x31A', '\x3', 
+		'\x2', '\x2', '\x2', '\x319', '\x31B', '\a', 'I', '\x2', '\x2', '\x31A', 
+		'\x319', '\x3', '\x2', '\x2', '\x2', '\x31A', '\x31B', '\x3', '\x2', '\x2', 
+		'\x2', '\x31B', '\xAF', '\x3', '\x2', '\x2', '\x2', '\x31C', '\x31E', 
+		'\a', '\x17', '\x2', '\x2', '\x31D', '\x31C', '\x3', '\x2', '\x2', '\x2', 
+		'\x31D', '\x31E', '\x3', '\x2', '\x2', '\x2', '\x31E', '\x31F', '\x3', 
+		'\x2', '\x2', '\x2', '\x31F', '\x320', '\x5', 'r', ':', '\x2', '\x320', 
+		'\xB1', '\x3', '\x2', '\x2', '\x2', '\x321', '\x322', '\a', '\f', '\x2', 
+		'\x2', '\x322', '\x323', '\x5', '\x1E', '\x10', '\x2', '\x323', '\xB3', 
+		'\x3', '\x2', '\x2', '\x2', '\x324', '\x325', '\b', '[', '\x1', '\x2', 
+		'\x325', '\x328', '\x5', '\x94', 'K', '\x2', '\x326', '\x328', '\x5', 
+		'\xC8', '\x65', '\x2', '\x327', '\x324', '\x3', '\x2', '\x2', '\x2', '\x327', 
+		'\x326', '\x3', '\x2', '\x2', '\x2', '\x328', '\x335', '\x3', '\x2', '\x2', 
+		'\x2', '\x329', '\x32A', '\f', '\a', '\x2', '\x2', '\x32A', '\x334', '\x5', 
+		'\xB6', '\\', '\x2', '\x32B', '\x32C', '\f', '\x6', '\x2', '\x2', '\x32C', 
+		'\x334', '\x5', '\xB8', ']', '\x2', '\x32D', '\x32E', '\f', '\x5', '\x2', 
+		'\x2', '\x32E', '\x334', '\x5', '\xBA', '^', '\x2', '\x32F', '\x330', 
+		'\f', '\x4', '\x2', '\x2', '\x330', '\x334', '\x5', '\xBC', '_', '\x2', 
+		'\x331', '\x332', '\f', '\x3', '\x2', '\x2', '\x332', '\x334', '\x5', 
+		'\xBE', '`', '\x2', '\x333', '\x329', '\x3', '\x2', '\x2', '\x2', '\x333', 
+		'\x32B', '\x3', '\x2', '\x2', '\x2', '\x333', '\x32D', '\x3', '\x2', '\x2', 
+		'\x2', '\x333', '\x32F', '\x3', '\x2', '\x2', '\x2', '\x333', '\x331', 
+		'\x3', '\x2', '\x2', '\x2', '\x334', '\x337', '\x3', '\x2', '\x2', '\x2', 
+		'\x335', '\x333', '\x3', '\x2', '\x2', '\x2', '\x335', '\x336', '\x3', 
+		'\x2', '\x2', '\x2', '\x336', '\xB5', '\x3', '\x2', '\x2', '\x2', '\x337', 
+		'\x335', '\x3', '\x2', '\x2', '\x2', '\x338', '\x339', '\a', '\a', '\x2', 
+		'\x2', '\x339', '\x33A', '\a', '@', '\x2', '\x2', '\x33A', '\xB7', '\x3', 
+		'\x2', '\x2', '\x2', '\x33B', '\x33C', '\a', '\x30', '\x2', '\x2', '\x33C', 
+		'\x33D', '\x5', '\xC4', '\x63', '\x2', '\x33D', '\x33E', '\a', '\x31', 
+		'\x2', '\x2', '\x33E', '\xB9', '\x3', '\x2', '\x2', '\x2', '\x33F', '\x34F', 
+		'\a', '\x30', '\x2', '\x2', '\x340', '\x342', '\x5', '\xC4', '\x63', '\x2', 
+		'\x341', '\x340', '\x3', '\x2', '\x2', '\x2', '\x341', '\x342', '\x3', 
+		'\x2', '\x2', '\x2', '\x342', '\x343', '\x3', '\x2', '\x2', '\x2', '\x343', 
+		'\x345', '\a', ' ', '\x2', '\x2', '\x344', '\x346', '\x5', '\xC4', '\x63', 
+		'\x2', '\x345', '\x344', '\x3', '\x2', '\x2', '\x2', '\x345', '\x346', 
+		'\x3', '\x2', '\x2', '\x2', '\x346', '\x350', '\x3', '\x2', '\x2', '\x2', 
+		'\x347', '\x349', '\x5', '\xC4', '\x63', '\x2', '\x348', '\x347', '\x3', 
+		'\x2', '\x2', '\x2', '\x348', '\x349', '\x3', '\x2', '\x2', '\x2', '\x349', 
+		'\x34A', '\x3', '\x2', '\x2', '\x2', '\x34A', '\x34B', '\a', ' ', '\x2', 
+		'\x2', '\x34B', '\x34C', '\x5', '\xC4', '\x63', '\x2', '\x34C', '\x34D', 
+		'\a', ' ', '\x2', '\x2', '\x34D', '\x34E', '\x5', '\xC4', '\x63', '\x2', 
+		'\x34E', '\x350', '\x3', '\x2', '\x2', '\x2', '\x34F', '\x341', '\x3', 
+		'\x2', '\x2', '\x2', '\x34F', '\x348', '\x3', '\x2', '\x2', '\x2', '\x350', 
+		'\x351', '\x3', '\x2', '\x2', '\x2', '\x351', '\x352', '\a', '\x31', '\x2', 
+		'\x2', '\x352', '\xBB', '\x3', '\x2', '\x2', '\x2', '\x353', '\x354', 
+		'\a', '\a', '\x2', '\x2', '\x354', '\x355', '\a', '\x5', '\x2', '\x2', 
+		'\x355', '\x356', '\x5', 'p', '\x39', '\x2', '\x356', '\x357', '\a', '\x6', 
+		'\x2', '\x2', '\x357', '\xBD', '\x3', '\x2', '\x2', '\x2', '\x358', '\x367', 
+		'\a', '\x5', '\x2', '\x2', '\x359', '\x360', '\x5', '\x16', '\f', '\x2', 
+		'\x35A', '\x35D', '\x5', 'p', '\x39', '\x2', '\x35B', '\x35C', '\a', '\n', 
+		'\x2', '\x2', '\x35C', '\x35E', '\x5', '\x16', '\f', '\x2', '\x35D', '\x35B', 
+		'\x3', '\x2', '\x2', '\x2', '\x35D', '\x35E', '\x3', '\x2', '\x2', '\x2', 
+		'\x35E', '\x360', '\x3', '\x2', '\x2', '\x2', '\x35F', '\x359', '\x3', 
+		'\x2', '\x2', '\x2', '\x35F', '\x35A', '\x3', '\x2', '\x2', '\x2', '\x360', 
+		'\x362', '\x3', '\x2', '\x2', '\x2', '\x361', '\x363', '\a', '\x35', '\x2', 
+		'\x2', '\x362', '\x361', '\x3', '\x2', '\x2', '\x2', '\x362', '\x363', 
+		'\x3', '\x2', '\x2', '\x2', '\x363', '\x365', '\x3', '\x2', '\x2', '\x2', 
+		'\x364', '\x366', '\a', '\n', '\x2', '\x2', '\x365', '\x364', '\x3', '\x2', 
+		'\x2', '\x2', '\x365', '\x366', '\x3', '\x2', '\x2', '\x2', '\x366', '\x368', 
+		'\x3', '\x2', '\x2', '\x2', '\x367', '\x35F', '\x3', '\x2', '\x2', '\x2', 
+		'\x367', '\x368', '\x3', '\x2', '\x2', '\x2', '\x368', '\x369', '\x3', 
+		'\x2', '\x2', '\x2', '\x369', '\x36A', '\a', '\x6', '\x2', '\x2', '\x36A', 
+		'\xBF', '\x3', '\x2', '\x2', '\x2', '\x36B', '\x36C', '\x5', '\xC2', '\x62', 
+		'\x2', '\x36C', '\x36D', '\a', '\a', '\x2', '\x2', '\x36D', '\x36E', '\a', 
+		'@', '\x2', '\x2', '\x36E', '\xC1', '\x3', '\x2', '\x2', '\x2', '\x36F', 
+		'\x37A', '\x5', 'r', ':', '\x2', '\x370', '\x371', '\a', '\x5', '\x2', 
+		'\x2', '\x371', '\x372', '\a', '\x17', '\x2', '\x2', '\x372', '\x373', 
+		'\x5', 'r', ':', '\x2', '\x373', '\x374', '\a', '\x6', '\x2', '\x2', '\x374', 
+		'\x37A', '\x3', '\x2', '\x2', '\x2', '\x375', '\x376', '\a', '\x5', '\x2', 
+		'\x2', '\x376', '\x377', '\x5', '\xC2', '\x62', '\x2', '\x377', '\x378', 
+		'\a', '\x6', '\x2', '\x2', '\x378', '\x37A', '\x3', '\x2', '\x2', '\x2', 
+		'\x379', '\x36F', '\x3', '\x2', '\x2', '\x2', '\x379', '\x370', '\x3', 
+		'\x2', '\x2', '\x2', '\x379', '\x375', '\x3', '\x2', '\x2', '\x2', '\x37A', 
+		'\xC3', '\x3', '\x2', '\x2', '\x2', '\x37B', '\x37C', '\b', '\x63', '\x1', 
+		'\x2', '\x37C', '\x37D', '\x5', '\xC6', '\x64', '\x2', '\x37D', '\x383', 
+		'\x3', '\x2', '\x2', '\x2', '\x37E', '\x37F', '\f', '\x3', '\x2', '\x2', 
+		'\x37F', '\x380', '\t', '\x6', '\x2', '\x2', '\x380', '\x382', '\x5', 
+		'\xC4', '\x63', '\x4', '\x381', '\x37E', '\x3', '\x2', '\x2', '\x2', '\x382', 
+		'\x385', '\x3', '\x2', '\x2', '\x2', '\x383', '\x381', '\x3', '\x2', '\x2', 
+		'\x2', '\x383', '\x384', '\x3', '\x2', '\x2', '\x2', '\x384', '\xC5', 
+		'\x3', '\x2', '\x2', '\x2', '\x385', '\x383', '\x3', '\x2', '\x2', '\x2', 
+		'\x386', '\x38A', '\x5', '\xB4', '[', '\x2', '\x387', '\x388', '\t', '\a', 
+		'\x2', '\x2', '\x388', '\x38A', '\x5', '\xC6', '\x64', '\x2', '\x389', 
+		'\x386', '\x3', '\x2', '\x2', '\x2', '\x389', '\x387', '\x3', '\x2', '\x2', 
+		'\x2', '\x38A', '\xC7', '\x3', '\x2', '\x2', '\x2', '\x38B', '\x38C', 
+		'\x5', 'p', '\x39', '\x2', '\x38C', '\x38D', '\a', '\x5', '\x2', '\x2', 
+		'\x38D', '\x38F', '\x5', '\xC4', '\x63', '\x2', '\x38E', '\x390', '\a', 
+		'\n', '\x2', '\x2', '\x38F', '\x38E', '\x3', '\x2', '\x2', '\x2', '\x38F', 
+		'\x390', '\x3', '\x2', '\x2', '\x2', '\x390', '\x391', '\x3', '\x2', '\x2', 
+		'\x2', '\x391', '\x392', '\a', '\x6', '\x2', '\x2', '\x392', '\xC9', '\x3', 
+		'\x2', '\x2', '\x2', '\x393', '\x398', '\a', '\x1F', '\x2', '\x2', '\x394', 
+		'\x398', '\a', '\x2', '\x2', '\x3', '\x395', '\x398', '\x6', '\x66', '\n', 
+		'\x2', '\x396', '\x398', '\x6', '\x66', '\v', '\x2', '\x397', '\x393', 
+		'\x3', '\x2', '\x2', '\x2', '\x397', '\x394', '\x3', '\x2', '\x2', '\x2', 
+		'\x397', '\x395', '\x3', '\x2', '\x2', '\x2', '\x397', '\x396', '\x3', 
+		'\x2', '\x2', '\x2', '\x398', '\xCB', '\x3', '\x2', '\x2', '\x2', '`', 
+		'\xD3', '\xDB', '\xE9', '\xED', '\xF0', '\xF9', '\xFE', '\x108', '\x10C', 
+		'\x110', '\x114', '\x11B', '\x123', '\x12E', '\x132', '\x13B', '\x145', 
+		'\x151', '\x155', '\x15B', '\x15F', '\x16A', '\x17C', '\x184', '\x194', 
+		'\x1A4', '\x1A8', '\x1AC', '\x1BA', '\x1C1', '\x1C3', '\x1C7', '\x1CD', 
+		'\x1D0', '\x1D6', '\x1E2', '\x1E8', '\x1EF', '\x1F6', '\x205', '\x20C', 
+		'\x214', '\x220', '\x223', '\x22B', '\x233', '\x238', '\x23C', '\x240', 
+		'\x248', '\x256', '\x25A', '\x264', '\x279', '\x28D', '\x299', '\x2A0', 
+		'\x2A4', '\x2A9', '\x2AB', '\x2B4', '\x2B8', '\x2BB', '\x2C6', '\x2CB', 
+		'\x2D1', '\x2E3', '\x2E8', '\x2EA', '\x2F3', '\x2F9', '\x300', '\x304', 
+		'\x30D', '\x317', '\x31A', '\x31D', '\x327', '\x333', '\x335', '\x341', 
+		'\x345', '\x348', '\x34F', '\x35D', '\x35F', '\x362', '\x365', '\x367', 
+		'\x379', '\x383', '\x389', '\x38F', '\x397',
 	};
 
 	public static readonly ATN _ATN =

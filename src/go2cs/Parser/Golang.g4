@@ -237,7 +237,7 @@ expressionList
 
 //TypeDecl     = "type" ( TypeSpec | "(" { TypeSpec ";" } ")" ) .
 typeDecl
-    : 'type' ( typeSpec | '(' ( typeSpec ';' )* ')' )
+    : 'type' ( typeSpec | '(' ( typeSpec eos )* ')' )
     ;
 
 //TypeSpec     = identifier Type .
