@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,12 @@ namespace go2cs
         private bool m_firstImportSpec = true;
         private string m_lastImportSpecComment;
         private string m_lastEolImportSpecComment = "";
+        private readonly HashSet<string> m_usingStatements = new HashSet<string>(StringComparer.Ordinal);
+
+        public override void EnterImportDecl(GolangParser.ImportDeclContext context)
+        {
+            m_usingStatements.UnionWith(RequiredUsings.Select(usingType => $"using {usingType};"));
+        }
 
         public override void EnterImportSpec(GolangParser.ImportSpecContext context)
         {
@@ -56,11 +63,15 @@ namespace go2cs
                 string alias = importAlias.Key;
                 string targetUsing = importAlias.Value.targetUsing;
                 string targetImport = importAlias.Value.targetImport;
+                string usingStatement;
 
                 if (alias.StartsWith("static ", StringComparison.Ordinal))
-                    m_targetFile.Append($"using {alias};");
+                    usingStatement = $"using {alias};";
                 else
-                    m_targetFile.Append($"using {alias} = {targetUsing};");
+                    usingStatement = $"using {alias} = {targetUsing};";
+
+                m_targetFile.Append(usingStatement);
+                m_usingStatements.Add(usingStatement);
 
                 FolderMetadata metadata = LoadImportMetadata(Options, targetImport, out string warning);
 

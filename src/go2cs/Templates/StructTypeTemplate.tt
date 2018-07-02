@@ -13,8 +13,10 @@
 //     Generated on <#=GeneratedTime#>
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
 using System.Runtime.CompilerServices;
+<#=string.Join(Environment.NewLine, UsingStatements)#>
 <#if (!NamespacePrefix.Equals("go")) {#>
 using go;
 <#}#>
@@ -55,12 +57,15 @@ using go;
 
             foreach (KeyValuePair<string, List<FieldInfo>> kvp in PromotedFields)
             {
+
+                FieldInfo promotedStruct = GetPromotedStruct(kvp.Key);
+                bool isPointer = promotedStruct?.Type.IsPointer ?? false;
             #>
 
-            // <#=kvp.Key#> structure promotion
+            // <#=kvp.Key#> structure promotion - sourced from <#=isPointer ? "pointer" : "value copy"#>
             private readonly Ref<<#=kvp.Key#>> m_<#=kvp.Key#>Ref;
 
-            private ref <#=kvp.Key#> <#=kvp.Key#>_val => ref m_<#=kvp.Key#>Ref.Value;
+            private ref <#=kvp.Key#> <#=kvp.Key#>_<#=isPointer ? "ptr" : "val"#> => ref m_<#=kvp.Key#>Ref.Value;
 <#
 
                 foreach (var decl in kvp.Value)
@@ -104,7 +109,7 @@ using go;
             {<#
             foreach (var decl in StructFields)
             {
-                if (IsPromotedStruct(decl))
+                if (PromotedStructs.Contains(decl.Type.PrimitiveName))
                 {
                     // Promoted struct #>
 
@@ -124,15 +129,15 @@ using go;
             {#>
 
 
-            public <#=StructName#>(<#=string.Join(", ", StructFields.Select(field => $"{field.Type.PrimitiveName} {field.Name}"))#>)
+            public <#=StructName#>(<#=string.Join(", ", StructFields.Select(field => $"{(field.Type.IsPointer ? "ref " : "")}{field.Type.PrimitiveName} {field.Name}"))#>)
             {<#
             foreach (var decl in StructFields)
             {
-                if (IsPromotedStruct(decl))
+                if (PromotedStructs.Contains(decl.Type.PrimitiveName))
                 {
                     // Promoted struct #>
 
-                this.m_<#=decl.Name#>Ref = new Ref<<#=decl.Type.PrimitiveName#>>(<#=decl.Name#>);<#
+                this.m_<#=decl.Name#>Ref = new Ref<<#=decl.Type.PrimitiveName#>>(<#=decl.Type.IsPointer ? "ref " : ""#><#=decl.Name#>);<#
                 }
                 else
                 {
@@ -175,6 +180,7 @@ public FieldInfo[] StructFields;
 public HashSet<string> PromotedStructs;
 public Dictionary<string, List<FunctionSignature>> PromotedFunctions;
 public Dictionary<string, List<FieldInfo>> PromotedFields;
+public IEnumerable<string> UsingStatements;
 
 private string GetParameterNames(FunctionSignature function)
 {
@@ -196,20 +202,14 @@ private string GetParameterTypes(FunctionSignature function)
     return parameterTypes;
 }
 
-private bool IsPromotedStruct(FieldInfo field)
+private FieldInfo GetPromotedStruct(string fieldName)
 {
-    if (!field.IsPromoted)
-        return false;
-
-    foreach (string fullTypeName in PromotedStructs)
+    foreach (FieldInfo field in StructFields)
     {
-        string[] parts = fullTypeName.Split('.');
-        string typeName = parts[parts.Length - 1];
-
-        if (typeName.Equals(field.Type.PrimitiveName, StringComparison.Ordinal))
-            return true;
+        if (field.Name.Equals(fieldName, StringComparison.Ordinal))
+            return field;
     }
 
-    return false;
+    return null;
 }
 #>

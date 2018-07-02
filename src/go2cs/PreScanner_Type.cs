@@ -55,16 +55,27 @@ namespace go2cs
                         });
                     }
                 }
-                else if (Types.TryGetValue(fieldDecl.anonymousField(), out typeInfo))
+                else
                 {
-                    fields.Add(new FieldInfo
+                    GolangParser.AnonymousFieldContext anonymousField = fieldDecl.anonymousField();
+
+                    if (Types.TryGetValue(anonymousField, out typeInfo))
                     {
-                        Name = GetValidIdentifierName(typeInfo.PrimitiveName),
-                        Type = ConvertByRefToBasicPointer(typeInfo),
-                        Description = description,
-                        Comments = CheckForCommentsRight(fieldDecl),
-                        IsPromoted = true
-                    });
+                        if (anonymousField.ChildCount > 1 && anonymousField.children[0].GetText() == "*")
+                        {
+                            typeInfo = typeInfo.Clone();
+                            typeInfo.IsPointer = true;
+                        }
+
+                        fields.Add(new FieldInfo
+                        {
+                            Name = GetValidIdentifierName(typeInfo.PrimitiveName),
+                            Type = typeInfo,
+                            Description = description,
+                            Comments = CheckForCommentsRight(fieldDecl),
+                            IsPromoted = true
+                        });
+                    }
                 }
             }
 

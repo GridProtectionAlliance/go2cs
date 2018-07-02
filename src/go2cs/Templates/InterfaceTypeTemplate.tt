@@ -18,6 +18,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+<#=string.Join(Environment.NewLine, UsingStatements)#>
 <#if (!NamespacePrefix.Equals("go")) {#>
 using go;
 <#}#>
@@ -120,6 +121,7 @@ public string InterfaceName;
 public string Scope;
 public InterfaceInfo Interface;
 public IEnumerable<FunctionSignature> Functions;
+public IEnumerable<string> UsingStatements;
 
 private string GetParameterNames(FunctionSignature function)
 {

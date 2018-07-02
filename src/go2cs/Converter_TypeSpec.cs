@@ -87,7 +87,8 @@ namespace go2cs
                         InterfaceName = identifier,
                         Scope = scope,
                         Interface = interfaceInfo,
-                        Functions = allFunctions
+                        Functions = allFunctions,
+                        UsingStatements = m_usingStatements
                     }
                     .TransformText());
                 }
@@ -129,7 +130,7 @@ namespace go2cs
                 Dictionary<string, List<FieldInfo>> promotedFields = new Dictionary<string, List<FieldInfo>>(StringComparer.Ordinal);
                 HashSet<string> promotedStructs = new HashSet<string>(StringComparer.Ordinal);
 
-                SearchPromotedStructFields(context, originalIdentifier, structInfo, promotedFields, promotedStructs);
+                SearchPromotedStructFields(context, originalIdentifier, structInfo, inheritedTypeNames, promotedFields, promotedStructs);
 
                 using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
                 {
@@ -144,7 +145,8 @@ namespace go2cs
                         StructFields = structInfo.Fields,
                         PromotedStructs = promotedStructs,
                         PromotedFunctions = promotedFunctions,
-                        PromotedFields = promotedFields
+                        PromotedFields = promotedFields,
+                        UsingStatements = m_usingStatements
                     }
                     .TransformText());
                 }
@@ -161,7 +163,7 @@ namespace go2cs
                         FieldInfo promotedStruct = field.Clone();
 
                         promotedStruct.Type.PrimitiveName = $"ref {promotedStruct.Type.Name}";
-                        promotedStruct.Name = $"{promotedStruct.Name} => ref {promotedStruct.Name}_val";
+                        promotedStruct.Name = $"{promotedStruct.Name} => ref {promotedStruct.Name}_{(promotedStruct.Type.IsPointer ? "ptr" : "val")}";
 
                         fields.Add(promotedStruct);
                     }
@@ -190,7 +192,6 @@ namespace go2cs
                     }
 
                     fieldDecl.Append($"{Spacing(1)}public {field.Type.PrimitiveName} {field.Name};{(string.IsNullOrEmpty(field.Comments) ? Environment.NewLine : field.Comments)}");
-
                     m_targetFile.Append(fieldDecl);
                 }
 
@@ -202,44 +203,34 @@ namespace go2cs
                 if (!string.IsNullOrEmpty(comments))
                     m_targetFile.Append(FixForwardSpacing(comments));
             }
+            else if (Types.TryGetValue(context.type(), out TypeInfo typeInfo))
+            {
+                // Handle declaration like "type MyFloat float64"
+                string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.PrimitiveName)}).cs");
 
-            //if (m_interfaceMethods.TryGetValue(context.type()?.typeLit()?.interfaceType(), out List<(string functionName, string parameterSignature, string namedParameters, string parameterTypes, string resultType)> functions))
-            //{
+                // TODO: The following works OK for a primitive type definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
+                using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
+                {
+                    writer.Write(new InheritedTypeTemplate
+                    {
+                        NamespacePrefix = PackageNamespace,
+                        NamespaceHeader = m_namespaceHeader,
+                        NamespaceFooter = m_namespaceFooter,
+                        PackageName = Package,
+                        StructName = identifier,
+                        Scope = scope,
+                        TypeName = typeInfo.PrimitiveName
+                    }
+                    .TransformText());
+                }
 
-            //}
-            //else if (m_structFields.TryGetValue(context.type()?.typeLit()?.structType(), out string fields))
-            //{
+                // Track file name associated with package
+                AddFileToPackage(Package, ancillaryInheritedTypeFileName, PackageNamespace);
 
-
-            //m_structFields[context] = string.Join(Environment.NewLine, fields.Select(getStructureField));
-
-            //}
-            //else if (m_types.TryGetValue(context.type(), out GoTypeInfo typeInfo))
-            //{
-            //    // Handle declaration like "type MyFloat float64"
-            //    string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.PrimitiveName)}).cs");
-
-            //    // TODO: The following works well for a primitive type definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
-            //    using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
-            //        writer.Write(new InheritedTypeTemplate
-            //        {
-            //            NamespacePrefix = PackageNamespace,
-            //            NamespaceHeader = m_namespaceHeader,
-            //            NamespaceFooter = m_namespaceFooter,
-            //            PackageName = Package,
-            //            StructName = identifier,
-            //            Scope = scope,
-            //            TypeName = typeInfo.PrimitiveName
-            //        }
-            //        .TransformText());
-
-            //    // Track file name associated with package
-            //    AddFileToPackage(Package, ancillaryInheritedTypeFileName, PackageNamespace);
-
-            //    m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // {typeInfo.PrimitiveName}");
-            //    m_targetFile.AppendLine($"{Spacing()}{{");
-            //    m_targetFile.AppendLine($"{Spacing()}}}");
-            //}
+                m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // : {typeInfo.PrimitiveName}");
+                m_targetFile.AppendLine($"{Spacing()}{{");
+                m_targetFile.AppendLine($"{Spacing()}}}");
+            }
         }
 
         private void RecurseInheritedInterfaces(GolangParser.TypeSpecContext context, string identifier, InterfaceInfo interfaceInfo, List<FunctionSignature> functions, List<string> inheritedTypeNames = null, bool useFullTypeName = false)
@@ -344,10 +335,14 @@ namespace go2cs
             return interfaceFileMetadata != null;
         }
 
-        private void SearchPromotedStructFields(GolangParser.TypeSpecContext context, string identifier, StructInfo structInfo, Dictionary<string, List<FieldInfo>> promotedFields, HashSet<string> promotedStructTypeNames = null, bool useFullTypeName = true)
+        private void SearchPromotedStructFields(GolangParser.TypeSpecContext context, string identifier, StructInfo structInfo, HashSet<string> inheritedTypeNames, Dictionary<string, List<FieldInfo>> promotedFields, HashSet<string> promotedStructTypeNames = null, bool useFullTypeName = false)
         {
             foreach (FieldInfo field in structInfo.GetAnonymousFields())
             {
+                // If type is a known interface, skip ahead
+                if (inheritedTypeNames.Contains(field.Name))
+                    continue;
+
                 string structName = field.Type.PrimitiveName;
 
                 if (TryFindPromotedStructInfo(structName, out StructInfo promotedStructInfo, out string shortTypeName, out string fullTypeName))
