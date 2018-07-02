@@ -32,6 +32,7 @@ namespace go2cs.Metadata
     {
         public string Name;
         public Signature Signature;
+        public string Comments;
         public bool IsPromoted;
 
         public virtual string Generate()

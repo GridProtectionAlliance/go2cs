@@ -110,6 +110,7 @@ namespace go2cs
                                     }
                                 }
                             },
+                            Comments = CheckForCommentsRight(methodSpec),
                             IsPromoted = true
                         });
                     }
@@ -126,6 +127,7 @@ namespace go2cs
                             Parameters = parameters?.ToArray() ?? new ParameterInfo[0],
                             Result = Result?.ToArray() ?? new ParameterInfo[0]
                         },
+                        Comments = CheckForCommentsRight(methodSpec),
                         IsPromoted = false
                     });
                 }

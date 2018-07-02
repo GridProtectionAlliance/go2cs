@@ -31,86 +31,86 @@ namespace go2cs.Templates
             
             #line default
             #line hidden
-            this.Write("\r\n\r\n            // ");
+            this.Write("\r\n            // ");
             
-            #line 5 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PromotedField));
             
             #line default
             #line hidden
             this.Write(".");
             
-            #line 5 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write(" function promotion\r\n            private delegate ");
             
-            #line 6 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 5 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ResultType));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 6 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 5 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByVal(T value");
             
-            #line 6 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 5 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PrefixedParameterSignature));
             
             #line default
             #line hidden
             this.Write(");\r\n            private delegate ");
             
-            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 6 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ResultType));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 6 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef(ref T value");
             
-            #line 7 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 6 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PrefixedParameterSignature));
             
             #line default
             #line hidden
             this.Write(");\r\n\r\n            private static readonly ");
             
-            #line 9 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 8 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByVal s_");
             
-            #line 9 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 8 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByVal;\r\n            private static readonly ");
             
-            #line 10 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 9 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef s_");
             
-            #line 10 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 9 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
@@ -118,82 +118,82 @@ namespace go2cs.Templates
             this.Write("ByRef;\r\n\r\n            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.Aggressi" +
                     "veInlining)]\r\n            ");
             
-            #line 13 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Scope));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 13 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ResultType));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 13 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("(");
             
-            #line 13 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ParameterSignature));
             
             #line default
             #line hidden
             this.Write(") => s_");
             
-            #line 13 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef?.Invoke(ref this");
             
-            #line 13 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ParameterNames));
             
             #line default
             #line hidden
             this.Write(") ?? s_");
             
-            #line 13 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByVal?.Invoke(this");
             
-            #line 13 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ParameterNames));
             
             #line default
             #line hidden
             this.Write(") ?? ");
             
-            #line 13 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PromotedField));
             
             #line default
             #line hidden
             this.Write("?.");
             
-            #line 13 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("(");
             
-            #line 13 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs\Templates\StructFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UnprefixedParameterNames));
             
             #line default
             #line hidden
-            this.Write(") ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);");
+            this.Write(") ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);\r\n");
             return this.GenerationEnvironment.ToString();
         }
         

@@ -76,15 +76,12 @@ using go;
             {
             #>
             
-
             [DebuggerStepperBoundary]
             static <#=StructName#>()
             {
                 Type targetType = typeof(<#=StructName#>);
-                MethodInfo extensionMethod;
-                
-                // Any existing defined extensions will override interface instance reference calls<#
-                
+                MethodInfo extensionMethod;<#
+
                 foreach (KeyValuePair<string, List<FunctionSignature>> kvp in PromotedFunctions)
                 {
                     foreach (var decl in kvp.Value)
@@ -97,7 +94,8 @@ using go;
                     }
                 }#>
 
-            }<#
+            }
+<#
             
             }#>
 

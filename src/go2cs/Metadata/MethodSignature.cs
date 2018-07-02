@@ -40,6 +40,7 @@ namespace go2cs.Metadata
         {
             Name = functionSignature.Name;
             Signature = functionSignature.Signature;
+            Comments = functionSignature.Comments;
             IsPromoted = functionSignature.IsPromoted;
         }
 

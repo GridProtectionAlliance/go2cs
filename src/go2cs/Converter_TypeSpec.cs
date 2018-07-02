@@ -36,6 +36,19 @@ namespace go2cs
 {
     public partial class Converter
     {
+        private bool m_firstTypeSpec;
+
+        public override void EnterTypeDecl(GolangParser.TypeDeclContext context)
+        {
+            if (!m_firstTopLevelDeclaration)
+                m_targetFile.AppendLine();
+
+            if (!string.IsNullOrWhiteSpace(m_nextDeclComments))
+                m_targetFile.Append(FixForwardSpacing(m_nextDeclComments));
+
+            m_firstTypeSpec = true;
+        }
+
         public override void ExitTypeSpec(GolangParser.TypeSpecContext context)
         {
             string originalIdentifier = context.IDENTIFIER().GetText();
@@ -43,8 +56,15 @@ namespace go2cs
             string target = Path.GetFileNameWithoutExtension(TargetFileName);
             string identifier = SanitizedIdentifier(originalIdentifier);
 
-            if (!m_firstTopLevelDeclaration)
-                m_targetFile.AppendLine();
+            if (m_firstTypeSpec)
+            {
+                m_firstTypeSpec = false;
+
+                string comments = CheckForCommentsLeft(context);
+
+                if (!string.IsNullOrEmpty(comments))
+                    m_targetFile.Append(FixForwardSpacing(comments));
+            }
 
             if (Metadata.Interfaces.TryGetValue(originalIdentifier, out InterfaceInfo interfaceInfo))
             {
@@ -85,10 +105,16 @@ namespace go2cs
 
                 foreach (FunctionSignature function in localFunctions)
                 {
-                    m_targetFile.AppendLine($"{Spacing(1)}{function.Signature.GenerateResultSignature()} {SanitizedIdentifier(function.Name)}({function.Signature.GenerateParametersSignature(false)});");
+                    m_targetFile.Append($"{Spacing(1)}{function.Signature.GenerateResultSignature()} {SanitizedIdentifier(function.Name)}({function.Signature.GenerateParametersSignature(false)});{(string.IsNullOrEmpty(function.Comments) ? Environment.NewLine : function.Comments)}");
                 }
 
                 m_targetFile.AppendLine($"{Spacing()}}}");
+                m_targetFile.AppendLine();
+
+                string comments = CheckForCommentsRight(context);
+
+                if (!string.IsNullOrEmpty(comments))
+                    m_targetFile.Append(FixForwardSpacing(comments));
             }
             else if (Metadata.Structs.TryGetValue(originalIdentifier, out StructInfo structInfo))
             {
@@ -146,7 +172,7 @@ namespace go2cs
                 }
 
                 m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier}{GetInheritedTypeList(inheritedTypeNames)}");
-                m_targetFile.Append($"{Spacing()}{{");
+                m_targetFile.AppendLine($"{Spacing()}{{");
 
                 foreach (FieldInfo field in fields)
                 {
@@ -159,19 +185,22 @@ namespace go2cs
                         if (description.Length > 2)
                         {
                             RequiredUsings.Add("System.ComponentModel");
-                            fieldDecl.Append($"{Environment.NewLine}{Spacing(1)}[Description({description})]");
+                            fieldDecl.AppendLine($"{Spacing(1)}[Description({description})]");
                         }
                     }
 
-                    fieldDecl.Append($"{Environment.NewLine}{Spacing(1)}public {field.Type.PrimitiveName} {field.Name};");
-
-                    if (!string.IsNullOrEmpty(field.Comments))
-                        fieldDecl.Append(field.Comments);
+                    fieldDecl.Append($"{Spacing(1)}public {field.Type.PrimitiveName} {field.Name};{(string.IsNullOrEmpty(field.Comments) ? Environment.NewLine : field.Comments)}");
 
                     m_targetFile.Append(fieldDecl);
                 }
 
-                m_targetFile.AppendLine($"{Environment.NewLine}{Spacing()}}}");
+                m_targetFile.AppendLine($"{Spacing()}}}");
+                m_targetFile.AppendLine();
+
+                string comments = CheckForCommentsRight(context);
+
+                if (!string.IsNullOrEmpty(comments))
+                    m_targetFile.Append(FixForwardSpacing(comments));
             }
 
             //if (m_interfaceMethods.TryGetValue(context.type()?.typeLit()?.interfaceType(), out List<(string functionName, string parameterSignature, string namedParameters, string parameterTypes, string resultType)> functions))

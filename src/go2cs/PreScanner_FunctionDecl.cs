@@ -24,6 +24,7 @@
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
+using Antlr4.Runtime;
 
 namespace go2cs
 {
@@ -45,9 +46,13 @@ namespace go2cs
         private FunctionInfo ExitMethod(GolangParser.IFunctionContext context)
         {
             string identifer = context.IDENTIFIER().GetText();
+            GolangParser.SignatureContext signatureContext = context.signature();
 
-            if (!Signatures.TryGetValue(context.signature(), out Signature signature))
-                Signatures.TryGetValue(context.function().signature(), out signature);
+            if (!Signatures.TryGetValue(signatureContext, out Signature signature))
+            {
+                signatureContext = context.function().signature();
+                Signatures.TryGetValue(signatureContext, out signature);
+            }
 
             return new FunctionInfo
             {
@@ -55,6 +60,7 @@ namespace go2cs
                 {
                     Name = identifer,
                     Signature = signature,
+                    Comments = CheckForCommentsRight(signatureContext),
                     IsPromoted = false
                 },
                 Variables = new Dictionary<string, VariableInfo>(m_variables),

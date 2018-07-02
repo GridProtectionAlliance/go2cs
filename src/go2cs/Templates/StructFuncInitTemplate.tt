@@ -1,7 +1,7 @@
 ﻿<# // This template creates the function initializations in a <PackageName>_<StructName>Struct.cs file #>
 <#@ template language="C#" #>
 
-
+                
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("<#=FunctionName#>");
 
                 if ((object)extensionMethod != null)
