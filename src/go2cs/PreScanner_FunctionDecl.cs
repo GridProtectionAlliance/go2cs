@@ -24,7 +24,6 @@
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
-using Antlr4.Runtime;
 
 namespace go2cs
 {
