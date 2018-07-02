@@ -205,31 +205,90 @@ namespace go2cs
             }
             else if (Types.TryGetValue(context.type(), out TypeInfo typeInfo))
             {
-                // Handle declaration like "type MyFloat float64"
-                string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.PrimitiveName)}).cs");
-
-                // TODO: The following works OK for a primitive type definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
-                using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
+                if (typeInfo.TypeClass == TypeClass.Function)
                 {
-                    writer.Write(new InheritedTypeTemplate
+                    string signature = typeInfo.PrimitiveName;
+
+                    if (signature.Equals("Action", StringComparison.Ordinal))
                     {
-                        NamespacePrefix = PackageNamespace,
-                        NamespaceHeader = m_namespaceHeader,
-                        NamespaceFooter = m_namespaceFooter,
-                        PackageName = Package,
-                        StructName = identifier,
-                        Scope = scope,
-                        TypeName = typeInfo.PrimitiveName
+                        m_targetFile.Append($"{Spacing()}public delegate void {identifier}();");
+
+                        string comments = CheckForCommentsRight(context);
+
+                        if (!string.IsNullOrEmpty(comments))
+                            m_targetFile.Append(FixForwardSpacing(comments));
+
+                        m_targetFile.AppendLine();
                     }
-                    .TransformText());
+                    else if (signature.StartsWith("Action<", StringComparison.Ordinal))
+                    {
+                        signature = RemoveSurrounding(signature.Substring(6), "<", ">");
+                        m_targetFile.Append($"{Spacing()}public delegate void {identifier}({signature});");
+
+                        string comments = CheckForCommentsRight(context);
+
+                        if (!string.IsNullOrEmpty(comments))
+                            m_targetFile.Append(FixForwardSpacing(comments));
+
+                        m_targetFile.AppendLine();
+                    }
+                    else if (signature.StartsWith("Func<", StringComparison.Ordinal))
+                    {
+                        signature = RemoveSurrounding(signature.Substring(4), "<", ">");
+                        string[] parts = signature.Split(',');
+
+                        if (parts.Length > 0)
+                        {
+                            string result = parts[parts.Length - 1];
+                            signature = string.Join(", ", parts.Take(parts.Length - 1));
+
+                            m_targetFile.Append($"{Spacing()}public delegate {result} {identifier}({signature});");
+
+                            string comments = CheckForCommentsRight(context);
+
+                            if (!string.IsNullOrEmpty(comments))
+                                m_targetFile.Append(FixForwardSpacing(comments));
+
+                            m_targetFile.AppendLine();
+                        }
+                        else
+                        {
+                            AddWarning(context, $"Could not determine function based delegate signature from \"{signature}\"");
+                        }
+                    }
+                    else
+                    {
+                        AddWarning(context, $"Could not determine delegate signature from \"{signature}\"");
+                    }
                 }
+                else
+                {
+                    // Handle declaration like "type MyFloat float64"
+                    string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.PrimitiveName)}).cs");
 
-                // Track file name associated with package
-                AddFileToPackage(Package, ancillaryInheritedTypeFileName, PackageNamespace);
+                    // TODO: The following works OK for a primitive type definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
+                    using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
+                    {
+                        writer.Write(new InheritedTypeTemplate
+                            {
+                                NamespacePrefix = PackageNamespace,
+                                NamespaceHeader = m_namespaceHeader,
+                                NamespaceFooter = m_namespaceFooter,
+                                PackageName = Package,
+                                StructName = identifier,
+                                Scope = scope,
+                                TypeName = typeInfo.PrimitiveName
+                            }
+                            .TransformText());
+                    }
 
-                m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // : {typeInfo.PrimitiveName}");
-                m_targetFile.AppendLine($"{Spacing()}{{");
-                m_targetFile.AppendLine($"{Spacing()}}}");
+                    // Track file name associated with package
+                    AddFileToPackage(Package, ancillaryInheritedTypeFileName, PackageNamespace);
+
+                    m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // : {typeInfo.PrimitiveName}");
+                    m_targetFile.AppendLine($"{Spacing()}{{");
+                    m_targetFile.AppendLine($"{Spacing()}}}");
+                }
             }
         }
 

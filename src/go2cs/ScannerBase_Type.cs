@@ -194,13 +194,24 @@ namespace go2cs
 
             if (resultSignature == "void")
             {
-                primitiveName = $"Action<{typeList}>";
-                frameworkName = $"System.Action<{typeList}>";
+                if (string.IsNullOrEmpty(typeList))
+                {
+                    primitiveName = "Action";
+                    frameworkName = "System.Action";
+                }
+                else
+                {
+                    primitiveName = $"Action<{typeList}>";
+                    frameworkName = $"System.Action<{typeList}>";
+                }
             }
             else
             {
-                primitiveName = $"Func<{typeList}, {resultSignature}>";
-                frameworkName = $"System.Func<{typeList}, {resultSignature}>";
+                if (!string.IsNullOrEmpty(typeList))
+                    typeList = $"{typeList}, ";
+
+                primitiveName = $"Func<{typeList}{resultSignature}>";
+                frameworkName = $"System.Func<{typeList}{resultSignature}>";
             }
 
             Types[context.Parent.Parent] = new TypeInfo
