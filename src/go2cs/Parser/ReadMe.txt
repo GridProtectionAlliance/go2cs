@@ -15,7 +15,7 @@ Specific grammar and embedded code changes:
     /// <c>HiddenChannel</c> which either is a line terminator, or is a multi line comment that
     /// contains a line terminator; otherwise, <c>false</c>.
     /// </returns>
-    private bool LineTerminatorAhead()
+    private bool lineTerminatorAhead()
     {
         // Get the token ahead of the current index.
         int possibleIndexEosToken = CurrentToken.TokenIndex - 1;
@@ -59,7 +59,7 @@ Specific grammar and embedded code changes:
     /// </summary>
     /// <param name="tokenOffset">Starting token offset.</param>
     /// <returns>
-    /// <c>true</c>  if no line terminator exists between the specified
+    /// <c>true</c> if no line terminator exists between the specified
     /// <paramref name="tokenOffset"/> and the prior one on the hidden
     /// channel; otherwise, <c>false</c>.
     /// </returns>
@@ -155,12 +155,12 @@ fragment RAW_STRING_LIT
 eos
     : ';'
     | EOF
-    | {LineTerminatorAhead()}?
+    | {lineTerminatorAhead()}?
     | {TokenStream.LT(1).Text.Equals("}", StringComparison.Ordinal)}?
     ;
 
 COMMENT
-	:   '/*' .*? '*/' [\r\n]* -> channel(HIDDEN)
+	:   [ \t]* '/*' .*? '*/' [\r\n]* -> channel(HIDDEN)
 	;
 
 LINE_COMMENT

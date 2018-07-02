@@ -153,7 +153,7 @@ public partial class GolangParser : Parser {
 	    /// <c>HiddenChannel</c> which either is a line terminator, or is a multi line comment that
 	    /// contains a line terminator; otherwise, <c>false</c>.
 	    /// </returns>
-	    private bool LineTerminatorAhead()
+	    private bool lineTerminatorAhead()
 	    {
 	        // Get the token ahead of the current index.
 	        int possibleIndexEosToken = CurrentToken.TokenIndex - 1;
@@ -197,7 +197,7 @@ public partial class GolangParser : Parser {
 	    /// </summary>
 	    /// <param name="tokenOffset">Starting token offset.</param>
 	    /// <returns>
-	    /// <c>true</c>  if no line terminator exists between the specified
+	    /// <c>true</c> if no line terminator exists between the specified
 	    /// <paramref name="tokenOffset"/> and the prior one on the hidden
 	    /// channel; otherwise, <c>false</c>.
 	    /// </returns>
@@ -6368,7 +6368,7 @@ public partial class GolangParser : Parser {
 				EnterOuterAlt(_localctx, 3);
 				{
 				State = 915;
-				if (!(LineTerminatorAhead())) throw new FailedPredicateException(this, "LineTerminatorAhead()");
+				if (!(lineTerminatorAhead())) throw new FailedPredicateException(this, "lineTerminatorAhead()");
 				}
 				break;
 			case 4:
@@ -6431,7 +6431,7 @@ public partial class GolangParser : Parser {
 	}
 	private bool eos_sempred(EosContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 8: return LineTerminatorAhead();
+		case 8: return lineTerminatorAhead();
 		case 9: return TokenStream.LT(1).Text.Equals("}", StringComparison.Ordinal);
 		}
 		return true;
