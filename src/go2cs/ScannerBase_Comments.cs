@@ -88,19 +88,17 @@ namespace go2cs
 
             if (lineCommentChannel?.Count > 0)
             {
-                foreach (IToken token in lineCommentChannel)
+                IToken token = lineCommentChannel[0];
+                string commentText = token.Text;
+
+                if (commentText.Trim().StartsWith("//"))
                 {
-                    string commentText = token.Text;
-
-                    if (commentText.Trim().StartsWith("//"))
+                    if (!CommentOnNewLine(TokenStream.GetHiddenTokensToLeft(token.TokenIndex), token))
                     {
-                        if (!CommentOnNewLine(lineCommentChannel, token))
-                        {
-                            string[] lines = commentText.Split(NewLineDelimeters, StringSplitOptions.RemoveEmptyEntries);
+                        string[] lines = commentText.Split(NewLineDelimeters, StringSplitOptions.RemoveEmptyEntries);
 
-                            if (lines.Length > 0)
-                                comments.Append(lines[0]);
-                        }
+                        if (lines.Length > 0)
+                            comments.Append(lines[0]);
                     }
                 }
             }
