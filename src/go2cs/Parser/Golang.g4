@@ -80,6 +80,72 @@ grammar Golang;
         // Check if the token is, or contains a line terminator
         return type == LINE_COMMENT || (type == COMMENT && text.IndexOfAny(new[] { '\r', '\n' }) >= 0) || type == TERMINATOR;
     }
+
+    /// <summary>
+    /// Determines if no line terminator exists between the specified
+    /// <paramref name="tokenOffset"/> and the prior one on the hidden
+    /// channel.
+    /// </summary>
+    /// <param name="tokenOffset">Starting token offset.</param>
+    /// <returns>
+    /// <c>true</c>  if no line terminator exists between the specified
+    /// <paramref name="tokenOffset"/> and the prior one on the hidden
+    /// channel; otherwise, <c>false</c>.
+    /// </returns>
+	private bool noTerminatorBetween(int tokenOffset)
+	{
+		BufferedTokenStream stream = TokenStream as BufferedTokenStream;		
+        IList<IToken> tokens = stream.GetHiddenTokensToLeft(stream.LT(tokenOffset).TokenIndex);
+
+        if (tokens == null)
+            return true;
+
+		foreach (IToken token in tokens)
+		{
+            if (token.Text.Contains("\n"))
+                return false;
+		}
+
+		return true;
+	}
+
+    /// <summary>
+    /// Determines if no line terminator exists after any encountered
+    /// parameters beyond the specified <paramref name="tokenOffset"/>
+    /// and the next on the hidden channel.
+    /// </summary>
+    /// <param name="tokenOffset">Starting token offset.</param>
+    /// <returns>
+    /// <c>true</c> if no line terminator exists after any encountered
+    /// parameters beyond the specified <paramref name="tokenOffset"/>
+    /// and the next on the hidden channel; otherwise, <c>false</c>.
+    /// </returns>
+    private bool noTerminatorAfterParams(int tokenOffset)
+    {
+		BufferedTokenStream stream = TokenStream as BufferedTokenStream;
+        int leftParams = 1;
+        int rightParams = 0;
+
+        if (stream.LT(tokenOffset).Text == "(")
+        {
+            // Scan past parameters
+            while (leftParams != rightParams)
+            {
+                tokenOffset++;
+                string value = stream.LT(tokenOffset).Text;
+
+                if (value == "(")
+                    leftParams++;
+                else if (value == ")")
+                    rightParams++;
+            }
+
+            tokenOffset++;
+            return noTerminatorBetween(tokenOffset);
+        }
+        
+        return true;
+    }
 }
 
 @lexer::members {
@@ -484,8 +550,9 @@ channelType
     ;
 
 methodSpec
-    : IDENTIFIER signature
+    : {noTerminatorAfterParams(2)}? IDENTIFIER parameters result
     | typeName
+    | IDENTIFIER parameters
     ;
 
 
@@ -614,7 +681,7 @@ structType
     ;
 
 fieldDecl
-    : (identifierList type | anonymousField) STRING_LIT?
+    : ({noTerminatorBetween(2)}? identifierList type | anonymousField) STRING_LIT?
     ;
 
 anonymousField

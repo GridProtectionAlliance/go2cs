@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System.Collections.Generic;
 using static go2cs.Common;
@@ -71,6 +72,16 @@ namespace go2cs
             m_structFields[context] = fields;
         }
 
+        public override void EnterInterfaceType(GolangParser.InterfaceTypeContext context)
+        {
+            Result = new List<ParameterInfo>(new[] { new ParameterInfo
+            {
+                Name = "",
+                Type = TypeInfo.VoidType,
+                IsVariadic = false
+            }});
+        }
+
         public override void ExitInterfaceType(GolangParser.InterfaceTypeContext context)
         {
             List<FunctionSignature> methods = new List<FunctionSignature>();
@@ -106,15 +117,18 @@ namespace go2cs
                 }
                 else
                 {
-                    if (Signatures.TryGetValue(methodSpec.signature(), out Signature signature))
+                    Parameters.TryGetValue(methodSpec.parameters(), out List<ParameterInfo> parameters);
+
+                    methods.Add(new FunctionSignature
                     {
-                        methods.Add(new FunctionSignature
+                        Name = identifier,
+                        Signature = Signatures[context] = new Signature
                         {
-                            Name = identifier,
-                            Signature = signature,
-                            IsPromoted = false
-                        });
-                    }
+                            Parameters = parameters?.ToArray() ?? new ParameterInfo[0],
+                            Result = Result?.ToArray() ?? new ParameterInfo[0]
+                        },
+                        IsPromoted = false
+                    });
                 }
             }
 
