@@ -207,6 +207,9 @@ namespace go2cs
             {
                 if (typeInfo.TypeClass == TypeClass.Function)
                 {
+                    RequiredUsings.Decrement("System");
+
+                    // Handle delegate type declaration
                     string signature = typeInfo.PrimitiveName;
 
                     if (signature.Equals("Action", StringComparison.Ordinal))
@@ -263,23 +266,23 @@ namespace go2cs
                 }
                 else
                 {
-                    // Handle declaration like "type MyFloat float64"
+                    // Handle named type declaration, e.g., "type MyFloat float64"
                     string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.PrimitiveName)}).cs");
 
-                    // TODO: The following works OK for a primitive type definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
+                    // TODO: The following works OK for a primitive type re-definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
                     using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
                     {
                         writer.Write(new InheritedTypeTemplate
-                            {
-                                NamespacePrefix = PackageNamespace,
-                                NamespaceHeader = m_namespaceHeader,
-                                NamespaceFooter = m_namespaceFooter,
-                                PackageName = Package,
-                                StructName = identifier,
-                                Scope = scope,
-                                TypeName = typeInfo.PrimitiveName
-                            }
-                            .TransformText());
+                        {
+                            NamespacePrefix = PackageNamespace,
+                            NamespaceHeader = m_namespaceHeader,
+                            NamespaceFooter = m_namespaceFooter,
+                            PackageName = Package,
+                            StructName = identifier,
+                            Scope = scope,
+                            TypeName = typeInfo.PrimitiveName
+                        }
+                        .TransformText());
                     }
 
                     // Track file name associated with package

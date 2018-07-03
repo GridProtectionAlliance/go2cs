@@ -58,7 +58,7 @@ namespace go2cs
 
         private readonly List<string> m_warnings = new List<string>();
 
-        protected readonly HashSet<string> RequiredUsings = new HashSet<string>(StringComparer.Ordinal);
+        protected readonly DependencyCounter RequiredUsings = new DependencyCounter();
 
         protected sealed class ParserErrorListener : IAntlrErrorListener<IToken>
         {
