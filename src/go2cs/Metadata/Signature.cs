@@ -33,6 +33,8 @@ namespace go2cs.Metadata
         public ParameterInfo[] Parameters;
         public ParameterInfo[] Result;
 
+        public string GenerateParameterNameList() => string.Join(", ", Parameters.Select(parameter => parameter.Name));
+
         public string GenerateParameterTypeList() => string.Join(", ", Parameters.Select(parameter => parameter.Type.PrimitiveName));
 
         public string GenerateParametersSignature(bool prefixByRef)

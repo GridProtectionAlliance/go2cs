@@ -53,11 +53,10 @@ namespace go2cs
         public override void EnterExpression(GolangParser.ExpressionContext context)
         {
             string expression = context.GetText();
+            char firstChar = expression[0];
 
-            if (expression.StartsWith("\""))
-                Expressions[context] = $"\"{ToStringLiteral(RemoveSurrounding(expression))}\"";
-            else if (expression.StartsWith("`"))
-                Expressions[context] = $"\"{ToStringLiteral(RemoveSurrounding(expression, "`", "`"))}\"";
+            if (firstChar == '"' || firstChar == '`')
+                Expressions[context] = $"\"{ToStringLiteral(expression)}\"";
             else
                 Expressions[context] = expression;
         }

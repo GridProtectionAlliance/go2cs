@@ -69,7 +69,7 @@
     <Compile Include="Converter.cs" />
     <Compile Include="Converter_ConstDecl.cs" />
     <Compile Include="Converter_FunctionDecl.cs" />
-    <Compile Include="Converter_GoStmt.cs" />
+    <Compile Include="Converter_Statement.cs" />
     <Compile Include="Converter_ImportDecl.cs" />
     <Compile Include="Converter_MethodDecl.cs" />
     <Compile Include="Converter_PackageClause.cs" />

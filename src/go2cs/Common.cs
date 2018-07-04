@@ -284,13 +284,19 @@ namespace go2cs
 
         public static string ToStringLiteral(string input)
         {
-            input = RemoveSurrounding(RemoveSurrounding(input ?? ""), "`", "`");
+            if (string.IsNullOrEmpty(input))
+                return "";
 
-            using (StringWriter writer = new StringWriter())
+            if (input.StartsWith("`"))
             {
-                s_provider.GenerateCodeFromExpression(new CodePrimitiveExpression(input), writer, s_generatorOptions);
-                return writer.ToString();
+                using (StringWriter writer = new StringWriter())
+                {
+                    s_provider.GenerateCodeFromExpression(new CodePrimitiveExpression(RemoveSurrounding(input, "`", "`")), writer, s_generatorOptions);
+                    return writer.ToString();
+                }
             }
+
+            return RemoveSurrounding(input);
         }
     }
 }

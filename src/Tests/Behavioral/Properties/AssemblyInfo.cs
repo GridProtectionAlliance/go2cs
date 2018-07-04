@@ -18,11 +18,11 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("Release Build")]
 #endif
 
-[assembly: AssemblyTitle("InterfaceCasting")]
-[assembly: AssemblyDescription("InterfaceCasting - auto-converted with go2cs")]
+[assembly: AssemblyTitle("LambdaFunctions")]
+[assembly: AssemblyDescription("LambdaFunctions - auto-converted with go2cs")]
 
 // Other configuration attributes.
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(false)]
-[assembly: Guid("8d59ba14-30a0-4da2-b0a0-ab9ca1eace76")]
+[assembly: Guid("d4c1a901-ca45-4b8f-ba36-43e05be784e2")]
 [assembly: NeutralResourcesLanguage("en-US")]

@@ -74,18 +74,16 @@ namespace go2cs
                 m_targetFile.Append(FixForwardSpacing(m_nextDeclComments));
 
             m_targetFile.AppendLine($"{Spacing()}{scope} static {m_functionResultTypeMarker} {m_currentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
-            m_targetFile.AppendLine($"{Spacing()}{{");
-
-            IndentLevel++;
         }
 
         public override void ExitFunctionDecl(GolangParser.FunctionDeclContext context)
         {
-            IndentLevel--;
+            bool signatureOnly = false;
 
-            if (!Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) || (object)parameters == null)
-                if (!Parameters.TryGetValue(context.function()?.signature()?.parameters(), out parameters) || (object)parameters == null)
-                    parameters = new List<ParameterInfo>();
+            if (Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) && (object)parameters == null)
+                signatureOnly = true;
+            else if (!Parameters.TryGetValue(context.function()?.signature()?.parameters(), out parameters) || (object)parameters == null)
+                parameters = new List<ParameterInfo>();
 
             string functionSignature = FunctionSignature.Generate(m_originalFunctionName, parameters);
 
@@ -135,16 +133,18 @@ namespace go2cs
             m_inFunction = false;
 
             if (useFuncExecutionContext)
-                m_targetFile.AppendLine($"{Spacing()}}});");
-            else
-                m_targetFile.AppendLine($"{Spacing()}}}");
+                m_targetFile.Append(");");
+            else if (signatureOnly)
+                m_targetFile.Append(";");
+
+            m_targetFile.AppendLine();
         }
 
-        public override void ExitFunction(GolangParser.FunctionContext context)
-        {
-            string tempBlock = RemoveSurrounding(context.block().GetText(), "{", "}");
+        //public override void ExitFunction(GolangParser.FunctionContext context)
+        //{
+        //    string tempBlock = RemoveSurrounding(context.block().GetText(), "{", "}");
 
-            m_targetFile.AppendLine(FixForwardSpacing(tempBlock));
-        }
+        //    m_targetFile.AppendLine(FixForwardSpacing(tempBlock));
+        //}
     }
 }

@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5b82927c-9ec8-4a53-aaca-2eba065773e9}</ProjectGuid>
+    <ProjectGuid>{d4c1a901-ca45-4b8f-ba36-43e05be784e2}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>LambdaFunctions</AssemblyName>

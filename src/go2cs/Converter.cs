@@ -43,7 +43,7 @@ namespace go2cs
         public const string StandardLibrary = "GoStandardLibrary";
         private const string UsingsMarker = ">>MARKER:USINGS<<";
 
-        private readonly StringBuilder m_targetFile = new StringBuilder();
+        private StringBuilder m_targetFile = new StringBuilder();
 
         public FileMetadata Metadata { get; }
 
