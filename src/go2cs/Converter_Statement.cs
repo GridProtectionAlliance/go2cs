@@ -21,11 +21,9 @@
 //
 //******************************************************************************************************
 
-using System;
+using go2cs.Metadata;
 using System.Collections.Generic;
 using System.Text;
-using Antlr4.Runtime.Misc;
-using go2cs.Metadata;
 
 namespace go2cs
 {
@@ -41,10 +39,11 @@ namespace go2cs
             m_targetFile = new StringBuilder();
         }
 
-        private void PopBlock()
+        private void PopBlock(bool trim = false)
         {
             StringBuilder lastTarget = m_blocks.Pop();
-            lastTarget.Append(m_targetFile);
+            string block = m_targetFile.ToString();
+            lastTarget.Append(trim ? block.Trim(): block);
             m_targetFile = lastTarget;
         }
 
@@ -66,7 +65,7 @@ namespace go2cs
 
         public override void EnterFunctionLit(GolangParser.FunctionLitContext context)
         {
-            m_targetFile.AppendLine($"{FunctionLiteralParametersMarker} =>");
+            m_targetFile.AppendLine($"{Spacing()}{FunctionLiteralParametersMarker} =>");
         }
 
         public override void ExitFunctionLit(GolangParser.FunctionLitContext context)
@@ -108,7 +107,7 @@ namespace go2cs
 
         public override void ExitReturnStmt(GolangParser.ReturnStmtContext context)
         {
-            PopBlock();
+            PopBlock(true);
             m_targetFile.Append($";{CheckForCommentsRight(context)}");
 
             if (!WroteCommentWithLineFeed)

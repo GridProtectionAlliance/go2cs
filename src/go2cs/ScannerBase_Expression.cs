@@ -61,25 +61,25 @@ namespace go2cs
                 Expressions[context] = expression;
         }
 
+        // TODO: Focus on getting primaryExpr working, and build out from there
+        public override void ExitPrimaryExpr(GolangParser.PrimaryExprContext context)
+        {
+        }
+
         public override void ExitExpression(GolangParser.ExpressionContext context)
         {
             if (context.expression()?.Length == 2)
             {
-                Debug.WriteLine(context.GetText());
-                //Debug.WriteLine(context.GetTokens(1));
-                //Debug.WriteLine(context.GetTokens(2));
+                // TODO: BINARY_OP - convert "^" to " ~" and "&^" to "& ~"
+                Debug.WriteLine($"{context.expression(0).GetText()} {context.children[1].GetText()} {context.expression(1).GetText()}");
             }
-        }
-
-        public override void ExitPrimaryExpr(GolangParser.PrimaryExprContext context)
-        {
-            // TODO: At some point in the expression tree, replace "&^" with "& ~"
         }
 
         public override void ExitBasicLit(GolangParser.BasicLitContext context)
         {
             if (context.IMAGINARY_LIT() != null)
             {
+                // TODO: Convert expression like "1.2i" to "i(1.2)"
             }
         }
     }
