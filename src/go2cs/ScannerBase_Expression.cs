@@ -69,7 +69,7 @@ namespace go2cs
         public override void ExitExpression(GolangParser.ExpressionContext context)
         {
             if (context.expression()?.Length == 2)
-            {
+            {                
                 // TODO: BINARY_OP - convert "^" to " ~" and "&^" to "& ~"
                 Debug.WriteLine($"{context.expression(0).GetText()} {context.children[1].GetText()} {context.expression(1).GetText()}");
             }
@@ -81,6 +81,7 @@ namespace go2cs
             {
                 // TODO: Convert expression like "1.2i" to "i(1.2)"
             }
+            //else if (context.RUNE_LIT())
         }
     }
 }

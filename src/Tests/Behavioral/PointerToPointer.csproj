@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{d4c1a901-ca45-4b8f-ba36-43e05be784e2}</ProjectGuid>
+    <ProjectGuid>{4bb94c2b-1266-480c-99e8-b96b8c9758c5}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>LambdaFunctions</AssemblyName>
+    <AssemblyName>PointerToPointer</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -48,7 +48,7 @@
     <Compile Include="InterfaceInheritance_T2Struct.cs" />
     <Compile Include="InterfaceInheritance_IInterface.cs" />
     <Compile Include="InterfaceInheritance_VInterface.cs" />
-    <Compile Include="LambdaFunctions.cs" />
+    <Compile Include="PointerToPointer.cs" />
     <Compile Include="SortArrayType_PersonStruct.cs" />
     <Compile Include="SortArrayType_PeopleByShoeSizeStructOf(Slice(Person)).cs" />
     <Compile Include="StructPointerPromotionWithInterface_AbserInterface.cs" />
@@ -61,7 +61,7 @@
     <Compile Include="StructPromotionWithInterface_MyErrorStruct.cs" />
     <Compile Include="StructPromotionWithInterface_MyCustomErrorStruct.cs" />
     <Compile Include="StructWithPointer_ColorListStruct.cs" />
-    <Compile Include="LambdaFunctions_AssemblyInfo.cs" />
+    <Compile Include="PointerToPointer_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

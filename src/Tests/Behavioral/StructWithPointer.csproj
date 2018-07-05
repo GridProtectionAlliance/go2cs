@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{d4c1a901-ca45-4b8f-ba36-43e05be784e2}</ProjectGuid>
+    <ProjectGuid>{03cffcb9-9ddf-45e7-8101-b5635023bb05}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>LambdaFunctions</AssemblyName>
+    <AssemblyName>StructWithPointer</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -48,7 +48,6 @@
     <Compile Include="InterfaceInheritance_T2Struct.cs" />
     <Compile Include="InterfaceInheritance_IInterface.cs" />
     <Compile Include="InterfaceInheritance_VInterface.cs" />
-    <Compile Include="LambdaFunctions.cs" />
     <Compile Include="SortArrayType_PersonStruct.cs" />
     <Compile Include="SortArrayType_PeopleByShoeSizeStructOf(Slice(Person)).cs" />
     <Compile Include="StructPointerPromotionWithInterface_AbserInterface.cs" />
@@ -60,8 +59,9 @@
     <Compile Include="StructPromotionWithInterface_AbserInterface.cs" />
     <Compile Include="StructPromotionWithInterface_MyErrorStruct.cs" />
     <Compile Include="StructPromotionWithInterface_MyCustomErrorStruct.cs" />
+    <Compile Include="StructWithPointer.cs" />
     <Compile Include="StructWithPointer_ColorListStruct.cs" />
-    <Compile Include="LambdaFunctions_AssemblyInfo.cs" />
+    <Compile Include="StructWithPointer_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

@@ -31,6 +31,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 #pragma warning disable SCS0006 // Weak hash
@@ -56,6 +57,8 @@ namespace go2cs
 
         private static readonly char[] s_dirVolChars;
 
+        private static readonly Regex s_findOctals;
+
         static Common()
         {
             EntryAssembly = Assembly.GetEntryAssembly();
@@ -75,6 +78,7 @@ namespace go2cs
             s_provider = CodeDomProvider.CreateProvider("CSharp");
             s_generatorOptions = new CodeGeneratorOptions { IndentString = "    " };
             s_dirVolChars = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, Path.VolumeSeparatorChar };
+            s_findOctals = new Regex(@"\\[0-7]{3}", RegexOptions.Compiled);
         }
 
         public static void RestoreGoUtilSources(string targetPath)
@@ -297,6 +301,11 @@ namespace go2cs
             }
 
             return RemoveSurrounding(input);
+        }
+
+        public static string ReplaceOctalBytes(string input)
+        {
+            return s_findOctals.Replace(input, match => new string(new[] { Convert.ToChar(Convert.ToUInt16(match.Value.Substring(1), 8)) }));
         }
     }
 }

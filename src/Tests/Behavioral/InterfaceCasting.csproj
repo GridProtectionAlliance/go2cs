@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{d4c1a901-ca45-4b8f-ba36-43e05be784e2}</ProjectGuid>
+    <ProjectGuid>{92bed477-ca16-4b6f-813a-32881bb2e6b9}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>LambdaFunctions</AssemblyName>
+    <AssemblyName>InterfaceCasting</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -40,6 +40,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InterfaceCasting.cs" />
     <Compile Include="InterfaceCasting_MyErrorStruct.cs" />
     <Compile Include="InterfaceImplementation_AnimalInterface.cs" />
     <Compile Include="InterfaceImplementation_DogStruct.cs" />
@@ -48,7 +49,6 @@
     <Compile Include="InterfaceInheritance_T2Struct.cs" />
     <Compile Include="InterfaceInheritance_IInterface.cs" />
     <Compile Include="InterfaceInheritance_VInterface.cs" />
-    <Compile Include="LambdaFunctions.cs" />
     <Compile Include="SortArrayType_PersonStruct.cs" />
     <Compile Include="SortArrayType_PeopleByShoeSizeStructOf(Slice(Person)).cs" />
     <Compile Include="StructPointerPromotionWithInterface_AbserInterface.cs" />
@@ -61,7 +61,7 @@
     <Compile Include="StructPromotionWithInterface_MyErrorStruct.cs" />
     <Compile Include="StructPromotionWithInterface_MyCustomErrorStruct.cs" />
     <Compile Include="StructWithPointer_ColorListStruct.cs" />
-    <Compile Include="LambdaFunctions_AssemblyInfo.cs" />
+    <Compile Include="InterfaceCasting_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

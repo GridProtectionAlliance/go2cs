@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 July 04 00:15:03 UTC
+// package main -- go2cs converted at 2018 July 05 21:01:34 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\LambdaFunctions.go
 
 using fmt = go.fmt_package;
@@ -33,7 +33,7 @@ namespace go
         {
             takesAFunction(foo);
             f();
-() =>
+            () =>
             {
                 return ;
             }            fmt.Printf(baz());
