@@ -21,7 +21,6 @@
 //
 //******************************************************************************************************
 
-using System.Diagnostics;
 using static go2cs.Common;
 
 namespace go2cs
@@ -49,17 +48,7 @@ namespace go2cs
         //  expression (optional)
         //  conversion (required)
         protected readonly ParseTreeValues<string> Expressions = new ParseTreeValues<string>();
-
-        public override void EnterExpression(GolangParser.ExpressionContext context)
-        {
-            string expression = context.GetText();
-            char firstChar = expression[0];
-
-            if (firstChar == '"' || firstChar == '`')
-                Expressions[context] = $"\"{ToStringLiteral(expression)}\"";
-            else
-                Expressions[context] = expression;
-        }
+        protected readonly ParseTreeValues<string> UnaryExpressions = new ParseTreeValues<string>();
 
         // TODO: Focus on getting primaryExpr working, and build out from there
         public override void ExitPrimaryExpr(GolangParser.PrimaryExprContext context)
@@ -70,18 +59,99 @@ namespace go2cs
         {
             if (context.expression()?.Length == 2)
             {                
-                // TODO: BINARY_OP - convert "^" to " ~" and "&^" to "& ~"
-                Debug.WriteLine($"{context.expression(0).GetText()} {context.children[1].GetText()} {context.expression(1).GetText()}");
+                string binaryOP = context.children[1].GetText();
+                binaryOP = binaryOP.Equals("&^") ? " & ~" : $" {binaryOP} ";
+                Expressions[context] = $"{Expressions[context.expression(0)]}{binaryOP}{Expressions[context.expression(1)]}";
+            }
+            else
+            {
+                Expressions[context] = UnaryExpressions[context.unaryExpr()];
+            }
+        }
+
+        public override void ExitUnaryExpr(GolangParser.UnaryExprContext context)
+        {
+            if (context.unaryExpr() != null)
+            {
+                string unaryOP = context.children[0].GetText();
+
+                if (unaryOP.Equals("^"))
+                {
+                    unaryOP = "~";
+                }
+                else if (unaryOP.Equals("<-"))
+                {
+                    // TODO: Handle channel value access (update when channel class is created):
+                    unaryOP = null;
+                    UnaryExpressions[context] = $"{UnaryExpressions[context.unaryExpr()]}.Receive()";
+                }
+                else if (unaryOP.Equals("&"))
+                {
+                    // TODO: Handle pointer acquisition context - may need to augment pre-scan metadata for heap allocation notation
+                }
+                else if (unaryOP.Equals("*"))
+                {
+                    // TODO: Handle pointer dereference context
+                }
+
+                if ((object)unaryOP != null)
+                    UnaryExpressions[context] = $"{unaryOP}{UnaryExpressions[context.unaryExpr()]}";
+            }
+            else if (!UnaryExpressions.ContainsKey(context))
+            {
+                // TODO: This is an expression fall back until all sub-tree paths are populated as needed
+                UnaryExpressions[context] = context.GetText();
+            }
+        }
+
+        public override void ExitArguments(GolangParser.ArgumentsContext context)
+        {
+            // Unary expression path = unaryExpr->primaryExpr->arguments:
+            if (!(context.Parent.Parent is GolangParser.UnaryExprContext unaryExprContext))
+            {
+                AddWarning(context, $"Could not derive parent unary expression context from arguments: \"{context.GetText()}\"");
+                return;
             }
         }
 
         public override void ExitBasicLit(GolangParser.BasicLitContext context)
         {
+            // Unary expression path = unaryExpr->primaryExpr->operand->literal->basicLit:
+            if (!(context.Parent.Parent.Parent.Parent is GolangParser.UnaryExprContext unaryExprContext))
+            {
+                AddWarning(context, $"Could not derive parent unary expression context from basic literal: \"{context.GetText()}\"");
+                return;
+            }
+
+            string expressionValue;
+
+            //basicLit
+            //    : INT_LIT
+            //    | FLOAT_LIT
+            //    | IMAGINARY_LIT
+            //    | RUNE_LIT
+            //    | STRING_LIT
+            //    ;
+
             if (context.IMAGINARY_LIT() != null)
             {
-                // TODO: Convert expression like "1.2i" to "i(1.2)"
+                string value = context.IMAGINARY_LIT().GetText();
+                expressionValue = value.EndsWith("i") ? $"i({value.Substring(0, value.Length - 1)})" : value;
             }
-            //else if (context.RUNE_LIT())
+            else if (context.RUNE_LIT() != null)
+            {
+                expressionValue = ReplaceOctalBytes(context.RUNE_LIT().GetText());
+            }
+            else if (context.STRING_LIT() != null)
+            {
+                expressionValue = ToStringLiteral(ReplaceOctalBytes(context.STRING_LIT().GetText()));
+            }
+            else
+            {
+                expressionValue = context.GetText();
+            }
+
+            UnaryExpressions[unaryExprContext] = expressionValue;
         }
     }
 }

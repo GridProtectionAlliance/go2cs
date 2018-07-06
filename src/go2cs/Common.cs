@@ -300,7 +300,7 @@ namespace go2cs
                 }
             }
 
-            return RemoveSurrounding(input);
+            return input;
         }
 
         public static string ReplaceOctalBytes(string input)

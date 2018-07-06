@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System.Linq;
 
@@ -180,6 +181,21 @@ namespace go2cs
         {
             // TODO: Add new channel type
             //m_types.TryGetValue(context.elementType().type(), out GoTypeInfo typeInfo);
+        }
+
+        public override void ExitInterfaceType(GolangParser.InterfaceTypeContext context)
+        {
+            if (context.methodSpec()?.Length == 0)
+            {
+                // Handle empty interface as a C# object
+                Types[context.Parent.Parent] = new TypeInfo
+                {
+                    Name = "object",
+                    PrimitiveName = "object",
+                    FrameworkName = "System.Object",
+                    TypeClass = TypeClass.Simple
+                };
+            }
         }
 
         public override void ExitFunctionType(GolangParser.FunctionTypeContext context)

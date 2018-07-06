@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 July 05 21:01:34 UTC
+// package main -- go2cs converted at 2018 July 06 21:24:28 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\LambdaFunctions.go
 
 using fmt = go.fmt_package;
@@ -17,7 +17,7 @@ namespace go
 
         private static void takesAFunction(Stringy foo)
         {
-            fmt.Printf("takesAFunction: %v\n",foo());
+            fmt.Printf("takesAFunction \111: %v\n",foo());
         }
 
         private static Stringy returnsAFunction()

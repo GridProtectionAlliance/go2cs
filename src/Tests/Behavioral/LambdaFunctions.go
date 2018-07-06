@@ -9,7 +9,7 @@ func foo() string{
 }
 
 func takesAFunction(foo Stringy) {
-  fmt.Printf("takesAFunction: %v\n", foo())
+  fmt.Printf("takesAFunction \111: %v\n", foo())
 }
 
 func returnsAFunction() Stringy {

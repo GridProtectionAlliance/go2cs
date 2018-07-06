@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 July 05 21:01:33 UTC
+// package main -- go2cs converted at 2018 July 06 21:24:28 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\InterfaceImplementation.go
 
 using fmt = go.fmt_package;
