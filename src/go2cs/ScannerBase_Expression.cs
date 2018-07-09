@@ -21,6 +21,9 @@
 //
 //******************************************************************************************************
 
+using Antlr4.Runtime.Misc;
+using go2cs.Metadata;
+using System.Collections.Generic;
 using static go2cs.Common;
 
 namespace go2cs
@@ -49,10 +52,28 @@ namespace go2cs
         //  conversion (required)
         protected readonly ParseTreeValues<string> Expressions = new ParseTreeValues<string>();
         protected readonly ParseTreeValues<string> UnaryExpressions = new ParseTreeValues<string>();
+        protected readonly ParseTreeValues<string> PrimaryExpressions = new ParseTreeValues<string>();
+        protected readonly ParseTreeValues<string> Operands = new ParseTreeValues<string>();
+        protected readonly ParseTreeValues<string> Arguments = new ParseTreeValues<string>();
 
         // TODO: Focus on getting primaryExpr working, and build out from there
         public override void ExitPrimaryExpr(GolangParser.PrimaryExprContext context)
         {
+            PrimaryExpressions.TryGetValue(context.primaryExpr(), out string primaryExpression);
+
+            if (Operands.TryGetValue(context.operand(), out string operand))
+            {
+                PrimaryExpressions[context] = operand;
+            }
+            else if (Arguments.TryGetValue(context.arguments(), out string arguments))
+            {
+                PrimaryExpressions[context] = $"{primaryExpression}{arguments}";
+            }
+            else
+            {
+                // TODO: This is an expression fall back until all sub-tree paths are populated as needed
+                PrimaryExpressions[context] = context.GetText();
+            }
         }
 
         public override void ExitExpression(GolangParser.ExpressionContext context)
@@ -71,7 +92,11 @@ namespace go2cs
 
         public override void ExitUnaryExpr(GolangParser.UnaryExprContext context)
         {
-            if (context.unaryExpr() != null)
+            if (PrimaryExpressions.TryGetValue(context.primaryExpr(), out string primaryExpression))
+            {
+                UnaryExpressions[context] = primaryExpression;
+            }
+            else if (context.unaryExpr() != null)
             {
                 string unaryOP = context.children[0].GetText();
 
@@ -106,24 +131,32 @@ namespace go2cs
 
         public override void ExitArguments(GolangParser.ArgumentsContext context)
         {
-            // Unary expression path = unaryExpr->primaryExpr->arguments:
-            if (!(context.Parent.Parent is GolangParser.UnaryExprContext unaryExprContext))
-            {
-                AddWarning(context, $"Could not derive parent unary expression context from arguments: \"{context.GetText()}\"");
-                return;
-            }
+            List<string> arguments = new List<string>();
+
+            if (Types.TryGetValue(context.type(), out TypeInfo typeInfo))
+                arguments.Add($"typeof({typeInfo.PrimitiveName})");
+
+            if (ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
+                arguments.AddRange(expressions);
+
+            Arguments[context] = $"({string.Join(", ", arguments)})";
+        }
+
+        public override void ExitOperand( GolangParser.OperandContext context)
+        {
+            if (Expressions.TryGetValue(context.expression(), out string expression))
+                Operands[context] = $"({expression})"; ;
         }
 
         public override void ExitBasicLit(GolangParser.BasicLitContext context)
         {
-            // Unary expression path = unaryExpr->primaryExpr->operand->literal->basicLit:
-            if (!(context.Parent.Parent.Parent.Parent is GolangParser.UnaryExprContext unaryExprContext))
+            if (!(context.Parent.Parent is GolangParser.OperandContext operandContext))
             {
-                AddWarning(context, $"Could not derive parent unary expression context from basic literal: \"{context.GetText()}\"");
+                AddWarning(context, $"Could not derive parent operand context from basic literal: \"{context.GetText()}\"");
                 return;
             }
 
-            string expressionValue;
+            string basicLiteral;
 
             //basicLit
             //    : INT_LIT
@@ -136,22 +169,69 @@ namespace go2cs
             if (context.IMAGINARY_LIT() != null)
             {
                 string value = context.IMAGINARY_LIT().GetText();
-                expressionValue = value.EndsWith("i") ? $"i({value.Substring(0, value.Length - 1)})" : value;
+                basicLiteral = value.EndsWith("i") ? $"i({value.Substring(0, value.Length - 1)})" : value;
             }
             else if (context.RUNE_LIT() != null)
             {
-                expressionValue = ReplaceOctalBytes(context.RUNE_LIT().GetText());
+                basicLiteral = ReplaceOctalBytes(context.RUNE_LIT().GetText());
             }
             else if (context.STRING_LIT() != null)
             {
-                expressionValue = ToStringLiteral(ReplaceOctalBytes(context.STRING_LIT().GetText()));
+                basicLiteral = ToStringLiteral(ReplaceOctalBytes(context.STRING_LIT().GetText()));
             }
             else
             {
-                expressionValue = context.GetText();
+                basicLiteral = context.GetText();
             }
 
-            UnaryExpressions[unaryExprContext] = expressionValue;
+            Operands[operandContext] = basicLiteral;
+        }
+
+        public override void ExitCompositeLit(GolangParser.CompositeLitContext context)
+        {
+            if (!(context.Parent.Parent is GolangParser.OperandContext operandContext))
+            {
+                AddWarning(context, $"Could not derive parent operand context from composite literal: \"{context.GetText()}\"");
+                return;
+            }
+
+            // TODO: Update to handle in-line type constructions
+            Operands[operandContext] = context.GetText();
+        }
+
+        public override void ExitFunctionLit(GolangParser.FunctionLitContext context)
+        {
+            if (!(context.Parent.Parent is GolangParser.OperandContext operandContext))
+            {
+                AddWarning(context, $"Could not derive parent operand context from function literal: \"{context.GetText()}\"");
+                return;
+            }
+
+            // TODO: Update to handle in-line lambda declarations
+            Operands[operandContext] = context.GetText();
+        }
+
+        public override void ExitOperandName(GolangParser.OperandNameContext context)
+        {
+            if (!(context.Parent is GolangParser.OperandContext operandContext))
+            {
+                AddWarning(context, $"Could not derive parent operand context from operand name: \"{context.GetText()}\"");
+                return;
+            }
+
+            Operands[operandContext] = context.GetText();
+        }
+
+        public override void ExitMethodExpr([NotNull] GolangParser.MethodExprContext context)
+        {
+            if (!(context.Parent is GolangParser.OperandContext operandContext))
+            {
+                AddWarning(context, $"Could not derive parent operand context from method expression: \"{context.GetText()}\"");
+                return;
+            }
+
+            // TODO: Update type name pointer dereferences, e.g., (*typeName)
+            Operands[operandContext] = context.GetText();
         }
     }
 }

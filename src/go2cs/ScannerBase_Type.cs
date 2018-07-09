@@ -21,7 +21,6 @@
 //
 //******************************************************************************************************
 
-using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System.Linq;
 
@@ -171,7 +170,7 @@ namespace go2cs
             {
                 Name = typeInfo.Name,
                 PrimitiveName = $"Slice<{typeInfo.PrimitiveName}>",
-                FrameworkName = $"goutil.Slice<{typeInfo.FrameworkName}>",
+                FrameworkName = $"go.Slice<{typeInfo.FrameworkName}>",
                 TypeClass = TypeClass.Simple,
                 IsSlice = true
             };
@@ -187,7 +186,9 @@ namespace go2cs
         {
             if (context.methodSpec()?.Length == 0)
             {
-                // Handle empty interface as a C# object
+                // Handle empty interface as a C# object, i.e., the type
+                // that all classes inherit from - this is how an empty
+                // interface is used in Go
                 Types[context.Parent.Parent] = new TypeInfo
                 {
                     Name = "object",
@@ -196,6 +197,31 @@ namespace go2cs
                     TypeClass = TypeClass.Simple
                 };
             }
+            else
+            {
+                // All other intra-function scoped declared interfaces
+                // are defined as dynamic so they can behave like ducks
+                Types[context.Parent.Parent] = new TypeInfo
+                {
+                    Name = "dynamic",
+                    PrimitiveName = "dynamic",
+                    FrameworkName = "System.Dynamic.DynamicObject",
+                    TypeClass = TypeClass.Simple
+                };
+            }
+        }
+
+        public override void ExitStructType(GolangParser.StructTypeContext context)
+        {
+            // All intra-function scoped declared structures are
+            // defined as dynamic so they can behave like ducks
+            Types[context.Parent.Parent] = new TypeInfo
+            {
+                Name = "dynamic",
+                PrimitiveName = "dynamic",
+                FrameworkName = "System.Dynamic.DynamicObject",
+                TypeClass = TypeClass.Simple
+            };
         }
 
         public override void ExitFunctionType(GolangParser.FunctionTypeContext context)

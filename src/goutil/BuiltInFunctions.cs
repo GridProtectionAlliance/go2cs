@@ -343,11 +343,11 @@ namespace go
         //public static Channel<T> make<T>(Channel<T> _, capacity = 0) => new Channel<T>(capacity);
 
         /// <summary>
-        /// Creates a new type instance.
+        /// Creates a pointer to a new type instance.
         /// </summary>
         /// <returns>Reference to newly allocated zero value of provided type.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static T @new<T>() where T: new() => new T();
+        public static Ptr<T> @new<T>() where T: new() => new Ptr<T>(new T());
 
         /// <summary>
         /// Formats arguments in an implementation-specific way and writes the result to standard-error.

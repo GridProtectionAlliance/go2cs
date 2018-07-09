@@ -70,6 +70,9 @@ namespace go2cs
 
         public override void ExitFunctionLit(GolangParser.FunctionLitContext context)
         {
+            // TODO: Determine context usage - could be a function argument!!
+            base.ExitFunctionLit(context);
+
             string parametersSignature = "()";
 
             if (Signatures.TryGetValue(context.function()?.signature(), out Signature signature))
