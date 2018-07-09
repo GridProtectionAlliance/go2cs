@@ -384,13 +384,24 @@ namespace go
     public static class SliceExtensions
     {
         // Slice of a slice helper function:
-        //      s = s[2:]  => s = s.Slice(2)
-        //      s = s[3:5] => s = s.Slice(3, 5);
-        //      s = s[:4]  => s = s.Slice(high:4)
-        public static Slice<T> Slice<T>(this ref Slice<T> slice, int low = -1, int high = -1)
+        //      s = s[2:]    => s = s.Slice(2)
+        //      s = s[3:5]   => s = s.Slice(3, 5);
+        //      s = s[:4]    => s = s.Slice(high:4)
+        //      s = s[1:3:5] => s = s.Slice(1, 3, 5) // Full slice expression
+        public static Slice<T> Slice<T>(this ref Slice<T> slice, int low = -1, int high = -1, int max = -1)
         {
             if (low == -1)
                 low = slice.Low;
+
+            if (high > -1 && max > -1)
+            {
+                int length = high - low;
+                int capacity = max - low;
+
+                Slice<T> fullSlice = new Slice<T>(length, capacity);
+                Array.Copy(slice.Array, low, fullSlice.Array, low, length);
+                return fullSlice;
+            }
 
             if (high == -1)
                 high = slice.High;
