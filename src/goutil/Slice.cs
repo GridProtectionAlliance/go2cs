@@ -94,16 +94,19 @@ namespace go
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Slice(int length, int capacity = -1)
+        public Slice(int length, int capacity = -1, int low = 0)
         {
             if (length < 0)
                 throw new ArgumentOutOfRangeException(nameof(length), "Value is less than zero.");
+
+            if (low < 0)
+                throw new ArgumentOutOfRangeException(nameof(low), "Value is less than zero.");
 
             if (capacity == -1)
                 capacity = length;
 
             m_array = new T[capacity];
-            m_low = 0;
+            m_low = low;
             m_length = length;
         }
 
@@ -398,7 +401,7 @@ namespace go
                 int length = high - low;
                 int capacity = max - low;
 
-                Slice<T> fullSlice = new Slice<T>(length, capacity);
+                Slice<T> fullSlice = new Slice<T>(length, capacity, low);
                 Array.Copy(slice.Array, low, fullSlice.Array, low, length);
                 return fullSlice;
             }
