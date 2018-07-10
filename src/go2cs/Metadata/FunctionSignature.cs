@@ -52,7 +52,7 @@ namespace go2cs.Metadata
 
         public static string Generate(string functionName, IEnumerable<ParameterInfo> parameters)
         {
-            return $"{functionName}({string.Join(",", parameters.Select(parameter => parameter.Type.PrimitiveName))})";
+            return $"{functionName}({string.Join(", ", parameters.Select(parameter => parameter.Type.PrimitiveName))})";
         }
     }
 }
