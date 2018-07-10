@@ -48,7 +48,7 @@ namespace go2cs.Metadata
         public bool IsPointer;
         public bool IsByRefPointer;
 
-        public TypeInfo Clone()
+        public virtual TypeInfo Clone()
         {
             return new TypeInfo
             {
@@ -90,6 +90,20 @@ namespace go2cs.Metadata
     public class ArrayTypeInfo : TypeInfo
     {
         public string Length;
+
+        public override TypeInfo Clone()
+        {
+            return new ArrayTypeInfo
+            {
+                Name = Name,
+                PrimitiveName = PrimitiveName,
+                FrameworkName = FrameworkName,
+                TypeClass = TypeClass,
+                IsPointer = IsPointer,
+                IsByRefPointer = IsByRefPointer,
+                Length = Length
+            };
+        }
     }
 
     [Serializable]
@@ -97,5 +111,20 @@ namespace go2cs.Metadata
     {
         public TypeInfo KeyTypeInfo;
         public TypeInfo ElementTypeInfo;
+
+        public override TypeInfo Clone()
+        {
+            return new MapTypeInfo
+            {
+                Name = Name,
+                PrimitiveName = PrimitiveName,
+                FrameworkName = FrameworkName,
+                TypeClass = TypeClass,
+                IsPointer = IsPointer,
+                IsByRefPointer = IsByRefPointer,
+                KeyTypeInfo = KeyTypeInfo,
+                ElementTypeInfo = ElementTypeInfo
+            };
+        }
     }
 }
