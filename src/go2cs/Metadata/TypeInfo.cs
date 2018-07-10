@@ -29,11 +29,13 @@ namespace go2cs.Metadata
     public enum TypeClass
     {
         Simple,
+        Array,
+        Slice,
+        Map,        // Dictionary<kT, vT>
+        Channel,
         Struct,
         Function,   // Func<..., T> / Action<...>
-        Interface,
-        Map,        // Dictionary<kT, vT>
-        Channel
+        Interface
     }
 
     [Serializable]
@@ -43,10 +45,8 @@ namespace go2cs.Metadata
         public string PrimitiveName;
         public string FrameworkName;
         public TypeClass TypeClass;
-        public bool IsArray;
         public bool IsPointer;
         public bool IsByRefPointer;
-        public bool IsSlice;            // Slice<T>
 
         public TypeInfo Clone()
         {
@@ -56,10 +56,8 @@ namespace go2cs.Metadata
                 PrimitiveName = PrimitiveName,
                 FrameworkName = FrameworkName,
                 TypeClass = TypeClass,
-                IsArray = IsArray,
                 IsPointer = IsPointer,
-                IsByRefPointer = IsByRefPointer,
-                IsSlice = IsSlice
+                IsByRefPointer = IsByRefPointer
             };
         }
 
@@ -86,6 +84,12 @@ namespace go2cs.Metadata
             FrameworkName = "var",
             TypeClass = TypeClass.Simple
         };
+    }
+
+    [Serializable]
+    public class ArrayTypeInfo : TypeInfo
+    {
+        public string Length;
     }
 
     [Serializable]

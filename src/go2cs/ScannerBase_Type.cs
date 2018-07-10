@@ -60,18 +60,19 @@ namespace go2cs
 
         public override void ExitPointerType(GolangParser.PointerTypeContext context)
         {
-            string type = context.GetText();
+            string name = context.GetText();
 
-            Types.TryGetValue(context.type(), out TypeInfo typeInfo);
+            if (!Types.TryGetValue(context.type(), out TypeInfo typeInfo))
+            {
+                AddWarning(context, $"Failed to find pointer type info for \"{name}\"");
+                return;
+            }
 
-            if (typeInfo == null)
-                return; // throw new InvalidOperationException("Pointer type undefined.");
-
-            if (type.StartsWith("**"))
+            if (name.StartsWith("**"))
             {
                 int count = 0;
 
-                while (type[count] == '*')
+                while (name[count] == '*')
                     count++;
 
                 count = count - (typeInfo.IsByRefPointer ? 1 : 0);
@@ -83,7 +84,7 @@ namespace go2cs
 
                 Types[context.Parent.Parent] = new TypeInfo
                 {
-                    Name = type,
+                    Name = name,
                     PrimitiveName = $"{prefix}{typeInfo.PrimitiveName}{suffix}",
                     FrameworkName = $"{prefix}{typeInfo.FrameworkName}{suffix}",
                     IsPointer = true,
@@ -95,7 +96,7 @@ namespace go2cs
             {
                 Types[context.Parent.Parent] = new TypeInfo
                 {
-                    Name = type,
+                    Name = name,
                     PrimitiveName = $"ref {typeInfo.PrimitiveName}",
                     FrameworkName = $"ref {typeInfo.FrameworkName}",
                     IsPointer = true,
@@ -107,28 +108,33 @@ namespace go2cs
 
         public override void ExitArrayType(GolangParser.ArrayTypeContext context)
         {
-            string type = context.GetText();
+            string name = context.GetText();
 
-            Types.TryGetValue(context.elementType().type(), out TypeInfo typeInfo);
-
-            if (typeInfo == null)
-                return; // throw new InvalidOperationException("Array type undefined.");
-
-            Expressions.TryGetValue(context.arrayLength().expression(), out string expression);
-
-            string arrayLength = $"[{expression}]";
-
-            typeInfo.PrimitiveName += arrayLength;
-            typeInfo.FrameworkName += arrayLength;
-            typeInfo.IsArray = true;
-
-            Types[context.Parent.Parent] = new TypeInfo
+            if (!Types.TryGetValue(context.elementType().type(), out TypeInfo typeInfo))
             {
-                Name = type,
-                PrimitiveName = $"{typeInfo.PrimitiveName}{arrayLength}",
-                FrameworkName = $"{typeInfo.FrameworkName}{arrayLength}",
-                TypeClass = TypeClass.Simple,
-                IsArray = true
+                AddWarning(context, $"Failed to find array type info for \"{name}\"");
+                return;
+            }
+
+            string length;
+
+            if (Expressions.TryGetValue(context.arrayLength().expression(), out string expression))
+            {
+                length = expression;
+            }
+            else
+            {
+                length = "0";
+                AddWarning(context, $"Failed to find array length expression for \"{name}\"");
+            }
+
+            Types[context.Parent.Parent] = new ArrayTypeInfo
+            {
+                Name = name,
+                PrimitiveName = $"{typeInfo.PrimitiveName}[]",
+                FrameworkName = $"{typeInfo.FrameworkName}[]",
+                TypeClass = TypeClass.Array,
+                Length = expression
             };
         }
 
@@ -171,8 +177,7 @@ namespace go2cs
                 Name = typeInfo.Name,
                 PrimitiveName = $"Slice<{typeInfo.PrimitiveName}>",
                 FrameworkName = $"go.Slice<{typeInfo.FrameworkName}>",
-                TypeClass = TypeClass.Simple,
-                IsSlice = true
+                TypeClass = TypeClass.Slice
             };
         }
 
