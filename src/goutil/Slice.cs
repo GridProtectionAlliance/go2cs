@@ -393,8 +393,14 @@ namespace go
         //      s = s[1:3:5] => s = s.Slice(1, 3, 5) // Full slice expression
         public static Slice<T> Slice<T>(this ref Slice<T> slice, int low = -1, int high = -1, int max = -1)
         {
+            return slice.Array.Slice(low == -1 ? slice.Low : low, high == -1 ? slice.High : high, max);
+        }
+
+        // Slice of an array helper function
+        public static Slice<T> Slice<T>(this T[] array , int low = -1, int high = -1, int max = -1)
+        {
             if (low == -1)
-                low = slice.Low;
+                low = 0;
 
             if (high > -1 && max > -1)
             {
@@ -402,14 +408,14 @@ namespace go
                 int capacity = max - low;
 
                 Slice<T> fullSlice = new Slice<T>(length, capacity, low);
-                Array.Copy(slice.Array, low, fullSlice.Array, low, length);
+                Array.Copy(array, low, fullSlice.Array, low, length);
                 return fullSlice;
             }
 
             if (high == -1)
-                high = slice.High;
+                high = array.Length;
 
-            return new Slice<T>(slice.Array, low, high);
+            return new Slice<T>(array, low, high);
         }
     }
 }
