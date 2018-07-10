@@ -65,6 +65,68 @@ namespace go2cs
             {
                 PrimaryExpressions[context] = operand;
             }
+            else if (context.selector() != null)
+            {
+                PrimaryExpressions[context] = $"{primaryExpression}.{SanitizedIdentifier(context.selector().IDENTIFIER().GetText())}";
+            }
+            else if (context.index() != null)
+            {
+                if (Expressions.TryGetValue(context.index().expression(), out string expression))
+                    PrimaryExpressions[context] = $"{primaryExpression}[{expression}]";
+                else
+                    AddWarning(context, $"Failed to find index expression for \"{context.GetText()}\"");
+            }
+            else if (context.slice() != null)
+            {
+                GolangParser.SliceContext slice = context.slice();
+
+                if (slice.children.Count == 3)
+                {
+                    // exp[:]
+                    PrimaryExpressions[context] = $"{primaryExpression}.Slice()";
+                }
+                else if (slice.children.Count == 4)
+                {
+                    bool expressionIsLeft = slice.children[1] is GolangParser.ExpressionContext;
+
+                    // exp[low:] or exp[:high]
+                    if (Expressions.TryGetValue(slice.expression(0), out string expression))
+                        PrimaryExpressions[context] = $"{primaryExpression}.Slice({(expressionIsLeft ? expression : $"high:{expression}")})";
+                    else
+                        AddWarning(context, $"Failed to find slice expression for \"{context.GetText()}\"");
+                }
+                else if (slice.children.Count == 5)
+                {
+                    if (slice.children[1] is GolangParser.ExpressionContext && slice.children[3] is GolangParser.ExpressionContext)
+                    {
+                        // exp[low:high]
+                        if (Expressions.TryGetValue(slice.expression(0), out string lowExpression) && Expressions.TryGetValue(slice.expression(1), out string highExpression))
+                            PrimaryExpressions[context] = $"{primaryExpression}.Slice({lowExpression}, {highExpression})";
+                        else
+                            AddWarning(context, $"Failed to find one of the slice expressions for \"{context.GetText()}\"");
+                    }
+                    else
+                    {
+                        AddWarning(context, $"Failed to find slice expression for \"{context.GetText()}\"");
+                    }
+                }
+                else if (slice.children.Count == 6)
+                {
+                    // exp[:high:max]
+                    if (Expressions.TryGetValue(slice.expression(0), out string highExpression) && Expressions.TryGetValue(slice.expression(1), out string maxExpression))
+                        PrimaryExpressions[context] = $"{primaryExpression}.Slice(-1, {highExpression}, {maxExpression})";
+                    else
+                        AddWarning(context, $"Failed to find one of the slice expressions for \"{context.GetText()}\"");
+                }
+                else if (slice.children.Count == 7)
+                {
+                    // exp[low:high:max]
+                    if (Expressions.TryGetValue(slice.expression(0), out string lowExpression) && Expressions.TryGetValue(slice.expression(1), out string highExpression) && Expressions.TryGetValue(slice.expression(2), out string maxExpression))
+                        PrimaryExpressions[context] = $"{primaryExpression}.Slice({lowExpression}, {highExpression}, {maxExpression})";
+                    else
+                        AddWarning(context, $"Failed to find one of the slice expressions for \"{context.GetText()}\"");
+                }
+            }
             else if (Arguments.TryGetValue(context.arguments(), out string arguments))
             {
                 PrimaryExpressions[context] = $"{primaryExpression}{arguments}";
@@ -119,8 +181,7 @@ namespace go2cs
                     // TODO: Handle pointer dereference context
                 }
 
-                if ((object)unaryOP != null)
-                    UnaryExpressions[context] = $"{unaryOP}{UnaryExpressions[context.unaryExpr()]}";
+                UnaryExpressions[context] = $"{unaryOP}{UnaryExpressions[context.unaryExpr()]}";
             }
             else if (!UnaryExpressions.ContainsKey(context))
             {
