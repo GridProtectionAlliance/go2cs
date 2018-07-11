@@ -127,6 +127,10 @@ namespace go2cs
                         AddWarning(context, $"Failed to find one of the slice expressions for \"{context.GetText()}\"");
                 }
             }
+            else if (context.typeAssertion() != null)
+            {
+                // TODO: 
+            }
             else if (Arguments.TryGetValue(context.arguments(), out string arguments))
             {
                 PrimaryExpressions[context] = $"{primaryExpression}{arguments}";
@@ -175,13 +179,18 @@ namespace go2cs
                 else if (unaryOP.Equals("&"))
                 {
                     // TODO: Handle pointer acquisition context - may need to augment pre-scan metadata for heap allocation notation
+                    unaryOP = null;
+                    UnaryExpressions[context] = $"ref {UnaryExpressions[context.unaryExpr()]}";
                 }
                 else if (unaryOP.Equals("*"))
                 {
                     // TODO: Handle pointer dereference context
+                    unaryOP = null;
+                    UnaryExpressions[context] = $"{UnaryExpressions[context.unaryExpr()]}.Deref";
                 }
 
-                UnaryExpressions[context] = $"{unaryOP}{UnaryExpressions[context.unaryExpr()]}";
+                if ((object)unaryOP != null)
+                    UnaryExpressions[context] = $"{unaryOP}{UnaryExpressions[context.unaryExpr()]}";
             }
             else if (!UnaryExpressions.ContainsKey(context))
             {
