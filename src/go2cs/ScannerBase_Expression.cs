@@ -56,7 +56,6 @@ namespace go2cs
         protected readonly ParseTreeValues<string> Operands = new ParseTreeValues<string>();
         protected readonly ParseTreeValues<string> Arguments = new ParseTreeValues<string>();
 
-        // TODO: Focus on getting primaryExpr working, and build out from there
         public override void ExitPrimaryExpr(GolangParser.PrimaryExprContext context)
         {
             PrimaryExpressions.TryGetValue(context.primaryExpr(), out string primaryExpression);
@@ -64,6 +63,13 @@ namespace go2cs
             if (Operands.TryGetValue(context.operand(), out string operand))
             {
                 PrimaryExpressions[context] = operand;
+            }
+            else if (context.conversion() != null)
+            {
+                if (Types.TryGetValue(context.conversion().type(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.index().expression(), out string expression))
+                    PrimaryExpressions[context] = $"({typeInfo.PrimitiveName})({expression})";
+                else
+                    AddWarning(context, $"Failed to find type or sub-expression for the conversion expression in \"{context.GetText()}\"");
             }
             else if (context.selector() != null)
             {
@@ -129,7 +135,10 @@ namespace go2cs
             }
             else if (context.typeAssertion() != null)
             {
-                // TODO: 
+                if (Types.TryGetValue(context.typeAssertion().type(), out TypeInfo typeInfo))
+                    PrimaryExpressions[context] = $"{primaryExpression}.TypeAssert<{typeInfo.PrimitiveName}>()";
+                else
+                    AddWarning(context, $"Failed to find type for the type assertion expression in \"{context.GetText()}\"");
             }
             else if (Arguments.TryGetValue(context.arguments(), out string arguments))
             {
@@ -137,8 +146,7 @@ namespace go2cs
             }
             else
             {
-                // TODO: This is an expression fall back until all sub-tree paths are populated as needed
-                PrimaryExpressions[context] = context.GetText();
+                AddWarning(context, $"Unexpected primary expression \"{context.GetText()}\"");
             }
         }
 
@@ -194,8 +202,7 @@ namespace go2cs
             }
             else if (!UnaryExpressions.ContainsKey(context))
             {
-                // TODO: This is an expression fall back until all sub-tree paths are populated as needed
-                UnaryExpressions[context] = context.GetText();
+                AddWarning(context, $"Unexpected unary expression \"{context.GetText()}\"");
             }
         }
 
