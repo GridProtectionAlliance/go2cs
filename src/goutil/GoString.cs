@@ -22,6 +22,7 @@
 //******************************************************************************************************
 // ReSharper disable CheckNamespace
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -36,7 +37,18 @@ namespace go
     {
         private readonly byte[] m_value;
 
-        public GoString(byte[] value) => m_value = value ?? new byte[0];
+        public GoString(byte[] value)
+        {
+            if ((object)value == null)
+            {
+                m_value = new byte[0];
+            }
+            else
+            {
+                m_value = new byte[value.Length];
+                Array.Copy(value, m_value, value.Length);
+            }
+        }
 
         public GoString(string value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
 
