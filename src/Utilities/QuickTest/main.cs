@@ -26,6 +26,14 @@ namespace go
 
             Console.WriteLine("Ref int out2 = {0}", value);
 
+            GoString a = "hello";
+            GoString b = a;
+
+            a += "more";
+
+            Console.WriteLine(a);
+            Console.WriteLine(b);
+
             Console.ReadLine();
         }
 
@@ -227,6 +235,9 @@ namespace go
             ab = Abser_cast(f);
             ab = (Abser<MyFloat>)f;
             ab = Abser_cast(v);
+
+            //GoString test1 = ab.TypeAssert<GoString>();
+            bool ok = ab.TryTypeAssert(out GoString test);
 
             Console.WriteLine(ab.Abs());
         }

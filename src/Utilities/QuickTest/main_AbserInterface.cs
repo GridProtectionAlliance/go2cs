@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 26 19:23:09 UTC
+//     Generated on 2018 July 11 20:04:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,6 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using static go.BuiltInFunctions;
 
 #pragma warning disable CS0660, CS0661
 
@@ -20,7 +21,6 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-
         public struct Abser<T> : Abser
         {
             private T m_target;
@@ -50,9 +50,8 @@ namespace go
                         s_AbsByVal = extensionMethod.CreateStaticDelegate(typeof(AbsByVal)) as AbsByVal;
                 }
 
-                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_AbsByRef == null && (object)s_AbsByVal == null)
-                    throw new NotImplementedException($"{targetType.Name} does not implement Abser.Abs function");
+                    throw new NotImplementedException($"{targetType.Name} does not implement Abser.Abs method", new Exception("Abs"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
@@ -99,5 +98,41 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, go.main_package.Abser value) => value != nil;
+    }
+
+    public static class main_AbserExtensions
+    {
+        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static T TypeAssert<T>(this go.main_package.Abser target)
+        {
+            try
+            {
+                go.main_package.Abser<T> test = (go.main_package.Abser<T>)target;
+                return (T)target;
+            }
+            catch (InvalidCastException)
+            {
+                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}");
+            }
+            catch (NotImplementedException ex)
+            {
+                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}: missing method {ex.InnerException?.Message}");
+            }
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static bool TryTypeAssert<T>(this go.main_package.Abser target, out T result)
+        {
+            try
+            {
+                result = target.TypeAssert<T>();
+                return true;
+            }
+            catch (PanicException)
+            {
+                result = default(T);
+                return false;
+            }
+        }
     }
 }
