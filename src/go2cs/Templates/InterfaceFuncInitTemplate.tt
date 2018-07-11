@@ -12,9 +12,8 @@
                         s_<#=FunctionName#>ByVal = extensionMethod.CreateStaticDelegate(typeof(<#=FunctionName#>ByVal)) as <#=FunctionName#>ByVal;
                 }
 
-                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_<#=FunctionName#>ByRef == null && (object)s_<#=FunctionName#>ByVal == null)
-                    throw new NotImplementedException($"{targetType.Name} does not implement <#=InterfaceName#>.<#=FunctionName#> function");<#+
+                    throw new NotImplementedException($"{targetType.Name} does not implement <#=InterfaceName#>.<#=FunctionName#> method", new Exception("<#=FunctionName#>"));<#+
 // Template Parameters
 public string FunctionName;
 public string InterfaceName;

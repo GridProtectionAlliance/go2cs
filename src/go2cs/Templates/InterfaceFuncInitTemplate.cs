@@ -88,18 +88,16 @@ namespace go2cs.Templates
             
             #line default
             #line hidden
-            this.Write("ByVal;\r\n                }\r\n\r\n                // This run-time exception is a comp" +
-                    "ile-time error in Go, so it\'s not an expected exception if Go code compiles\r\n   " +
-                    "             if ((object)s_");
+            this.Write("ByVal;\r\n                }\r\n\r\n                if ((object)s_");
             
-            #line 16 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 15 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef == null && (object)s_");
             
-            #line 16 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 15 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
@@ -107,23 +105,30 @@ namespace go2cs.Templates
             this.Write("ByVal == null)\r\n                    throw new NotImplementedException($\"{targetTy" +
                     "pe.Name} does not implement ");
             
-            #line 17 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 16 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
             
             #line default
             #line hidden
             this.Write(".");
             
-            #line 17 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            #line 16 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
-            this.Write(" function\");");
+            this.Write(" method\", new Exception(\"");
+            
+            #line 16 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
+            
+            #line default
+            #line hidden
+            this.Write("\"));");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 17 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
+        #line 16 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceFuncInitTemplate.tt"
 
 // Template Parameters
 public string FunctionName;

@@ -398,11 +398,152 @@ if (!NamespacePrefix.Equals("go")) {
             
             #line default
             #line hidden
-            this.Write(" value) => value != nil;\r\n    }\r\n}");
+            this.Write(" value) => value != nil;\r\n    }\r\n\r\n    public static class ");
+            
+            #line 115 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
+            
+            #line default
+            #line hidden
+            this.Write("_");
+            
+            #line 115 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
+            
+            #line default
+            #line hidden
+            this.Write("Extensions\r\n    {\r\n        [");
+            
+            #line 117 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(GeneratedCodeAttribute));
+            
+            #line default
+            #line hidden
+            this.Write(", MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]\r\n       " +
+                    " public static T TypeAssert<T>(this ");
+            
+            #line 118 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(NamespacePrefix));
+            
+            #line default
+            #line hidden
+            this.Write(".");
+            
+            #line 118 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
+            
+            #line default
+            #line hidden
+            this.Write("_package.");
+            
+            #line 118 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
+            
+            #line default
+            #line hidden
+            this.Write(" target)\r\n        {\r\n            try\r\n            {\r\n                ");
+            
+            #line 122 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(NamespacePrefix));
+            
+            #line default
+            #line hidden
+            this.Write(".");
+            
+            #line 122 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
+            
+            #line default
+            #line hidden
+            this.Write("_package.");
+            
+            #line 122 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
+            
+            #line default
+            #line hidden
+            this.Write("<T> test = (");
+            
+            #line 122 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(NamespacePrefix));
+            
+            #line default
+            #line hidden
+            this.Write(".");
+            
+            #line 122 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
+            
+            #line default
+            #line hidden
+            this.Write("_package.");
+            
+            #line 122 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
+            
+            #line default
+            #line hidden
+            this.Write(@"<T>)target;
+                return (T)target;
+            }
+            catch (InvalidCastException)
+            {
+                throw new PanicException($""panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}"");
+            }
+            catch (NotImplementedException ex)
+            {
+                throw new PanicException($""panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}: missing method {ex.InnerException?.Message}"");
+            }
+        }
+
+        [");
+            
+            #line 135 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(GeneratedCodeAttribute));
+            
+            #line default
+            #line hidden
+            this.Write(", MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]\r\n       " +
+                    " public static bool TryTypeAssert<T>(this ");
+            
+            #line 136 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(NamespacePrefix));
+            
+            #line default
+            #line hidden
+            this.Write(".");
+            
+            #line 136 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
+            
+            #line default
+            #line hidden
+            this.Write("_package.");
+            
+            #line 136 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
+            
+            #line default
+            #line hidden
+            this.Write(@" target, out T result)
+        {
+            try
+            {
+                result = target.TypeAssert<T>();
+                return true;
+            }
+            catch (PanicException)
+            {
+                result = default(T);
+                return false;
+            }
+        }
+    }
+}");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 114 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
+        #line 150 "D:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
 
 // Template Parameters
 public string NamespacePrefix;

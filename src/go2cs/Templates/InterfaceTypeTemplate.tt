@@ -111,6 +111,42 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> value) => value != nil;
     }
+
+    public static class <#=PackageName#>_<#=InterfaceName#>Extensions
+    {
+        [<#=GeneratedCodeAttribute#>, MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static T TypeAssert<T>(this <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> target)
+        {
+            try
+            {
+                <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#><T> test = (<#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#><T>)target;
+                return (T)target;
+            }
+            catch (InvalidCastException)
+            {
+                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}");
+            }
+            catch (NotImplementedException ex)
+            {
+                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}: missing method {ex.InnerException?.Message}");
+            }
+        }
+
+        [<#=GeneratedCodeAttribute#>, MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static bool TryTypeAssert<T>(this <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> target, out T result)
+        {
+            try
+            {
+                result = target.TypeAssert<T>();
+                return true;
+            }
+            catch (PanicException)
+            {
+                result = default(T);
+                return false;
+            }
+        }
+    }
 }<#+
 // Template Parameters
 public string NamespacePrefix;
