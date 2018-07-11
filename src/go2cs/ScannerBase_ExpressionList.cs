@@ -49,8 +49,6 @@ namespace go2cs
                     expressions.Add(expression);
             }
 
-            expressions.Reverse();
-
             ExpressionLists[context] = expressions.ToArray();
         }
     }
