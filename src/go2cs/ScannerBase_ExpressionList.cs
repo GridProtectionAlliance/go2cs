@@ -45,7 +45,7 @@ namespace go2cs
 
             for (int i = 0; i < context.expression().Length; i++)
             {
-                if (Expressions.TryGetValue(context.GetChild(i), out string expression))
+                if (Expressions.TryGetValue(context.expression(i), out string expression))
                     expressions.Add(expression);
             }
 
