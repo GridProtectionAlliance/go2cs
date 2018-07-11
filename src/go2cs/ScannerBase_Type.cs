@@ -134,7 +134,7 @@ namespace go2cs
                 PrimitiveName = $"{typeInfo.PrimitiveName}[]",
                 FrameworkName = $"{typeInfo.FrameworkName}[]",
                 TypeClass = TypeClass.Array,
-                Length = expression
+                Length = length
             };
         }
 
