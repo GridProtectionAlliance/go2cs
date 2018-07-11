@@ -206,7 +206,7 @@ namespace go2cs
         public static string GetDirectoryName(string filePath)
         {
             // Test for case where valid path does not end in directory separator, Path.GetDirectoryName assumes
-            // this is a file name - whether is exists or not
+            // this is a file name - whether it exists or not
             string directoryName = AddPathSuffix(filePath);
 
             if (Directory.Exists(directoryName))
@@ -284,7 +284,10 @@ namespace go2cs
             return source;
         }
 
-        public static string SanitizedIdentifier(string identifier) => s_keywords.Contains(identifier) ? $"@{identifier}" : identifier;
+        public static string SanitizedIdentifier(string identifier)
+        {
+            return s_keywords.Contains(identifier) ? $"@{identifier}" : identifier;
+        }
 
         public static string ToStringLiteral(string input)
         {
