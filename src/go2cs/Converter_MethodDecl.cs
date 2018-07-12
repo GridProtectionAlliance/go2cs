@@ -52,21 +52,19 @@ namespace go2cs
                 m_targetFile.Append(FixForwardSpacing(m_nextDeclComments));
 
             m_targetFile.AppendLine($"{Spacing()}{scope} static {m_functionResultTypeMarker} {m_currentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
-            m_targetFile.AppendLine($"{Spacing()}{{");
-
-            IndentLevel++;
         }
 
         public override void ExitMethodDecl(GolangParser.MethodDeclContext context)
         {
-            IndentLevel--;
+            bool signatureOnly = false;
 
             if (!Parameters.TryGetValue(context.receiver()?.parameters(), out List<ParameterInfo> receiverParameters) || (object)receiverParameters == null)
                 receiverParameters = new List<ParameterInfo>();
 
-            if (!Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> functionParameters) || (object)functionParameters == null)
-                if (!Parameters.TryGetValue(context.function()?.signature()?.parameters(), out functionParameters) || (object)functionParameters == null)
-                    functionParameters = new List<ParameterInfo>();
+            if (Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> functionParameters) && (object)functionParameters != null)
+                signatureOnly = true;
+            else if (!Parameters.TryGetValue(context.function()?.signature()?.parameters(), out functionParameters) || (object)functionParameters == null)
+                functionParameters = new List<ParameterInfo>();
 
             IEnumerable<ParameterInfo> parameters = receiverParameters.Concat(functionParameters);
 
@@ -128,9 +126,11 @@ namespace go2cs
             m_inFunction = false;
 
             if (useFuncExecutionContext)
-                m_targetFile.AppendLine($"{Spacing()}}});");
-            else
-                m_targetFile.AppendLine($"{Spacing()}}}");
+                m_targetFile.Append(");");
+            else if (signatureOnly)
+                m_targetFile.Append(";");
+
+            m_targetFile.AppendLine();
         }
     }
 }

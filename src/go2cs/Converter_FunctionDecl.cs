@@ -80,7 +80,7 @@ namespace go2cs
         {
             bool signatureOnly = false;
 
-            if (Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) && (object)parameters == null)
+            if (Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) && (object)parameters != null)
                 signatureOnly = true;
             else if (!Parameters.TryGetValue(context.function()?.signature()?.parameters(), out parameters) || (object)parameters == null)
                 parameters = new List<ParameterInfo>();
