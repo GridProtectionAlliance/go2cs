@@ -112,29 +112,40 @@ namespace go2cs
 
             if (!Types.TryGetValue(context.elementType().type(), out TypeInfo typeInfo))
             {
-                AddWarning(context, $"Failed to find array type info for \"{name}\"");
+                AddWarning(context, $"Failed to find array type info for: {name}");
                 return;
             }
 
-            // TODO: Remove once expressions dictionary holds expression info
-            ExpressionInfo length = new ExpressionInfo
-            {
-                Type = new TypeInfo
-                {
-                    TypeClass = TypeClass.Simple,
-                    PrimitiveName = "int",
-                    FrameworkName = "System.Int32"
-                }
-            };
+            ExpressionInfo length;
 
             if (Expressions.TryGetValue(context.arrayLength().expression(), out string expression))
             {
-                length.Text = expression;
+                // TODO: Remove once expressions dictionary holds expression info
+                length = new ExpressionInfo
+                {
+                    Text = expression,
+                    Type = new TypeInfo
+                    {
+                        TypeClass = TypeClass.Simple,
+                        PrimitiveName = "int",
+                        FrameworkName = "System.Int32"
+                    }
+                };
             }
             else
             {
-                length.Text = "0";
-                AddWarning(context, $"Failed to find array length expression for \"{name}\"");
+                length = new ExpressionInfo
+                {
+                    Text = "0",
+                    Type = new TypeInfo
+                    {
+                        TypeClass = TypeClass.Simple,
+                        PrimitiveName = "int",
+                        FrameworkName = "System.Int32"
+                    }
+                };
+
+                AddWarning(context, $"Failed to find array length expression for: {name}");
             }
 
             Types[context.Parent.Parent] = new ArrayTypeInfo
@@ -214,25 +225,13 @@ namespace go2cs
                 // Handle empty interface as a C# object, i.e., the type
                 // that all classes inherit from - this is how an empty
                 // interface is used in Go
-                Types[context.Parent.Parent] = new TypeInfo
-                {
-                    Name = "object",
-                    PrimitiveName = "object",
-                    FrameworkName = "System.Object",
-                    TypeClass = TypeClass.Simple
-                };
+                Types[context.Parent.Parent] = TypeInfo.ObjectType;
             }
             else
             {
                 // All other intra-function scoped declared interfaces
                 // are defined as dynamic so they can behave like ducks
-                Types[context.Parent.Parent] = new TypeInfo
-                {
-                    Name = "dynamic",
-                    PrimitiveName = "dynamic",
-                    FrameworkName = "System.Dynamic.DynamicObject",
-                    TypeClass = TypeClass.Simple
-                };
+                Types[context.Parent.Parent] = TypeInfo.DynamicType;
             }
         }
 
@@ -240,13 +239,7 @@ namespace go2cs
         {
             // All intra-function scoped declared structures are
             // defined as dynamic so they can behave like ducks
-            Types[context.Parent.Parent] = new TypeInfo
-            {
-                Name = "dynamic",
-                PrimitiveName = "dynamic",
-                FrameworkName = "System.Dynamic.DynamicObject",
-                TypeClass = TypeClass.Simple
-            };
+            Types[context.Parent.Parent] = TypeInfo.DynamicType;
         }
 
         public override void ExitFunctionType(GolangParser.FunctionTypeContext context)

@@ -84,6 +84,14 @@ namespace go2cs.Metadata
             FrameworkName = "var",
             TypeClass = TypeClass.Simple
         };
+
+        public static readonly TypeInfo DynamicType = new TypeInfo
+        {
+            Name = "dynamic",
+            PrimitiveName = "dynamic",
+            FrameworkName = "System.Dynamic.DynamicObject",
+            TypeClass = TypeClass.Simple
+        };
     }
 
     [Serializable]

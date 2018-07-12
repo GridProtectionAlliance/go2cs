@@ -38,7 +38,7 @@ namespace go2cs
     {
         private bool m_firstTypeSpec;
 
-        // TODO: Need to properly handle sub-function type declarations (function name prefix declared directly prior to function definition?)
+        // TODO: Consider strongly typing sub-function type declarations with function name prefix declared directly prior to function definition - sub-function type declarations are syntactically invalid in C#
 
         public override void EnterTypeDecl(GolangParser.TypeDeclContext context)
         {
@@ -64,6 +64,10 @@ namespace go2cs
             string scope = char.IsUpper(originalIdentifier[0]) ? "public" : "private";
             string target = Path.GetFileNameWithoutExtension(TargetFileName);
             string identifier = SanitizedIdentifier(originalIdentifier);
+
+            // TODO: Sub-function strategy, declare directly prior to function using PushBlock / PopBlock operations and a new replacement marker
+            if (m_inFunction)
+                AddWarning(context, $"Type specification made from within function \"{m_currentFunctionName}\" - this is will not compile in C#");
 
             if (Metadata.Interfaces.TryGetValue(originalIdentifier, out InterfaceInfo interfaceInfo))
             {
