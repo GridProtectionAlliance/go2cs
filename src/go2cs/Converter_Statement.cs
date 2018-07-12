@@ -31,7 +31,7 @@ namespace go2cs
     {
         private readonly Stack<StringBuilder> m_blocks = new Stack<StringBuilder>();
 
-        public const string FunctionLiteralParametersMarker = ">>MARKER:FUNCTIONLITERAL_PARAMETERS<<";
+        public const string FunctionLiteralParametersMarker = ">>MARKER:FUNCTIONLIT_PARAMETERS<<";
 
         private void PushBlock()
         {
@@ -39,7 +39,7 @@ namespace go2cs
             m_targetFile = new StringBuilder();
         }
 
-        private bool PopBlock(bool trim = false, string prefix = null, string suffix = null)
+        private string PopBlock(bool appendToPrevious = true, string prefix = null, string suffix = null)
         {
             StringBuilder lastTarget = m_blocks.Pop();
             string block = m_targetFile.ToString();
@@ -47,14 +47,15 @@ namespace go2cs
             if (!string.IsNullOrEmpty(prefix))
                 lastTarget.Append(prefix);
 
-            lastTarget.Append(trim ? block.Trim(): block);
+            if (appendToPrevious)
+                lastTarget.Append(block);
 
             if (!string.IsNullOrEmpty(suffix))
                 lastTarget.Append(suffix);
 
             m_targetFile = lastTarget;
 
-            return !string.IsNullOrWhiteSpace(block);
+            return block;
         }
 
         public override void EnterBlock(GolangParser.BlockContext context)
@@ -75,13 +76,14 @@ namespace go2cs
 
         public override void EnterFunctionLit(GolangParser.FunctionLitContext context)
         {
-            m_targetFile.AppendLine($"{Spacing()}{FunctionLiteralParametersMarker} =>");
+            PushBlock();
+            m_targetFile.AppendLine($"{FunctionLiteralParametersMarker} =>");
         }
 
         public override void ExitFunctionLit(GolangParser.FunctionLitContext context)
         {
-            // TODO: Determine context usage - could be a function argument!!
-            base.ExitFunctionLit(context);
+            // functionLit
+            //     : 'func' function
 
             string parametersSignature = "()";
 
@@ -99,6 +101,16 @@ namespace go2cs
 
             // Replace marker for function literal
             m_targetFile.Replace(FunctionLiteralParametersMarker, parametersSignature);
+
+            if (!(context.Parent.Parent is GolangParser.OperandContext operandContext))
+            {
+                AddWarning(context, $"Could not derive parent operand context from function literal: \"{context.GetText()}\"");
+                PopBlock();
+                return;
+            }
+
+            // Update expression operand
+            Operands[operandContext] = PopBlock(false);
         }
 
         public override void ExitExpressionStmt(GolangParser.ExpressionStmtContext context)
@@ -112,23 +124,16 @@ namespace go2cs
             }
         }
 
-        public override void EnterReturnStmt(GolangParser.ReturnStmtContext context)
-        {
-            m_targetFile.Append($"{Spacing()}return");
-            PushBlock();
-        }
-
         public override void ExitReturnStmt(GolangParser.ReturnStmtContext context)
         {
-            if (!PopBlock(true, " "))
+            m_targetFile.Append($"{Spacing()}return");
+
+            if (ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
             {
-                if (ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
-                {
-                    if (expressions.Length > 1)
-                        m_targetFile.Append($"({string.Join(", ", expressions)})");
-                    else
-                        m_targetFile.Append(expressions[0]);
-                }
+                if (expressions.Length > 1)
+                    m_targetFile.Append($" ({string.Join(", ", expressions)})");
+                else
+                    m_targetFile.Append($" {expressions[0]}");
             }
 
             m_targetFile.Append($";{CheckForCommentsRight(context)}");

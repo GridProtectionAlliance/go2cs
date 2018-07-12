@@ -170,6 +170,7 @@ namespace go2cs
 
         public override void ExitExpressionStmt(GolangParser.ExpressionStmtContext context)
         {
+            // TODO: Better to directly find tokens in PrimaryExpressions tree values
             string expression = context.expression().GetText();
 
             if (expression.StartsWith("panic("))
