@@ -21,16 +21,40 @@
 //
 //******************************************************************************************************
 
-using System.Collections.Generic;
-using System.Text;
+using System;
+using static go2cs.Common;
 
 namespace go2cs
 {
     public partial class Converter
     {
+        public override void EnterLabeledStmt(GolangParser.LabeledStmtContext context)
+        {
+            PushBlock();
+        }
+
+        public override void ExitLabeledStmt(GolangParser.LabeledStmtContext context)
+        {
+            // labeledStmt
+            //     : IDENTIFIER ':' statement
+
+            string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
+            string statement = PopBlock(false);
+
+            m_targetFile.Append($"{label}:{Environment.NewLine}{Environment.NewLine}{statement}");
+        }
+
+        public override void ExitSendStmt(GolangParser.SendStmtContext context)
+        {
+            // sendStmt
+            //     : expression '<-' expression
+        }
 
         public override void ExitExpressionStmt(GolangParser.ExpressionStmtContext context)
         {
+            // expressionStmt
+            //     : expression
+
             if (Expressions.TryGetValue(context.expression(), out string expression))
             {
                 m_targetFile.Append($"{Spacing()}{expression};{CheckForCommentsRight(context)}");
@@ -38,10 +62,54 @@ namespace go2cs
                 if (!WroteCommentWithLineFeed)
                     m_targetFile.AppendLine();
             }
+            else
+            {
+                AddWarning(context, $"Failed to find expression for expression statement: {context.GetText()}");
+            }
+        }
+
+        public override void EnterIncDecStmt(GolangParser.IncDecStmtContext context)
+        {
+            // incDecStmt
+            //     : expression('++' | '--')
+        }
+
+        public override void ExitAssignment(GolangParser.AssignmentContext context)
+        {
+            // assignment
+            //     : expressionList assign_op expressionList
+        }
+
+        public override void ExitShortVarDecl(GolangParser.ShortVarDeclContext context)
+        {
+            // shortVarDecl
+            //     : identifierList ':=' expressionList
+        }
+
+        public override void ExitGoStmt(GolangParser.GoStmtContext context)
+        {
+            // goStmt
+            //     : 'go' expression
+
+            if (Expressions.TryGetValue(context.expression(), out string expression))
+            {
+                RequiredUsings.Add("System.Threading");
+                m_targetFile.Append($"{Spacing()}ThreadPool.QueueUserWorkItem(state => {expression});{CheckForCommentsRight(context)}");
+
+                if (!WroteCommentWithLineFeed)
+                    m_targetFile.AppendLine();
+            }
+            else
+            {
+                AddWarning(context, $"Failed to find expression for go statement: {context.GetText()}");
+            }
         }
 
         public override void ExitReturnStmt(GolangParser.ReturnStmtContext context)
         {
+            // returnStmt
+            //     : 'return' expressionList?
+
             m_targetFile.Append($"{Spacing()}return");
 
             if (ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
@@ -58,11 +126,58 @@ namespace go2cs
                 m_targetFile.AppendLine();
         }
 
-        public override void ExitGoStmt(GolangParser.GoStmtContext context)
+        public override void ExitBreakStmt(GolangParser.BreakStmtContext context)
         {
-            Expressions.TryGetValue(context.expression(), out string expression);
-            RequiredUsings.Add("System.Threading");
-            m_targetFile.Append($"{Spacing()}ThreadPool.QueueUserWorkItem(state => {expression});");
+            // breakStmt
+            //     : 'break' IDENTIFIER ?
+        }
+
+        public override void ExitContinueStmt(GolangParser.ContinueStmtContext context)
+        {
+            // continueStmt
+            //     : 'continue' IDENTIFIER ?
+        }
+
+        public override void ExitGotoStmt(GolangParser.GotoStmtContext context)
+        {
+            // gotoStmt
+            //     : 'goto' IDENTIFIER
+        }
+
+        public override void ExitFallthroughStmt(GolangParser.FallthroughStmtContext context)
+        {
+            // fallthroughStmt
+            //     : 'fallthrough'
+        }
+
+        public override void ExitIfStmt(GolangParser.IfStmtContext context)
+        {
+            // ifStmt
+            //     : 'if'(simpleStmt ';') ? expression block('else'(ifStmt | block)) ?
+        }
+
+        public override void ExitSwitchStmt(GolangParser.SwitchStmtContext context)
+        {
+            // switchStmt
+            //     : exprSwitchStmt | typeSwitchStmt
+        }
+
+        public override void ExitSelectStmt(GolangParser.SelectStmtContext context)
+        {
+            // selectStmt
+            //     : 'select' '{' commClause * '}'
+        }
+
+        public override void ExitForStmt(GolangParser.ForStmtContext context)
+        {
+            // forStmt
+            //     : 'for'(expression | forClause | rangeClause) ? block
+        }
+
+        public override void ExitDeferStmt(GolangParser.DeferStmtContext context)
+        {
+            // deferStmt
+            //     : 'defer' expression
         }
     }
 }
