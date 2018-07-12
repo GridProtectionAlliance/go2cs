@@ -39,12 +39,22 @@ namespace go2cs
             m_targetFile = new StringBuilder();
         }
 
-        private void PopBlock(bool trim = false)
+        private bool PopBlock(bool trim = false, string prefix = null, string suffix = null)
         {
             StringBuilder lastTarget = m_blocks.Pop();
             string block = m_targetFile.ToString();
+
+            if (!string.IsNullOrEmpty(prefix))
+                lastTarget.Append(prefix);
+
             lastTarget.Append(trim ? block.Trim(): block);
+
+            if (!string.IsNullOrEmpty(suffix))
+                lastTarget.Append(suffix);
+
             m_targetFile = lastTarget;
+
+            return !string.IsNullOrWhiteSpace(block);
         }
 
         public override void EnterBlock(GolangParser.BlockContext context)
@@ -104,13 +114,23 @@ namespace go2cs
 
         public override void EnterReturnStmt(GolangParser.ReturnStmtContext context)
         {
-            m_targetFile.Append($"{Spacing()}return ");
+            m_targetFile.Append($"{Spacing()}return");
             PushBlock();
         }
 
         public override void ExitReturnStmt(GolangParser.ReturnStmtContext context)
         {
-            PopBlock(true);
+            if (!PopBlock(true, " "))
+            {
+                if (ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
+                {
+                    if (expressions.Length > 1)
+                        m_targetFile.Append($"({string.Join(", ", expressions)})");
+                    else
+                        m_targetFile.Append(expressions[0]);
+                }
+            }
+
             m_targetFile.Append($";{CheckForCommentsRight(context)}");
 
             if (!WroteCommentWithLineFeed)
