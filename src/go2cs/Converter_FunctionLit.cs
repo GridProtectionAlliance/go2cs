@@ -104,7 +104,7 @@ namespace go2cs
                         if (lambdaExpression.EndsWith(";", StringComparison.Ordinal))
                             lambdaExpression = lambdaExpression.Substring(0, lambdaExpression.Length - 1).Trim();
 
-                        lambdaExpression = $"{parameters} {lambdaExpression.Trim()}";
+                        lambdaExpression = $"{parameters} {lambdaExpression}";
                     }
                 }
             }
