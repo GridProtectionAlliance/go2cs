@@ -89,7 +89,7 @@ namespace go2cs.Metadata
     [Serializable]
     public class ArrayTypeInfo : TypeInfo
     {
-        public string Length;
+        public ExpressionInfo Length;
 
         public override TypeInfo Clone()
         {

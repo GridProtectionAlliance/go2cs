@@ -50,6 +50,7 @@
     <Compile Include="Converter_FunctionLit.cs" />
     <Compile Include="Converter_VarDecl.cs" />
     <Compile Include="DependencyCounter.cs" />
+    <Compile Include="Metadata\ExpressionInfo.cs" />
     <Compile Include="Metadata\MethodSignature.cs" />
     <Compile Include="Metadata\Signature.cs" />
     <Compile Include="Metadata\TypeInfo.cs" />

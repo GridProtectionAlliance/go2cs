@@ -116,15 +116,24 @@ namespace go2cs
                 return;
             }
 
-            string length;
+            // TODO: Remove once expressions dictionary holds expression info
+            ExpressionInfo length = new ExpressionInfo
+            {
+                Type = new TypeInfo
+                {
+                    TypeClass = TypeClass.Simple,
+                    PrimitiveName = "int",
+                    FrameworkName = "System.Int32"
+                }
+            };
 
             if (Expressions.TryGetValue(context.arrayLength().expression(), out string expression))
             {
-                length = expression;
+                length.Text = expression;
             }
             else
             {
-                length = "0";
+                length.Text = "0";
                 AddWarning(context, $"Failed to find array length expression for \"{name}\"");
             }
 
@@ -183,8 +192,19 @@ namespace go2cs
 
         public override void ExitChannelType(GolangParser.ChannelTypeContext context)
         {
-            // TODO: Add new channel type
-            //m_types.TryGetValue(context.elementType().type(), out GoTypeInfo typeInfo);
+            // TODO: Update to reference proper channel type name when added
+            Types.TryGetValue(context.elementType().type(), out TypeInfo typeInfo);
+
+            if (typeInfo == null)
+                typeInfo = TypeInfo.ObjectType;
+
+            Types[context.Parent.Parent] = new TypeInfo
+            {
+                Name = typeInfo.Name,
+                PrimitiveName = $"Channel<{typeInfo.PrimitiveName}>",
+                FrameworkName = $"go.Channel<{typeInfo.FrameworkName}>",
+                TypeClass = TypeClass.Channel
+            };
         }
 
         public override void ExitInterfaceType(GolangParser.InterfaceTypeContext context)
