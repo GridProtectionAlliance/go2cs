@@ -21,7 +21,6 @@
 //
 //******************************************************************************************************
 
-using System;
 using System.Globalization;
 using static go2cs.Common;
 
@@ -29,25 +28,48 @@ namespace go2cs
 {
     public partial class Converter
     {
+        private bool m_firstConstSpec;
         private int m_iota;
 
         public override void EnterConstDecl(GolangParser.ConstDeclContext context)
         {
+            m_firstConstSpec = !m_inFunction;
             m_iota = 0;
         }
 
-        // TODO: This needs work - likely need expression evaluator
+        // TODO: This needs work - need to use an expression type evaluator
         public override void ExitConstSpec(GolangParser.ConstSpecContext context)
         {
-            Identifiers.TryGetValue(context.identifierList(), out string[] identifiers);
+            // constSpec
+            //     : identifierList(type ? '=' expressionList) ?
 
-            ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions);
+            if (m_firstConstSpec)
+            {
+                m_firstConstSpec = false;
 
-            if (identifiers == null)
-                throw new DataMisalignedException("No identifier specified in constant expression.");
+                string comments = CheckForCommentsLeft(context);
 
-            if (expressions != null && identifiers.Length != expressions.Length)
-                return; // throw new DataMisalignedException("Missing value in const declaration"); 
+                if (!string.IsNullOrEmpty(comments))
+                    m_targetFile.Append(FixForwardSpacing(comments));
+            }
+
+            if (!Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
+            {
+                AddWarning(context, $"No identifiers specified in constant expression: {context.GetText()}");
+                return;
+            }
+
+            if (ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
+            {
+                AddWarning(context, $"No identifiers specified in constant expression: {context.GetText()}");
+                return;
+            }
+
+            if (identifiers.Length != expressions.Length)
+            {
+                AddWarning(context, $"Encountered identifier to expression count mismatch in constant expression: {context.GetText()}");
+                return;
+            }
 
             GolangParser.TypeContext typeContext = context.type();
             string lastType = null;

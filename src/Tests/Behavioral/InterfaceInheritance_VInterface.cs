@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 12 03:35:10 UTC
+//     Generated on 2018 July 12 19:15:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,6 +43,15 @@ namespace go
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void M() => s_MByRef?.Invoke(ref m_target) ?? s_MByVal(m_target);
+
+            private delegate string StringByVal(T value);
+            private delegate string StringByRef(ref T value);
+
+            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByRef s_StringByRef;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public string String() => s_StringByRef?.Invoke(ref m_target) ?? s_StringByVal(m_target);
 
             private delegate string ErrorByVal(T value);
             private delegate string ErrorByRef(ref T value);
@@ -84,6 +93,19 @@ namespace go
 
                 if ((object)s_MByRef == null && (object)s_MByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement V.M method", new Exception("M"));
+
+                extensionMethod = targetType.GetExtensionMethod("String");
+
+                if ((object)extensionMethod != null)
+                {
+                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+
+                    if ((object)s_StringByRef == null)
+                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
+                }
+
+                if ((object)s_StringByRef == null && (object)s_StringByVal == null)
+                    throw new NotImplementedException($"{targetType.Name} does not implement V.String method", new Exception("String"));
 
                 extensionMethod = targetType.GetExtensionMethod("Error");
 

@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  Converter_TypeSpec.cs - Gbtc
+//  Converter_TypeDecl.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -38,23 +38,17 @@ namespace go2cs
     {
         private bool m_firstTypeSpec;
 
+        // TODO: Need to properly handle sub-function type declarations (function name prefix declared directly prior to function definition?)
+
         public override void EnterTypeDecl(GolangParser.TypeDeclContext context)
         {
-            if (!m_firstTopLevelDeclaration)
-                m_targetFile.AppendLine();
-
-            if (!string.IsNullOrWhiteSpace(m_nextDeclComments))
-                m_targetFile.Append(FixForwardSpacing(m_nextDeclComments));
-
-            m_firstTypeSpec = true;
+            m_firstTypeSpec = !m_inFunction;
         }
 
         public override void ExitTypeSpec(GolangParser.TypeSpecContext context)
         {
-            string originalIdentifier = context.IDENTIFIER().GetText();
-            string scope = char.IsUpper(originalIdentifier[0]) ? "public" : "private";
-            string target = Path.GetFileNameWithoutExtension(TargetFileName);
-            string identifier = SanitizedIdentifier(originalIdentifier);
+            // typeSpec
+            //     : IDENTIFIER type
 
             if (m_firstTypeSpec)
             {
@@ -65,6 +59,11 @@ namespace go2cs
                 if (!string.IsNullOrEmpty(comments))
                     m_targetFile.Append(FixForwardSpacing(comments));
             }
+
+            string originalIdentifier = context.IDENTIFIER().GetText();
+            string scope = char.IsUpper(originalIdentifier[0]) ? "public" : "private";
+            string target = Path.GetFileNameWithoutExtension(TargetFileName);
+            string identifier = SanitizedIdentifier(originalIdentifier);
 
             if (Metadata.Interfaces.TryGetValue(originalIdentifier, out InterfaceInfo interfaceInfo))
             {

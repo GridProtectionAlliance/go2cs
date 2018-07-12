@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 12 03:35:09 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue.go
+// package main -- go2cs converted at 2018 July 12 19:15:05 UTC
+// Original source: D:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue.go
 
 using fmt = go.fmt_package;
 using static go.BuiltInFunctions;
@@ -10,6 +10,7 @@ namespace go
     {
         private static void Main()
         {
+            GoString[] a;
             test(a);
             fmt.Println(a[0], a[1]);
             fmt.Println();

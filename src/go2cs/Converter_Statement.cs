@@ -21,7 +21,6 @@
 //
 //******************************************************************************************************
 
-using go2cs.Metadata;
 using System.Collections.Generic;
 using System.Text;
 
@@ -29,89 +28,6 @@ namespace go2cs
 {
     public partial class Converter
     {
-        private readonly Stack<StringBuilder> m_blocks = new Stack<StringBuilder>();
-
-        public const string FunctionLiteralParametersMarker = ">>MARKER:FUNCTIONLIT_PARAMETERS<<";
-
-        private void PushBlock()
-        {
-            m_blocks.Push(m_targetFile);
-            m_targetFile = new StringBuilder();
-        }
-
-        private string PopBlock(bool appendToPrevious = true, string prefix = null, string suffix = null)
-        {
-            StringBuilder lastTarget = m_blocks.Pop();
-            string block = m_targetFile.ToString();
-
-            if (!string.IsNullOrEmpty(prefix))
-                lastTarget.Append(prefix);
-
-            if (appendToPrevious)
-                lastTarget.Append(block);
-
-            if (!string.IsNullOrEmpty(suffix))
-                lastTarget.Append(suffix);
-
-            m_targetFile = lastTarget;
-
-            return block;
-        }
-
-        public override void EnterBlock(GolangParser.BlockContext context)
-        {
-            PushBlock();
-            m_targetFile.AppendLine($"{Spacing()}{{");
-
-            IndentLevel++;
-        }
-
-        public override void ExitBlock(GolangParser.BlockContext context)
-        {
-            IndentLevel--;
-
-            m_targetFile.Append($"{Spacing()}}}");
-            PopBlock();
-        }
-
-        public override void EnterFunctionLit(GolangParser.FunctionLitContext context)
-        {
-            PushBlock();
-            m_targetFile.AppendLine($"{FunctionLiteralParametersMarker} =>");
-        }
-
-        public override void ExitFunctionLit(GolangParser.FunctionLitContext context)
-        {
-            // functionLit
-            //     : 'func' function
-
-            string parametersSignature = "()";
-
-            if (Signatures.TryGetValue(context.function()?.signature(), out Signature signature))
-            {
-                parametersSignature = signature.GenerateParameterNameList();
-
-                if (signature.Parameters.Length != 1)
-                    parametersSignature = $"({parametersSignature})";
-            }
-            else
-            {
-                AddWarning(context, $"Failed to find signature for function literal inside \"{m_currentFunctionName}\" function");
-            }
-
-            // Replace marker for function literal
-            m_targetFile.Replace(FunctionLiteralParametersMarker, parametersSignature);
-
-            if (!(context.Parent.Parent is GolangParser.OperandContext operandContext))
-            {
-                AddWarning(context, $"Could not derive parent operand context from function literal: \"{context.GetText()}\"");
-                PopBlock();
-                return;
-            }
-
-            // Update expression operand
-            Operands[operandContext] = PopBlock(false);
-        }
 
         public override void ExitExpressionStmt(GolangParser.ExpressionStmtContext context)
         {

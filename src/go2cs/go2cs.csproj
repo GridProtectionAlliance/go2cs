@@ -45,6 +45,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converter_Block.cs" />
+    <Compile Include="Converter_Declaration.cs" />
+    <Compile Include="Converter_FunctionLit.cs" />
+    <Compile Include="Converter_VarDecl.cs" />
     <Compile Include="DependencyCounter.cs" />
     <Compile Include="Metadata\MethodSignature.cs" />
     <Compile Include="Metadata\Signature.cs" />
@@ -74,7 +78,7 @@
     <Compile Include="Converter_MethodDecl.cs" />
     <Compile Include="Converter_PackageClause.cs" />
     <Compile Include="Converter_TopLevelDecl.cs" />
-    <Compile Include="Converter_TypeSpec.cs" />
+    <Compile Include="Converter_TypeDecl.cs" />
     <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="ParseTreeValues.cs" />

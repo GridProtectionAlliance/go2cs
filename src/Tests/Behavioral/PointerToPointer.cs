@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 12 03:35:10 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\PointerToPointer.go
+// package main -- go2cs converted at 2018 July 12 19:15:05 UTC
+// Original source: D:\Projects\go2cs\src\Tests\Behavioral\PointerToPointer.go
 
 using fmt = go.fmt_package;
 using static go.BuiltInFunctions;
@@ -10,6 +10,9 @@ namespace go
     {
         private static void Main()
         {
+            long a;
+            ref long ptr;
+            Ptr<Ptr<long>> pptr;
             fmt.Printf("Value of a = %d\n", a);
             PrintValPtr(ptr);
             PrintValPtr2Ptr(pptr);

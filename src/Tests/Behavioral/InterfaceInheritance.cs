@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 12 03:35:10 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceInheritance.go
+// package main -- go2cs converted at 2018 July 12 19:15:05 UTC
+// Original source: D:\Projects\go2cs\src\Tests\Behavioral\InterfaceInheritance.go
 
 using fmt = go.fmt_package;
 using static go.BuiltInFunctions;
@@ -71,7 +71,11 @@ namespace go
 
         private static void Main()
         {
+            I i1 = T1{"foo"};
+            I i2 = T2{"bar"};
             fmt.Println(m);
+            V v1 = T1{"foo"};
+            V v2 = T2{"bar"};
             v1.N();
             v2.M();
             v1.String();

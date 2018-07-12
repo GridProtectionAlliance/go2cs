@@ -73,6 +73,52 @@ namespace go2cs
             }
         }
 
+        public override void ExitUnaryExpr(GolangParser.UnaryExprContext context)
+        {
+            // unaryExpr
+            //     : primaryExpr
+            //     | ('+' | '-' | '!' | '^' | '*' | '&' | '<-') unaryExpr
+
+            if (PrimaryExpressions.TryGetValue(context.primaryExpr(), out string primaryExpression))
+            {
+                UnaryExpressions[context] = primaryExpression;
+            }
+            else if (context.unaryExpr() != null)
+            {
+                string unaryOP = context.children[0].GetText();
+
+                if (unaryOP.Equals("^"))
+                {
+                    unaryOP = "~";
+                }
+                else if (unaryOP.Equals("<-"))
+                {
+                    // TODO: Handle channel value access (update when channel class is created):
+                    unaryOP = null;
+                    UnaryExpressions[context] = $"{UnaryExpressions[context.unaryExpr()]}.Receive()";
+                }
+                else if (unaryOP.Equals("&"))
+                {
+                    // TODO: Handle pointer acquisition context - may need to augment pre-scan metadata for heap allocation notation
+                    unaryOP = null;
+                    UnaryExpressions[context] = $"ref {UnaryExpressions[context.unaryExpr()]}";
+                }
+                else if (unaryOP.Equals("*"))
+                {
+                    // TODO: Handle pointer dereference context - if this is a ref variable, Deref call is unnecessary
+                    unaryOP = null;
+                    UnaryExpressions[context] = $"{UnaryExpressions[context.unaryExpr()]}.Deref";
+                }
+
+                if ((object)unaryOP != null)
+                    UnaryExpressions[context] = $"{unaryOP}{UnaryExpressions[context.unaryExpr()]}";
+            }
+            else if (!UnaryExpressions.ContainsKey(context))
+            {
+                AddWarning(context, $"Unexpected unary expression \"{context.GetText()}\"");
+            }
+        }
+
         public override void ExitPrimaryExpr(GolangParser.PrimaryExprContext context)
         {
             // primaryExpr
@@ -203,52 +249,6 @@ namespace go2cs
             else
             {
                 AddWarning(context, $"Unexpected primary expression \"{context.GetText()}\"");
-            }
-        }
-
-        public override void ExitUnaryExpr(GolangParser.UnaryExprContext context)
-        {
-            // unaryExpr
-            //     : primaryExpr
-            //     | ('+' | '-' | '!' | '^' | '*' | '&' | '<-') unaryExpr
-
-            if (PrimaryExpressions.TryGetValue(context.primaryExpr(), out string primaryExpression))
-            {
-                UnaryExpressions[context] = primaryExpression;
-            }
-            else if (context.unaryExpr() != null)
-            {
-                string unaryOP = context.children[0].GetText();
-
-                if (unaryOP.Equals("^"))
-                {
-                    unaryOP = "~";
-                }
-                else if (unaryOP.Equals("<-"))
-                {
-                    // TODO: Handle channel value access (update when channel class is created):
-                    unaryOP = null;
-                    UnaryExpressions[context] = $"{UnaryExpressions[context.unaryExpr()]}.Receive()";
-                }
-                else if (unaryOP.Equals("&"))
-                {
-                    // TODO: Handle pointer acquisition context - may need to augment pre-scan metadata for heap allocation notation
-                    unaryOP = null;
-                    UnaryExpressions[context] = $"ref {UnaryExpressions[context.unaryExpr()]}";
-                }
-                else if (unaryOP.Equals("*"))
-                {
-                    // TODO: Handle pointer dereference context - if this is a ref variable, Deref call is unnecessary
-                    unaryOP = null;
-                    UnaryExpressions[context] = $"{UnaryExpressions[context.unaryExpr()]}.Deref";
-                }
-
-                if ((object)unaryOP != null)
-                    UnaryExpressions[context] = $"{unaryOP}{UnaryExpressions[context.unaryExpr()]}";
-            }
-            else if (!UnaryExpressions.ContainsKey(context))
-            {
-                AddWarning(context, $"Unexpected unary expression \"{context.GetText()}\"");
             }
         }
 
@@ -409,6 +409,7 @@ namespace go2cs
 
             GolangParser.ReceiverTypeContext receiverType = context.receiverType();
 
+            // TODO: Handle type name pointer dereference context - if this is a ref variable, Deref call is unnecessary
             if (receiverType?.children.Count == 4)
                 Operands[operandContext] = $"{receiverType.typeName().GetText()}.Deref";
             else
