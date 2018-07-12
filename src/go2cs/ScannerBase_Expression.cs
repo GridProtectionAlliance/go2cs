@@ -56,8 +56,35 @@ namespace go2cs
         protected readonly ParseTreeValues<string> Operands = new ParseTreeValues<string>();
         protected readonly ParseTreeValues<string> Arguments = new ParseTreeValues<string>();
 
+        public override void ExitExpression(GolangParser.ExpressionContext context)
+        {
+            // expression
+            //     : unaryExpr
+            //     | expression BINARY_OP expression
+
+            if (context.expression()?.Length == 2)
+            {
+                string binaryOP = context.children[1].GetText();
+                binaryOP = binaryOP.Equals("&^") ? " & ~" : $" {binaryOP} ";
+                Expressions[context] = $"{Expressions[context.expression(0)]}{binaryOP}{Expressions[context.expression(1)]}";
+            }
+            else
+            {
+                Expressions[context] = UnaryExpressions[context.unaryExpr()];
+            }
+        }
+
         public override void ExitPrimaryExpr(GolangParser.PrimaryExprContext context)
         {
+            //primaryExpr
+            //    : operand
+            //    | conversion
+            //    | primaryExpr selector
+            //    | primaryExpr index
+            //    | primaryExpr slice
+            //    | primaryExpr typeAssertion
+            //    | primaryExpr arguments
+
             PrimaryExpressions.TryGetValue(context.primaryExpr(), out string primaryExpression);
 
             if (Operands.TryGetValue(context.operand(), out string operand))
@@ -147,20 +174,6 @@ namespace go2cs
             else
             {
                 AddWarning(context, $"Unexpected primary expression \"{context.GetText()}\"");
-            }
-        }
-
-        public override void ExitExpression(GolangParser.ExpressionContext context)
-        {
-            if (context.expression()?.Length == 2)
-            {                
-                string binaryOP = context.children[1].GetText();
-                binaryOP = binaryOP.Equals("&^") ? " & ~" : $" {binaryOP} ";
-                Expressions[context] = $"{Expressions[context.expression(0)]}{binaryOP}{Expressions[context.expression(1)]}";
-            }
-            else
-            {
-                Expressions[context] = UnaryExpressions[context.unaryExpr()];
             }
         }
 
