@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 06 21:24:28 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\InterfaceImplementation.go
+// package main -- go2cs converted at 2018 July 12 03:35:10 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceImplementation.go
 
 using fmt = go.fmt_package;
 using static go.BuiltInFunctions;
@@ -32,31 +32,27 @@ namespace go
         private static void Main()
         {
             {
-                fmt.Println(a.Type(),"can",a.Swim());
+                fmt.Println(a.Type(), "can", a.Swim());
             }        }
 
         public static GoString Type(this ref Frog f)
         {
-            {
-                return ;
-            }        }
+            return "Frog";
+        }
 
         public static GoString Swim(this ref Frog f)
         {
-            {
-                return ;
-            }        }
+            return "Kick";
+        }
 
         public static GoString Swim(this ref Dog d)
         {
-            {
-                return ;
-            }        }
+            return "Paddle";
+        }
 
         public static GoString Type(this ref Dog d)
         {
-            {
-                return ;
-            }        }
+            return "Doggie";
+        }
     }
 }

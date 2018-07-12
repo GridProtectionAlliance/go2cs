@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 06 21:24:28 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\SortArrayType.go
+// package main -- go2cs converted at 2018 July 12 03:35:10 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\SortArrayType.go
 
 using fmt = go.fmt_package;
 using sort = go.sort_package;
@@ -23,20 +23,17 @@ namespace go
 
         public static long Len(this PeopleByShoeSize p)
         {
-            {
-                return ;
-            }        }
+            return len(p);
+        }
 
         public static void Swap(this PeopleByShoeSize p, long i, long j)
         {
-            {
-            }        }
+        }
 
         public static bool Less(this PeopleByShoeSize p, long i, long j)
         {
-            {
-                return ;
-            }        }
+            return (p[i].ShoeSize < p[j].ShoeSize);
+        }
 
         private static void Main()
         {

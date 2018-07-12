@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 06 21:24:28 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\InterfaceCasting.go
+// package main -- go2cs converted at 2018 July 12 03:35:09 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceCasting.go
 
 using fmt = go.fmt_package;
 using static go.BuiltInFunctions;
@@ -16,19 +16,18 @@ namespace go
 
         public static GoString Error(this MyError err)
         {
-            {
-                return ;
-            }        }
+            return fmt.Sprintf("error: %s", err.description);
+        }
 
         // error is an interface - MyError is cast to error interface upon return
         private static error f()
         {
-            return ;
+            return MyError{"foo"};
         }
 
         private static void Main()
         {
-            fmt.Printf("%v\n",f()); // error: foo
+            fmt.Printf("%v\n", f()); // error: foo
         }
     }
 }

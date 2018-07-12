@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 06 21:24:28 UTC
+//     Generated on 2018 July 12 03:35:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -60,9 +60,8 @@ namespace go
                         s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
                 }
 
-                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_TypeByRef == null && (object)s_TypeByVal == null)
-                    throw new NotImplementedException($"{targetType.Name} does not implement Animal.Type function");
+                    throw new NotImplementedException($"{targetType.Name} does not implement Animal.Type method", new Exception("Type"));
 
                 extensionMethod = targetType.GetExtensionMethod("Swim");
 
@@ -74,9 +73,8 @@ namespace go
                         s_SwimByVal = extensionMethod.CreateStaticDelegate(typeof(SwimByVal)) as SwimByVal;
                 }
 
-                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_SwimByRef == null && (object)s_SwimByVal == null)
-                    throw new NotImplementedException($"{targetType.Name} does not implement Animal.Swim function");
+                    throw new NotImplementedException($"{targetType.Name} does not implement Animal.Swim method", new Exception("Swim"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
@@ -123,5 +121,41 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, go.main_package.Animal value) => value != nil;
+    }
+
+    public static class main_AnimalExtensions
+    {
+        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static T TypeAssert<T>(this go.main_package.Animal target)
+        {
+            try
+            {
+                go.main_package.Animal<T> test = (go.main_package.Animal<T>)target;
+                return (T)target;
+            }
+            catch (InvalidCastException)
+            {
+                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}");
+            }
+            catch (NotImplementedException ex)
+            {
+                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}: missing method {ex.InnerException?.Message}");
+            }
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static bool TryTypeAssert<T>(this go.main_package.Animal target, out T result)
+        {
+            try
+            {
+                result = target.TypeAssert<T>();
+                return true;
+            }
+            catch (PanicException)
+            {
+                result = default(T);
+                return false;
+            }
+        }
     }
 }

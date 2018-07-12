@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 06 21:24:29 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructWithPointer.go
+// package main -- go2cs converted at 2018 July 12 03:35:11 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructWithPointer.go
 
 using fmt = go.fmt_package;
 using static go.BuiltInFunctions;
@@ -19,8 +19,8 @@ namespace go
 
         private static void Main()
         {
-            fmt.Printf("Value of red = %v\n",red);
-            fmt.Printf("Value of blue = %v\n",blue);
+            fmt.Printf("Value of red = %v\n", red);
+            fmt.Printf("Value of blue = %v\n", blue);
         }
     }
 }

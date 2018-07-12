@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 06 21:24:28 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructPromotionWithInterface.go
+// package main -- go2cs converted at 2018 July 12 03:35:11 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructPromotionWithInterface.go
 
 using fmt = go.fmt_package;
 using time = go.time_package;
@@ -40,14 +40,13 @@ namespace go
         // The following takes precedence over instance call to Abs()
         public static double Abs(this ref MyCustomError myErr)
         {
-            {
-                return ;
-            }        }
+            return 0.0;
+        }
 
         private static void Main()
         {
             a.Abs();
-            fmt.Println("MyCustomError method =",a.Abs());
+            fmt.Println("MyCustomError method =", a.Abs());
         }
     }
 }

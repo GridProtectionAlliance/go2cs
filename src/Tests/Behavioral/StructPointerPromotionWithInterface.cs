@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 06 21:24:28 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructPointerPromotionWithInterface.go
+// package main -- go2cs converted at 2018 July 12 03:35:10 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructPointerPromotionWithInterface.go
 
 using fmt = go.fmt_package;
 using time = go.time_package;
@@ -30,8 +30,8 @@ namespace go
 
         private static void Main()
         {
-            fmt.Println("MyError What =",e.What);
-            fmt.Println("MyCustomError What =",a.What);
+            fmt.Println("MyError What =", e.What);
+            fmt.Println("MyCustomError What =", a.What);
         }
     }
 }

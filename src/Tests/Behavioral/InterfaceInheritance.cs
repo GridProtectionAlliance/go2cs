@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 06 21:24:28 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\InterfaceInheritance.go
+// package main -- go2cs converted at 2018 July 12 03:35:10 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceInheritance.go
 
 using fmt = go.fmt_package;
 using static go.BuiltInFunctions;
@@ -17,25 +17,21 @@ namespace go
 
         public static void M(this T1 t)
         {
-            {
-            }        }
+        }
 
         public static void N(this T1 t)
         {
-            {
-            }        }
+        }
 
         public static GoString String(this T1 t)
         {
-            {
-                return ;
-            }        }
+            return "";
+        }
 
         public static GoString Error(this T1 t)
         {
-            {
-                return ;
-            }        }
+            return "";
+        }
 
         public partial struct T2
         {
@@ -45,25 +41,21 @@ namespace go
 
         public static void M(this T2 t)
         {
-            {
-            }        }
+        }
 
         public static void N(this T2 t)
         {
-            {
-            }        }
+        }
 
         public static GoString String(this T2 t)
         {
-            {
-                return ;
-            }        }
+            return "";
+        }
 
         public static GoString Error(this T2 t)
         {
-            {
-                return ;
-            }        }
+            return "";
+        }
 
         public interface I
         {

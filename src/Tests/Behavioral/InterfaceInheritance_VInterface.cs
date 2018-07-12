@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 06 21:24:28 UTC
+//     Generated on 2018 July 12 03:35:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,15 +44,6 @@ namespace go
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void M() => s_MByRef?.Invoke(ref m_target) ?? s_MByVal(m_target);
 
-            private delegate string StringByVal(T value);
-            private delegate string StringByRef(ref T value);
-
-            private static readonly StringByVal s_StringByVal;
-            private static readonly StringByRef s_StringByRef;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public string String() => s_StringByRef?.Invoke(ref m_target) ?? s_StringByVal(m_target);
-
             private delegate string ErrorByVal(T value);
             private delegate string ErrorByRef(ref T value);
 
@@ -78,9 +69,8 @@ namespace go
                         s_NByVal = extensionMethod.CreateStaticDelegate(typeof(NByVal)) as NByVal;
                 }
 
-                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_NByRef == null && (object)s_NByVal == null)
-                    throw new NotImplementedException($"{targetType.Name} does not implement V.N function");
+                    throw new NotImplementedException($"{targetType.Name} does not implement V.N method", new Exception("N"));
 
                 extensionMethod = targetType.GetExtensionMethod("M");
 
@@ -92,23 +82,8 @@ namespace go
                         s_MByVal = extensionMethod.CreateStaticDelegate(typeof(MByVal)) as MByVal;
                 }
 
-                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_MByRef == null && (object)s_MByVal == null)
-                    throw new NotImplementedException($"{targetType.Name} does not implement V.M function");
-
-                extensionMethod = targetType.GetExtensionMethod("String");
-
-                if ((object)extensionMethod != null)
-                {
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
-
-                    if ((object)s_StringByRef == null)
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
-
-                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
-                if ((object)s_StringByRef == null && (object)s_StringByVal == null)
-                    throw new NotImplementedException($"{targetType.Name} does not implement V.String function");
+                    throw new NotImplementedException($"{targetType.Name} does not implement V.M method", new Exception("M"));
 
                 extensionMethod = targetType.GetExtensionMethod("Error");
 
@@ -120,9 +95,8 @@ namespace go
                         s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
                 }
 
-                // This run-time exception is a compile-time error in Go, so it's not an expected exception if Go code compiles
                 if ((object)s_ErrorByRef == null && (object)s_ErrorByVal == null)
-                    throw new NotImplementedException($"{targetType.Name} does not implement V.Error function");
+                    throw new NotImplementedException($"{targetType.Name} does not implement V.Error method", new Exception("Error"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
@@ -169,5 +143,41 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, go.main_package.V value) => value != nil;
+    }
+
+    public static class main_VExtensions
+    {
+        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static T TypeAssert<T>(this go.main_package.V target)
+        {
+            try
+            {
+                go.main_package.V<T> test = (go.main_package.V<T>)target;
+                return (T)target;
+            }
+            catch (InvalidCastException)
+            {
+                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}");
+            }
+            catch (NotImplementedException ex)
+            {
+                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}: missing method {ex.InnerException?.Message}");
+            }
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static bool TryTypeAssert<T>(this go.main_package.V target, out T result)
+        {
+            try
+            {
+                result = target.TypeAssert<T>();
+                return true;
+            }
+            catch (PanicException)
+            {
+                result = default(T);
+                return false;
+            }
+        }
     }
 }
