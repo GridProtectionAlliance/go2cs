@@ -222,10 +222,8 @@ namespace go2cs
         {
             if (context.methodSpec()?.Length == 0)
             {
-                // Handle empty interface as a C# object, i.e., the type
-                // that all classes inherit from - this is how an empty
-                // interface is used in Go
-                Types[context.Parent.Parent] = TypeInfo.ObjectType;
+                // Handle empty interface type as a special case
+                Types[context.Parent.Parent] = TypeInfo.EmptyInterfaceType;
             }
             else
             {

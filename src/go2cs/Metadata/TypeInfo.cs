@@ -92,6 +92,15 @@ namespace go2cs.Metadata
             FrameworkName = "System.Dynamic.DynamicObject",
             TypeClass = TypeClass.Simple
         };
+
+        public static readonly TypeInfo EmptyInterfaceType = new TypeInfo
+        {
+            Name = "EmptyInterface",
+            PrimitiveName = "EmptyInterface",
+            FrameworkName = "go.builtin.EmptyInterface",
+            TypeClass = TypeClass.Simple
+        };
+
     }
 
     [Serializable]

@@ -39,7 +39,7 @@ namespace go
     public static class builtin
     {
         /// <summary>
-        /// Represents the Go interface type known as the empty interface.
+        /// Represents the Go interface type known as the empty interface, i.e., "interface {}".
         /// </summary>
         /// <remarks>
         /// An empty interface may hold values of any Go type as every type implements at least
