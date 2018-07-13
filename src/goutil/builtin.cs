@@ -65,7 +65,7 @@ namespace go
         /// The built-in rune type is used, by convention, to distinguish character values from
         /// integer values. It is an alias for int32 and is equivalent to int32 in all ways.
         /// </summary>
-        public struct rune
+        public struct rune : EmptyInterface
         {
             // Value of the rune struct
             private readonly int m_value;

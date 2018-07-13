@@ -23,13 +23,14 @@
 // ReSharper disable CheckNamespace
 
 using System.Runtime.CompilerServices;
+using static go.builtin;
 
 namespace go
 {
     /// <summary>
     /// Represents the "nil" type.
     /// </summary>
-    public partial class NilType
+    public partial class NilType : EmptyInterface
     {
         public static NilType Default = null;
 
