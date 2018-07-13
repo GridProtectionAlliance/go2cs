@@ -34,7 +34,7 @@ namespace go2cs
         public const int BaseSpacing = 4;
 
         protected int IndentLevel;
-        protected bool WroteCommentWithLineFeed;
+        protected bool WroteLineFeed;
 
         protected string Spacing(int offsetLevel = 0, int indentLevel = -1)
         {
@@ -61,24 +61,24 @@ namespace go2cs
             return string.Join(Environment.NewLine, lines.Select(line => string.IsNullOrWhiteSpace(line) ? "" : $"{forwardSpacing}{(autoTrim? line.Trim() : line)}"));
         }
 
-        protected string CheckForCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
+        protected string CheckForCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = false)
         {
             if (indentLevel < 0)
                 indentLevel = IndentLevel;
 
             indentLevel += offsetLevel;
 
-            return CheckForComments(indentLevel, context.Start.TokenIndex, TokenStream.GetHiddenTokensToLeft);
+            return CheckForComments(indentLevel, context.Start.TokenIndex, TokenStream.GetHiddenTokensToLeft, preserveLineFeeds);
         }
 
-        protected string CheckForCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
+        protected string CheckForCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = false)
         {
             if (indentLevel < 0)
                 indentLevel = IndentLevel;
 
             indentLevel += offsetLevel;
 
-            return CheckForComments(indentLevel, context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight);
+            return CheckForComments(indentLevel, context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight, preserveLineFeeds);
         }
 
         protected string CheckForEndOfLineComment(ParserRuleContext context)
@@ -106,13 +106,13 @@ namespace go2cs
             return comments.ToString();
         }
 
-        private string CheckForComments(int indentLevel, int tokenIndex, Func<int, int, IList<IToken>> getHiddenTokens)
+        private string CheckForComments(int indentLevel, int tokenIndex, Func<int, int, IList<IToken>> getHiddenTokens, bool preserveLineFeeds)
         {
             StringBuilder comments = new StringBuilder();
             IList<IToken> hiddenChannel = getHiddenTokens(tokenIndex, TokenConstants.HiddenChannel);
             IList<IToken> lineCommentChannel = getHiddenTokens(tokenIndex, GolangLexer.LineCommentChannel);
 
-            WroteCommentWithLineFeed = false;
+            WroteLineFeed = false;
 
             if (hiddenChannel?.Count > 0)
             {
@@ -127,7 +127,20 @@ namespace go2cs
                         else
                             comments.Append(hiddenText);
 
-                        WroteCommentWithLineFeed = hiddenText.EndsWith("\r") || hiddenText.EndsWith("\n");
+                        if (!WroteLineFeed)
+                            WroteLineFeed = EndsWithLineFeed(hiddenText);
+                    }
+                    else if (preserveLineFeeds)
+                    {
+                        hiddenText = PreserveOnlyLineFeeds(hiddenText);
+
+                        if (hiddenText.Length > 0)
+                        {
+                            comments.Append(hiddenText);
+
+                            if (!WroteLineFeed)
+                                WroteLineFeed = EndsWithLineFeed(hiddenText);
+                        }
                     }
                 }
             }
@@ -145,7 +158,19 @@ namespace go2cs
                         else
                             comments.Append(commentText);
 
-                        WroteCommentWithLineFeed = true;
+                        WroteLineFeed = true;
+                    }
+                    else if (preserveLineFeeds)
+                    {
+                        commentText = PreserveOnlyLineFeeds(commentText);
+
+                        if (commentText.Length > 0)
+                        {
+                            comments.Append(commentText);
+
+                            if (!WroteLineFeed)
+                                WroteLineFeed = EndsWithLineFeed(commentText);
+                        }
                     }
                 }
             }
@@ -156,9 +181,26 @@ namespace go2cs
         private bool CommentOnNewLine(IList<IToken> hiddenChannel, IToken testToken)
         {
             IToken priorToken = hiddenChannel?.FirstOrDefault(token => token.StopIndex == testToken.StartIndex - 1);
+            return priorToken != null && EndsWithLineFeed(priorToken.Text);
+        }
 
-            if (priorToken != null)
-                return priorToken.Text.EndsWith("\r") || priorToken.Text.EndsWith("\n");
+        private string PreserveOnlyLineFeeds(string line)
+        {
+            return new string(Array.FindAll(line.ToCharArray(), c => c == '\r' || c == '\n'));
+        }
+
+        private bool EndsWithLineFeed(string line)
+        {
+            int lastLineFeed = line.LastIndexOf('\n');
+
+            if (lastLineFeed == -1)
+                return false;
+
+            if (lastLineFeed == line.Length - 1)
+                return true;
+
+            if (line.Substring(lastLineFeed + 1).Trim().Length == 0)
+                return true;
 
             return false;
         }

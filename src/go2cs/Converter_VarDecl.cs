@@ -60,16 +60,14 @@ namespace go2cs
             ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions);
 
             if ((object)expressions != null && identifiers.Length != expressions.Length)
-            {
-                AddWarning(context, $"Encountered identifier to expression count mismatch in var specification expression: {context.GetText()}");
-                return;
-            }
+                AddWarning(context, $"Encountered count mismatch for identifiers and expressions in var specification expression: {context.GetText()}");
 
             Types.TryGetValue(context.type(), out TypeInfo typeInfo);
 
             string type = typeInfo?.PrimitiveName ?? "var";
+            int length = Math.Min(identifiers.Length, expressions?.Length ?? int.MaxValue);
 
-            for (int i = 0; i < identifiers.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 string identifier = SanitizedIdentifier(identifiers[i]);
                 string expression = expressions?[i];
@@ -90,10 +88,18 @@ namespace go2cs
                 if ((object)expression != null)
                     m_targetFile.Append($" = {expression}");
 
-                m_targetFile.Append($";{CheckForCommentsRight(context)}");
+                // Since multiple specifications can be on one line, only check for comments after last specification
+                if (i < length - 1)
+                {
+                    m_targetFile.AppendLine(";");
+                }
+                else
+                {
+                    m_targetFile.Append($";{CheckForCommentsRight(context, preserveLineFeeds: m_inFunction)}");
 
-                if (!WroteCommentWithLineFeed)
-                    m_targetFile.AppendLine();
+                    if (!WroteLineFeed)
+                        m_targetFile.AppendLine();
+                }
             }
         }
     }

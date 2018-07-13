@@ -108,7 +108,7 @@ namespace go2cs
 
                 m_targetFile.Append(CheckForCommentsRight(context));
 
-                if (!WroteCommentWithLineFeed)
+                if (!WroteLineFeed)
                     m_targetFile.AppendLine();
 
                 m_iota++;

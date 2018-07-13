@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -29,6 +30,8 @@ namespace go2cs
     public partial class Converter
     {
         private readonly Stack<StringBuilder> m_blocks = new Stack<StringBuilder>();
+        private readonly Stack<String> m_blockPrefixInjection = new Stack<string>();
+        private readonly Stack<String> m_blockSuffixInjection = new Stack<string>();
         private bool m_firstStatementIsReturn;
 
         private void PushBlock()
@@ -56,6 +59,16 @@ namespace go2cs
             return block;
         }
 
+        private void PushBlockPrefix(string prefix)
+        {
+            m_blockPrefixInjection.Push(prefix);
+        }
+
+        private void PushBlockSuffix(string suffix)
+        {
+            m_blockSuffixInjection.Push(suffix);
+        }
+
         public override void EnterBlock(GolangParser.BlockContext context)
         {
             // block
@@ -65,7 +78,26 @@ namespace go2cs
             //     : (statement eos )*
 
             PushBlock();
-            m_targetFile.AppendLine($"{Spacing()}{{");
+
+            if (m_blockPrefixInjection.Count > 0)
+                m_targetFile.Append(m_blockPrefixInjection.Pop());
+
+            m_targetFile.Append($"{Spacing()}{{");
+
+            string comments = CheckForCommentsLeft(context.statementList(), preserveLineFeeds: true);
+
+            if (!string.IsNullOrEmpty(comments?.Trim()))
+            {
+                m_targetFile.Append($"{Environment.NewLine}{FixForwardSpacing(comments, 1)}");
+
+                if (!WroteLineFeed)
+                    m_targetFile.AppendLine();
+            }
+            else
+            {
+                m_targetFile.AppendLine();
+            }
+
             m_firstStatementIsReturn = false;
 
             IndentLevel++;
@@ -81,6 +113,13 @@ namespace go2cs
                 m_firstStatementIsReturn = statementListContext.statement(0).returnStmt() != null;
 
             m_targetFile.Append($"{Spacing()}}}");
+
+            if (IndentLevel > 2)
+                m_targetFile.Append(CheckForEndOfLineComment(context));
+
+            if (m_blockSuffixInjection.Count > 0)
+                m_targetFile.Append(m_blockSuffixInjection.Pop());
+
             PopBlock();
         }
     }

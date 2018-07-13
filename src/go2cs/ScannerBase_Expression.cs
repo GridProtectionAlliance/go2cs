@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using System;
 using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System.Collections.Generic;
@@ -64,7 +65,7 @@ namespace go2cs
             if (context.expression()?.Length == 2)
             {
                 string binaryOP = context.children[1].GetText();
-                binaryOP = binaryOP.Equals("&^") ? " & ~" : $" {binaryOP} ";
+                binaryOP = binaryOP.Equals("&^", StringComparison.Ordinal) ? " & ~" : $" {binaryOP} ";
                 Expressions[context] = $"{Expressions[context.expression(0)]}{binaryOP}{Expressions[context.expression(1)]}";
             }
             else
@@ -87,23 +88,23 @@ namespace go2cs
             {
                 string unaryOP = context.children[0].GetText();
 
-                if (unaryOP.Equals("^"))
+                if (unaryOP.Equals("^", StringComparison.Ordinal))
                 {
                     unaryOP = "~";
                 }
-                else if (unaryOP.Equals("<-"))
+                else if (unaryOP.Equals("<-", StringComparison.Ordinal))
                 {
                     // TODO: Handle channel value access (update when channel class is created):
                     unaryOP = null;
                     UnaryExpressions[context] = $"{UnaryExpressions[context.unaryExpr()]}.Receive()";
                 }
-                else if (unaryOP.Equals("&"))
+                else if (unaryOP.Equals("&", StringComparison.Ordinal))
                 {
                     // TODO: Handle pointer acquisition context - may need to augment pre-scan metadata for heap allocation notation
                     unaryOP = null;
                     UnaryExpressions[context] = $"ref {UnaryExpressions[context.unaryExpr()]}";
                 }
-                else if (unaryOP.Equals("*"))
+                else if (unaryOP.Equals("*", StringComparison.Ordinal))
                 {
                     // TODO: Handle pointer dereference context - if this is a ref variable, Deref call is unnecessary
                     unaryOP = null;
