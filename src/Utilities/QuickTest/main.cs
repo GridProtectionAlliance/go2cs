@@ -37,7 +37,7 @@ namespace go
             Console.ReadLine();
         }
 
-        public interface Abser
+        public partial interface Abser
         {
             double Abs();
         }

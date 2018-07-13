@@ -133,7 +133,7 @@ if (!NamespacePrefix.Equals("go")) {
             
             #line default
             #line hidden
-            this.Write("\r\n        {");
+            this.Write(" : EmptyInterface\r\n        {");
             
             #line 39 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
 

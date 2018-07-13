@@ -39,10 +39,21 @@ namespace go
     public static class builtin
     {
         /// <summary>
+        /// Represents the Go interface type known as the empty interface.
+        /// </summary>
+        /// <remarks>
+        /// An empty interface may hold values of any Go type as every type implements at least
+        /// zero methods. All Go types converted to C# inherit this interface.
+        /// </remarks>
+        public interface EmptyInterface
+        {
+        }
+
+        /// <summary>
         /// The built-in error interface type is the conventional interface for representing an
         /// error condition, with the nil value representing no error.
         /// </summary>
-        public interface error
+        public interface error : EmptyInterface
         {
             /// <summary>
             /// Get string that represents an error.

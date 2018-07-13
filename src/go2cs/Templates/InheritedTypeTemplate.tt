@@ -20,7 +20,7 @@ using go;
     public static partial class <#=PackageName#>_package
     {
         [<#=GeneratedCodeAttribute#>]
-        <#=Scope#> partial struct <#=StructName#>
+        <#=Scope#> partial struct <#=StructName#> : go.builtin.EmptyInterface
         {
             // Value of the <#=StructName#> struct
             private readonly <#=TypeName#> m_value;

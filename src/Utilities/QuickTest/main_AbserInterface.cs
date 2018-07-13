@@ -21,6 +21,11 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
+        public partial interface Abser : EmptyInterface
+        {
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0")]
         public struct Abser<T> : Abser
         {
             private T m_target;

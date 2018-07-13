@@ -104,7 +104,7 @@ namespace go2cs
                 if (inheritedInterfaces.Length > 0)
                     inheritedInterfaces = $" : {inheritedInterfaces}";
 
-                m_targetFile.AppendLine($"{Spacing()}{scope} interface {identifier}{inheritedInterfaces}");
+                m_targetFile.AppendLine($"{Spacing()}{scope} partial interface {identifier}{inheritedInterfaces}");
                 m_targetFile.AppendLine($"{Spacing()}{{");
 
                 foreach (FunctionSignature function in localFunctions)

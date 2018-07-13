@@ -27,13 +27,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using static go.builtin;
 
 namespace go
 {
     /// <summary>
     /// Represents a structure that behaves like a Go string.
     /// </summary>
-    public struct GoString : IReadOnlyList<byte>, IEnumerable<char>, IEnumerable<(int index, char rune)>
+    public struct GoString : EmptyInterface, IReadOnlyList<byte>, IEnumerable<char>, IEnumerable<(int index, char rune)>
     {
         private readonly byte[] m_value;
 

@@ -35,7 +35,7 @@ using go;
             }
         }#>
 
-        <#=Scope#> partial struct <#=StructName#>
+        <#=Scope#> partial struct <#=StructName#> : EmptyInterface
         {<#
             foreach (KeyValuePair<string, List<FunctionSignature>> kvp in PromotedFunctions)
             {

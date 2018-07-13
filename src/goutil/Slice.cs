@@ -34,7 +34,7 @@ using static go.builtin;
 
 namespace go
 {
-    public interface ISlice
+    public interface ISlice : EmptyInterface
     {
         Array Array { get; }
 
