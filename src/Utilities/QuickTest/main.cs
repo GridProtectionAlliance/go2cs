@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {

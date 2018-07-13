@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 #pragma warning disable CS0660, CS0661
 

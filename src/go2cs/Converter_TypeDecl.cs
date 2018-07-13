@@ -341,7 +341,7 @@ namespace go2cs
             if (interfaceName.Equals("error", StringComparison.Ordinal))
             {
                 interfaceInfo = InterfaceInfo.error();
-                fullTypeName = "go.BuiltInFunctions.error";
+                fullTypeName = "go.builtin.error";
                 return true;
             }
 

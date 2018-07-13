@@ -88,7 +88,7 @@ namespace go2cs
                 m_targetFile.Append(packageLevelComments.TrimStart());
 
             // Add commonly required using statements
-            RequiredUsings.Add("static go.BuiltInFunctions");
+            RequiredUsings.Add("static go.builtin");
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  BuiltInFunctions.cs - Gbtc
+//  builtin.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -36,7 +36,7 @@ using static System.Math;
 
 namespace go
 {
-    public static class BuiltInFunctions
+    public static class builtin
     {
         /// <summary>
         /// The built-in error interface type is the conventional interface for representing an

@@ -9,7 +9,7 @@
     <Import_RootNamespace>go</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)BuiltInFunctions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)builtin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GoFunc.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GoString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NilType.cs" />

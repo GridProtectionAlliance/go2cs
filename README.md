@@ -146,7 +146,7 @@ would be converted to C# as:
 using fmt = go.fmt_package;
 using strings = go.strings_package;
 
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {
@@ -185,7 +185,7 @@ Example excerpt of converted code from the Go [`fmt`](https://github.com/golang/
 using strconv = go.strconv_package;
 using utf8 = go.unicode.utf8_package;
 
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {
@@ -254,7 +254,7 @@ The Go code gets converted into C# code like the following:
 ```CSharp
 using fmt = go.fmt_package;
 
-using static goutil.BuiltInFunctions;
+using static go.builtin;
 using goutil;
 
 public static partial class main_package
