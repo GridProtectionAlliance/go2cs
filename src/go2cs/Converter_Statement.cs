@@ -23,7 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using static go2cs.Common;
 
 namespace go2cs
@@ -33,11 +32,21 @@ namespace go2cs
         public const string IfElseMarker = ">>MARKER:IFELSE_LEVEL_{0}<<";
         public const string IfExpressionMarker = ">>MARKER:IFEXPR_LEVEL_{0}<<";
 
+        private readonly Dictionary<string, bool> m_labels = new Dictionary<string, bool>(StringComparer.Ordinal);
+        private readonly Stack<HashSet<string>> m_blockLabeledContinues = new Stack<HashSet<string>>();
+        private readonly Stack<HashSet<string>> m_blockLabeledBreaks = new Stack<HashSet<string>>();
         private int m_ifExpressionLevel;
 
         public override void EnterLabeledStmt(GolangParser.LabeledStmtContext context)
         {
+            // labeledStmt
+            //     : IDENTIFIER ':' statement
+
             PushBlock();
+            m_labels.Add(SanitizedIdentifier(context.IDENTIFIER().GetText()), false);
+
+            // Check labeled continue in for loop
+            // Check labeled break in for loop, select and switch
         }
 
         public override void ExitLabeledStmt(GolangParser.LabeledStmtContext context)
@@ -48,7 +57,12 @@ namespace go2cs
             string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
             string statement = PopBlock(false);
 
-            m_targetFile.Append($"{label}:{Environment.NewLine}{Environment.NewLine}{statement}");
+            m_targetFile.Append($"{label}:{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+
+            if (!WroteLineFeed)
+                m_targetFile.AppendLine();
+
+            m_targetFile.Append(statement);
         }
 
         public override void ExitSendStmt(GolangParser.SendStmtContext context)
@@ -235,7 +249,35 @@ namespace go2cs
             // breakStmt
             //     : 'break' IDENTIFIER ?
 
-            string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
+            bool breakHandled = false;
+
+            if (context.IDENTIFIER() != null)
+            {
+                string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
+
+                if (m_labels.ContainsKey(label))
+                {
+                    breakHandled = true;
+
+                    foreach (HashSet<string> blockBreaks in m_blockLabeledBreaks)
+                        blockBreaks.Add(label);
+
+                    m_targetFile.Append($"_break{label} = true;{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+
+                    if (!WroteLineFeed)
+                        m_targetFile.AppendLine();
+
+                    m_targetFile.AppendLine("break;");
+                }
+            }
+
+            if (!breakHandled)
+            {
+                m_targetFile.Append($"break;{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+
+                if (!WroteLineFeed)
+                    m_targetFile.AppendLine();
+            }
         }
 
         public override void ExitContinueStmt(GolangParser.ContinueStmtContext context)
@@ -243,7 +285,35 @@ namespace go2cs
             // continueStmt
             //     : 'continue' IDENTIFIER ?
 
-            string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
+            bool continueHandled = false;
+
+            if (context.IDENTIFIER() != null)
+            {
+                string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
+
+                if (m_labels.ContainsKey(label))
+                {
+                    continueHandled = true;
+
+                    foreach (HashSet<string> blockContinues in m_blockLabeledContinues)
+                        blockContinues.Add(label);
+
+                    m_targetFile.Append($"_continue{label} = true;{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+
+                    if (!WroteLineFeed)
+                        m_targetFile.AppendLine();
+
+                    m_targetFile.AppendLine("break;");
+                }
+            }
+
+            if (!continueHandled)
+            {
+                m_targetFile.Append($"continue;{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+
+                if (!WroteLineFeed)
+                    m_targetFile.AppendLine();
+            }
         }
 
         public override void ExitGotoStmt(GolangParser.GotoStmtContext context)
@@ -261,6 +331,11 @@ namespace go2cs
         {
             // fallthroughStmt
             //     : 'fallthrough'
+
+            m_targetFile.Append($"{Spacing()}// fallthrough;{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+
+            if (!WroteLineFeed)
+                m_targetFile.AppendLine();
         }
 
         public override void EnterIfStmt(GolangParser.IfStmtContext context)
@@ -337,6 +412,18 @@ namespace go2cs
         {
             // deferStmt
             //     : 'defer' expression
+
+            if (Expressions.TryGetValue(context.expression(), out string expression))
+            {
+                m_targetFile.Append($"{Spacing()}defer({expression});{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+
+                if (!WroteLineFeed)
+                    m_targetFile.AppendLine();
+            }
+            else
+            {
+                AddWarning(context, $"Failed to find expression for defer statement: {context.GetText()}");
+            }
         }
     }
 }
