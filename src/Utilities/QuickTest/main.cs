@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 
 namespace go
 {
@@ -25,14 +23,6 @@ namespace go
             value = Main9().Value;
 
             Console.WriteLine("Ref int out2 = {0}", value);
-
-            GoString a = "hello";
-            GoString b = a;
-
-            a += "more";
-
-            Console.WriteLine(a);
-            Console.WriteLine(b);
 
             Console.ReadLine();
         }

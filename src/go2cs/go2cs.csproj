@@ -138,6 +138,9 @@
         <EmbeddedResource Include="..\goutil\Slice.cs">
             <Link>goutil\Slice.cs</Link>
         </EmbeddedResource>
+        <EmbeddedResource Include="..\goutil\SwitchExpression.cs">
+            <Link>goutil\SwitchExpression.cs</Link>
+        </EmbeddedResource>
         <EmbeddedResource Include="..\goutil\TypeExtensions.cs">
             <Link>goutil\TypeExtensions.cs</Link>
         </EmbeddedResource>

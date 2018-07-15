@@ -21,8 +21,10 @@
 //
 //******************************************************************************************************
 
+using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using static go2cs.Common;
 
 namespace go2cs
@@ -31,11 +33,17 @@ namespace go2cs
     {
         public const string IfElseMarker = ">>MARKER:IFELSE_LEVEL_{0}<<";
         public const string IfExpressionMarker = ">>MARKER:IFEXPR_LEVEL_{0}<<";
+        public const string TypeSwitchExpressionMarker = ">>MARKER:TYPESWITCH_LEVEL_{0}<<";
+        public const string TypeSwitchCaseTypeMarker = ">>MARKER:TYPESWITCHCASE_LEVEL_{0}<<";
 
         private readonly Dictionary<string, bool> m_labels = new Dictionary<string, bool>(StringComparer.Ordinal);
         private readonly Stack<HashSet<string>> m_blockLabeledContinues = new Stack<HashSet<string>>();
         private readonly Stack<HashSet<string>> m_blockLabeledBreaks = new Stack<HashSet<string>>();
+        private readonly Stack<StringBuilder> m_exprSwitchDefaultCase = new Stack<StringBuilder>();
+        private readonly Stack<StringBuilder> m_typeSwitchDefaultCase = new Stack<StringBuilder>();
         private int m_ifExpressionLevel;
+        private int m_typeSwitchExpressionLevel;
+        private bool m_fallThrough;
 
         public override void EnterLabeledStmt(GolangParser.LabeledStmtContext context)
         {
@@ -332,10 +340,7 @@ namespace go2cs
             // fallthroughStmt
             //     : 'fallthrough'
 
-            m_targetFile.Append($"{Spacing()}// fallthrough;{CheckForCommentsRight(context, preserveLineFeeds: true)}");
-
-            if (!WroteLineFeed)
-                m_targetFile.AppendLine();
+            m_fallThrough = true;
         }
 
         public override void EnterIfStmt(GolangParser.IfStmtContext context)
@@ -390,10 +395,159 @@ namespace go2cs
             }
         }
 
-        public override void ExitSwitchStmt(GolangParser.SwitchStmtContext context)
+        public override void EnterExprSwitchStmt(GolangParser.ExprSwitchStmtContext context)
         {
-            // switchStmt
-            //     : exprSwitchStmt | typeSwitchStmt
+            // exprSwitchStmt
+            //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
+
+            if (context.simpleStmt() != null && context.simpleStmt().shortVarDecl() != null)
+            {
+                // Any declared variable will be scoped to switch statement, so create a sub-block for it
+                m_targetFile.AppendLine($"{Spacing()}{{");
+                IndentLevel++;
+            }
+        }
+
+        public override void ExitExprSwitchStmt(GolangParser.ExprSwitchStmtContext context)
+        {
+            // exprSwitchStmt
+            //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
+
+            // exprCaseClause
+            //     : exprSwitchCase ':' statementList
+
+            // exprSwitchCase
+            //     : 'case' expressionList | 'default'
+
+            if (context.simpleStmt() != null && context.simpleStmt().shortVarDecl() != null)
+            {
+                // Close any locally scoped declared variable sub-block
+                IndentLevel--;
+                m_targetFile.AppendLine($"{Spacing()}}}");
+            }
+        }
+
+        public override void EnterTypeSwitchStmt(GolangParser.TypeSwitchStmtContext context)
+        {
+            // typeSwitchStmt
+            //     : 'switch'(simpleStmt ';') ? typeSwitchGuard '{' typeCaseClause * '}'
+
+            // typeSwitchGuard
+            //     : ( IDENTIFIER ':=' )? primaryExpr '.' '(' 'type' ')'
+
+            if (context.simpleStmt() != null && context.simpleStmt().shortVarDecl() != null)
+            {
+                // Any declared variable will be scoped to switch statement, so create a sub-block for it
+                m_targetFile.AppendLine($"{Spacing()}{{");
+                IndentLevel++;
+            }
+
+            m_typeSwitchExpressionLevel++;
+
+            string identifier = context.typeSwitchGuard().IDENTIFIER() != null ? SanitizedIdentifier(context.typeSwitchGuard().IDENTIFIER().GetText()) : "_type";
+
+            m_targetFile.AppendLine($"{Spacing()}object {identifier} = {string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)};");
+            m_targetFile.AppendLine();
+            m_targetFile.AppendLine($"{Spacing()}Switch({identifier})");
+
+            IndentLevel++;
+
+            m_typeSwitchDefaultCase.Push(new StringBuilder());
+        }
+
+        public override void EnterTypeCaseClause(GolangParser.TypeCaseClauseContext context)
+        {
+            // typeCaseClause
+            //     : typeSwitchCase ':' statementList
+
+            // typeSwitchCase
+            //     : 'case' typeList | 'default'
+
+            // typeList
+            //     : type ( ',' type )*
+
+            if (context.typeSwitchCase().typeList() == null)
+                m_typeSwitchDefaultCase.Peek().AppendLine($"{Spacing()}.Default(() =>{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
+            else
+                m_targetFile.AppendLine($"{Spacing()}.Case({string.Format(TypeSwitchCaseTypeMarker, m_typeSwitchExpressionLevel)})(() =>{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
+            
+            IndentLevel++;
+
+            PushBlock();
+        }
+
+        public override void ExitTypeCaseClause(GolangParser.TypeCaseClauseContext context)
+        {
+            // typeCaseClause
+            //     : typeSwitchCase ':' statementList
+
+            // typeSwitchCase
+            //     : 'case' typeList | 'default'
+
+            // typeList
+            //     : type ( ',' type )*
+
+            IndentLevel--;
+
+            if (context.typeSwitchCase().typeList() == null)
+            {
+                m_typeSwitchDefaultCase.Peek().AppendLine($"{PopBlock(false)}{Spacing()}}})");
+            }
+            else
+            {
+                PopBlock();
+                m_targetFile.AppendLine($"{Spacing()}}}{(m_fallThrough ? ", fallthrough" : "")})");
+
+                GolangParser.TypeListContext typeList = context.typeSwitchCase().typeList();
+                List<string> types = new List<string>();
+
+                for (int i = 0; i < typeList.type().Length; i++)
+                {
+                    if (Types.TryGetValue(typeList.type(i), out TypeInfo typeInfo))
+                        types.Add($"typeof({typeInfo.PrimitiveName})");
+                    else
+                        AddWarning(typeList, $"Failed to find type info for type switch case statement: {context.typeSwitchCase().GetText()}");
+                }
+
+                // Replace type switch expression marker
+                m_targetFile.Replace(string.Format(TypeSwitchCaseTypeMarker, m_typeSwitchExpressionLevel), string.Join(", ", types));
+            }
+
+            // Reset fallthrough flag at the end of each case clause
+            m_fallThrough = false;
+        }
+
+        public override void ExitTypeSwitchStmt(GolangParser.TypeSwitchStmtContext context)
+        {
+            // typeSwitchStmt
+            //     : 'switch'(simpleStmt ';') ? typeSwitchGuard '{' typeCaseClause * '}'
+
+            // typeSwitchGuard
+            //     : ( IDENTIFIER ':=' )? primaryExpr '.' '(' 'type' ')'
+
+            IndentLevel--;
+
+            // Default case always needs to be last case clause in SwitchExpression - Go allows its declaration anywhere
+            m_targetFile.Append($"{m_typeSwitchDefaultCase.Pop()};");
+
+            if (PrimaryExpressions.TryGetValue(context.typeSwitchGuard().primaryExpr(), out string expression))
+            {
+                // Replace type switch expression marker
+                m_targetFile.Replace(string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel), expression);
+            }
+            else
+            {
+                AddWarning(context, $"Failed to find primary expression for type switch statement: {context.typeSwitchGuard().GetText()}");
+            }
+
+            m_typeSwitchExpressionLevel--;
+
+            if (context.simpleStmt() != null && context.simpleStmt().shortVarDecl() != null)
+            {
+                // Close any locally scoped declared variable sub-block
+                IndentLevel--;
+                m_targetFile.AppendLine($"{Spacing()}}}");
+            }
         }
 
         public override void ExitSelectStmt(GolangParser.SelectStmtContext context)
