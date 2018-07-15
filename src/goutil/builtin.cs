@@ -117,6 +117,12 @@ namespace go
         public static readonly NilType nil = NilType.Default;
 
         /// <summary>
+        /// Instructs a switch case extension call to transfer control to the first
+        /// statement of the next case clause in an expression.
+        /// </summary>
+        public const bool fallthrough = true;
+
+        /// <summary>
         /// Appends elements to the end of a slice. If it has sufficient capacity, the destination is
         /// resliced to accommodate the new elements. If it does not, a new underlying array will be
         /// allocated.
@@ -400,6 +406,15 @@ namespace go
         /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public static Complex i(double imaginary) => new Complex(0.0D, imaginary);
+
+        /// <summary>
+        /// Creates a new switch expression that behaves like a Go switch statement.
+        /// </summary>
+        /// <param name="value">Switch target value.</param>
+        /// <returns>New switch object that behaves like a Go switch statement.</returns>
+        /// <typeparam name="T">Target type of the switch statement.</typeparam>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SwitchExpression<T> Switch<T>(T value) => new SwitchExpression<T>(value);
 
         // ** Go Function Execution Context Handlers **/
 
