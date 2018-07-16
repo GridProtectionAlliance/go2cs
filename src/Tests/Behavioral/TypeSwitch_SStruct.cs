@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 16 19:42:07 UTC
+//     Generated on 2018 July 16 19:42:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,34 +18,34 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial struct Employee : EmptyInterface
+        public partial struct S : EmptyInterface
         {
             // Constructors
-            public Employee(NilType _)
+            public S(NilType _)
             {
-                this.position = default;
+                this.name = default;
             }
 
-            public Employee(GoString position)
+            public S(GoString name)
             {
-                this.position = position;
+                this.name = name;
             }
 
-            // Enable comparisons between nil and Employee struct
+            // Enable comparisons between nil and S struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(Employee value, NilType nil) => value.Equals(default(Employee));
+            public static bool operator ==(S value, NilType nil) => value.Equals(default(S));
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(Employee value, NilType nil) => !(value == nil);
+            public static bool operator !=(S value, NilType nil) => !(value == nil);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, Employee value) => value == nil;
+            public static bool operator ==(NilType nil, S value) => value == nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, Employee value) => value != nil;
+            public static bool operator !=(NilType nil, S value) => value != nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Employee(NilType nil) => default(Employee);
+            public static implicit operator S(NilType nil) => default(S);
         }
     }
 }

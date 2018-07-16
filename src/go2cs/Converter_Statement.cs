@@ -444,11 +444,18 @@ namespace go2cs
 
             m_typeSwitchExpressionLevel++;
 
-            string identifier = context.typeSwitchGuard().IDENTIFIER() != null ? SanitizedIdentifier(context.typeSwitchGuard().IDENTIFIER().GetText()) : "_type";
+            if (context.typeSwitchGuard().IDENTIFIER() != null)
+            {
+                string identifier = SanitizedIdentifier(context.typeSwitchGuard().IDENTIFIER().GetText());
 
-            m_targetFile.AppendLine($"{Spacing()}object {identifier} = {string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)};");
-            m_targetFile.AppendLine();
-            m_targetFile.AppendLine($"{Spacing()}Switch({identifier})");
+                m_targetFile.AppendLine($"{Spacing()}var {identifier} = {string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)};");
+                m_targetFile.AppendLine();
+                m_targetFile.AppendLine($"{Spacing()}Switch({identifier})");
+            }
+            else
+            {
+                m_targetFile.AppendLine($"{Spacing()}Switch({string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)})");
+            }
 
             IndentLevel++;
 
@@ -504,9 +511,18 @@ namespace go2cs
                 for (int i = 0; i < typeList.type().Length; i++)
                 {
                     if (Types.TryGetValue(typeList.type(i), out TypeInfo typeInfo))
-                        types.Add($"typeof({typeInfo.PrimitiveName})");
+                    {
+                        string typeName = typeInfo.PrimitiveName;
+
+                        if (typeName.Equals("nil", StringComparison.Ordinal))
+                            typeName = "NilType";
+
+                        types.Add($"typeof({typeName})");
+                    }
                     else
+                    {
                         AddWarning(typeList, $"Failed to find type info for type switch case statement: {context.typeSwitchCase().GetText()}");
+                    }
                 }
 
                 // Replace type switch expression marker

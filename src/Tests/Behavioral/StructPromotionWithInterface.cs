@@ -1,9 +1,9 @@
-// package main -- go2cs converted at 2018 July 12 19:15:05 UTC
+// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructPromotionWithInterface.go
 
 using fmt = go.fmt_package;
 using time = go.time_package;
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {
@@ -11,7 +11,7 @@ namespace go
     {
         // Above type comment
         // Top inner type comment
-        public interface Abser
+        public partial interface Abser
         {
             double Abs(); // To the right comments
         }
@@ -45,7 +45,9 @@ namespace go
 
         private static void Main()
         {
+            var a = MyCustomError{"New One",nil,MyError{time.Now(),"Hello"}};
             a.Abs();
+            a.Message = "New";
             fmt.Println("MyCustomError method =", a.Abs());
         }
     }

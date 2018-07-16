@@ -1,9 +1,9 @@
-// package main -- go2cs converted at 2018 July 12 19:15:05 UTC
+// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\SortArrayType.go
 
 using fmt = go.fmt_package;
 using sort = go.sort_package;
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {
@@ -28,6 +28,8 @@ namespace go
 
         public static void Swap(this PeopleByShoeSize p, long i, long j)
         {
+            p[i] = p[j];
+            p[j] = p[i];
         }
 
         public static bool Less(this PeopleByShoeSize p, long i, long j)
@@ -37,6 +39,8 @@ namespace go
 
         private static void Main()
         {
+            var people = []Person{{Name:"Person1",Age:25,ShoeSize:8,},{Name:"Person2",Age:21,ShoeSize:4,},{Name:"Person3",Age:15,ShoeSize:9,},{Name:"Person4",Age:45,ShoeSize:15,},{Name:"Person5",Age:25,ShoeSize:8.5,}};
+
             fmt.Println(people);
             sort.Sort(PeopleByShoeSize(people));
             fmt.Println(people);

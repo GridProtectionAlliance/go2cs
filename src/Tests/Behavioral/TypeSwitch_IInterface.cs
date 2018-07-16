@@ -23,90 +23,68 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial interface Animal : EmptyInterface
+        public partial interface I : EmptyInterface
         {
         }
 
         [GeneratedCode("go2cs", "0.1.1.0")]
-        public struct Animal<T> : Animal
+        public struct I<T> : I
         {
             private T m_target;
 
-            private delegate GoString TypeByVal(T value);
-            private delegate GoString TypeByRef(ref T value);
+            private delegate GoString mByVal(T value);
+            private delegate GoString mByRef(ref T value);
 
-            private static readonly TypeByVal s_TypeByVal;
-            private static readonly TypeByRef s_TypeByRef;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public GoString Type() => s_TypeByRef?.Invoke(ref m_target) ?? s_TypeByVal(m_target);
-
-            private delegate GoString SwimByVal(T value);
-            private delegate GoString SwimByRef(ref T value);
-
-            private static readonly SwimByVal s_SwimByVal;
-            private static readonly SwimByRef s_SwimByRef;
+            private static readonly mByVal s_mByVal;
+            private static readonly mByRef s_mByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public GoString Swim() => s_SwimByRef?.Invoke(ref m_target) ?? s_SwimByVal(m_target);
+            public GoString m() => s_mByRef?.Invoke(ref m_target) ?? s_mByVal(m_target);
 
             [DebuggerStepperBoundary]
-            static Animal()
+            static I()
             {
                 Type targetType = typeof(T);
                 MethodInfo extensionMethod;
 
-                extensionMethod = targetType.GetExtensionMethod("Type");
+                extensionMethod = targetType.GetExtensionMethod("m");
 
                 if ((object)extensionMethod != null)
                 {
-                    s_TypeByRef = extensionMethod.CreateStaticDelegate(typeof(TypeByRef)) as TypeByRef;
+                    s_mByRef = extensionMethod.CreateStaticDelegate(typeof(mByRef)) as mByRef;
 
-                    if ((object)s_TypeByRef == null)
-                        s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
+                    if ((object)s_mByRef == null)
+                        s_mByVal = extensionMethod.CreateStaticDelegate(typeof(mByVal)) as mByVal;
                 }
 
-                if ((object)s_TypeByRef == null && (object)s_TypeByVal == null)
-                    throw new NotImplementedException($"{targetType.Name} does not implement Animal.Type method", new Exception("Type"));
-
-                extensionMethod = targetType.GetExtensionMethod("Swim");
-
-                if ((object)extensionMethod != null)
-                {
-                    s_SwimByRef = extensionMethod.CreateStaticDelegate(typeof(SwimByRef)) as SwimByRef;
-
-                    if ((object)s_SwimByRef == null)
-                        s_SwimByVal = extensionMethod.CreateStaticDelegate(typeof(SwimByVal)) as SwimByVal;
-                }
-
-                if ((object)s_SwimByRef == null && (object)s_SwimByVal == null)
-                    throw new NotImplementedException($"{targetType.Name} does not implement Animal.Swim method", new Exception("Swim"));
+                if ((object)s_mByRef == null && (object)s_mByVal == null)
+                    throw new NotImplementedException($"{targetType.Name} does not implement I.m method", new Exception("m"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static explicit operator Animal<T>(T target) => new Animal<T> { m_target = target };
+            public static explicit operator I<T>(T target) => new I<T> { m_target = target };
 
-            // Enable comparisons between nil and Animal<T> interface instance
+            // Enable comparisons between nil and I<T> interface instance
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(Animal<T> value, NilType nil) => (object)value == null || Activator.CreateInstance<Animal<T>>().Equals(value);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(Animal<T> value, NilType nil) => !(value == nil);
+            public static bool operator ==(I<T> value, NilType nil) => (object)value == null || Activator.CreateInstance<I<T>>().Equals(value);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, Animal<T> value) => value == nil;
+            public static bool operator !=(I<T> value, NilType nil) => !(value == nil);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, Animal<T> value) => value != nil;
+            public static bool operator ==(NilType nil, I<T> value) => value == nil;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(NilType nil, I<T> value) => value != nil;
         }
 
         [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static Animal Animal_cast<T>(T target)
+        public static I I_cast<T>(T target)
         {
-            if (typeof(Animal).IsAssignableFrom(typeof(T)))
-                return target as Animal;
+            if (typeof(I).IsAssignableFrom(typeof(T)))
+                return target as I;
 
-            return (Animal<T>)target;
+            return (I<T>)target;
         }
     }
 }
@@ -115,30 +93,30 @@ namespace go
 {
     public partial class NilType
     {
-        // Enable comparisons between nil and Animal interface
+        // Enable comparisons between nil and I interface
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(go.main_package.Animal value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
+        public static bool operator ==(go.main_package.I value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(go.main_package.Animal value, NilType nil) => !(value == nil);
+        public static bool operator !=(go.main_package.I value, NilType nil) => !(value == nil);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(NilType nil, go.main_package.Animal value) => value == nil;
+        public static bool operator ==(NilType nil, go.main_package.I value) => value == nil;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(NilType nil, go.main_package.Animal value) => value != nil;
+        public static bool operator !=(NilType nil, go.main_package.I value) => value != nil;
     }
 
-    public static class main_AnimalExtensions
+    public static class main_IExtensions
     {
         private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new ConcurrentDictionary<Type, MethodInfo>();
 
         [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static T TypeAssert<T>(this go.main_package.Animal target)
+        public static T TypeAssert<T>(this go.main_package.I target)
         {
             try
             {
-                go.main_package.Animal<T> test = (go.main_package.Animal<T>)target;
+                go.main_package.I<T> test = (go.main_package.I<T>)target;
                 return (T)target;
             }
             catch (InvalidCastException)
@@ -152,7 +130,7 @@ namespace go
         }
 
         [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static bool TryTypeAssert<T>(this go.main_package.Animal target, out T result)
+        public static bool TryTypeAssert<T>(this go.main_package.I target, out T result)
         {
             try
             {
@@ -167,11 +145,11 @@ namespace go
         }
 
         [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static object TypeAssert(this go.main_package.Animal target, Type type)
+        public static object TypeAssert(this go.main_package.I target, Type type)
         {
             try
             {
-                MethodInfo conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(go.main_package.Animal<>).GetExplicitGenericConversionOperator(type));
+                MethodInfo conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(go.main_package.I<>).GetExplicitGenericConversionOperator(type));
 
                 if ((object)conversionOperator == null)
                     throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {type.FullName}");
@@ -185,7 +163,7 @@ namespace go
         }
 
         [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static bool TryTypeAssert(this go.main_package.Animal target, Type type, out object result)
+        public static bool TryTypeAssert(this go.main_package.I target, Type type, out object result)
         {
             try
             {

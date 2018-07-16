@@ -61,6 +61,9 @@
     <Compile Include="StructPromotionWithInterface_MyErrorStruct.cs" />
     <Compile Include="StructPromotionWithInterface_MyCustomErrorStruct.cs" />
     <Compile Include="StructWithPointer_ColorListStruct.cs" />
+    <Compile Include="TypeSwitch_IInterface.cs" />
+    <Compile Include="TypeSwitch_TStruct.cs" />
+    <Compile Include="TypeSwitch_SStruct.cs" />
     <Compile Include="ImportOptions_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

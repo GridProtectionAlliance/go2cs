@@ -177,6 +177,8 @@ namespace go
         /// <returns>Method metadata of extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
         public static MethodInfo GetExtensionMethod(this Type targetType, string methodName)
         {
+            // Note that match by function name alone is sufficient as Go does not support function overloading by adjusting signature:
+            // https://golang.org/doc/faq#overloading
             return targetType.GetExtensionMethods().Where(methodInfo => methodInfo.Name == methodName).OrderBy(GetExtensionTargetType, new TypePrecedenceComparer(targetType)).FirstOrDefault();
         }
 
@@ -270,6 +272,32 @@ namespace go
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Finds the explicit conversion operator for converting <paramref name="targetType"/> to
+        /// <paramref name="genericType"/> of <paramref name="targetType"/>.
+        /// </summary>
+        /// <param name="genericType">Generic type to search.</param>
+        /// <param name="targetType">Target type of generic type.</param>
+        /// <returns>Explicit conversion operator, if found; otherwise <c>null</c>.</returns>
+        public static MethodInfo GetExplicitGenericConversionOperator(this Type genericType, Type targetType)
+        {
+            Type genericOfType = genericType.MakeGenericType(targetType);
+
+            return genericOfType
+                   .GetMethods(BindingFlags.Static | BindingFlags.Public)
+                   .FirstOrDefault(method => IsConversionOperator(method, genericOfType, targetType));
+        }
+
+        private static bool IsConversionOperator(MethodInfo method, Type genericOfType, Type targetType)
+        {
+            ParameterInfo[] parameters = method.GetParameters();
+
+            return method.Name == "op_Explicit" && 
+                   method.ReturnType == genericOfType && 
+                   parameters.Length == 1 && 
+                   parameters[0].ParameterType == targetType;
         }
     }
 }

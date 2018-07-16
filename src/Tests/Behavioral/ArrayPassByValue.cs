@@ -1,8 +1,8 @@
-// package main -- go2cs converted at 2018 July 12 19:15:05 UTC
+// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue.go
 
 using fmt = go.fmt_package;
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {
@@ -11,15 +11,25 @@ namespace go
         private static void Main()
         {
             GoString[] a;
+
+            a[0] = "Hello";
+            a[1] = "World";
+
             test(a);
             fmt.Println(a[0], a[1]);
             fmt.Println();
+
+            a[0] = "Hello";
             test2(ref a);
             fmt.Println(a[0], a[1]);
             fmt.Println();
+
+            a[0] = "Hello";
             test3(a.Slice());
             fmt.Println(a[0], a[1]);
             fmt.Println();
+
+            var primes = [6]int{2,3,5,7,11,13};
             fmt.Println(primes);
         }
 
@@ -27,18 +37,21 @@ namespace go
         private static void test(GoString[] a)
         {
             fmt.Println(a[0], a[1]);
+            a[0] = "Goodbye";
             fmt.Println(a[0], a[1]);
         }
 
         private static void test2(ref GoString[] a)
         {
             fmt.Println(a[0], a[1]);
+            a[0] = "Goodbye";
             fmt.Println(a[0], a[1]);
         }
 
         private static void test3(Slice<GoString> a)
         {
             fmt.Println(a[0], a[1]);
+            a[0] = "Goodbye";
             fmt.Println(a[0], a[1]);
         }
     }

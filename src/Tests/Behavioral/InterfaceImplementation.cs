@@ -1,14 +1,14 @@
-// package main -- go2cs converted at 2018 July 12 19:15:05 UTC
+// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\InterfaceImplementation.go
 
 using fmt = go.fmt_package;
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {
     public static partial class main_package
     {
-        public interface Animal
+        public partial interface Animal
         {
             GoString Type();
             GoString Swim();
@@ -31,6 +31,10 @@ namespace go
 
         private static void Main()
         {
+            var f = @new(Frog);
+            var d = @new(Dog);
+            var zoo = [...]Animal{f,d};
+
             {
                 fmt.Println(a.Type(), "can", a.Swim());
             }        }

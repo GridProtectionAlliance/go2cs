@@ -1,15 +1,15 @@
-// package main -- go2cs converted at 2018 July 12 19:15:05 UTC
+// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructPointerPromotionWithInterface.go
 
 using fmt = go.fmt_package;
 using time = go.time_package;
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {
     public static partial class main_package
     {
-        public interface Abser
+        public partial interface Abser
         {
             double Abs();
         }
@@ -30,6 +30,12 @@ namespace go
 
         private static void Main()
         {
+            var e = MyError{time.Now(),"Hello"};
+            var a = MyCustomError{"New One",nil,&e};
+
+            a.Message = "New";
+            a.What = "World";
+
             fmt.Println("MyError What =", e.What);
             fmt.Println("MyCustomError What =", a.What);
         }

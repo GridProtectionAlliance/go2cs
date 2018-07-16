@@ -4,15 +4,16 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 12 19:15:05 UTC
+//     Generated on 2018 July 16 19:42:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
 using System.CodeDom.Compiler;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.BuiltInFunctions;
+using static go.builtin;
 using fmt = go.fmt_package;
 using time = go.time_package;
 
@@ -22,6 +23,11 @@ namespace go
 {
     public static partial class main_package
     {
+        [GeneratedCode("go2cs", "0.1.1.0")]
+        public partial interface Abser : EmptyInterface
+        {
+        }
+
         [GeneratedCode("go2cs", "0.1.1.0")]
         public struct Abser<T> : Abser
         {
@@ -104,6 +110,8 @@ namespace go
 
     public static class main_AbserExtensions
     {
+        private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new ConcurrentDictionary<Type, MethodInfo>();
+
         [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static T TypeAssert<T>(this go.main_package.Abser target)
         {
@@ -133,6 +141,39 @@ namespace go
             catch (PanicException)
             {
                 result = default(T);
+                return false;
+            }
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static object TypeAssert(this go.main_package.Abser target, Type type)
+        {
+            try
+            {
+                MethodInfo conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(go.main_package.Abser<>).GetExplicitGenericConversionOperator(type));
+
+                if ((object)conversionOperator == null)
+                    throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {type.FullName}");
+
+                return conversionOperator.Invoke(null, new object[] { target });
+            }
+            catch (NotImplementedException ex)
+            {
+                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {type.FullName}: missing method {ex.InnerException?.Message}");
+            }
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static bool TryTypeAssert(this go.main_package.Abser target, Type type, out object result)
+        {
+            try
+            {
+                result = target.TypeAssert(type);
+                return true;
+            }
+            catch (PanicException)
+            {
+                result = type.IsValueType ? Activator.CreateInstance(type) : null;
                 return false;
             }
         }

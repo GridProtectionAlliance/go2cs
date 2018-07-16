@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{91b474d5-e15c-41ba-be9a-47e03eee4a53}</ProjectGuid>
+    <ProjectGuid>{b73446bd-9d09-4930-842d-df2a8932907c}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>InterfaceImplementation</AssemblyName>
+    <AssemblyName>TypeSwitch</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -41,7 +41,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InterfaceCasting_MyErrorStruct.cs" />
-    <Compile Include="InterfaceImplementation.cs" />
     <Compile Include="InterfaceImplementation_AnimalInterface.cs" />
     <Compile Include="InterfaceImplementation_DogStruct.cs" />
     <Compile Include="InterfaceImplementation_FrogStruct.cs" />
@@ -61,10 +60,11 @@
     <Compile Include="StructPromotionWithInterface_MyErrorStruct.cs" />
     <Compile Include="StructPromotionWithInterface_MyCustomErrorStruct.cs" />
     <Compile Include="StructWithPointer_ColorListStruct.cs" />
+    <Compile Include="TypeSwitch.cs" />
     <Compile Include="TypeSwitch_IInterface.cs" />
     <Compile Include="TypeSwitch_TStruct.cs" />
     <Compile Include="TypeSwitch_SStruct.cs" />
-    <Compile Include="InterfaceImplementation_AssemblyInfo.cs" />
+    <Compile Include="TypeSwitch_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

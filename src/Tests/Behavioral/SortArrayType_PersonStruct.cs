@@ -4,13 +4,13 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 12 19:15:05 UTC
+//     Generated on 2018 July 16 19:42:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
 using System.CodeDom.Compiler;
 using System.Runtime.CompilerServices;
-using static go.BuiltInFunctions;
+using static go.builtin;
 using fmt = go.fmt_package;
 using sort = go.sort_package;
 
@@ -19,7 +19,7 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial struct Person
+        public partial struct Person : EmptyInterface
         {
             // Constructors
             public Person(NilType _)

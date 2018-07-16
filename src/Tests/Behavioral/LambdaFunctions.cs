@@ -1,8 +1,8 @@
-// package main -- go2cs converted at 2018 July 12 19:15:05 UTC
+// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\LambdaFunctions.go
 
 using fmt = go.fmt_package;
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {
