@@ -54,7 +54,7 @@ namespace go2cs
             {
                 m_firstTypeSpec = false;
 
-                string comments = CheckForCommentsLeft(context);
+                string comments = CheckForCommentsLeft(context, preserveLineFeeds: m_inFunction);
 
                 if (!string.IsNullOrEmpty(comments))
                     m_targetFile.Append(FixForwardSpacing(comments));
@@ -113,12 +113,7 @@ namespace go2cs
                 }
 
                 m_targetFile.AppendLine($"{Spacing()}}}");
-                m_targetFile.AppendLine();
-
-                string comments = CheckForCommentsRight(context);
-
-                if (!string.IsNullOrEmpty(comments))
-                    m_targetFile.Append(FixForwardSpacing(comments));
+                m_targetFile.Append(CheckForBodyCommentsRight(context));
             }
             else if (Metadata.Structs.TryGetValue(originalIdentifier, out StructInfo structInfo))
             {
@@ -199,12 +194,7 @@ namespace go2cs
                 }
 
                 m_targetFile.AppendLine($"{Spacing()}}}");
-                m_targetFile.AppendLine();
-
-                string comments = CheckForCommentsRight(context);
-
-                if (!string.IsNullOrEmpty(comments))
-                    m_targetFile.Append(FixForwardSpacing(comments));
+                m_targetFile.Append(CheckForBodyCommentsRight(context));
             }
             else if (Types.TryGetValue(context.type(), out TypeInfo typeInfo))
             {
@@ -218,25 +208,13 @@ namespace go2cs
                     if (signature.Equals("Action", StringComparison.Ordinal))
                     {
                         m_targetFile.Append($"{Spacing()}public delegate void {identifier}();");
-
-                        string comments = CheckForCommentsRight(context);
-
-                        if (!string.IsNullOrEmpty(comments))
-                            m_targetFile.Append(FixForwardSpacing(comments));
-
-                        m_targetFile.AppendLine();
+                        m_targetFile.Append(CheckForBodyCommentsRight(context));
                     }
                     else if (signature.StartsWith("Action<", StringComparison.Ordinal))
                     {
                         signature = RemoveSurrounding(signature.Substring(6), "<", ">");
                         m_targetFile.Append($"{Spacing()}public delegate void {identifier}({signature});");
-
-                        string comments = CheckForCommentsRight(context);
-
-                        if (!string.IsNullOrEmpty(comments))
-                            m_targetFile.Append(FixForwardSpacing(comments));
-
-                        m_targetFile.AppendLine();
+                        m_targetFile.Append(CheckForBodyCommentsRight(context));
                     }
                     else if (signature.StartsWith("Func<", StringComparison.Ordinal))
                     {
@@ -249,13 +227,7 @@ namespace go2cs
                             signature = string.Join(", ", parts.Take(parts.Length - 1));
 
                             m_targetFile.Append($"{Spacing()}public delegate {result} {identifier}({signature});");
-
-                            string comments = CheckForCommentsRight(context);
-
-                            if (!string.IsNullOrEmpty(comments))
-                                m_targetFile.Append(FixForwardSpacing(comments));
-
-                            m_targetFile.AppendLine();
+                            m_targetFile.Append(CheckForBodyCommentsRight(context));
                         }
                         else
                         {
@@ -294,6 +266,7 @@ namespace go2cs
                     m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // : {typeInfo.TypeName}");
                     m_targetFile.AppendLine($"{Spacing()}{{");
                     m_targetFile.AppendLine($"{Spacing()}}}");
+                    m_targetFile.Append(CheckForBodyCommentsRight(context));
                 }
             }
         }

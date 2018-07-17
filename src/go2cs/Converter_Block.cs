@@ -88,7 +88,7 @@ namespace go2cs
 
             if (!string.IsNullOrEmpty(comments?.Trim()))
             {
-                m_targetFile.Append($"{Environment.NewLine}{FixForwardSpacing(comments, 1)}");
+                m_targetFile.Append($"{(WroteLineFeed ? "" : Environment.NewLine)}{FixForwardSpacing(comments, 1)}");
 
                 if (!WroteLineFeed)
                     m_targetFile.AppendLine();
@@ -114,11 +114,10 @@ namespace go2cs
 
             m_targetFile.Append($"{Spacing()}}}");
 
-            if (IndentLevel > 2)
-                m_targetFile.Append(CheckForEndOfLineComment(context));
-
             if (m_blockSuffixInjection.Count > 0)
                 m_targetFile.Append(m_blockSuffixInjection.Pop());
+
+            m_targetFile.Append(CheckForBodyCommentsRight(context));
 
             PopBlock();
         }

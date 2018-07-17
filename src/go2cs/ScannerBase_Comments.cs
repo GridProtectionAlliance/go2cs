@@ -49,7 +49,7 @@ namespace go2cs
             return new string(' ', BaseSpacing * indentLevel);
         }
 
-        protected string FixForwardSpacing(string source, int offsetLevel = 0, int indentLevel = -1, bool autoTrim = true)
+        protected string FixForwardSpacing(string source, int offsetLevel = 0, int indentLevel = -1, bool autoTrim = true, bool firstIsEOLComment = false)
         {
             if (indentLevel < 0)
                 indentLevel = IndentLevel;
@@ -58,7 +58,18 @@ namespace go2cs
 
             string forwardSpacing = Spacing(0, indentLevel);
             string[] lines = source.Split(NewLineDelimeters, StringSplitOptions.None);
-            return string.Join(Environment.NewLine, lines.Select(line => string.IsNullOrWhiteSpace(line) ? "" : $"{forwardSpacing}{(autoTrim? line.Trim() : line)}"));
+           
+            return string.Join(Environment.NewLine, lines.Select((line, index) => string.IsNullOrWhiteSpace(line) ? "" : $"{(index > 0 || !firstIsEOLComment ? forwardSpacing : "")}{(autoTrim ? line.Trim() : line)}"));
+        }
+
+        protected string CheckForBodyCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = true)
+        {
+            return FixForwardSpacing(CheckForCommentsLeft(context, offsetLevel, indentLevel, preserveLineFeeds), firstIsEOLComment: IsEndOfLineComment(context));
+        }
+
+        protected string CheckForBodyCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = true)
+        {
+            return FixForwardSpacing(CheckForCommentsRight(context, offsetLevel, indentLevel, preserveLineFeeds), firstIsEOLComment: IsEndOfLineComment(context));
         }
 
         protected string CheckForCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = false)
@@ -104,6 +115,22 @@ namespace go2cs
             }
 
             return comments.ToString();
+        }
+
+        protected bool IsEndOfLineComment(ParserRuleContext context)
+        {
+            IList<IToken> lineCommentChannel = TokenStream.GetHiddenTokensToRight(context.Stop.TokenIndex, GolangLexer.LineCommentChannel);
+
+            if (lineCommentChannel?.Count > 0)
+            {
+                IToken token = lineCommentChannel[0];
+                string commentText = token.Text;
+
+                if (commentText.Trim().StartsWith("//"))
+                    return !CommentOnNewLine(TokenStream.GetHiddenTokensToLeft(token.TokenIndex), token);
+            }
+
+            return false;
         }
 
         private string CheckForComments(int indentLevel, int tokenIndex, Func<int, int, IList<IToken>> getHiddenTokens, bool preserveLineFeeds)

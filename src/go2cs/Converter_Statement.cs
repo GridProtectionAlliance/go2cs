@@ -33,9 +33,11 @@ namespace go2cs
     {
         public const string IfElseMarker = ">>MARKER:IFELSE_LEVEL_{0}<<";
         public const string IfExpressionMarker = ">>MARKER:IFEXPR_LEVEL_{0}<<";
+        public const string IfStatementMarker = ">>MARKER:IFSTATEMENT_LEVEL_{0}<<";
         public const string TypeSwitchExpressionMarker = ">>MARKER:TYPESWITCH_LEVEL_{0}<<";
         public const string TypeSwitchCaseTypeMarker = ">>MARKER:TYPESWITCHCASE_LEVEL_{0}<<";
 
+        private readonly ParseTreeValues<string> m_simpleStatements = new ParseTreeValues<string>();
         private readonly Dictionary<string, bool> m_labels = new Dictionary<string, bool>(StringComparer.Ordinal);
         private readonly Stack<HashSet<string>> m_blockLabeledContinues = new Stack<HashSet<string>>();
         private readonly Stack<HashSet<string>> m_blockLabeledBreaks = new Stack<HashSet<string>>();
@@ -44,6 +46,17 @@ namespace go2cs
         private int m_ifExpressionLevel;
         private int m_typeSwitchExpressionLevel;
         private bool m_fallThrough;
+
+        public override void ExitStatement(GolangParser.StatementContext context)
+        {
+            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
+            {
+                if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statememt))
+                    m_targetFile.Append(statememt);
+                else
+                    AddWarning(context, $"Failed to find simple statement for: {context.GetText()}");
+            }
+        }
 
         public override void EnterLabeledStmt(GolangParser.LabeledStmtContext context)
         {
@@ -65,7 +78,7 @@ namespace go2cs
             string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
             string statement = PopBlock(false);
 
-            m_targetFile.Append($"{label}:{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+            m_targetFile.Append($"{label}:{CheckForBodyCommentsRight(context)}");
 
             if (!WroteLineFeed)
                 m_targetFile.AppendLine();
@@ -80,10 +93,14 @@ namespace go2cs
 
             if (Expressions.TryGetValue(context.expression(0), out string channel) && Expressions.TryGetValue(context.expression(1), out string value))
             {
-                m_targetFile.Append($"{Spacing()}{channel}.Send({value});{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+                StringBuilder statement = new StringBuilder();
+
+                statement.Append($"{Spacing()}{channel}.Send({value});{CheckForBodyCommentsRight(context)}");
 
                 if (!WroteLineFeed)
-                    m_targetFile.AppendLine();
+                    statement.AppendLine();
+
+                m_simpleStatements[context.Parent] = statement.ToString();
             }
             else
             {
@@ -98,10 +115,14 @@ namespace go2cs
 
             if (Expressions.TryGetValue(context.expression(), out string expression))
             {
-                m_targetFile.Append($"{Spacing()}{expression};{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+                StringBuilder statement = new StringBuilder();
+
+                statement.Append($"{Spacing()}{expression};{CheckForBodyCommentsRight(context)}");
 
                 if (!WroteLineFeed)
-                    m_targetFile.AppendLine();
+                    statement.AppendLine();
+
+                m_simpleStatements[context.Parent] = statement.ToString();
             }
             else
             {
@@ -116,10 +137,14 @@ namespace go2cs
 
             if (Expressions.TryGetValue(context.expression(), out string expression))
             {
-                m_targetFile.Append($"{Spacing()}{expression}{context.children[1].GetText()};{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+                StringBuilder statement = new StringBuilder();
+
+                statement.Append($"{Spacing()}{expression}{context.children[1].GetText()};{CheckForBodyCommentsRight(context)}");
 
                 if (!WroteLineFeed)
-                    m_targetFile.AppendLine();
+                    statement.AppendLine();
+
+                m_simpleStatements[context.Parent] = statement.ToString();
             }
             else
             {
@@ -134,8 +159,15 @@ namespace go2cs
 
             if (ExpressionLists.TryGetValue(context.expressionList(0), out string[] leftOperands) && ExpressionLists.TryGetValue(context.expressionList(1), out string[] rightOperands))
             {
+                StringBuilder statement = new StringBuilder();
+
                 if (leftOperands.Length != rightOperands.Length)
-                    AddWarning(context, $"Encountered count mismatch for left and right operand expressions in assignment statement: {context.GetText()}");
+                {
+                    if (leftOperands.Length > rightOperands.Length && rightOperands.Length == 1)
+                        leftOperands = new[] { $"({string.Join(", ", leftOperands)})" };
+                    else
+                        AddWarning(context, $"Encountered count mismatch for left and right operand expressions in assignment statement: {context.GetText()}");
+                }
 
                 int length = Math.Min(leftOperands.Length, rightOperands.Length);
                
@@ -154,20 +186,22 @@ namespace go2cs
                         assignOP = $" {assignOP} ";
                     }
 
-                    m_targetFile.Append($"{Spacing()}{leftOperands[i]}{assignOP}{notOP}{rightOperands[i]};");
+                    statement.Append($"{Spacing()}{leftOperands[i]}{assignOP}{notOP}{rightOperands[i]};");
 
                     // Since multiple assignments can be on one line, only check for comments after last assignment
                     if (i < length - 1)
                     {
-                        m_targetFile.AppendLine();
+                        statement.AppendLine();
                     }
                     else
                     {
-                        m_targetFile.Append($"{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+                        statement.Append(CheckForBodyCommentsRight(context));
 
                         if (!WroteLineFeed)
-                            m_targetFile.AppendLine();
+                            statement.AppendLine();
                     }
+
+                    m_simpleStatements[context.Parent] = statement.ToString();
                 }
             }
             else
@@ -183,28 +217,37 @@ namespace go2cs
 
             if (Identifiers.TryGetValue(context.identifierList(), out string[] identifiers) && ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
             {
+                StringBuilder statement = new StringBuilder();
+
                 if (identifiers.Length != expressions.Length)
-                    AddWarning(context, $"Encountered count mismatch for identifiers and expressions in short var declaration statement: {context.GetText()}");
+                {
+                    if (identifiers.Length > expressions.Length && expressions.Length == 1)
+                        identifiers = new[] { $"({string.Join(", ", identifiers)})" };
+                    else
+                        AddWarning(context, $"Encountered count mismatch for identifiers and expressions in short var declaration statement: {context.GetText()}");
+                }
 
                 int length = Math.Min(identifiers.Length, expressions.Length);
 
                 for (int i = 0; i < length; i++)
                 {
-                    m_targetFile.Append($"{Spacing()}var {identifiers[i]} = {expressions[i]};");
+                    statement.Append($"{Spacing()}var {identifiers[i]} = {expressions[i]};");
 
                     // Since multiple declarations can be on one line, only check for comments after last declaration
                     if (i < length - 1)
                     {
-                        m_targetFile.AppendLine();
+                        statement.AppendLine();
                     }
                     else
                     {
-                        m_targetFile.Append($"{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+                        statement.Append(CheckForBodyCommentsRight(context));
 
                         if (!WroteLineFeed)
-                            m_targetFile.AppendLine();
+                            statement.AppendLine();
                     }
                 }
+
+                m_simpleStatements[context.Parent] = statement.ToString();
             }
             else
             {
@@ -220,7 +263,7 @@ namespace go2cs
             if (Expressions.TryGetValue(context.expression(), out string expression))
             {
                 RequiredUsings.Add("System.Threading");
-                m_targetFile.Append($"{Spacing()}ThreadPool.QueueUserWorkItem(state => {expression});{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+                m_targetFile.Append($"{Spacing()}ThreadPool.QueueUserWorkItem(state => {expression});{CheckForBodyCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     m_targetFile.AppendLine();
@@ -246,7 +289,7 @@ namespace go2cs
                     m_targetFile.Append($" {expressions[0]}");
             }
 
-            m_targetFile.Append($";{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+            m_targetFile.Append($";{CheckForBodyCommentsRight(context)}");
 
             if (!WroteLineFeed)
                 m_targetFile.AppendLine();
@@ -270,7 +313,7 @@ namespace go2cs
                     foreach (HashSet<string> blockBreaks in m_blockLabeledBreaks)
                         blockBreaks.Add(label);
 
-                    m_targetFile.Append($"_break{label} = true;{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+                    m_targetFile.Append($"_break{label} = true;{CheckForBodyCommentsRight(context)}");
 
                     if (!WroteLineFeed)
                         m_targetFile.AppendLine();
@@ -281,7 +324,7 @@ namespace go2cs
 
             if (!breakHandled)
             {
-                m_targetFile.Append($"break;{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+                m_targetFile.Append($"break;{CheckForBodyCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     m_targetFile.AppendLine();
@@ -306,7 +349,7 @@ namespace go2cs
                     foreach (HashSet<string> blockContinues in m_blockLabeledContinues)
                         blockContinues.Add(label);
 
-                    m_targetFile.Append($"_continue{label} = true;{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+                    m_targetFile.Append($"_continue{label} = true;{CheckForBodyCommentsRight(context)}");
 
                     if (!WroteLineFeed)
                         m_targetFile.AppendLine();
@@ -317,7 +360,7 @@ namespace go2cs
 
             if (!continueHandled)
             {
-                m_targetFile.Append($"continue;{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+                m_targetFile.Append($"continue;{CheckForBodyCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     m_targetFile.AppendLine();
@@ -329,7 +372,7 @@ namespace go2cs
             // gotoStmt
             //     : 'goto' IDENTIFIER
 
-            m_targetFile.Append($"{Spacing()}goto {SanitizedIdentifier(context.IDENTIFIER().GetText())};{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+            m_targetFile.Append($"{Spacing()}goto {SanitizedIdentifier(context.IDENTIFIER().GetText())};{CheckForBodyCommentsRight(context)}");
 
             if (!WroteLineFeed)
                 m_targetFile.AppendLine();
@@ -348,14 +391,20 @@ namespace go2cs
             // ifStmt
             //     : 'if '(simpleStmt ';') ? expression block ( 'else' ( ifStmt | block ) ) ?
 
-            if (context.simpleStmt() != null && context.simpleStmt().shortVarDecl() != null)
+            m_ifExpressionLevel++;
+
+            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
             {
                 // Any declared variable will be scoped to if statement, so create a sub-block for it
-                m_targetFile.AppendLine($"{Spacing()}{{");
-                IndentLevel++;
+                if (context.simpleStmt().shortVarDecl() != null)
+                {
+                    m_targetFile.AppendLine($"{Spacing()}{{");
+                    IndentLevel++;
+                }
+
+                m_targetFile.Append(string.Format(IfStatementMarker, m_ifExpressionLevel));
             }
 
-            m_ifExpressionLevel++;
             m_targetFile.AppendLine($"{Spacing()}{string.Format(IfElseMarker, m_ifExpressionLevel)}if ({string.Format(IfExpressionMarker, m_ifExpressionLevel)})");
 
             if (context.block().Length == 2)
@@ -363,9 +412,9 @@ namespace go2cs
                 PushBlockSuffix(Environment.NewLine);
                 PushBlockSuffix($"{Environment.NewLine}{Spacing()}else{Environment.NewLine}");
             }
-            else
+            else if (context.Parent is GolangParser.IfStmtContext)
             {
-                PushBlockSuffix(Environment.NewLine);
+                PushBlockPrefix(Environment.NewLine);
             }
         }
 
@@ -376,7 +425,7 @@ namespace go2cs
 
             if (Expressions.TryGetValue(context.expression(), out string expression))
             {
-                // Replace if statement markers
+                // Replace if markers
                 m_targetFile.Replace(string.Format(IfExpressionMarker, m_ifExpressionLevel), expression);
                 m_targetFile.Replace(string.Format(IfElseMarker, m_ifExpressionLevel), context.Parent is GolangParser.IfStmtContext ? "else " : "");
             }
@@ -385,14 +434,22 @@ namespace go2cs
                 AddWarning(context, $"Failed to find expression for if statement: {context.GetText()}");
             }
 
-            m_ifExpressionLevel--;
-
-            if (context.simpleStmt() != null && context.simpleStmt().shortVarDecl() != null)
+            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
             {
+                if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statememt))
+                    m_targetFile.Replace(string.Format(IfStatementMarker, m_ifExpressionLevel), statememt + Environment.NewLine);
+                else
+                    AddWarning(context, $"Failed to find simple statement for if statement: {context.GetText()}");
+                
                 // Close any locally scoped declared variable sub-block
-                IndentLevel--;
-                m_targetFile.AppendLine($"{Spacing()}}}");
+                if (context.simpleStmt().shortVarDecl() != null)
+                {
+                    IndentLevel--;
+                    m_targetFile.AppendLine($"{Spacing()}}}");
+                }
             }
+
+            m_ifExpressionLevel--;
         }
 
         public override void EnterExprSwitchStmt(GolangParser.ExprSwitchStmtContext context)
@@ -585,7 +642,7 @@ namespace go2cs
 
             if (Expressions.TryGetValue(context.expression(), out string expression))
             {
-                m_targetFile.Append($"{Spacing()}defer({expression});{CheckForCommentsRight(context, preserveLineFeeds: true)}");
+                m_targetFile.Append($"{Spacing()}defer({expression});{CheckForBodyCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     m_targetFile.AppendLine();

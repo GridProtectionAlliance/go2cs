@@ -45,7 +45,7 @@ namespace go2cs
             {
                 m_firstVarSpec = false;
 
-                string comments = CheckForCommentsLeft(context);
+                string comments = CheckForCommentsLeft(context, preserveLineFeeds: m_inFunction);
 
                 if (!string.IsNullOrEmpty(comments))
                     m_targetFile.Append(FixForwardSpacing(comments));
@@ -60,7 +60,10 @@ namespace go2cs
             ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions);
 
             if ((object)expressions != null && identifiers.Length != expressions.Length)
+            {
                 AddWarning(context, $"Encountered count mismatch for identifiers and expressions in var specification expression: {context.GetText()}");
+                return;
+            }
 
             Types.TryGetValue(context.type(), out TypeInfo typeInfo);
 
@@ -94,8 +97,11 @@ namespace go2cs
                     m_targetFile.AppendLine(";");
                 }
                 else
-                {
-                    m_targetFile.Append($";{CheckForCommentsRight(context, preserveLineFeeds: m_inFunction)}");
+                {                   
+                    if (m_inFunction)
+                        m_targetFile.Append($";{CheckForBodyCommentsRight(context)}");
+                    else
+                        m_targetFile.Append($";{CheckForEndOfLineComment(context)}");
 
                     if (!WroteLineFeed)
                         m_targetFile.AppendLine();
