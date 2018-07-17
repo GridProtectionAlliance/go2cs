@@ -70,9 +70,9 @@ namespace go2cs
 
             if (!string.IsNullOrWhiteSpace(headerLevelComments))
             {
-                m_targetFile.AppendLine(headerLevelComments);
+                m_targetFile.Append(headerLevelComments);
 
-                if (!headerLevelComments.EndsWith("\r") && !headerLevelComments.EndsWith("\n"))
+                if (!EndsWithLineFeed(headerLevelComments))
                     m_targetFile.AppendLine();
             }
 

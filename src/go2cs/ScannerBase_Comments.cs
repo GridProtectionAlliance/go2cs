@@ -178,18 +178,7 @@ namespace go2cs
             return comments.ToString();
         }
 
-        private bool CommentOnNewLine(IList<IToken> hiddenChannel, IToken testToken)
-        {
-            IToken priorToken = hiddenChannel?.FirstOrDefault(token => token.StopIndex == testToken.StartIndex - 1);
-            return priorToken != null && EndsWithLineFeed(priorToken.Text);
-        }
-
-        private string PreserveOnlyLineFeeds(string line)
-        {
-            return new string(Array.FindAll(line.ToCharArray(), c => c == '\r' || c == '\n'));
-        }
-
-        private bool EndsWithLineFeed(string line)
+        protected bool EndsWithLineFeed(string line)
         {
             int lastLineFeed = line.LastIndexOf('\n');
 
@@ -203,6 +192,17 @@ namespace go2cs
                 return true;
 
             return false;
+        }
+
+        private bool CommentOnNewLine(IList<IToken> hiddenChannel, IToken testToken)
+        {
+            IToken priorToken = hiddenChannel?.FirstOrDefault(token => token.StopIndex == testToken.StartIndex - 1);
+            return priorToken != null && EndsWithLineFeed(priorToken.Text);
+        }
+
+        private string PreserveOnlyLineFeeds(string line)
+        {
+            return new string(Array.FindAll(line.ToCharArray(), c => c == '\r' || c == '\n'));
         }
     }
 }
