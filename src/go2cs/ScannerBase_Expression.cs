@@ -146,7 +146,7 @@ namespace go2cs
                 //     : type '(' expression ',' ? ')'
 
                 if (Types.TryGetValue(context.conversion().type(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.index().expression(), out string expression))
-                    PrimaryExpressions[context] = $"({typeInfo.PrimitiveName}){expression}";
+                    PrimaryExpressions[context] = $"({typeInfo.TypeName}){expression}";
                 else
                     AddWarning(context, $"Failed to find type or sub-expression for the conversion expression in \"{context.GetText()}\"");
             }
@@ -227,7 +227,7 @@ namespace go2cs
                 //     : '.' '(' type ')'
 
                 if (Types.TryGetValue(context.typeAssertion().type(), out TypeInfo typeInfo))
-                    PrimaryExpressions[context] = $"{primaryExpression}.TypeAssert<{typeInfo.PrimitiveName}>()";
+                    PrimaryExpressions[context] = $"{primaryExpression}.TypeAssert<{typeInfo.TypeName}>()";
                 else
                     AddWarning(context, $"Failed to find type for the type assertion expression in \"{context.GetText()}\"");
             }
@@ -240,7 +240,7 @@ namespace go2cs
                 List<string> arguments = new List<string>();
 
                 if (Types.TryGetValue(argumentsContext.type(), out TypeInfo typeInfo))
-                    arguments.Add($"typeof({typeInfo.PrimitiveName})");
+                    arguments.Add($"typeof({typeInfo.TypeName})");
 
                 if (ExpressionLists.TryGetValue(argumentsContext.expressionList(), out string[] expressions))
                     arguments.AddRange(expressions);

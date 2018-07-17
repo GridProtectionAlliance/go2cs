@@ -512,7 +512,7 @@ namespace go2cs
                 {
                     if (Types.TryGetValue(typeList.type(i), out TypeInfo typeInfo))
                     {
-                        string typeName = typeInfo.PrimitiveName;
+                        string typeName = typeInfo.TypeName;
 
                         if (typeName.Equals("nil", StringComparison.Ordinal))
                             typeName = "NilType";

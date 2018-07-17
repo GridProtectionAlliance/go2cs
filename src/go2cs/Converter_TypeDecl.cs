@@ -165,7 +165,7 @@ namespace go2cs
                     {
                         FieldInfo promotedStruct = field.Clone();
 
-                        promotedStruct.Type.PrimitiveName = $"ref {promotedStruct.Type.Name}";
+                        promotedStruct.Type.TypeName = $"ref {promotedStruct.Type.Name}";
                         promotedStruct.Name = $"{promotedStruct.Name} => ref {promotedStruct.Name}_{(promotedStruct.Type.IsPointer ? "ptr" : "val")}";
 
                         fields.Add(promotedStruct);
@@ -194,7 +194,7 @@ namespace go2cs
                         }
                     }
 
-                    fieldDecl.Append($"{Spacing(1)}public {field.Type.PrimitiveName} {field.Name};{(string.IsNullOrEmpty(field.Comments) ? Environment.NewLine : field.Comments)}");
+                    fieldDecl.Append($"{Spacing(1)}public {field.Type.TypeName} {field.Name};{(string.IsNullOrEmpty(field.Comments) ? Environment.NewLine : field.Comments)}");
                     m_targetFile.Append(fieldDecl);
                 }
 
@@ -213,7 +213,7 @@ namespace go2cs
                     RequiredUsings.Decrement("System");
 
                     // Handle delegate type declaration
-                    string signature = typeInfo.PrimitiveName;
+                    string signature = typeInfo.TypeName;
 
                     if (signature.Equals("Action", StringComparison.Ordinal))
                     {
@@ -270,7 +270,7 @@ namespace go2cs
                 else
                 {
                     // Handle named type declaration, e.g., "type MyFloat float64"
-                    string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.PrimitiveName)}).cs");
+                    string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.TypeName)}).cs");
 
                     // TODO: The following works OK for a primitive type re-definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
                     using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
@@ -283,7 +283,7 @@ namespace go2cs
                             PackageName = Package,
                             StructName = identifier,
                             Scope = scope,
-                            TypeName = typeInfo.PrimitiveName
+                            TypeName = typeInfo.TypeName
                         }
                         .TransformText());
                     }
@@ -291,7 +291,7 @@ namespace go2cs
                     // Track file name associated with package
                     AddFileToPackage(Package, ancillaryInheritedTypeFileName, PackageNamespace);
 
-                    m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // : {typeInfo.PrimitiveName}");
+                    m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // : {typeInfo.TypeName}");
                     m_targetFile.AppendLine($"{Spacing()}{{");
                     m_targetFile.AppendLine($"{Spacing()}}}");
                 }
@@ -319,7 +319,7 @@ namespace go2cs
         {
             foreach (FieldInfo field in structInfo.GetAnonymousFields())
             {
-                string interfaceName = field.Type.PrimitiveName;
+                string interfaceName = field.Type.TypeName;
 
                 if (TryFindInheritedInterfaceInfo(interfaceName, out InterfaceInfo inheritedInferfaceInfo, out string shortTypeName, out string fullTypeName))
                 {
@@ -408,7 +408,7 @@ namespace go2cs
                 if (inheritedTypeNames.Contains(field.Name))
                     continue;
 
-                string structName = field.Type.PrimitiveName;
+                string structName = field.Type.TypeName;
 
                 if (TryFindPromotedStructInfo(structName, out StructInfo promotedStructInfo, out string shortTypeName, out string fullTypeName))
                 {

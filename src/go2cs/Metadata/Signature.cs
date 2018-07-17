@@ -35,7 +35,7 @@ namespace go2cs.Metadata
 
         public string GenerateParameterNameList() => string.Join(", ", Parameters.Select(parameter => parameter.Name));
 
-        public string GenerateParameterTypeList() => string.Join(", ", Parameters.Select(parameter => parameter.Type.PrimitiveName));
+        public string GenerateParameterTypeList() => string.Join(", ", Parameters.Select(parameter => parameter.Type.TypeName));
 
         public string GenerateParametersSignature(bool prefixByRef)
         {
@@ -44,12 +44,12 @@ namespace go2cs.Metadata
 
         public IEnumerable<String> GetParameters(bool prefixByRef)
         {
-            return Parameters.Select(parameter => $"{parameter.Type.PrimitiveName} {(prefixByRef && parameter.Type.IsByRefPointer ? "_" : "")}{parameter.Name}");
+            return Parameters.Select(parameter => $"{parameter.Type.TypeName} {(prefixByRef && parameter.Type.IsByRefPointer ? "_" : "")}{parameter.Name}");
         }
 
         public IEnumerable<String> GetByRefParameters(bool includeType)
         {
-            return Parameters.Where(parameter => parameter.Type.IsByRefPointer).Select(parameter => $"{(includeType ? $"{parameter.Type.PrimitiveName} " : "_")}{parameter.Name}");
+            return Parameters.Where(parameter => parameter.Type.IsByRefPointer).Select(parameter => $"{(includeType ? $"{parameter.Type.TypeName} " : "_")}{parameter.Name}");
         }
 
         public string GenerateResultSignature()
@@ -58,9 +58,9 @@ namespace go2cs.Metadata
                 return "void";
 
             if (Result.Length > 1)
-                return $"({string.Join(", ", Result.Select(parameter => parameter.Type.PrimitiveName))})";
+                return $"({string.Join(", ", Result.Select(parameter => parameter.Type.TypeName))})";
 
-            return Result[0].Type.PrimitiveName;
+            return Result[0].Type.TypeName;
         }
     }
 }

@@ -52,8 +52,8 @@ namespace go2cs
             Types[context.Parent] = new TypeInfo
             {
                 Name = type,
-                PrimitiveName = ConvertToPrimitiveType(type),
-                FrameworkName = ConvertToFrameworkType(type),
+                TypeName = ConvertToPrimitiveType(type),
+                FullTypeName = ConvertToFrameworkType(type),
                 TypeClass = TypeClass.Simple
             };
         }
@@ -85,8 +85,8 @@ namespace go2cs
                 Types[context.Parent.Parent] = new TypeInfo
                 {
                     Name = name,
-                    PrimitiveName = $"{prefix}{typeInfo.PrimitiveName}{suffix}",
-                    FrameworkName = $"{prefix}{typeInfo.FrameworkName}{suffix}",
+                    TypeName = $"{prefix}{typeInfo.TypeName}{suffix}",
+                    FullTypeName = $"{prefix}{typeInfo.FullTypeName}{suffix}",
                     IsPointer = true,
                     IsByRefPointer = false,
                     TypeClass = TypeClass.Simple
@@ -97,8 +97,8 @@ namespace go2cs
                 Types[context.Parent.Parent] = new TypeInfo
                 {
                     Name = name,
-                    PrimitiveName = $"ref {typeInfo.PrimitiveName}",
-                    FrameworkName = $"ref {typeInfo.FrameworkName}",
+                    TypeName = $"ref {typeInfo.TypeName}",
+                    FullTypeName = $"ref {typeInfo.FullTypeName}",
                     IsPointer = true,
                     IsByRefPointer = true,
                     TypeClass = TypeClass.Simple
@@ -127,8 +127,8 @@ namespace go2cs
                     Type = new TypeInfo
                     {
                         TypeClass = TypeClass.Simple,
-                        PrimitiveName = "@int",
-                        FrameworkName = "go.@int"
+                        TypeName = "@int",
+                        FullTypeName = "go.@int"
                     }
                 };
             }
@@ -140,8 +140,8 @@ namespace go2cs
                     Type = new TypeInfo
                     {
                         TypeClass = TypeClass.Simple,
-                        PrimitiveName = "@int",
-                        FrameworkName = "go.@int"
+                        TypeName = "@int",
+                        FullTypeName = "go.@int"
                     }
                 };
 
@@ -151,8 +151,8 @@ namespace go2cs
             Types[context.Parent.Parent] = new ArrayTypeInfo
             {
                 Name = name,
-                PrimitiveName = $"{typeInfo.PrimitiveName}[]",
-                FrameworkName = $"{typeInfo.FrameworkName}[]",
+                TypeName = $"{typeInfo.TypeName}[]",
+                FullTypeName = $"{typeInfo.FullTypeName}[]",
                 TypeClass = TypeClass.Array,
                 Length = length
             };
@@ -177,8 +177,8 @@ namespace go2cs
             Types[context.Parent.Parent] = new MapTypeInfo
             {
                 Name = type,
-                PrimitiveName = $"Dictionary<{keyTypeInfo.PrimitiveName}, {elementTypeInfo.PrimitiveName}>",
-                FrameworkName = $"System.Collections.Generic.Dictionary<{keyTypeInfo.FrameworkName}, {elementTypeInfo.FrameworkName}>",
+                TypeName = $"Dictionary<{keyTypeInfo.TypeName}, {elementTypeInfo.TypeName}>",
+                FullTypeName = $"System.Collections.Generic.Dictionary<{keyTypeInfo.FullTypeName}, {elementTypeInfo.FullTypeName}>",
                 ElementTypeInfo = elementTypeInfo,
                 KeyTypeInfo = keyTypeInfo,
                 TypeClass = TypeClass.Map
@@ -195,8 +195,8 @@ namespace go2cs
             Types[context.Parent.Parent] = new TypeInfo
             {
                 Name = typeInfo.Name,
-                PrimitiveName = $"slice<{typeInfo.PrimitiveName}>",
-                FrameworkName = $"go.slice<{typeInfo.FrameworkName}>",
+                TypeName = $"slice<{typeInfo.TypeName}>",
+                FullTypeName = $"go.slice<{typeInfo.FullTypeName}>",
                 TypeClass = TypeClass.Slice
             };
         }
@@ -212,8 +212,8 @@ namespace go2cs
             Types[context.Parent.Parent] = new TypeInfo
             {
                 Name = typeInfo.Name,
-                PrimitiveName = $"channel<{typeInfo.PrimitiveName}>",
-                FrameworkName = $"go.channel<{typeInfo.FrameworkName}>",
+                TypeName = $"channel<{typeInfo.TypeName}>",
+                FullTypeName = $"go.channel<{typeInfo.FullTypeName}>",
                 TypeClass = TypeClass.Channel
             };
         }
@@ -275,8 +275,8 @@ namespace go2cs
             Types[context.Parent.Parent] = new TypeInfo
             {
                 Name = context.GetText(),
-                PrimitiveName = primitiveName,
-                FrameworkName = frameworkName,
+                TypeName = primitiveName,
+                FullTypeName = frameworkName,
                 TypeClass = TypeClass.Function
             };
         }

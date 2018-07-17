@@ -10,6 +10,12 @@ namespace go
     {
         private static void Main()
         {
+            @bool b = false;
+            @string s = "hello";
+            @int i = 12;
+            EmptyInterface eb = b;
+            EmptyInterface ai = (@int)12;
+
             Main1();
             Main2();
             Main3();
@@ -209,12 +215,12 @@ namespace go
 
         private static void Main1()
         {
-            complex64 vi1 = new complex64(0, 0);
+            complex128 vi1 = new complex128(0.0D, 0.0D);
 
             // 12 * 1.5 + 1i * iota / 3 + 2i
             for (int iota = 0; iota < 2; iota++)
             {
-                complex64 result = 12 * 1.5 + i(1) * iota / 3 + i(2);
+                complex128 result = 12 * 1.5 + i(1) * iota / 3 + i(2);
                 Console.WriteLine(result);
             }
 

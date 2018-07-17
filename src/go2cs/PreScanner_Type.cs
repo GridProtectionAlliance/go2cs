@@ -69,7 +69,7 @@ namespace go2cs
 
                         fields.Add(new FieldInfo
                         {
-                            Name = GetValidIdentifierName(typeInfo.PrimitiveName),
+                            Name = GetValidIdentifierName(typeInfo.TypeName),
                             Type = typeInfo,
                             Description = description,
                             Comments = CheckForCommentsRight(fieldDecl),
@@ -107,7 +107,7 @@ namespace go2cs
                     if (Types.TryGetValue(methodSpec, out TypeInfo typeInfo)){
                         methods.Add(new FunctionSignature
                         {
-                            Name = GetValidIdentifierName(typeInfo.PrimitiveName),
+                            Name = GetValidIdentifierName(typeInfo.TypeName),
                             Signature = new Signature
                             {
                                 Parameters = new ParameterInfo[0],

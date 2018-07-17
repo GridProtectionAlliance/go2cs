@@ -246,7 +246,7 @@ if (!NamespacePrefix.Equals("go")) {
             this.Write("\r\n            public ref ");
             
             #line 75 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(decl.Type.PrimitiveName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(decl.Type.TypeName));
             
             #line default
             #line hidden
@@ -351,7 +351,7 @@ if (!NamespacePrefix.Equals("go")) {
 
             foreach (var decl in StructFields)
             {
-                if (PromotedStructs.Contains(decl.Type.PrimitiveName))
+                if (PromotedStructs.Contains(decl.Type.TypeName))
                 {
                     // Promoted struct 
             
@@ -367,14 +367,14 @@ if (!NamespacePrefix.Equals("go")) {
             this.Write("Ref = new Ref<");
             
             #line 116 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(decl.Type.PrimitiveName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(decl.Type.TypeName));
             
             #line default
             #line hidden
             this.Write(">(new ");
             
             #line 116 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(decl.Type.PrimitiveName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(decl.Type.TypeName));
             
             #line default
             #line hidden
@@ -425,7 +425,7 @@ if (!NamespacePrefix.Equals("go")) {
             this.Write("(");
             
             #line 132 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(string.Join(", ", StructFields.Select(field => $"{(field.Type.IsPointer ? "ref " : "")}{field.Type.PrimitiveName} {field.Name}"))));
+            this.Write(this.ToStringHelper.ToStringWithCulture(string.Join(", ", StructFields.Select(field => $"{(field.Type.IsPointer ? "ref " : "")}{field.Type.TypeName} {field.Name}"))));
             
             #line default
             #line hidden
@@ -435,7 +435,7 @@ if (!NamespacePrefix.Equals("go")) {
 
             foreach (var decl in StructFields)
             {
-                if (PromotedStructs.Contains(decl.Type.PrimitiveName))
+                if (PromotedStructs.Contains(decl.Type.TypeName))
                 {
                     // Promoted struct 
             
@@ -451,7 +451,7 @@ if (!NamespacePrefix.Equals("go")) {
             this.Write("Ref = new Ref<");
             
             #line 140 "D:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(decl.Type.PrimitiveName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(decl.Type.TypeName));
             
             #line default
             #line hidden

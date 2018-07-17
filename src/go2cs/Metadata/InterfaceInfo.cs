@@ -45,7 +45,7 @@ namespace go2cs.Metadata
 
         public IEnumerable<string> GetInheritedInterfaceNames()
         {
-            return GetInheritedInterfaces().Select(method => method.Signature.Result[0].Type.PrimitiveName);
+            return GetInheritedInterfaces().Select(method => method.Signature.Result[0].Type.TypeName);
         }
 
         public string GenerateInheritedInterfaceList()
@@ -75,8 +75,8 @@ namespace go2cs.Metadata
                                     Type = new TypeInfo
                                     {
                                         Name = "string",
-                                        PrimitiveName = "string",
-                                        FrameworkName = "System.String",
+                                        TypeName = "@string",
+                                        FullTypeName = "go.@string",
                                         TypeClass = TypeClass.Simple
                                     }
                                 }

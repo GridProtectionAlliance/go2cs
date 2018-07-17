@@ -473,8 +473,8 @@ namespace go2cs
             if (!typeInfo.IsByRefPointer)
                 return typeInfo;
 
-            string primitiveName = typeInfo.PrimitiveName;
-            string frameworkName = typeInfo.FrameworkName;
+            string primitiveName = typeInfo.TypeName;
+            string frameworkName = typeInfo.FullTypeName;
 
             string[] parts = primitiveName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -489,8 +489,8 @@ namespace go2cs
             return new TypeInfo
             {
                 Name = typeInfo.Name,
-                PrimitiveName = primitiveName,
-                FrameworkName = frameworkName,
+                TypeName = primitiveName,
+                FullTypeName = frameworkName,
                 IsPointer = true,
                 IsByRefPointer = false,
                 TypeClass = TypeClass.Simple

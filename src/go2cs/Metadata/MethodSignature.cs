@@ -57,12 +57,12 @@ namespace go2cs.Metadata
 
         public IEnumerable<String> GetReceiverParameters(bool prefixByRef)
         {
-            return ReceiverParameters.Select(parameter => $"{parameter.Type.PrimitiveName} {(prefixByRef && parameter.Type.IsByRefPointer ? "_" : "")}{parameter.Name}");
+            return ReceiverParameters.Select(parameter => $"{parameter.Type.TypeName} {(prefixByRef && parameter.Type.IsByRefPointer ? "_" : "")}{parameter.Name}");
         }
 
         public IEnumerable<String> GetByRefReceiverParameters(bool includeType)
         {
-            return ReceiverParameters.Where(parameter => parameter.Type.IsByRefPointer).Select(parameter => $"{(includeType ? $"{parameter.Type.PrimitiveName} " : "_")}{parameter.Name}");
+            return ReceiverParameters.Where(parameter => parameter.Type.IsByRefPointer).Select(parameter => $"{(includeType ? $"{parameter.Type.TypeName} " : "_")}{parameter.Name}");
         }
     }
 }

@@ -42,8 +42,8 @@ namespace go2cs.Metadata
     public class TypeInfo
     {
         public string Name;
-        public string PrimitiveName;
-        public string FrameworkName;
+        public string TypeName;
+        public string FullTypeName;
         public TypeClass TypeClass;
         public bool IsPointer;
         public bool IsByRefPointer;
@@ -53,8 +53,8 @@ namespace go2cs.Metadata
             return new TypeInfo
             {
                 Name = Name,
-                PrimitiveName = PrimitiveName,
-                FrameworkName = FrameworkName,
+                TypeName = TypeName,
+                FullTypeName = FullTypeName,
                 TypeClass = TypeClass,
                 IsPointer = IsPointer,
                 IsByRefPointer = IsByRefPointer
@@ -64,40 +64,40 @@ namespace go2cs.Metadata
         public static readonly TypeInfo ObjectType = new TypeInfo
         {
             Name = "object",
-            PrimitiveName = "object",
-            FrameworkName = "System.Object",
+            TypeName = "object",
+            FullTypeName = "System.Object",
             TypeClass = TypeClass.Simple
         };
 
         public static readonly TypeInfo VoidType = new TypeInfo
         {
             Name = "void",
-            PrimitiveName = "void",
-            FrameworkName = "void",
+            TypeName = "void",
+            FullTypeName = "void",
             TypeClass = TypeClass.Simple
         };
 
         public static readonly TypeInfo VarType = new TypeInfo
         {
             Name = "var",
-            PrimitiveName = "var",
-            FrameworkName = "var",
+            TypeName = "var",
+            FullTypeName = "var",
             TypeClass = TypeClass.Simple
         };
 
         public static readonly TypeInfo DynamicType = new TypeInfo
         {
             Name = "dynamic",
-            PrimitiveName = "dynamic",
-            FrameworkName = "System.Dynamic.DynamicObject",
+            TypeName = "dynamic",
+            FullTypeName = "System.Dynamic.DynamicObject",
             TypeClass = TypeClass.Simple
         };
 
         public static readonly TypeInfo EmptyInterfaceType = new TypeInfo
         {
             Name = "EmptyInterface",
-            PrimitiveName = "EmptyInterface",
-            FrameworkName = "go.EmptyInterface",
+            TypeName = "EmptyInterface",
+            FullTypeName = "go.EmptyInterface",
             TypeClass = TypeClass.Simple
         };
 
@@ -113,8 +113,8 @@ namespace go2cs.Metadata
             return new ArrayTypeInfo
             {
                 Name = Name,
-                PrimitiveName = PrimitiveName,
-                FrameworkName = FrameworkName,
+                TypeName = TypeName,
+                FullTypeName = FullTypeName,
                 TypeClass = TypeClass,
                 IsPointer = IsPointer,
                 IsByRefPointer = IsByRefPointer,
@@ -134,8 +134,8 @@ namespace go2cs.Metadata
             return new MapTypeInfo
             {
                 Name = Name,
-                PrimitiveName = PrimitiveName,
-                FrameworkName = FrameworkName,
+                TypeName = TypeName,
+                FullTypeName = FullTypeName,
                 TypeClass = TypeClass,
                 IsPointer = IsPointer,
                 IsByRefPointer = IsByRefPointer,
