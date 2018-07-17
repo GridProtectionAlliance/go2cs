@@ -90,6 +90,8 @@ namespace go2cs
 
         protected string CurrentImportPath { get; private set; }
 
+        protected bool UsesUnsafePointers { get; set; }
+
         protected ScannerBase(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName)
         {
             Options = options;
@@ -473,24 +475,53 @@ namespace go2cs
             if (!typeInfo.IsByRefPointer)
                 return typeInfo;
 
-            string primitiveName = typeInfo.TypeName;
-            string frameworkName = typeInfo.FullTypeName;
+            string typeName = typeInfo.TypeName;
+            string fullTypeName = typeInfo.FullTypeName;
 
-            string[] parts = primitiveName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (parts.Length == 2)
-                primitiveName = $"Ptr<{parts[1]}>";
-
-            parts = frameworkName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = typeName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length == 2)
-                frameworkName = $"Ptr<{parts[1]}>";
+                typeName = $"Ptr<{parts[1]}>";
+
+            parts = fullTypeName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 2)
+                fullTypeName = $"Ptr<{parts[1]}>";
 
             return new TypeInfo
             {
                 Name = typeInfo.Name,
-                TypeName = primitiveName,
-                FullTypeName = frameworkName,
+                TypeName = typeName,
+                FullTypeName = fullTypeName,
+                IsPointer = true,
+                IsByRefPointer = false,
+                TypeClass = TypeClass.Simple
+            };
+        }
+
+        protected TypeInfo ConvertByRefToNativePointer(TypeInfo typeInfo)
+        {
+            if (!typeInfo.IsByRefPointer)
+                return typeInfo;
+
+            string typeName = typeInfo.TypeName;
+            string fullTypeName = typeInfo.FullTypeName;
+
+            string[] parts = typeName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 2)
+                typeName = $"*{parts[1]}";
+
+            parts = fullTypeName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 2)
+                fullTypeName = $"*{parts[1]}";
+
+            return new TypeInfo
+            {
+                Name = typeInfo.Name,
+                TypeName = typeName,
+                FullTypeName = fullTypeName,
                 IsPointer = true,
                 IsByRefPointer = false,
                 TypeClass = TypeClass.Simple

@@ -42,6 +42,7 @@ namespace go2cs
     {
         public const string StandardLibrary = "GoStandardLibrary";
         private const string UsingsMarker = ">>MARKER:USINGS<<";
+        private const string UnsafeMarker = ">>MARKER:UNSAFE<<";
 
         private StringBuilder m_targetFile = new StringBuilder();
 
@@ -92,6 +93,7 @@ namespace go2cs
 
             // Remove code markers
             targetFile = targetFile.Replace(UsingsMarker, "");
+            targetFile = targetFile.Replace(UnsafeMarker, UsesUnsafePointers ? "unsafe " : "");
 
             using (StreamWriter writer = File.CreateText(TargetFileName))
                 writer.Write(targetFile);

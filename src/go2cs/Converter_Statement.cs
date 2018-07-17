@@ -242,7 +242,7 @@ namespace go2cs
             {
                 if (expressions.Length > 1)
                     m_targetFile.Append($" ({string.Join(", ", expressions)})");
-                else
+                else if (expressions.Length > 0)
                     m_targetFile.Append($" {expressions[0]}");
             }
 

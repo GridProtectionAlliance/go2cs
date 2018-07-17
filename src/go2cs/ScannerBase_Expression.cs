@@ -70,7 +70,10 @@ namespace go2cs
             }
             else
             {
-                Expressions[context] = UnaryExpressions[context.unaryExpr()];
+                if (UnaryExpressions.TryGetValue(context.unaryExpr(), out string unaryExpression))
+                    Expressions[context] = unaryExpression;
+                else
+                    AddWarning(context, $"Failed to find unary expression \"{context.unaryExpr().GetText()}\" in the expression \"{context.GetText()}\"");
             }
         }
 
@@ -145,10 +148,17 @@ namespace go2cs
                 // conversion
                 //     : type '(' expression ',' ? ')'
 
-                if (Types.TryGetValue(context.conversion().type(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.index().expression(), out string expression))
-                    PrimaryExpressions[context] = $"({typeInfo.TypeName}){expression}";
+                if (Types.TryGetValue(context.conversion().type(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.conversion().expression(), out string expression))
+                {
+                    if (typeInfo.TypeName.StartsWith("*(*"))
+                        PrimaryExpressions[context] = $"{typeInfo.TypeName}{expression}";
+                    else
+                        PrimaryExpressions[context] = $"({typeInfo.TypeName}){expression}";
+                }
                 else
+                {
                     AddWarning(context, $"Failed to find type or sub-expression for the conversion expression in \"{context.GetText()}\"");
+                }
             }
             else if (context.selector() != null)
             {

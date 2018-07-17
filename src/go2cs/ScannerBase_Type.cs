@@ -45,6 +45,17 @@ namespace go2cs
         //  conversion (required)
         protected readonly ParseTreeValues<TypeInfo> Types = new ParseTreeValues<TypeInfo>();
 
+        public override void ExitType(GolangParser.TypeContext context)
+        {
+            if (context.type() != null)
+            {
+                if (Types.TryGetValue(context.type(), out TypeInfo typeInfo))
+                    Types[context] = typeInfo;
+                else
+                    AddWarning(context, $"Failed to find sub-type in type expression \"{context.GetText()}\"");
+            }
+        }
+
         public override void EnterTypeName(GolangParser.TypeNameContext context)
         {
             string type = context.GetText();
@@ -92,6 +103,22 @@ namespace go2cs
                     TypeClass = TypeClass.Simple
                 };
             }
+            else if (name.StartsWith("*(*") && name.EndsWith(")"))
+            {
+                typeInfo = ConvertByRefToNativePointer(typeInfo);
+
+                Types[context.Parent.Parent] = new TypeInfo
+                {
+                    Name = name,
+                    TypeName = $"*({typeInfo.TypeName})",
+                    FullTypeName = $"*({typeInfo.FullTypeName})",
+                    IsPointer = true,
+                    IsByRefPointer = false,
+                    TypeClass = TypeClass.Simple
+                };
+
+                UsesUnsafePointers = true;
+            }
             else
             {
                 Types[context.Parent.Parent] = new TypeInfo
@@ -112,7 +139,7 @@ namespace go2cs
 
             if (!Types.TryGetValue(context.elementType().type(), out TypeInfo typeInfo))
             {
-                AddWarning(context, $"Failed to find array type info for: {name}");
+                AddWarning(context, $"Failed to find array type info for \"{name}\"");
                 return;
             }
 
@@ -145,7 +172,7 @@ namespace go2cs
                     }
                 };
 
-                AddWarning(context, $"Failed to find array length expression for: {name}");
+                AddWarning(context, $"Failed to find array length expression for \"{name}\"");
             }
 
             Types[context.Parent.Parent] = new ArrayTypeInfo
@@ -246,7 +273,7 @@ namespace go2cs
 
             string typeList = signature.GenerateParameterTypeList();
             string resultSignature = signature.GenerateResultSignature();
-            string primitiveName, frameworkName;
+            string typeName, fullTypeName;
 
             RequiredUsings.Add("System");
 
@@ -254,13 +281,13 @@ namespace go2cs
             {
                 if (string.IsNullOrEmpty(typeList))
                 {
-                    primitiveName = "Action";
-                    frameworkName = "System.Action";
+                    typeName = "Action";
+                    fullTypeName = "System.Action";
                 }
                 else
                 {
-                    primitiveName = $"Action<{typeList}>";
-                    frameworkName = $"System.Action<{typeList}>";
+                    typeName = $"Action<{typeList}>";
+                    fullTypeName = $"System.Action<{typeList}>";
                 }
             }
             else
@@ -268,15 +295,15 @@ namespace go2cs
                 if (!string.IsNullOrEmpty(typeList))
                     typeList = $"{typeList}, ";
 
-                primitiveName = $"Func<{typeList}{resultSignature}>";
-                frameworkName = $"System.Func<{typeList}{resultSignature}>";
+                typeName = $"Func<{typeList}{resultSignature}>";
+                fullTypeName = $"System.Func<{typeList}{resultSignature}>";
             }
 
             Types[context.Parent.Parent] = new TypeInfo
             {
                 Name = context.GetText(),
-                TypeName = primitiveName,
-                FullTypeName = frameworkName,
+                TypeName = typeName,
+                FullTypeName = fullTypeName,
                 TypeClass = TypeClass.Function
             };
         }
