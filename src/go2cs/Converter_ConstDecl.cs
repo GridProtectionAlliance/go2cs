@@ -83,7 +83,7 @@ namespace go2cs
                 if (typeContext == null)
                     type = DerviveType(expression, lastType) ?? "double";
                 else
-                    type = "object"; // m_types[typeContext].PrimitiveName;
+                    type = "object"; // m_types[typeContext].TypeName;
 
                 lastType = type;
 

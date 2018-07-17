@@ -72,7 +72,7 @@ using go;
                 {
                 #>
 
-            public ref <#=decl.Type.PrimitiveName#> <#=decl.Name#> => ref m_<#=kvp.Key#>Ref.Value.<#=decl.Name#>;
+            public ref <#=decl.Type.TypeName#> <#=decl.Name#> => ref m_<#=kvp.Key#>Ref.Value.<#=decl.Name#>;
 <#
                 }
             }
@@ -109,11 +109,11 @@ using go;
             {<#
             foreach (var decl in StructFields)
             {
-                if (PromotedStructs.Contains(decl.Type.PrimitiveName))
+                if (PromotedStructs.Contains(decl.Type.TypeName))
                 {
                     // Promoted struct #>
 
-                this.m_<#=decl.Name#>Ref = new Ref<<#=decl.Type.PrimitiveName#>>(new <#=decl.Type.PrimitiveName#>(nil));<#
+                this.m_<#=decl.Name#>Ref = new Ref<<#=decl.Type.TypeName#>>(new <#=decl.Type.TypeName#>(nil));<#
                 }
                 else
                 {
@@ -129,15 +129,15 @@ using go;
             {#>
 
 
-            public <#=StructName#>(<#=string.Join(", ", StructFields.Select(field => $"{(field.Type.IsPointer ? "ref " : "")}{field.Type.PrimitiveName} {field.Name}"))#>)
+            public <#=StructName#>(<#=string.Join(", ", StructFields.Select(field => $"{(field.Type.IsPointer ? "ref " : "")}{field.Type.TypeName} {field.Name}"))#>)
             {<#
             foreach (var decl in StructFields)
             {
-                if (PromotedStructs.Contains(decl.Type.PrimitiveName))
+                if (PromotedStructs.Contains(decl.Type.TypeName))
                 {
                     // Promoted struct #>
 
-                this.m_<#=decl.Name#>Ref = new Ref<<#=decl.Type.PrimitiveName#>>(<#=decl.Type.IsPointer ? "ref " : ""#><#=decl.Name#>);<#
+                this.m_<#=decl.Name#>Ref = new Ref<<#=decl.Type.TypeName#>>(<#=decl.Type.IsPointer ? "ref " : ""#><#=decl.Name#>);<#
                 }
                 else
                 {
