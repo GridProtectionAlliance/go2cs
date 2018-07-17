@@ -338,28 +338,12 @@ namespace go
         // ** Helper Functions **
 
         /// <summary>
-        /// Converts imaginary literal value to a <see cref="complex64"/> imaginary number.
-        /// </summary>
-        /// <param name="literal">Literal imaginary value with "i" suffix.</param>
-        /// <returns>New complex number with parsed <paramref name="literal"/> as imaginary part and a zero value real part.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static complex64 i64(string literal)
-        {
-            if (!literal.EndsWith("i"))
-                throw new InvalidCastException($"Token \"{literal}\" is not an imaginary literal.");
-
-            if (float.TryParse(literal.Substring(0, literal.Length - 1), out float imaginary))
-                return i(imaginary);
-
-            throw new InvalidCastException($"Could not parse \"{literal}\" as an imaginary value.");
-        }
-        /// <summary>
         /// Converts imaginary literal value to a <see cref="complex128"/> imaginary number.
         /// </summary>
         /// <param name="literal">Literal imaginary value with "i" suffix.</param>
         /// <returns>New complex number with parsed <paramref name="literal"/> as imaginary part and a zero value real part.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static complex128 i128(string literal)
+        public static complex128 i(string literal)
         {
             if (!literal.EndsWith("i"))
                 throw new InvalidCastException($"Token \"{literal}\" is not an imaginary literal.");
@@ -369,14 +353,6 @@ namespace go
 
             throw new InvalidCastException($"Could not parse \"{literal}\" as an imaginary value.");
         }
-
-        /// <summary>
-        /// Converts value to a <see cref="complex64"/> imaginary number.
-        /// </summary>
-        /// <param name="imaginary">Value to convert to imaginary.</param>
-        /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static complex64 i(float imaginary) => new complex64(0.0F, imaginary);
 
         /// <summary>
         /// Converts value to a <see cref="complex128"/> imaginary number.
