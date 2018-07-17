@@ -21,9 +21,9 @@
 //
 //******************************************************************************************************
 
-using System;
 using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
+using System;
 using System.Collections.Generic;
 using static go2cs.Common;
 
@@ -177,7 +177,7 @@ namespace go2cs
                 if (sliceContext.children.Count == 3)
                 {
                     // primaryExpr[:]
-                    PrimaryExpressions[context] = $"{primaryExpression}.Slice()";
+                    PrimaryExpressions[context] = $"{primaryExpression}.slice()";
                 }
                 else if (sliceContext.children.Count == 4)
                 {
@@ -185,7 +185,7 @@ namespace go2cs
 
                     // primaryExpr[low:] or primaryExpr[:high]
                     if (Expressions.TryGetValue(sliceContext.expression(0), out string expression))
-                        PrimaryExpressions[context] = $"{primaryExpression}.Slice({(expressionIsLeft ? expression : $"high:{expression}")})";
+                        PrimaryExpressions[context] = $"{primaryExpression}.slice({(expressionIsLeft ? expression : $"high:{expression}")})";
                     else
                         AddWarning(context, $"Failed to find slice expression for \"{context.GetText()}\"");
                 }
@@ -195,7 +195,7 @@ namespace go2cs
                     {
                         // primaryExpr[low:high]
                         if (Expressions.TryGetValue(sliceContext.expression(0), out string lowExpression) && Expressions.TryGetValue(sliceContext.expression(1), out string highExpression))
-                            PrimaryExpressions[context] = $"{primaryExpression}.Slice({lowExpression}, {highExpression})";
+                            PrimaryExpressions[context] = $"{primaryExpression}.slice({lowExpression}, {highExpression})";
                         else
                             AddWarning(context, $"Failed to find one of the slice expressions for \"{context.GetText()}\"");
                     }
@@ -208,7 +208,7 @@ namespace go2cs
                 {
                     // primaryExpr[:high:max]
                     if (Expressions.TryGetValue(sliceContext.expression(0), out string highExpression) && Expressions.TryGetValue(sliceContext.expression(1), out string maxExpression))
-                        PrimaryExpressions[context] = $"{primaryExpression}.Slice(-1, {highExpression}, {maxExpression})";
+                        PrimaryExpressions[context] = $"{primaryExpression}.slice(-1, {highExpression}, {maxExpression})";
                     else
                         AddWarning(context, $"Failed to find one of the slice expressions for \"{context.GetText()}\"");
                 }
@@ -216,7 +216,7 @@ namespace go2cs
                 {
                     // primaryExpr[low:high:max]
                     if (Expressions.TryGetValue(sliceContext.expression(0), out string lowExpression) && Expressions.TryGetValue(sliceContext.expression(1), out string highExpression) && Expressions.TryGetValue(sliceContext.expression(2), out string maxExpression))
-                        PrimaryExpressions[context] = $"{primaryExpression}.Slice({lowExpression}, {highExpression}, {maxExpression})";
+                        PrimaryExpressions[context] = $"{primaryExpression}.slice({lowExpression}, {highExpression}, {maxExpression})";
                     else
                         AddWarning(context, $"Failed to find one of the slice expressions for \"{context.GetText()}\"");
                 }

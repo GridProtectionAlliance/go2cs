@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 16 19:42:07 UTC
+//     Generated on 2018 July 17 05:02:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,14 +23,14 @@ namespace go
         public partial struct MyCustomError : EmptyInterface
         {
             // Abser.Abs function promotion
-            private delegate double AbsByVal(T value);
-            private delegate double AbsByRef(ref T value);
+            private delegate float64 AbsByVal(T value);
+            private delegate float64 AbsByRef(ref T value);
 
             private static readonly AbsByVal s_AbsByVal;
             private static readonly AbsByRef s_AbsByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public double Abs() => s_AbsByRef?.Invoke(ref this) ?? s_AbsByVal?.Invoke(this) ?? Abser?.Abs() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public float64 Abs() => s_AbsByRef?.Invoke(ref this) ?? s_AbsByVal?.Invoke(this) ?? Abser?.Abs() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // error.Error function promotion
             private delegate string ErrorByVal(T value);
@@ -49,7 +49,7 @@ namespace go
 
             public ref time.Time When => ref m_MyErrorRef.Value.When;
 
-            public ref GoString What => ref m_MyErrorRef.Value.What;
+            public ref @string What => ref m_MyErrorRef.Value.What;
             
             [DebuggerStepperBoundary]
             static MyCustomError()
@@ -87,7 +87,7 @@ namespace go
                 this.error = default;
             }
 
-            public MyCustomError(GoString Message, Abser Abser, MyError MyError, error error)
+            public MyCustomError(@string Message, Abser Abser, MyError MyError, error error)
             {
                 this.Message = Message;
                 this.Abser = Abser;

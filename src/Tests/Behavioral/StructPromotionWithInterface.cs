@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructPromotionWithInterface.go
+// package main -- go2cs converted at 2018 July 17 05:02:49 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructPromotionWithInterface.go
 
 using fmt = go.fmt_package;
 using time = go.time_package;
@@ -13,21 +13,21 @@ namespace go
         // Top inner type comment
         public partial interface Abser
         {
-            double Abs(); // To the right comments
+            float64 Abs(); // To the right comments
         }
 
         // Middle type comment
         public partial struct MyError
         {
             public time.Time When;
-            public GoString What;
+            public @string What;
         }
 
         // Weirdly placed comment
 
         public partial struct MyCustomError : Abser, error
         {
-            public GoString Message; // My custom error message
+            public @string Message; // My custom error message
             public Abser Abser;
             public ref MyError MyError => ref MyError_val;
             public error error;
@@ -38,7 +38,7 @@ namespace go
         // Below type comment
 
         // The following takes precedence over instance call to Abs()
-        public static double Abs(this ref MyCustomError myErr)
+        public static float64 Abs(this ref MyCustomError myErr)
         {
             return 0.0;
         }

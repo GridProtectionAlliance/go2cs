@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\SortArrayType.go
+// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\SortArrayType.go
 
 using fmt = go.fmt_package;
 using sort = go.sort_package;
@@ -11,28 +11,28 @@ namespace go
     {
         public partial struct Person
         {
-            public GoString Name;
-            public long Age;
-            public single ShoeSize;
+            public @string Name;
+            public @int Age;
+            public float32 ShoeSize;
         }
 
 
-        public partial struct PeopleByShoeSize // : Slice<Person>
+        public partial struct PeopleByShoeSize // : slice<Person>
         {
         }
 
-        public static long Len(this PeopleByShoeSize p)
+        public static @int Len(this PeopleByShoeSize p)
         {
             return len(p);
         }
 
-        public static void Swap(this PeopleByShoeSize p, long i, long j)
+        public static void Swap(this PeopleByShoeSize p, @int i, @int j)
         {
             p[i] = p[j];
             p[j] = p[i];
         }
 
-        public static bool Less(this PeopleByShoeSize p, long i, long j)
+        public static @bool Less(this PeopleByShoeSize p, @int i, @int j)
         {
             return (p[i].ShoeSize < p[j].ShoeSize);
         }

@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\InterfaceImplementation.go
+// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceImplementation.go
 
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -10,22 +10,22 @@ namespace go
     {
         public partial interface Animal
         {
-            GoString Type();
-            GoString Swim();
+            @string Type();
+            @string Swim();
         }
 
 
         public partial struct Dog
         {
-            public GoString Name;
-            public GoString Breed;
+            public @string Name;
+            public @string Breed;
         }
 
 
         public partial struct Frog
         {
-            public GoString Name;
-            public GoString Color;
+            public @string Name;
+            public @string Color;
         }
 
 
@@ -39,22 +39,22 @@ namespace go
                 fmt.Println(a.Type(), "can", a.Swim());
             }        }
 
-        public static GoString Type(this ref Frog f)
+        public static @string Type(this ref Frog f)
         {
             return "Frog";
         }
 
-        public static GoString Swim(this ref Frog f)
+        public static @string Swim(this ref Frog f)
         {
             return "Kick";
         }
 
-        public static GoString Swim(this ref Dog d)
+        public static @string Swim(this ref Dog d)
         {
             return "Paddle";
         }
 
-        public static GoString Type(this ref Dog d)
+        public static @string Type(this ref Dog d)
         {
             return "Doggie";
         }

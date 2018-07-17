@@ -45,7 +45,7 @@ namespace go
                     return true;
                 case ISlice slice:
                     return slice == Default;
-                case GoString gostr:
+                case @string gostr:
                     return gostr == Default;
                 case string str:
                     return str == Default;

@@ -97,7 +97,7 @@ namespace go2cs.Metadata
         {
             Name = "EmptyInterface",
             PrimitiveName = "EmptyInterface",
-            FrameworkName = "go.builtin.EmptyInterface",
+            FrameworkName = "go.EmptyInterface",
             TypeClass = TypeClass.Simple
         };
 

@@ -127,8 +127,8 @@ namespace go2cs
                     Type = new TypeInfo
                     {
                         TypeClass = TypeClass.Simple,
-                        PrimitiveName = "int",
-                        FrameworkName = "System.Int32"
+                        PrimitiveName = "@int",
+                        FrameworkName = "go.@int"
                     }
                 };
             }
@@ -140,8 +140,8 @@ namespace go2cs
                     Type = new TypeInfo
                     {
                         TypeClass = TypeClass.Simple,
-                        PrimitiveName = "int",
-                        FrameworkName = "System.Int32"
+                        PrimitiveName = "@int",
+                        FrameworkName = "go.@int"
                     }
                 };
 
@@ -195,8 +195,8 @@ namespace go2cs
             Types[context.Parent.Parent] = new TypeInfo
             {
                 Name = typeInfo.Name,
-                PrimitiveName = $"Slice<{typeInfo.PrimitiveName}>",
-                FrameworkName = $"go.Slice<{typeInfo.FrameworkName}>",
+                PrimitiveName = $"slice<{typeInfo.PrimitiveName}>",
+                FrameworkName = $"go.slice<{typeInfo.FrameworkName}>",
                 TypeClass = TypeClass.Slice
             };
         }
@@ -212,8 +212,8 @@ namespace go2cs
             Types[context.Parent.Parent] = new TypeInfo
             {
                 Name = typeInfo.Name,
-                PrimitiveName = $"Channel<{typeInfo.PrimitiveName}>",
-                FrameworkName = $"go.Channel<{typeInfo.FrameworkName}>",
+                PrimitiveName = $"channel<{typeInfo.PrimitiveName}>",
+                FrameworkName = $"go.channel<{typeInfo.FrameworkName}>",
                 TypeClass = TypeClass.Channel
             };
         }
@@ -285,41 +285,16 @@ namespace go2cs
         {
             switch (type)
             {
-                case "int8":
-                    return "sbyte";
-                case "uint8":
+                case "bool":
+                    return "@bool";
                 case "byte":
-                    return "byte";
-                case "int16":
-                    return "short";
-                case "uint16":
-                    return "ushort";
-                case "int32":
-                    return "int";
-                case "uint32":
-                    return "uint";
-                case "int64":
+                    return "@byte";
                 case "int":
-                    return "long";
-                case "uint64":
+                    return "@int";
                 case "uint":
-                    return "ulong";
-                case "float32":
-                    return "single";
-                case "float64":
-                    return "double";
-                case "rune":
-                    return "char";
-                case "uintptr":
-                    return "System.UIntPtr";
-                case "complex64 ":
-                case "complex128":
-                    RequiredUsings.Add("System.Numerics");
-                    return "Complex";
-                case "Type":
-                    return "object";
+                    return "@uint";
                 case "string":
-                    return "GoString";
+                    return "@string";
                 default:
                     return $"{type}";
             }
@@ -329,40 +304,44 @@ namespace go2cs
         {
             switch (type)
             {
+                case "bool":
+                    return "go.@bool";
                 case "int8":
-                    return "System.SByte";
+                    return "go.int8";
                 case "uint8":
+                    return "go.uint8";
                 case "byte":
-                    return "System.Byte";
+                    return "go.@byte";
                 case "int16":
-                    return "System.Int16";
+                    return "go.int16";
                 case "uint16":
-                    return "System.UInt16";
+                    return "go.uint16";
                 case "int32":
-                    return "System.Int32";
+                    return "go.int32";
                 case "uint32":
-                    return "System.UInt32";
+                    return "go.uint32";
                 case "int64":
+                    return "go.int64";
                 case "int":
-                    return "System.Int64";
+                    return "go.@int";
                 case "uint64":
+                    return "go.uint64";
                 case "uint":
-                    return "System.UInt64";
+                    return "go.@uint";
                 case "float32":
-                    return "System.Single";
+                    return "go.float32";
                 case "float64":
-                    return "System.Double";
+                    return "go.float64";
                 case "rune":
-                    return "System.Char";
+                    return "go.rune";
                 case "uintptr":
-                    return "System.UIntPtr";
-                case "complex64 ":
+                    return "go.uintptr";
+                case "complex64":
+                    return "go.complex64";
                 case "complex128":
-                    return "System.Numerics.Complex";
-                case "Type":
-                    return "System.Object";
+                    return "go.complex128";
                 case "string":
-                    return "go.GoString";
+                    return "go.@string";
                 default:
                     return $"{type}";
             }

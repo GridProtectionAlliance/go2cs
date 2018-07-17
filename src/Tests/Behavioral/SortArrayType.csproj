@@ -50,7 +50,7 @@
     <Compile Include="InterfaceInheritance_VInterface.cs" />
     <Compile Include="SortArrayType.cs" />
     <Compile Include="SortArrayType_PersonStruct.cs" />
-    <Compile Include="SortArrayType_PeopleByShoeSizeStructOf(Slice(Person)).cs" />
+    <Compile Include="SortArrayType_PeopleByShoeSizeStructOf(slice(Person)).cs" />
     <Compile Include="StructPointerPromotionWithInterface_AbserInterface.cs" />
     <Compile Include="StructPointerPromotionWithInterface_MyErrorStruct.cs" />
     <Compile Include="StructPointerPromotionWithInterface_MyCustomErrorStruct.cs" />

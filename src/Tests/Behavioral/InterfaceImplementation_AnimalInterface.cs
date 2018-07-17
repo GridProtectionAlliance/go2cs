@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 16 19:42:07 UTC
+//     Generated on 2018 July 17 05:02:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,23 +32,23 @@ namespace go
         {
             private T m_target;
 
-            private delegate GoString TypeByVal(T value);
-            private delegate GoString TypeByRef(ref T value);
+            private delegate @string TypeByVal(T value);
+            private delegate @string TypeByRef(ref T value);
 
             private static readonly TypeByVal s_TypeByVal;
             private static readonly TypeByRef s_TypeByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public GoString Type() => s_TypeByRef?.Invoke(ref m_target) ?? s_TypeByVal(m_target);
+            public @string Type() => s_TypeByRef?.Invoke(ref m_target) ?? s_TypeByVal(m_target);
 
-            private delegate GoString SwimByVal(T value);
-            private delegate GoString SwimByRef(ref T value);
+            private delegate @string SwimByVal(T value);
+            private delegate @string SwimByRef(ref T value);
 
             private static readonly SwimByVal s_SwimByVal;
             private static readonly SwimByRef s_SwimByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public GoString Swim() => s_SwimByRef?.Invoke(ref m_target) ?? s_SwimByVal(m_target);
+            public @string Swim() => s_SwimByRef?.Invoke(ref m_target) ?? s_SwimByVal(m_target);
 
             [DebuggerStepperBoundary]
             static Animal()

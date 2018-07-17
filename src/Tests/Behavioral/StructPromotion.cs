@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructPromotion.go
+// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructPromotion.go
 
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -10,23 +10,23 @@ namespace go
     {
         public partial struct Person
         {
-            public GoString name;
-            public int age;
+            public @string name;
+            public int32 age;
         }
 
 
-        public static bool IsAdult(this Person p)
+        public static @bool IsAdult(this Person p)
         {
             return p.age >= 18;
         }
 
         public partial struct Employee
         {
-            public GoString position;
+            public @string position;
         }
 
 
-        public static bool IsManager(this Employee e)
+        public static @bool IsManager(this Employee e)
         {
             return e.position == "manager";
         }

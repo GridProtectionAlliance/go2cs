@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\InterfaceInheritance.go
+// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceInheritance.go
 
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -11,7 +11,7 @@ namespace go
     {
         public partial struct T1
         {
-            public GoString name;
+            public @string name;
         }
 
 
@@ -23,19 +23,19 @@ namespace go
         {
         }
 
-        public static GoString String(this T1 t)
+        public static @string String(this T1 t)
         {
             return "";
         }
 
-        public static GoString Error(this T1 t)
+        public static @string Error(this T1 t)
         {
             return "";
         }
 
         public partial struct T2
         {
-            public GoString name;
+            public @string name;
         }
 
 
@@ -47,12 +47,12 @@ namespace go
         {
         }
 
-        public static GoString String(this T2 t)
+        public static @string String(this T2 t)
         {
             return "";
         }
 
-        public static GoString Error(this T2 t)
+        public static @string Error(this T2 t)
         {
             return "";
         }
@@ -71,14 +71,14 @@ namespace go
 
         private static void Main()
         {
-            var m = make(typeof(Dictionary<I, long>));
+            var m = make(typeof(Dictionary<I, @int>));
             I i1 = T1{"foo"};
             I i2 = T2{"bar"};
             m[i1] = 1;
             m[i2] = 2;
             fmt.Println(m);
 
-            var n = make(typeof(Dictionary<V, long>));
+            var n = make(typeof(Dictionary<V, @int>));
             V v1 = T1{"foo"};
             V v2 = T2{"bar"};
             v1.N();

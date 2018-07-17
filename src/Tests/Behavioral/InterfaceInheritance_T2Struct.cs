@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 16 19:42:07 UTC
+//     Generated on 2018 July 17 05:02:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace go
                 this.name = default;
             }
 
-            public T2(GoString name)
+            public T2(@string name)
             {
                 this.name = name;
             }

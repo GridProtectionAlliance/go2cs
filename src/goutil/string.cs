@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  GoString.cs - Gbtc
+//  string.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -27,18 +27,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-using static go.builtin;
 
 namespace go
 {
     /// <summary>
     /// Represents a structure that behaves like a Go string.
     /// </summary>
-    public struct GoString : EmptyInterface, IReadOnlyList<byte>, IEnumerable<char>, IEnumerable<(int index, char rune)>
+    public struct @string : EmptyInterface, IReadOnlyList<byte>, IEnumerable<char>, IEnumerable<(int index, char rune)>
     {
         private readonly byte[] m_value;
 
-        public GoString(byte[] value)
+        public @string(byte[] value)
         {
             if ((object)value == null)
             {
@@ -51,9 +50,9 @@ namespace go
             }
         }
 
-        public GoString(string value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
+        public @string(string value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
 
-        public GoString(GoString value) : this(value.m_value) { }
+        public @string(@string value) : this(value.m_value) { }
         
         private byte[] Value
         {
@@ -67,7 +66,7 @@ namespace go
 
         public override string ToString() => Encoding.UTF8.GetString(Value);
 
-        public bool Equals(GoString other) => BytesAreEqual(Value, other.Value);
+        public bool Equals(@string other) => BytesAreEqual(Value, other.Value);
 
         public override bool Equals(object obj)
         {
@@ -75,7 +74,7 @@ namespace go
             {
                 case null:
                     return false;
-                case GoString gostr:
+                case @string gostr:
                     return Equals(gostr);
                 case string str:
                     return Equals(str);
@@ -84,7 +83,7 @@ namespace go
             return false;
         }
 
-        public override int GetHashCode() =>  ToString().GetHashCode();
+        public override int GetHashCode() => ToString().GetHashCode();
 
         IEnumerator IEnumerable.GetEnumerator() => Value.GetEnumerator();
 
@@ -128,30 +127,30 @@ namespace go
             return completed;
         }
 
-        public static GoString Default { get; } = new GoString("");
+        public static @string Default { get; } = new @string("");
 
         // Enable implicit conversions between string and GoString struct
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator GoString(string value) => new GoString(value);
+        public static implicit operator @string(string value) => new @string(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator string(GoString value) => value.ToString();
+        public static implicit operator string(@string value) => value.ToString();
 
         // Enable comparisons between nil and GoString struct
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(GoString value, NilType nil) => value.Equals(default);
+        public static bool operator ==(@string value, NilType nil) => value.Equals(default);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(GoString value, NilType nil) => !(value == nil);
+        public static bool operator !=(@string value, NilType nil) => !(value == nil);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(NilType nil, GoString value) => value == nil;
+        public static bool operator ==(NilType nil, @string value) => value == nil;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(NilType nil, GoString value) => value != nil;
+        public static bool operator !=(NilType nil, @string value) => value != nil;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator GoString(NilType nil) => Default;
+        public static implicit operator @string(NilType nil) => Default;
 
         private static unsafe bool BytesAreEqual(byte[] data1, byte[] data2)
         {

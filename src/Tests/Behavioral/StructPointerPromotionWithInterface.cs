@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructPointerPromotionWithInterface.go
+// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructPointerPromotionWithInterface.go
 
 using fmt = go.fmt_package;
 using time = go.time_package;
@@ -11,18 +11,18 @@ namespace go
     {
         public partial interface Abser
         {
-            double Abs();
+            float64 Abs();
         }
 
         public partial struct MyError
         {
             public time.Time When;
-            public GoString What;
+            public @string What;
         }
 
         public partial struct MyCustomError : Abser
         {
-            public GoString Message;
+            public @string Message;
             public Abser Abser;
             public ref MyError MyError => ref MyError_ptr;
         }

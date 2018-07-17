@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 16 19:42:07 UTC
+//     Generated on 2018 July 17 05:02:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace go
                 this.NextNext = default;
             }
 
-            public ColorList(long Total, GoString Color, ref Ptr<ColorList> Next, ref Ptr<Ptr<ColorList>> NextNext)
+            public ColorList(@int Total, @string Color, ref Ptr<ColorList> Next, ref Ptr<Ptr<ColorList>> NextNext)
             {
                 this.Total = Total;
                 this.Color = Color;

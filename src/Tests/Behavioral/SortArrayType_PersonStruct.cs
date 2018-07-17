@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 16 19:42:07 UTC
+//     Generated on 2018 July 17 05:02:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace go
                 this.ShoeSize = default;
             }
 
-            public Person(GoString Name, long Age, single ShoeSize)
+            public Person(@string Name, @int Age, float32 ShoeSize)
             {
                 this.Name = Name;
                 this.Age = Age;

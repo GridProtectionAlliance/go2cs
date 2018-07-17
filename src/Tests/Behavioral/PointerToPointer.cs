@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\PointerToPointer.go
+// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\PointerToPointer.go
 
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -10,9 +10,9 @@ namespace go
     {
         private static void Main()
         {
-            long a;
-            ref long ptr;
-            Ptr<Ptr<long>> pptr;
+            @int a;
+            ref @int ptr;
+            Ptr<Ptr<@int>> pptr;
 
             a = 3000;
 
@@ -28,12 +28,12 @@ namespace go
             PrintValPtr2Ptr(pptr);
         }
 
-        public static void PrintValPtr(ref long ptr)
+        public static void PrintValPtr(ref @int ptr)
         {
             fmt.Printf("Value available at *ptr = %d\n", ptr.Deref);
         }
 
-        public static void PrintValPtr2Ptr(Ptr<Ptr<long>> pptr)
+        public static void PrintValPtr2Ptr(Ptr<Ptr<@int>> pptr)
         {
             fmt.Printf("Value available at **pptr = %d\n", pptr.Deref.Deref);
         }

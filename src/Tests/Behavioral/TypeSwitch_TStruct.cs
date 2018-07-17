@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 16 19:42:07 UTC
+//     Generated on 2018 July 17 05:02:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,14 +21,14 @@ namespace go
         public partial struct T : EmptyInterface
         {
             // I.m function promotion
-            private delegate GoString mByVal(T value);
-            private delegate GoString mByRef(ref T value);
+            private delegate @string mByVal(T value);
+            private delegate @string mByRef(ref T value);
 
             private static readonly mByVal s_mByVal;
             private static readonly mByRef s_mByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public GoString m() => s_mByRef?.Invoke(ref this) ?? s_mByVal?.Invoke(this) ?? I?.m() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public @string m() => s_mByRef?.Invoke(ref this) ?? s_mByVal?.Invoke(this) ?? I?.m() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
             
             [DebuggerStepperBoundary]
             static T()
@@ -54,7 +54,7 @@ namespace go
                 this.I = default;
             }
 
-            public T(GoString name, I I)
+            public T(@string name, I I)
             {
                 this.name = name;
                 this.I = I;

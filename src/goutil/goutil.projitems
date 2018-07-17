@@ -10,14 +10,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)builtin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DefinedTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GoFunc.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)GoString.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)string.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NilType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PanicException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PromotedStructAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ptr.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ref.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Slice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)slice.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SwitchExpression.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeExtensions.cs" />
   </ItemGroup>

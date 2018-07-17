@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 16 19:42:07 UTC
+//     Generated on 2018 July 17 05:02:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System.CodeDom.Compiler;
@@ -15,19 +15,19 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial struct PeopleByShoeSize : go.builtin.EmptyInterface
+        public partial struct PeopleByShoeSize : go.EmptyInterface
         {
             // Value of the PeopleByShoeSize struct
-            private readonly Slice<Person> m_value;
+            private readonly slice<Person> m_value;
 
-            public PeopleByShoeSize(Slice<Person> value) => m_value = value;
+            public PeopleByShoeSize(slice<Person> value) => m_value = value;
 
-            // Enable implicit conversions between Slice<Person> and PeopleByShoeSize struct
+            // Enable implicit conversions between slice<Person> and PeopleByShoeSize struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator PeopleByShoeSize(Slice<Person> value) => new PeopleByShoeSize(value);
+            public static implicit operator PeopleByShoeSize(slice<Person> value) => new PeopleByShoeSize(value);
             
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Slice<Person>(PeopleByShoeSize value) => value.m_value;
+            public static implicit operator slice<Person>(PeopleByShoeSize value) => value.m_value;
             
             // Enable comparisons between nil and PeopleByShoeSize struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

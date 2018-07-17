@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  Slice.cs - Gbtc
+//  slice.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -54,14 +54,14 @@ namespace go
     // Span<T> considered for slices: https://github.com/dotnet/corefxlab/blob/master/docs/specs/span.md#relationship-to-array-slicing
 
     [Serializable]
-    public struct Slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEquatable<Slice<T>>, IEquatable<ISlice>
+    public struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEquatable<slice<T>>, IEquatable<ISlice>
     {
         private readonly T[] m_array;
         private readonly int m_low;
         private readonly int m_length;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Slice(T[] array)
+        public slice(T[] array)
         {
             if ((object)array == null)
                 throw new ArgumentNullException(nameof(array), "Slice array reference is null.");
@@ -72,7 +72,7 @@ namespace go
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Slice(T[] array, int low = 0, int high = -1)
+        public slice(T[] array, int low = 0, int high = -1)
         {
             if ((object)array == null)
                 throw new ArgumentNullException(nameof(array), "Slice array reference is null.");
@@ -94,7 +94,7 @@ namespace go
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Slice(int length, int capacity = -1, int low = 0)
+        public slice(int length, int capacity = -1, int low = 0)
         {
             if (length < 0)
                 throw new ArgumentOutOfRangeException(nameof(length), "Value is less than zero.");
@@ -178,45 +178,45 @@ namespace go
         public bool Equals(ISlice other) => other?.Array == m_array && other?.Low == m_low && other.Length == m_length;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(Slice<T> other) => other.m_array == m_array && other.m_low == m_low && other.m_length == m_length;
+        public bool Equals(slice<T> other) => other.m_array == m_array && other.m_low == m_low && other.m_length == m_length;
 
         #region [ Equality Operators ]
 
         // Slice<T> to Slice<T> comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Slice<T> a, Slice<T> b) => a.Equals(b);
+        public static bool operator ==(slice<T> a, slice<T> b) => a.Equals(b);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Slice<T> a, Slice<T> b) => !(a == b);
+        public static bool operator !=(slice<T> a, slice<T> b) => !(a == b);
 
         // Slice<T> to ISlice comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(ISlice a, Slice<T> b) => a?.Equals(b) ?? false;
+        public static bool operator ==(ISlice a, slice<T> b) => a?.Equals(b) ?? false;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(ISlice a, Slice<T> b) => !(a == b);
+        public static bool operator !=(ISlice a, slice<T> b) => !(a == b);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Slice<T> a, ISlice b) => a.Equals(b);
+        public static bool operator ==(slice<T> a, ISlice b) => a.Equals(b);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Slice<T> a, ISlice b) => !(a == b);
+        public static bool operator !=(slice<T> a, ISlice b) => !(a == b);
 
         // Slice<T> to nil comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Slice<T> slice, NilType nil) => slice.Length == 0 && slice.Capacity == 0 && slice.Array == null;
+        public static bool operator ==(slice<T> slice, NilType nil) => slice.Length == 0 && slice.Capacity == 0 && slice.Array == null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Slice<T> slice, NilType nil) => !(slice == nil);
+        public static bool operator !=(slice<T> slice, NilType nil) => !(slice == nil);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(NilType nil, Slice<T> slice) => slice == nil;
+        public static bool operator ==(NilType nil, slice<T> slice) => slice == nil;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(NilType nil, Slice<T> slice) => slice != nil;
+        public static bool operator !=(NilType nil, slice<T> slice) => slice != nil;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator Slice<T>(NilType nil) => default;
+        public static implicit operator slice<T>(NilType nil) => default;
 
         #endregion
 
@@ -278,7 +278,7 @@ namespace go
             private readonly int m_end;
             private int m_current;
 
-            internal SliceEnumerator(ref Slice<T> slice)
+            internal SliceEnumerator(ref slice<T> slice)
             {
                 if (slice != nil && (object)slice.m_array == null)
                     throw new InvalidOperationException("Slice array reference is null.");
@@ -323,9 +323,9 @@ namespace go
 
         #endregion
 
-        public static readonly Slice<T> Nil = default;
+        public static readonly slice<T> Nil = default;
 
-        public static Slice<T> Append(ref Slice<T> slice, params object[] elems)
+        public static slice<T> Append(ref slice<T> slice, params object[] elems)
         {
             T[] newArray;
 
@@ -333,13 +333,13 @@ namespace go
             {
                 newArray = new T[elems.Length];
                 System.Array.Copy(elems, newArray, elems.Length);
-                return new Slice<T>(newArray);
+                return new slice<T>(newArray);
             }
 
             if (elems.Length <= slice.Available)
             {
                 System.Array.Copy(elems, 0, slice.Array, slice.High, elems.Length);
-                return slice.Slice(high: slice.High + elems.Length);
+                return slice.slice(high: slice.High + elems.Length);
             }
 
             int newCapacity = CalculateNewCapacity(ref slice, slice.Array.Length + elems.Length);
@@ -348,10 +348,10 @@ namespace go
             System.Array.Copy(slice.Array, newArray, slice.Length);
             System.Array.Copy(elems, 0, newArray, slice.Length, elems.Length);
 
-            return new Slice<T>(newArray, slice.Low, slice.High + elems.Length);
+            return new slice<T>(newArray, slice.Low, slice.High + elems.Length);
         }
 
-        private static int CalculateNewCapacity(ref Slice<T> slice, int neededCapacity)
+        private static int CalculateNewCapacity(ref slice<T> slice, int neededCapacity)
         {
             int capacity = slice.Capacity;
 
@@ -391,13 +391,13 @@ namespace go
         //      s = s[3:5]   => s = s.Slice(3, 5);
         //      s = s[:4]    => s = s.Slice(high:4)
         //      s = s[1:3:5] => s = s.Slice(1, 3, 5) // Full slice expression
-        public static Slice<T> Slice<T>(this ref Slice<T> slice, int low = -1, int high = -1, int max = -1)
+        public static slice<T> slice<T>(this ref slice<T> slice, int low = -1, int high = -1, int max = -1)
         {
-            return slice.Array.Slice(low == -1 ? slice.Low : low, high == -1 ? slice.High : high, max);
+            return slice.Array.slice(low == -1 ? slice.Low : low, high == -1 ? slice.High : high, max);
         }
 
         // Slice of an array helper function
-        public static Slice<T> Slice<T>(this T[] array , int low = -1, int high = -1, int max = -1)
+        public static slice<T> slice<T>(this T[] array , int low = -1, int high = -1, int max = -1)
         {
             if (low == -1)
                 low = 0;
@@ -407,7 +407,7 @@ namespace go
                 int length = high - low;
                 int capacity = max - low;
 
-                Slice<T> fullSlice = new Slice<T>(length, capacity, low);
+                slice<T> fullSlice = new slice<T>(length, capacity, low);
                 Array.Copy(array, low, fullSlice.Array, low, length);
                 return fullSlice;
             }
@@ -415,7 +415,7 @@ namespace go
             if (high == -1)
                 high = array.Length;
 
-            return new Slice<T>(array, low, high);
+            return new slice<T>(array, low, high);
         }
     }
 }

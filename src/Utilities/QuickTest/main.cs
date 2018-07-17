@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
@@ -210,12 +209,12 @@ namespace go
 
         private static void Main1()
         {
-            Complex vi1 = new Complex(0, 0);
+            complex64 vi1 = new complex64(0, 0);
 
             // 12 * 1.5 + 1i * iota / 3 + 2i
             for (int iota = 0; iota < 2; iota++)
             {
-                Complex result = 12 * 1.5 + i(1) * iota / 3 + i(2);
+                complex64 result = 12 * 1.5 + i(1) * iota / 3 + i(2);
                 Console.WriteLine(result);
             }
 
@@ -229,7 +228,7 @@ namespace go
             ab = Abser_cast(v);
 
             //GoString test1 = ab.TypeAssert<GoString>();
-            bool ok = ab.TryTypeAssert(out GoString test);
+            bool ok = ab.TryTypeAssert(out @string test);
 
             Console.WriteLine(ab.Abs());
         }
@@ -255,30 +254,30 @@ namespace go
 
         private static void Main2()
         {
-            Slice<int> s = new Slice<int>(new[] { 2, 3, 5, 7, 11, 13 });
+            slice<int> s = new slice<int>(new[] { 2, 3, 5, 7, 11, 13 });
             printSlice(s);
 
             // Slice the slice to give it zero length.
-            s = s.Slice(high: 0);
+            s = s.slice(high: 0);
             printSlice(s);
 
             // Extend its length.
-            s = s.Slice(high: 4);
+            s = s.slice(high: 4);
             printSlice(s);
 
             // Drop its first two values.
-            s = s.Slice(2);
+            s = s.slice(2);
             printSlice(s);
         }
 
-        private static void printSlice(Slice<int> s)
+        private static void printSlice(slice<int> s)
         {
             Console.WriteLine("len={0} cap={1} {2}", len(s), cap(s), s);
         }
 
         private static void Main3()
         {
-            Slice<int> s = new Slice<int>();
+            slice<int> s = new slice<int>();
             Console.WriteLine("{0} {1} {2}", s, len(s), cap(s));
 
             if (s == nil)
@@ -287,11 +286,11 @@ namespace go
 
         private static void Main4()
         {
-            Slice<Slice<string>> board = new Slice<Slice<string>>(new[]
+            slice<slice<string>> board = new slice<slice<string>>(new[]
             {
-            new Slice<string>(new[] {"_", "_", "_"}),
-            new Slice<string>(new[] {"_", "_", "_"}),
-            new Slice<string>(new[] {"_", "_", "_"}),
+            new slice<string>(new[] {"_", "_", "_"}),
+            new slice<string>(new[] {"_", "_", "_"}),
+            new slice<string>(new[] {"_", "_", "_"}),
         });
 
             // The players take turns.
@@ -318,7 +317,7 @@ namespace go
             //    printSlice(s);
             //}
 
-            Slice<int> s = new Slice<int>();
+            slice<int> s = new slice<int>();
             printSlice(s);
 
             // append works on nil slices.

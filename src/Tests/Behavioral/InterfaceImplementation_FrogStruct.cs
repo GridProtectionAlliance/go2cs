@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 16 19:42:07 UTC
+//     Generated on 2018 July 17 05:02:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace go
                 this.Color = default;
             }
 
-            public Frog(GoString Name, GoString Color)
+            public Frog(@string Name, @string Color)
             {
                 this.Name = Name;
                 this.Color = Color;

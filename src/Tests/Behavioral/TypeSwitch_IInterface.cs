@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 16 19:42:07 UTC
+//     Generated on 2018 July 17 05:02:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,14 +32,14 @@ namespace go
         {
             private T m_target;
 
-            private delegate GoString mByVal(T value);
-            private delegate GoString mByRef(ref T value);
+            private delegate @string mByVal(T value);
+            private delegate @string mByRef(ref T value);
 
             private static readonly mByVal s_mByVal;
             private static readonly mByRef s_mByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public GoString m() => s_mByRef?.Invoke(ref m_target) ?? s_mByVal(m_target);
+            public @string m() => s_mByRef?.Invoke(ref m_target) ?? s_mByVal(m_target);
 
             [DebuggerStepperBoundary]
             static I()

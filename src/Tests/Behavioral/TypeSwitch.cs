@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\TypeSwitch.go
+// package main -- go2cs converted at 2018 July 17 05:02:49 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\TypeSwitch.go
 
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -10,29 +10,29 @@ namespace go
     {
         public partial interface I
         {
-            GoString m();
+            @string m();
         }
 
 
         public partial struct T : I
         {
-            public GoString name;
+            public @string name;
             public I I;
         }
 
 
-        private static GoString m(this T @ref)
+        private static @string m(this T @ref)
         {
             return @ref.name;
         }
 
         public partial struct S
         {
-            public GoString name;
+            public @string name;
         }
 
 
-        private static GoString m(this S @ref)
+        private static @string m(this S @ref)
         {
             return "Am I an I?";
         }
@@ -40,7 +40,7 @@ namespace go
         private static void Main()
         {
             EmptyInterface x = 7;          // x has dynamic type int and value 7
-            var i = x.TypeAssert<long>();                   // i has type int and value 7
+            var i = x.TypeAssert<@int>();                   // i has type int and value 7
             fmt.Println(i);
 
             T y;
@@ -56,7 +56,7 @@ namespace go
 
                     fmt.Println("S is an I!!");
                 })
-                .Case(typeof(NilType), typeof(long))(() =>
+                .Case(typeof(NilType), typeof(@int))(() =>
                 {
 
                     fmt.Println("S is nil or an int");

@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8be282c1-def7-412a-9690-08f695805efb}</ProjectGuid>
+    <ProjectGuid>{a1fa653a-946a-4643-8617-7709ddc3aec6}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>ArrayPassByValue</AssemblyName>
+    <AssemblyName>TypeDefintions</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -40,7 +40,6 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArrayPassByValue.cs" />
     <Compile Include="InterfaceCasting_MyErrorStruct.cs" />
     <Compile Include="InterfaceImplementation_AnimalInterface.cs" />
     <Compile Include="InterfaceImplementation_DogStruct.cs" />
@@ -61,10 +60,29 @@
     <Compile Include="StructPromotionWithInterface_MyErrorStruct.cs" />
     <Compile Include="StructPromotionWithInterface_MyCustomErrorStruct.cs" />
     <Compile Include="StructWithPointer_ColorListStruct.cs" />
+    <Compile Include="TypeDefintions.cs" />
+    <Compile Include="TypeDefintions_@boolStructOf(@bool).cs" />
+    <Compile Include="TypeDefintions_uint8StructOf(uint8).cs" />
+    <Compile Include="TypeDefintions_uint16StructOf(uint16).cs" />
+    <Compile Include="TypeDefintions_uint32StructOf(uint32).cs" />
+    <Compile Include="TypeDefintions_uint64StructOf(uint64).cs" />
+    <Compile Include="TypeDefintions_int8StructOf(int8).cs" />
+    <Compile Include="TypeDefintions_int16StructOf(int16).cs" />
+    <Compile Include="TypeDefintions_int32StructOf(int32).cs" />
+    <Compile Include="TypeDefintions_int64StructOf(int64).cs" />
+    <Compile Include="TypeDefintions_float32StructOf(float32).cs" />
+    <Compile Include="TypeDefintions_float64StructOf(float64).cs" />
+    <Compile Include="TypeDefintions_complex64StructOf(complex64).cs" />
+    <Compile Include="TypeDefintions_complex128StructOf(complex128).cs" />
+    <Compile Include="TypeDefintions_@byteStructOf(@byte).cs" />
+    <Compile Include="TypeDefintions_runeStructOf(rune).cs" />
+    <Compile Include="TypeDefintions_@uintStructOf(@uint).cs" />
+    <Compile Include="TypeDefintions_@intStructOf(@int).cs" />
+    <Compile Include="TypeDefintions_uintptrStructOf(uintptr).cs" />
     <Compile Include="TypeSwitch_IInterface.cs" />
     <Compile Include="TypeSwitch_TStruct.cs" />
     <Compile Include="TypeSwitch_SStruct.cs" />
-    <Compile Include="ArrayPassByValue_AssemblyInfo.cs" />
+    <Compile Include="TypeDefintions_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

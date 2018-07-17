@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\LambdaFunctions.go
+// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\LambdaFunctions.go
 
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -8,9 +8,9 @@ namespace go
 {
     public static partial class main_package
     {
-        public delegate GoString Stringy();
+        public delegate @string Stringy();
 
-        private static GoString foo()
+        private static @string foo()
         {
             return "Stringy function";
         }

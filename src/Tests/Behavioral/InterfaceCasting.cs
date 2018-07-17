@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 July 16 19:42:07 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\InterfaceCasting.go
+// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceCasting.go
 
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -10,11 +10,11 @@ namespace go
     {
         public partial struct MyError
         {
-            public GoString description;
+            public @string description;
         }
 
 
-        public static GoString Error(this MyError err)
+        public static @string Error(this MyError err)
         {
             return fmt.Sprintf("error: %s", err.description);
         }

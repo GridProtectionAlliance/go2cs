@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 16 19:42:07 UTC
+//     Generated on 2018 July 17 05:02:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,16 +27,16 @@ namespace go
 
             private ref Person Person_val => ref m_PersonRef.Value;
 
-            public ref GoString name => ref m_PersonRef.Value.name;
+            public ref @string name => ref m_PersonRef.Value.name;
 
-            public ref int age => ref m_PersonRef.Value.age;
+            public ref int32 age => ref m_PersonRef.Value.age;
 
             // Employee structure promotion - sourced from value copy
             private readonly Ref<Employee> m_EmployeeRef;
 
             private ref Employee Employee_val => ref m_EmployeeRef.Value;
 
-            public ref GoString position => ref m_EmployeeRef.Value.position;
+            public ref @string position => ref m_EmployeeRef.Value.position;
 
             // Constructors
             public Record(NilType _)

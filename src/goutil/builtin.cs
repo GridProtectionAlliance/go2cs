@@ -27,7 +27,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using static System.Math;
@@ -39,17 +38,6 @@ namespace go
     public static class builtin
     {
         /// <summary>
-        /// Represents the Go interface type known as the empty interface, i.e., "interface {}".
-        /// </summary>
-        /// <remarks>
-        /// An empty interface may hold values of any Go type as every type implements at least
-        /// zero methods. All Go types converted to C# inherit this interface.
-        /// </remarks>
-        public interface EmptyInterface
-        {
-        }
-
-        /// <summary>
         /// The built-in error interface type is the conventional interface for representing an
         /// error condition, with the nil value representing no error.
         /// </summary>
@@ -59,48 +47,6 @@ namespace go
             /// Get string that represents an error.
             /// </summary>
             string Error();
-        }
-
-        /// <summary>
-        /// The built-in rune type is used, by convention, to distinguish character values from
-        /// integer values. It is an alias for int32 and is equivalent to int32 in all ways.
-        /// </summary>
-        public struct rune : EmptyInterface
-        {
-            // Value of the rune struct
-            private readonly int m_value;
-
-            public rune(int value) => m_value = value;
-
-            // Enable implicit conversions between int and rune struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator rune(int value) => new rune(value);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator int(rune value) => value.m_value;
-
-            // Enable implicit conversions between char and rune struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator rune(char value) => new rune(value);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator char(rune value) => (char)value.m_value;
-
-            // Enable comparisons between nil and rune struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(rune value, NilType nil) => value.Equals(default(rune));
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(rune value, NilType nil) => !(value == nil);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, rune value) => value == nil;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, rune value) => value != nil;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator rune(NilType nil) => default;
         }
 
         /// <summary>
@@ -139,7 +85,7 @@ namespace go
         /// </code>
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static Slice<T> append<T>(Slice<T> slice, params object[] elems) => append(ref slice, elems);
+        public static slice<T> append<T>(slice<T> slice, params object[] elems) => append(ref slice, elems);
 
         /// <summary>
         /// Appends elements to the end of a slice. If it has sufficient capacity, the destination is
@@ -158,7 +104,7 @@ namespace go
         /// </code>
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static Slice<T> append<T>(ref Slice<T> slice, params object[] elems) => Slice<T>.Append(ref slice, elems);
+        public static slice<T> append<T>(ref slice<T> slice, params object[] elems) => slice<T>.Append(ref slice, elems);
 
         /// <summary>
         /// Gets the length of the <paramref name="array"/> (same as <see cref="len{T}(T[])"/>).
@@ -174,7 +120,7 @@ namespace go
         /// <param name="slice">Target slice.</param>
         /// <returns>The capacity of the <paramref name="slice"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int cap<T>(Slice<T> slice) => cap(ref slice);
+        public static int cap<T>(slice<T> slice) => cap(ref slice);
 
         /// <summary>
         /// Gets the maximum length the <paramref name="slice"/> can reach when resliced.
@@ -182,7 +128,7 @@ namespace go
         /// <param name="slice">Target slice pointer.</param>
         /// <returns>The capacity of the <paramref name="slice"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int cap<T>(ref Slice<T> slice) => slice.Capacity;
+        public static int cap<T>(ref slice<T> slice) => slice.Capacity;
 
         //public static void close<T>(Channel<T> c) = c.Close();
 
@@ -193,7 +139,16 @@ namespace go
         /// <param name="imaginaryPart">Imaginary-part of complex value.</param>
         /// <returns>New complex value from specified <paramref name="realPart"/> and <paramref name="imaginaryPart"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static Complex complex(double realPart, double imaginaryPart) => new Complex(realPart, imaginaryPart);
+        public static complex64 complex(float32 realPart, float32 imaginaryPart) => new complex64(realPart, imaginaryPart);
+
+        /// <summary>
+        /// Constructs a complex value from two floating-point values.
+        /// </summary>
+        /// <param name="realPart">Real-part of complex value.</param>
+        /// <param name="imaginaryPart">Imaginary-part of complex value.</param>
+        /// <returns>New complex value from specified <paramref name="realPart"/> and <paramref name="imaginaryPart"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
+        public static complex128 complex(float64 realPart, float64 imaginaryPart) => new complex128(realPart, imaginaryPart);
 
         /// <summary>
         /// Copies elements from a source slice into a destination slice.
@@ -205,7 +160,7 @@ namespace go
         /// The number of elements copied, which will be the minimum of len(src) and len(dst).
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int copy<T1, T2>(Slice<T1> dst, Slice<T2> src) => copy(ref dst, ref src);
+        public static int copy<T1, T2>(slice<T1> dst, slice<T2> src) => copy(ref dst, ref src);
 
         /// <summary>
         /// Copies elements from a source slice into a destination slice.
@@ -217,7 +172,7 @@ namespace go
         /// The number of elements copied, which will be the minimum of len(src) and len(dst).
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int copy<T1, T2>(ref Slice<T1> dst, Slice<T2> src) => copy(ref dst, ref src);
+        public static int copy<T1, T2>(ref slice<T1> dst, slice<T2> src) => copy(ref dst, ref src);
 
         /// <summary>
         /// Copies elements from a source slice into a destination slice.
@@ -229,7 +184,7 @@ namespace go
         /// The number of elements copied, which will be the minimum of len(src) and len(dst).
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int copy<T1, T2>(Slice<T1> dst, ref Slice<T2> src) => copy(ref dst, ref src);
+        public static int copy<T1, T2>(slice<T1> dst, ref slice<T2> src) => copy(ref dst, ref src);
 
         /// <summary>
         /// Copies elements from a source slice into a destination slice.
@@ -241,7 +196,7 @@ namespace go
         /// The number of elements copied, which will be the minimum of len(src) and len(dst).
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int copy<T1, T2>(ref Slice<T1> dst, ref Slice<T2> src)
+        public static int copy<T1, T2>(ref slice<T1> dst, ref slice<T2> src)
         {
             if (dst.Array == null)
                 throw new InvalidOperationException("Destination slice array reference is null.");
@@ -270,7 +225,7 @@ namespace go
         /// As a special case, it also will copy bytes from a string to a slice of bytes.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int copy(Slice<byte> dst, string src) => copy(ref dst, src);
+        public static int copy(slice<byte> dst, string src) => copy(ref dst, src);
 
         /// <summary>
         /// Copies elements from a source slice into a destination slice.
@@ -285,9 +240,9 @@ namespace go
         /// As a special case, it also will copy bytes from a string to a slice of bytes.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int copy(ref Slice<byte> dst, string src)
+        public static int copy(ref slice<byte> dst, string src)
         {
-            Slice<byte> bytes = new Slice<byte>(Encoding.UTF8.GetBytes(src));
+            slice<byte> bytes = new slice<byte>(Encoding.UTF8.GetBytes(src));
             return copy(dst, bytes);
         }
 
@@ -299,7 +254,7 @@ namespace go
         /// <param name="c"></param>
         /// <returns>Imaginary part of the complex number <paramref name="c"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static double imag(Complex c) => c.Imaginary;
+        public static double imag(complex64 c) => c.Imaginary;
 
         /// <summary>
         /// 
@@ -315,14 +270,14 @@ namespace go
         /// <param name="slice"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int len<T>(Slice<T> slice) => len(ref slice);
+        public static int len<T>(slice<T> slice) => len(ref slice);
         /// <summary>
         /// 
         /// </summary>
         /// <param name="slice"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int len<T>(ref Slice<T> slice) => slice.Length;
+        public static int len<T>(ref slice<T> slice) => slice.Length;
 
         /// <summary>
         /// 
@@ -344,7 +299,7 @@ namespace go
         /// <param name="capacity"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static Slice<T> make<T>(Slice<T> _, int length, int capacity = -1) => make(ref _, length, capacity);
+        public static slice<T> make<T>(slice<T> _, int length, int capacity = -1) => make(ref _, length, capacity);
         /// <summary>
         /// 
         /// </summary>
@@ -353,7 +308,7 @@ namespace go
         /// <param name="capacity"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static Slice<T> make<T>(ref Slice<T> _, int length, int capacity = -1) => new Slice<T>(length, capacity);
+        public static slice<T> make<T>(ref slice<T> _, int length, int capacity = -1) => new slice<T>(length, capacity);
 
         //public static Map<TKey, TValue> make<TKey, TValue>(Map<TKey, TValue> _, int initialCapacity = -1) => new Map<TKey, TValue>(initialCapacity);
 
@@ -383,12 +338,28 @@ namespace go
         // ** Helper Functions **
 
         /// <summary>
-        /// Converts imaginary literal value to a <see cref="Complex"/> imaginary number.
+        /// Converts imaginary literal value to a <see cref="complex64"/> imaginary number.
         /// </summary>
         /// <param name="literal">Literal imaginary value with "i" suffix.</param>
         /// <returns>New complex number with parsed <paramref name="literal"/> as imaginary part and a zero value real part.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static Complex i(string literal)
+        public static complex64 i64(string literal)
+        {
+            if (!literal.EndsWith("i"))
+                throw new InvalidCastException($"Token \"{literal}\" is not an imaginary literal.");
+
+            if (float.TryParse(literal.Substring(0, literal.Length - 1), out float imaginary))
+                return i(imaginary);
+
+            throw new InvalidCastException($"Could not parse \"{literal}\" as an imaginary value.");
+        }
+        /// <summary>
+        /// Converts imaginary literal value to a <see cref="complex128"/> imaginary number.
+        /// </summary>
+        /// <param name="literal">Literal imaginary value with "i" suffix.</param>
+        /// <returns>New complex number with parsed <paramref name="literal"/> as imaginary part and a zero value real part.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
+        public static complex128 i128(string literal)
         {
             if (!literal.EndsWith("i"))
                 throw new InvalidCastException($"Token \"{literal}\" is not an imaginary literal.");
@@ -400,12 +371,20 @@ namespace go
         }
 
         /// <summary>
-        /// Converts value to a <see cref="Complex"/> imaginary number.
+        /// Converts value to a <see cref="complex64"/> imaginary number.
         /// </summary>
         /// <param name="imaginary">Value to convert to imaginary.</param>
         /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static Complex i(double imaginary) => new Complex(0.0D, imaginary);
+        public static complex64 i(float imaginary) => new complex64(0.0F, imaginary);
+
+        /// <summary>
+        /// Converts value to a <see cref="complex128"/> imaginary number.
+        /// </summary>
+        /// <param name="imaginary">Value to convert to imaginary.</param>
+        /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
+        public static complex128 i(double imaginary) => new complex128(0.0D, imaginary);
 
         /// <summary>
         /// Creates a new switch expression that behaves like a Go switch statement.
