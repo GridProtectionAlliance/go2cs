@@ -756,7 +756,7 @@ namespace go
     /// <summary>
     /// Represents a numeric type for the set of all complex numbers with float64 real and imaginary parts.
     /// </summary>
-    public struct complex128 : EmptyInterface
+    public struct complex128 : EmptyInterface, IEquatable<complex128>
     {
         // Value of the complex128 struct
         private readonly Complex m_value;
@@ -782,9 +782,75 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator complex64(complex128 value) => new complex64((float)value.m_value.Real, (float)value.m_value.Imaginary);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator complex128(short value) => new complex128(value, 0.0D);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator complex128(int value) => new complex128(value, 0.0D);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator complex128(long value) => new complex128(value, 0.0D);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator complex128(ushort value) => new complex128(value, 0.0D);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator complex128(uint value) => new complex128(value, 0.0D);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator complex128(ulong value) => new complex128(value, 0.0D);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator complex128(sbyte value) => new complex128(value, 0.0D);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator complex128(byte value) => new complex128(value, 0.0D);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator complex128(float value) => new complex128(value, 0.0D);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator complex128(double value) => new complex128(value, 0.0D);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator complex128(BigInteger value) => new complex128((double)value, 0.0D);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator complex128(Decimal value) => new complex128((double)value, 0.0D);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static complex128 operator -(complex128 value) => new complex128(-value.Real, -value.Imaginary);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static complex128 operator +(complex128 left, complex128 right) => new complex128(left.Real + right.Real, left.Imaginary + right.Imaginary);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static complex128 operator -(complex128 left, complex128 right) => new complex128(left.Real - right.Real, left.Imaginary - right.Imaginary);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static complex128 operator *(complex128 left, complex128 right) => left.m_value * right.m_value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static complex128 operator /(complex128 left, complex128 right) => left.m_value / right.m_value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(complex128 left, complex128 right) => left.Real == right.Real && left.Imaginary == right.Imaginary;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(complex128 left, complex128 right) => left.Real != right.Real || left.Imaginary != right.Imaginary;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Equals(object obj) => m_value.Equals(obj);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(complex128 value) => m_value.Equals(value.m_value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode() => m_value.GetHashCode();
+
         // Enable comparisons between nil and complex128 struct
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(complex128 value, NilType nil) => value.Equals(default(complex128));
+        public static bool operator ==(complex128 value, NilType nil) => value.Equals(default);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(complex128 value, NilType nil) => !(value == nil);
