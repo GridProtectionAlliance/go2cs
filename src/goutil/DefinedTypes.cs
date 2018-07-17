@@ -586,7 +586,7 @@ namespace go
         public static implicit operator complex64(float value) => new complex64(value, 0.0F);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator complex64(double value) => new complex64((float)value, 0.0F);
+        public static explicit operator complex64(double value) => new complex64((float)value, 0.0F);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator complex64(BigInteger value) => new complex64((float)value, 0.0F);
@@ -866,7 +866,7 @@ namespace go
         public static implicit operator rune(char value) => new rune(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator char(rune value) => (char)value.m_value;
+        public static explicit operator char(rune value) => (char)value.m_value;
 
         // Enable comparisons between nil and rune struct
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
