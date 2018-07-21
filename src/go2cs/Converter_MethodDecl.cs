@@ -37,8 +37,6 @@ namespace go2cs
             m_originalFunctionName = context.IDENTIFIER().GetText();
             m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
 
-            string scope = char.IsUpper(m_originalFunctionName[0]) ? "public" : "private";
-
             // Function signature containing result type and parameters have not been visited yet,
             // so we mark their desired positions and replace once the visit has occurred
             m_functionResultTypeMarker = string.Format(FunctionResultTypeMarker, m_currentFunctionName);
@@ -51,7 +49,7 @@ namespace go2cs
             if (!string.IsNullOrWhiteSpace(m_nextDeclComments))
                 m_targetFile.Append(FixForwardSpacing(m_nextDeclComments));
 
-            m_targetFile.AppendLine($"{Spacing()}{scope} static {m_functionResultTypeMarker} {m_currentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
+            m_targetFile.AppendLine($"{Spacing()}{m_functionResultTypeMarker} {m_currentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
         }
 
         public override void ExitMethodDecl(GolangParser.MethodDeclContext context)
@@ -91,6 +89,10 @@ namespace go2cs
                 parametersSignature = $"({receiverParametersSignature})";
             else
                 parametersSignature = $"({receiverParametersSignature}, {parametersSignature})";
+
+            // Scope of an extension function is based on scope of the receiver type
+            string scope = char.IsUpper(method.ReceiverParameters[0].Type.TypeName[0]) ? "public" : "private";
+            resultSignature = $"{scope} static {resultSignature}";
 
             // Replace function markers
             m_targetFile.Replace(m_functionResultTypeMarker, resultSignature);
