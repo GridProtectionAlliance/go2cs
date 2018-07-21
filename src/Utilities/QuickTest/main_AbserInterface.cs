@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 
 #pragma warning disable CS0660, CS0661
 
@@ -154,8 +153,8 @@ namespace go
                 if ((object)conversionOperator == null)
                     throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {type.FullName}");
 
-                // TODO: Return "Targert"
-                return conversionOperator.Invoke(null, new object[] { target });
+                dynamic result = conversionOperator.Invoke(null, new object[] { target });
+                return result.Target;
             }
             catch (NotImplementedException ex)
             {

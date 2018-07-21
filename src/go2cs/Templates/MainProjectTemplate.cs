@@ -81,13 +81,14 @@ namespace go2cs.Templates
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include=""Microsoft.CSharp"" />
     <Reference Include=""System.Numerics"" />
     <Reference Include=""System"" />
   </ItemGroup>
   <ItemGroup>
 ");
             
-            #line 46 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            #line 47 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
   foreach (string projectFile in ProjectFiles)
     {
         
@@ -96,14 +97,14 @@ namespace go2cs.Templates
             #line hidden
             this.Write("    <Compile Include=\"");
             
-            #line 48 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            #line 49 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(projectFile));
             
             #line default
             #line hidden
             this.Write("\" />\r\n");
             
-            #line 49 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            #line 50 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
 
     }
 
@@ -113,7 +114,7 @@ namespace go2cs.Templates
             this.Write("  </ItemGroup>\r\n  <ItemGroup>\r\n    <None Include=\"README.md\" />\r\n  </ItemGroup>\r\n" +
                     "");
             
-            #line 55 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            #line 56 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
   foreach (string sharedProject in SharedProjectReferences)
     {
         
@@ -122,14 +123,14 @@ namespace go2cs.Templates
             #line hidden
             this.Write("    <Import Project=\"");
             
-            #line 57 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            #line 58 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(sharedProject));
             
             #line default
             #line hidden
             this.Write("\" Label=\"Shared\" />\r\n");
             
-            #line 58 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+            #line 59 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
 
     }
 
@@ -141,7 +142,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 62 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
+        #line 63 "C:\Projects\go2cs\src\go2cs\Templates\MainProjectTemplate.tt"
 
 // Template Parameters
 public string AssemblyName;  // File name without extension (not package, package is always "main")

@@ -39,6 +39,7 @@
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Numerics" />
     <Reference Include="System" />
   </ItemGroup>
