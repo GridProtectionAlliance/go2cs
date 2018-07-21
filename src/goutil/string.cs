@@ -50,6 +50,12 @@ namespace go
             }
         }
 
+        public @string(slice<byte> value)
+        {
+            m_value = new byte[value.Length];
+            value.CopyTo(m_value, 0);
+        }
+
         public @string(string value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
 
         public @string(@string value) : this(value.m_value) { }
@@ -129,14 +135,20 @@ namespace go
 
         public static @string Default { get; } = new @string("");
 
-        // Enable implicit conversions between string and GoString struct
+        // Enable implicit conversions between string and @string struct
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @string(string value) => new @string(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator string(@string value) => value.ToString();
 
-        // Enable comparisons between nil and GoString struct
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator @string(slice<byte> value) => new @string(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator slice<byte>(@string value) => new slice<byte>(value.m_value);
+
+        // Enable comparisons between nil and @string struct
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(@string value, NilType nil) => value.Equals(default);
 
