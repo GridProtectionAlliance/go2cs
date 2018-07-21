@@ -79,7 +79,7 @@ using go;
 
             // Enable comparisons between nil and <#=InterfaceName#><T> interface instance
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(<#=InterfaceName#><T> value, NilType nil) => (object)value == null || Activator.CreateInstance<<#=InterfaceName#><T>>().Equals(value);
+            public static bool operator ==(<#=InterfaceName#><T> value, NilType nil) => Activator.CreateInstance<<#=InterfaceName#><T>>().Equals(value);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(<#=InterfaceName#><T> value, NilType nil) => !(value == nil);

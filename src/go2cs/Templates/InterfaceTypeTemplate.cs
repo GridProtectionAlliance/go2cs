@@ -241,7 +241,7 @@ if (!NamespacePrefix.Equals("go")) {
             
             #line default
             #line hidden
-            this.Write("<T> value, NilType nil) => (object)value == null || Activator.CreateInstance<");
+            this.Write("<T> value, NilType nil) => Activator.CreateInstance<");
             
             #line 82 "C:\Projects\go2cs\src\go2cs\Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));
