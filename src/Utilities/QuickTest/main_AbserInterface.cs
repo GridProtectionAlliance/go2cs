@@ -31,6 +31,8 @@ namespace go
         {
             private T m_target;
 
+            public T Target => m_target;
+
             private delegate double AbsByVal(T value);
             private delegate double AbsByRef(ref T value);
 
@@ -115,8 +117,7 @@ namespace go
         {
             try
             {
-                go.main_package.Abser<T> test = (go.main_package.Abser<T>)target;
-                return (T)target;
+                return ((go.main_package.Abser<T>)target).Target;
             }
             catch (InvalidCastException)
             {
@@ -153,6 +154,7 @@ namespace go
                 if ((object)conversionOperator == null)
                     throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {type.FullName}");
 
+                // TODO: Return "Targert"
                 return conversionOperator.Invoke(null, new object[] { target });
             }
             catch (NotImplementedException ex)

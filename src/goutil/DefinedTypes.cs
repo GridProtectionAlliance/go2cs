@@ -756,7 +756,7 @@ namespace go
     /// <summary>
     /// Represents a numeric type for the set of all complex numbers with float64 real and imaginary parts.
     /// </summary>
-    public struct complex128 : EmptyInterface, IEquatable<complex128>
+    public struct complex128 : EmptyInterface, IEquatable<complex128>, IFormattable
     {
         // Value of the complex128 struct
         private readonly Complex m_value;
@@ -847,6 +847,10 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode() => m_value.GetHashCode();
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(string format, IFormatProvider formatProvider) => m_value.ToString(format, formatProvider);
 
         // Enable comparisons between nil and complex128 struct
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

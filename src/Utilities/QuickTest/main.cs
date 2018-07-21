@@ -233,6 +233,10 @@ namespace go
             ab = (Abser<MyFloat>)f;
             ab = Abser_cast(v);
 
+            var err = ab.TypeAssert<Vertex>();
+
+            Console.WriteLine("Type asserted ab = " + err.GetType().Name);
+
             //GoString test1 = ab.TypeAssert<GoString>();
             bool ok = ab.TryTypeAssert(out @string test);
 
