@@ -37,7 +37,9 @@ using go;
         [<#=GeneratedCodeAttribute#>]
         <#=Scope#> struct <#=InterfaceName#><T> : <#=InterfaceName#>
         {
-            private T m_target;<#
+            private T m_target;
+
+            public T Target => m_target;<#
         
             foreach (var decl in Functions)
             {
@@ -127,12 +129,7 @@ namespace go
         {
             try
             {
-                <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#><T> test = (<#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#><T>)target;
-                return (T)target;
-            }
-            catch (InvalidCastException)
-            {
-                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}");
+                return ((<#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#><T>)target).Target;
             }
             catch (NotImplementedException ex)
             {
@@ -163,9 +160,10 @@ namespace go
                 MethodInfo conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(<#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#><>).GetExplicitGenericConversionOperator(type));
 
                 if ((object)conversionOperator == null)
-                    throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {type.FullName}");
+                    throw new PanicException($"panic: interface conversion: failed to create converter for {target.GetType().FullName} to {type.FullName}");
 
-                return conversionOperator.Invoke(null, new object[] { target });
+                dynamic result = conversionOperator.Invoke(null, new object[] { target });
+                return result.Target;
             }
             catch (NotImplementedException ex)
             {

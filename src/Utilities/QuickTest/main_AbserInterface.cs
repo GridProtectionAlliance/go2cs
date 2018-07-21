@@ -118,10 +118,6 @@ namespace go
             {
                 return ((go.main_package.Abser<T>)target).Target;
             }
-            catch (InvalidCastException)
-            {
-                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}");
-            }
             catch (NotImplementedException ex)
             {
                 throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}: missing method {ex.InnerException?.Message}");
@@ -151,7 +147,7 @@ namespace go
                 MethodInfo conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(go.main_package.Abser<>).GetExplicitGenericConversionOperator(type));
 
                 if ((object)conversionOperator == null)
-                    throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {type.FullName}");
+                    throw new PanicException($"panic: interface conversion: failed to create converter for {target.GetType().FullName} to {type.FullName}");
 
                 dynamic result = conversionOperator.Invoke(null, new object[] { target });
                 return result.Target;
