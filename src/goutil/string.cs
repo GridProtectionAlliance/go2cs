@@ -35,7 +35,7 @@ namespace go
     /// </summary>
     public struct @string : EmptyInterface, IReadOnlyList<byte>, IEnumerable<char>, IEnumerable<(int index, char rune)>
     {
-        private readonly byte[] m_value;
+        internal readonly byte[] m_value;
 
         public @string(byte[] value)
         {
