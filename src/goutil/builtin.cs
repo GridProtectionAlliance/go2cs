@@ -25,8 +25,10 @@
 // ReSharper disable UnusedMember.Global
 
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using static System.Math;
@@ -888,5 +890,158 @@ namespace go
         public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16);
 
         #endregion
+
+        #region [ error interface implementation ]
+
+        public struct error<T> : error
+        {
+            private T m_target;
+
+            public T Target => m_target;
+
+            private delegate string ErrorByVal(T value);
+            private delegate string ErrorByRef(ref T value);
+
+            private static readonly ErrorByVal s_ErrorByVal;
+            private static readonly ErrorByRef s_ErrorByRef;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public string Error() => s_ErrorByRef?.Invoke(ref m_target) ?? s_ErrorByVal(m_target);
+
+            [DebuggerStepperBoundary]
+            static error()
+            {
+                Type targetType = typeof(T);
+                MethodInfo extensionMethod;
+
+                extensionMethod = targetType.GetExtensionMethod("Error");
+
+                if ((object)extensionMethod != null)
+                {
+                    s_ErrorByRef = extensionMethod.CreateStaticDelegate(typeof(ErrorByRef)) as ErrorByRef;
+
+                    if ((object)s_ErrorByRef == null)
+                        s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
+                }
+
+                if ((object)s_ErrorByRef == null && (object)s_ErrorByVal == null)
+                    throw new NotImplementedException($"{targetType.Name} does not implement error.Error method", new Exception("Error"));
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+            public static explicit operator error<T>(T target) => new error<T> { m_target = target };
+
+            // Enable comparisons between nil and error<T> interface instance
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator ==(error<T> value, NilType nil) => Activator.CreateInstance<error<T>>().Equals(value);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(error<T> value, NilType nil) => !(value == nil);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator ==(NilType nil, error<T> value) => value == nil;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static bool operator !=(NilType nil, error<T> value) => value != nil;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static error error_cast<T>(T target)
+        {
+            if (typeof(error).IsAssignableFrom(typeof(T)))
+                return target as error;
+
+            return (error<T>)target;
+        }
+
+
+        #endregion
     }
+
+    #region [ error interface type assertions ]
+
+    public partial class NilType
+    {
+        // Enable comparisons between nil and error interface
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(builtin.error value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(builtin.error value, NilType nil) => !(value == nil);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(NilType nil, builtin.error value) => value == nil;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(NilType nil, builtin.error value) => value != nil;
+    }
+
+    public static class builtin_errorExtensions
+    {
+        private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new ConcurrentDictionary<Type, MethodInfo>();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static T TypeAssert<T>(this builtin.error target)
+        {
+            try
+            {
+                return ((builtin.error<T>)target).Target;
+            }
+            catch (NotImplementedException ex)
+            {
+                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}: missing method {ex.InnerException?.Message}");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static bool TryTypeAssert<T>(this builtin.error target, out T result)
+        {
+            try
+            {
+                result = target.TypeAssert<T>();
+                return true;
+            }
+            catch (PanicException)
+            {
+                result = default;
+                return false;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static object TypeAssert(this builtin.error target, Type type)
+        {
+            try
+            {
+                MethodInfo conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(builtin.error<>).GetExplicitGenericConversionOperator(type));
+
+                if ((object)conversionOperator == null)
+                    throw new PanicException($"panic: interface conversion: failed to create converter for {target.GetType().FullName} to {type.FullName}");
+
+                dynamic result = conversionOperator.Invoke(null, new object[] { target });
+                return result.Target;
+            }
+            catch (NotImplementedException ex)
+            {
+                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {type.FullName}: missing method {ex.InnerException?.Message}");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static bool TryTypeAssert(this builtin.error target, Type type, out object result)
+        {
+            try
+            {
+                result = target.TypeAssert(type);
+                return true;
+            }
+            catch (PanicException)
+            {
+                result = type.IsValueType ? Activator.CreateInstance(type) : null;
+                return false;
+            }
+        }
+    }
+
+    #endregion
 }
