@@ -174,19 +174,25 @@ namespace go2cs
                 for (int i = 0; i < length; i++)
                 {
                     string assignOP = context.assign_op().GetText();
-                    string notOP = "";
 
-                    if (assignOP.Equals("&^=", StringComparison.Ordinal))
+                    if (assignOP.Equals("<<=") || assignOP.Equals(">>="))
+                    {
+                        // TODO: Need expression evaluation - cast not needed for int expressions
+                        if (!int.TryParse(rightOperands[i], out int _))
+                            rightOperands[i] = $"(int)({rightOperands[i]})";
+                    }
+
+                    if (assignOP.Equals("&^="))
                     {
                         assignOP = " &= ";
-                        notOP = "~";
+                        rightOperands[i] = $"~({rightOperands[i]})";
                     }
                     else
                     {
                         assignOP = $" {assignOP} ";
                     }
 
-                    statement.Append($"{Spacing()}{leftOperands[i]}{assignOP}{notOP}{rightOperands[i]};");
+                    statement.Append($"{Spacing()}{leftOperands[i]}{assignOP}{rightOperands[i]};");
 
                     // Since multiple assignments can be on one line, only check for comments after last assignment
                     if (i < length - 1)

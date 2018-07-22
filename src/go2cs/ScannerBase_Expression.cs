@@ -64,9 +64,20 @@ namespace go2cs
 
             if (context.expression()?.Length == 2)
             {
+                string leftOperand = Expressions[context.expression(0)];
+                string rightOperand = Expressions[context.expression(1)];
                 string binaryOP = context.children[1].GetText();
-                binaryOP = binaryOP.Equals("&^", StringComparison.Ordinal) ? " & ~" : $" {binaryOP} ";
-                Expressions[context] = $"{Expressions[context.expression(0)]}{binaryOP}{Expressions[context.expression(1)]}";
+
+                if (binaryOP.Equals("<<") || binaryOP.Equals(">>"))
+                {
+                    // TODO: Need expression evaluations - no cast needed if expressions is int type
+                    if (!int.TryParse(rightOperand, out int _))
+                        rightOperand = $"(int)({rightOperand})";
+                }
+
+                binaryOP = binaryOP.Equals("&^") ? " & ~" : $" {binaryOP} ";
+
+                Expressions[context] = $"{leftOperand}{binaryOP}{rightOperand}";
             }
             else
             {

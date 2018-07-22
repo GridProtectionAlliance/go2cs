@@ -36,7 +36,7 @@ namespace go
     /// scope beyond the current stack, and (2) have the ability to create a pointer to the type,
     /// i.e., a reference to a reference of the type. Also see <see cref="Ptr{T}"/>.
     /// </remarks>
-    public class Ref<T>
+    public class Ref<T> : EmptyInterface
     {
         private T m_value;
 

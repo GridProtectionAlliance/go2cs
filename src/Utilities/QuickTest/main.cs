@@ -39,6 +39,11 @@ namespace go
             double Abs();
         }
 
+        // Right operand of shift operators should always be cast it int
+        private static readonly dynamic intSize = 32 << (int)(~(@uint)0 >> 63);
+
+        private static readonly dynamic maxUint64 = (1 << 64 - 1);
+
         // A NumError records a failed conversion.
         public partial struct NumError
         {
