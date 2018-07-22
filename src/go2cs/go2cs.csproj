@@ -69,7 +69,6 @@
     <Compile Include="Converter.cs" />
     <Compile Include="Converter_Block.cs" />
     <Compile Include="Converter_ConstDecl.cs" />
-    <Compile Include="Converter_Declaration.cs" />
     <Compile Include="Converter_FunctionDecl.cs" />
     <Compile Include="Converter_FunctionLit.cs" />
     <Compile Include="Converter_ImportDecl.cs" />

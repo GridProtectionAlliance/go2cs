@@ -38,6 +38,14 @@ namespace go2cs
 
         public override void EnterImportDecl(GolangParser.ImportDeclContext context)
         {
+            if (!string.IsNullOrWhiteSpace(m_packageLevelComments))
+            {
+                m_targetFile.Append(m_packageLevelComments.TrimStart());
+
+                if (!EndsWithLineFeed(m_packageLevelComments))
+                    m_targetFile.AppendLine();
+            }
+
             m_usingStatements.UnionWith(RequiredUsings.Select(usingType => $"using {usingType};"));
         }
 

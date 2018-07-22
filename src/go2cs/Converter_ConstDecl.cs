@@ -85,19 +85,9 @@ namespace go2cs
 
                 // Since multiple specifications can be on one line, only check for comments after last specification
                 if (i < length - 1)
-                {
                     m_targetFile.AppendLine();
-                }
                 else
-                {
-                    if (m_inFunction)
-                        m_targetFile.Append($"{CheckForBodyCommentsRight(context)}");
-                    else
-                        m_targetFile.Append($"{CheckForEndOfLineComment(context)}");
-
-                    if (!WroteLineFeed)
-                        m_targetFile.AppendLine();
-                }
+                    m_targetFile.Append(CheckForBodyCommentsRight(context));
             }
         }
 

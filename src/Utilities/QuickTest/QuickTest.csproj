@@ -43,6 +43,8 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="errors.cs" />
+    <Compile Include="errors_errorStringStruct.cs" />
     <Compile Include="main_AbserInterface.cs" />
     <Compile Include="main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

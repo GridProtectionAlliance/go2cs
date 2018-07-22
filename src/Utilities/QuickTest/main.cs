@@ -39,6 +39,19 @@ namespace go
             double Abs();
         }
 
+        // A NumError records a failed conversion.
+        public partial struct NumError
+        {
+            public @string Func; // the failing function (ParseBool, ParseInt, ParseUint, ParseFloat)
+            public @string Num;  // the input
+            public error Err;    // the reason the conversion failed (e.g. ErrRange, ErrSyntax, etc.)
+        }
+
+        private static ref NumError syntaxError(@string fn, @string str)
+        {
+            return ref new Ref<NumError>(new NumError{Func = fn, Num = str, Err = null}).Value;
+        }
+
         public partial struct ColorList
         {
             public long Total;
@@ -172,8 +185,8 @@ namespace go
 
             public fmtFlags fmtFlags;
 
-            public int wid;  // width
-            public int prec; // precision
+            public @int wid;  // width
+            public @int prec; // precision
 
             // intbuf is large enough to store %b of an int64 with a sign and
             // avoids padding at the end of the struct on 32 bit architectures.

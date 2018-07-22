@@ -40,6 +40,8 @@ namespace go2cs
 
         public string[] PackageNamespaces { get; private set; }
 
+        private string m_packageLevelComments;
+
         public override void EnterPackageClause(GolangParser.PackageClauseContext context)
         {
             // Go package clause is the first keyword encountered - cache details that
@@ -66,7 +68,7 @@ namespace go2cs
             PackageNamespaces = packageNamespaces.ToArray();
 
             string headerLevelComments = CheckForCommentsLeft(context);
-            string packageLevelComments = CheckForCommentsRight(context);
+            m_packageLevelComments = CheckForCommentsRight(context);
 
             if (!string.IsNullOrWhiteSpace(headerLevelComments))
             {
@@ -82,10 +84,7 @@ namespace go2cs
                 m_targetFile.AppendLine($"// import \"{PackageImport}\" ==> using {PackageUsing}");
 
             m_targetFile.AppendLine($"// Original source: {SourceFileName}");
-            m_targetFile.AppendLine();
 
-            if (!string.IsNullOrWhiteSpace(packageLevelComments))
-                m_targetFile.Append(packageLevelComments.TrimStart());
 
             // Add commonly required using statements
             RequiredUsings.Add("static go.builtin");

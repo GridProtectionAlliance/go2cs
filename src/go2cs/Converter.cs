@@ -71,13 +71,6 @@ namespace go2cs
             // Base class walks parse tree
             base.Scan(showParseTree);
 
-            // Write any end of file comments
-            if (!string.IsNullOrWhiteSpace(m_nextDeclComments))
-            {
-                m_targetFile.AppendLine();
-                m_targetFile.Append(FixForwardSpacing(m_nextDeclComments, indentLevel: 2));
-            }
-
             // Close class and namespaces as begun during Converter_TopLevelDecl visit
             m_targetFile.AppendLine($"{Spacing(indentLevel: 1)}}}");
             m_targetFile.AppendLine(m_namespaceFooter);

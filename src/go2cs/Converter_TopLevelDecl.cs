@@ -29,7 +29,6 @@ namespace go2cs
     public partial class Converter
     {
         private bool m_firstTopLevelDeclaration = true;
-        private string m_nextDeclComments;
         private string m_namespaceHeader;
         private string m_namespaceFooter;
 
@@ -87,7 +86,6 @@ namespace go2cs
             if (m_firstTopLevelDeclaration)
                 m_firstTopLevelDeclaration = false;
 
-            m_nextDeclComments = CheckForCommentsRight(context);
             IndentLevel--;
         }
     }

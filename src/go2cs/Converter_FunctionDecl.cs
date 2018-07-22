@@ -67,9 +67,6 @@ namespace go2cs
             m_functionParametersMarker = string.Format(FunctionParametersMarker, m_currentFunctionName);
             m_functionExecContextMarker = string.Format(FunctionExecContextMarker, m_currentFunctionName);
 
-            if (!string.IsNullOrWhiteSpace(m_nextDeclComments))
-                m_targetFile.Append(FixForwardSpacing(m_nextDeclComments));
-
             m_targetFile.AppendLine($"{Spacing()}{scope} static {m_functionResultTypeMarker} {m_currentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
         }
 
@@ -134,7 +131,7 @@ namespace go2cs
             else if (signatureOnly)
                 m_targetFile.Append(";");
 
-            m_targetFile.AppendLine();
+            m_targetFile.Append(CheckForBodyCommentsRight(context));
         }
 
         //public override void ExitFunction(GolangParser.FunctionContext context)

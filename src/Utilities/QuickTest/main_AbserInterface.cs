@@ -66,7 +66,7 @@ namespace go
 
             // Enable comparisons between nil and Abser<T> interface instance
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(Abser<T> value, NilType nil) => (object)value == null || Activator.CreateInstance<Abser<T>>().Equals(value);
+            public static bool operator ==(Abser<T> value, NilType nil) => Activator.CreateInstance<Abser<T>>().Equals(value);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(Abser<T> value, NilType nil) => !(value == nil);
