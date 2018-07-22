@@ -21,10 +21,8 @@
 //
 //******************************************************************************************************
 
-using System;
-using System.Globalization;
 using go2cs.Metadata;
-using static go2cs.Common;
+using System;
 
 namespace go2cs
 {

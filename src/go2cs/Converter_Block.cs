@@ -117,7 +117,8 @@ namespace go2cs
             if (m_blockSuffixInjection.Count > 0)
                 m_targetFile.Append(m_blockSuffixInjection.Pop());
 
-            m_targetFile.Append(CheckForBodyCommentsRight(context));
+            if (!m_firstTopLevelDeclaration && IndentLevel > 2)
+                m_targetFile.Append(CheckForBodyCommentsRight(context));
 
             PopBlock();
         }

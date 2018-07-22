@@ -112,8 +112,7 @@ namespace go2cs
                     m_targetFile.Append($"{Spacing(1)}{function.Signature.GenerateResultSignature()} {SanitizedIdentifier(function.Name)}({function.Signature.GenerateParametersSignature(false)});{(string.IsNullOrEmpty(function.Comments) ? Environment.NewLine : function.Comments)}");
                 }
 
-                m_targetFile.AppendLine($"{Spacing()}}}");
-                m_targetFile.Append(CheckForBodyCommentsRight(context));
+                m_targetFile.Append($"{Spacing()}}}{CheckForBodyCommentsRight(context)}");
             }
             else if (Metadata.Structs.TryGetValue(originalIdentifier, out StructInfo structInfo))
             {
@@ -193,8 +192,7 @@ namespace go2cs
                     m_targetFile.Append(fieldDecl);
                 }
 
-                m_targetFile.AppendLine($"{Spacing()}}}");
-                m_targetFile.Append(CheckForBodyCommentsRight(context));
+                m_targetFile.Append($"{Spacing()}}}{CheckForBodyCommentsRight(context)}");
             }
             else if (Types.TryGetValue(context.type(), out TypeInfo typeInfo))
             {
@@ -265,8 +263,7 @@ namespace go2cs
 
                     m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // : {typeInfo.TypeName}");
                     m_targetFile.AppendLine($"{Spacing()}{{");
-                    m_targetFile.AppendLine($"{Spacing()}}}");
-                    m_targetFile.Append(CheckForBodyCommentsRight(context));
+                    m_targetFile.Append($"{Spacing()}}}{CheckForBodyCommentsRight(context)}");
                 }
             }
         }

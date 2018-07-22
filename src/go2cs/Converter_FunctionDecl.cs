@@ -67,9 +67,6 @@ namespace go2cs
             m_functionParametersMarker = string.Format(FunctionParametersMarker, m_currentFunctionName);
             m_functionExecContextMarker = string.Format(FunctionExecContextMarker, m_currentFunctionName);
 
-            if (!m_firstTopLevelDeclaration)
-                m_targetFile.AppendLine();
-
             if (!string.IsNullOrWhiteSpace(m_nextDeclComments))
                 m_targetFile.Append(FixForwardSpacing(m_nextDeclComments));
 
