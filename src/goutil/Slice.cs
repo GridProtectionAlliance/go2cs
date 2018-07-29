@@ -419,9 +419,9 @@ namespace go
         }
 
         // Slice of a string helper function
-        public static slice<byte> slice(this @string source, int low = -1, int high = -1, int max = -1)
+        public static slice<@byte> slice(this @string source, int low = -1, int high = -1, int max = -1)
         {
-            return source.m_value.slice(low, high, max);
+            return ((IReadOnlyList<@byte>)source).ToArray().slice(low, high, max);
         }
     }
 }

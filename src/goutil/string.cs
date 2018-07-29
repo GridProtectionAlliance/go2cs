@@ -33,9 +33,22 @@ namespace go
     /// <summary>
     /// Represents a structure that behaves like a Go string.
     /// </summary>
-    public struct @string : EmptyInterface, IReadOnlyList<byte>, IEnumerable<char>, IEnumerable<(int index, char rune)>
+    public struct @string : EmptyInterface, IReadOnlyList<@byte>, IEnumerable<rune>, IEnumerable<(int index, rune rune)>, IEnumerable<byte>
     {
-        internal readonly byte[] m_value;
+        private readonly byte[] m_value;
+
+        public @string(@byte[] value)
+        {
+            if ((object)value == null)
+            {
+                m_value = new byte[0];
+            }
+            else
+            {
+                m_value = new byte[value.Length];
+                Array.Copy(value, m_value, value.Length);
+            }
+        }
 
         public @string(byte[] value)
         {
@@ -48,6 +61,12 @@ namespace go
                 m_value = new byte[value.Length];
                 Array.Copy(value, m_value, value.Length);
             }
+        }
+
+        public @string(slice<@byte> value)
+        {
+            m_value = new byte[value.Length];
+            Array.Copy(value.Array, value.Low, m_value, 0, value.Length);
         }
 
         public @string(slice<byte> value)
@@ -68,7 +87,7 @@ namespace go
 
         public int Count => Value.Length;
 
-        public byte this[int index] => Value[index];
+        public @byte this[int index] => Value[index];
 
         public override string ToString() => Encoding.UTF8.GetString(Value);
 
@@ -95,9 +114,19 @@ namespace go
 
         IEnumerator<byte> IEnumerable<byte>.GetEnumerator() => (IEnumerator<byte>)Value.GetEnumerator();
 
-        IEnumerator<char> IEnumerable<char>.GetEnumerator() => ToString().GetEnumerator();
+        IEnumerator<@byte> IEnumerable<@byte>.GetEnumerator()
+        {
+            foreach (byte item in Value)
+                yield return item;
+        }
 
-        public IEnumerator<(int index, char rune)> GetEnumerator()
+        IEnumerator<rune> IEnumerable<rune>.GetEnumerator()
+        {
+            foreach (char item in ToString())
+                yield return item;
+        }
+
+        public IEnumerator<(int index, rune rune)> GetEnumerator()
         {
             Decoder decoder = Encoding.UTF8.GetDecoder();
             byte[] value = Value;
