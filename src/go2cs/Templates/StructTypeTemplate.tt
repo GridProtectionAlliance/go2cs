@@ -168,6 +168,14 @@ using go;
             public static implicit operator <#=StructName#>(NilType nil) => default(<#=StructName#>);
         }
     }
+
+    public static partial class builtin
+    {
+        private static <#=PackageName#>_package.<#=StructName#> <#=StructName#>(dynamic value)
+        {
+            return new <#=PackageName#>_package.<#=StructName#>(<#=GetConstructorParameterNames()#>);
+        }
+    }
 <#=NamespaceFooter#><#+
 // Template Parameters
 public string NamespacePrefix;
@@ -190,6 +198,11 @@ private string GetParameterNames(FunctionSignature function)
         parameterNames = ", " + parameterNames;
 
     return parameterNames;
+}
+
+private string GetConstructorParameterNames()
+{
+    return string.Join(", ", StructFields.Select(field => $"value.{field.Type.TypeName}"));
 }
 
 private string GetParameterTypes(FunctionSignature function)
