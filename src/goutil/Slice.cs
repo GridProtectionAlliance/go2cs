@@ -167,6 +167,14 @@ namespace go
             System.Array.Copy(m_array, m_low, array, arrayIndex, m_length);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T[] ToArray()
+        {
+            T[] array = new T[Length];
+            CopyTo(array, 0);
+            return array;
+        }
+
         public override string ToString() => $"[{string.Join(" ", this.Take(5))}{(Length > 5 ? " ..." : "")}]";
 
         public override int GetHashCode() => (object)m_array == null ? 0 : m_array.GetHashCode() ^ m_low ^ m_length;
