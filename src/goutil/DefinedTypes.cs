@@ -28,6 +28,7 @@ using System;
 using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+// ReSharper disable SpecifyACultureInStringConversionExplicitly
 
 #pragma warning disable CS0660, CS0661
 
@@ -47,7 +48,7 @@ namespace go
     /// <summary>
     /// Represents a boolean type for the set of binary truth values denoted by the predeclared constants <c>true</c> and <c>false</c>. 
     /// </summary>
-    public struct @bool : EmptyInterface
+    public struct @bool : EmptyInterface, IConvertible
     {
         // Value of the @bool struct
         private readonly bool m_value;
@@ -76,12 +77,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @bool(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
     /// Represents a numeric type for the set of all unsigned 8-bit integers (0 to 255). 
     /// </summary>
-    public struct uint8 : EmptyInterface
+    public struct uint8 : EmptyInterface, IConvertible
     {
         // Value of the uint8 struct
         private readonly byte m_value;
@@ -110,12 +147,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator uint8(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
     /// Represents a numeric type for the set of all unsigned 16-bit integers (0 to 65535).
     /// </summary>
-    public struct uint16 : EmptyInterface
+    public struct uint16 : EmptyInterface, IConvertible
     {
         // Value of the uint16 struct
         private readonly ushort m_value;
@@ -144,12 +217,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator uint16(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
     /// Represents a numeric type for the set of all unsigned 32-bit integers (0 to 4294967295).
     /// </summary>
-    public struct uint32 : EmptyInterface
+    public struct uint32 : EmptyInterface, IConvertible
     {
         // Value of the uint32 struct
         private readonly uint m_value;
@@ -178,12 +287,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator uint32(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
     /// Represents a numeric type for the set of all unsigned 64-bit integers (0 to 18446744073709551615).
     /// </summary>
-    public struct uint64 : EmptyInterface
+    public struct uint64 : EmptyInterface, IConvertible
     {
         // Value of the uint64 struct
         private readonly ulong m_value;
@@ -212,12 +357,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator uint64(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
     /// Represents a numeric type for the set of all signed 8-bit integers (-128 to 127).
     /// </summary>
-    public struct int8 : EmptyInterface
+    public struct int8 : EmptyInterface, IConvertible
     {
         // Value of the int8 struct
         private readonly sbyte m_value;
@@ -246,12 +427,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator int8(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
     /// Represents a numeric type for the set of all signed 16-bit integers (-32768 to 32767).
     /// </summary>
-    public struct int16 : EmptyInterface
+    public struct int16 : EmptyInterface, IConvertible
     {
         // Value of the int16 struct
         private readonly short m_value;
@@ -280,12 +497,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator int16(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
     /// Represents a numeric type for the set of all signed 32-bit integers (-2147483648 to 2147483647).
     /// </summary>
-    public struct int32 : EmptyInterface
+    public struct int32 : EmptyInterface, IConvertible
     {
         // Value of the int32 struct
         private readonly int m_value;
@@ -314,12 +567,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator int32(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
     /// Represents a numeric type for the set of all signed 64-bit integers (-9223372036854775808 to 9223372036854775807).
     /// </summary>
-    public struct int64 : EmptyInterface
+    public struct int64 : EmptyInterface, IConvertible
     {
         // Value of the int64 struct
         private readonly long m_value;
@@ -348,12 +637,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator int64(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
     /// Represents a numeric type for the set of all IEEE-754 32-bit floating-point numbers.
     /// </summary>
-    public struct float32 : EmptyInterface
+    public struct float32 : EmptyInterface, IConvertible
     {
         // Value of the float32 struct
         private readonly float m_value;
@@ -382,12 +707,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator float32(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
     /// Represents a numeric type for the set of all IEEE-754 64-bit floating-point numbers.
     /// </summary>
-    public struct float64 : EmptyInterface
+    public struct float64 : EmptyInterface, IConvertible
     {
         // Value of the float64 struct
         private readonly double m_value;
@@ -416,6 +777,42 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator float64(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
@@ -774,13 +1171,7 @@ namespace go
         public static implicit operator complex128(Complex value) => new complex128(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator complex128(complex64 value) => new complex128(value.Real, value.Imaginary);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Complex(complex128 value) => value.m_value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator complex64(complex128 value) => new complex64((float)value.m_value.Real, (float)value.m_value.Imaginary);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator complex128(short value) => new complex128(value, 0.0D);
@@ -872,7 +1263,7 @@ namespace go
     /// <summary>
     /// Represents an alias for <see cref="uint8"/>, i.e., a numeric type for the set of all unsigned 8-bit integers (0 to 255). 
     /// </summary>
-    public struct @byte : EmptyInterface
+    public struct @byte : EmptyInterface, IConvertible
     {
         // Value of the @byte struct
         private readonly uint8 m_value;
@@ -908,6 +1299,42 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @byte(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
@@ -917,7 +1344,7 @@ namespace go
     /// The built-in rune type is used, by convention, to distinguish character values from integer values.
     /// It is an alias for <see cref="int32"/> and is equivalent to <see cref="int32"/> in all ways.
     /// </remarks>
-    public struct rune : EmptyInterface
+    public struct rune : EmptyInterface, IConvertible
     {
         // Value of the rune struct
         private readonly int32 m_value;
@@ -953,13 +1380,49 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator rune(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
 #if Target32Bit
     /// <summary>
     /// Represents a numeric type for the set of all unsigned 32-bit integers (0 to 4294967295).
     /// </summary>
-    public struct @uint : EmptyInterface
+    public struct @uint : EmptyInterface, IConvertible
     {
         // Value of the @uint struct
         private readonly uint m_value;
@@ -988,12 +1451,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @uint(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
     /// Represents a numeric type for the set of all signed 32-bit integers (-2147483648 to 2147483647).
     /// </summary>
-    public struct @int : EmptyInterface
+    public struct @int : EmptyInterface, IConvertible
     {
         // Value of the @int struct
         private readonly int m_value;
@@ -1022,12 +1521,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @int(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 #else
     /// <summary>
     /// Represents a numeric type for the set of all unsigned 64-bit integers (0 to 18446744073709551615).
     /// </summary>
-    public struct @uint : EmptyInterface
+    public struct @uint : EmptyInterface, IConvertible
     {
         // Value of the @uint struct
         private readonly ulong m_value;
@@ -1056,12 +1591,48 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @uint(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 
     /// <summary>
     /// Represents a numeric type for the set of all signed 64-bit integers (-9223372036854775808 to 9223372036854775807).
     /// </summary>
-    public struct @int : EmptyInterface
+    public struct @int : EmptyInterface, IConvertible
     {
         // Value of the @int struct
         private readonly long m_value;
@@ -1090,6 +1661,42 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @int(NilType nil) => default;
+
+        public override string ToString() => m_value.ToString();
+
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+
+        public TypeCode GetTypeCode() => m_value.GetTypeCode();
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)m_value).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)m_value).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)m_value).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)m_value).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)m_value).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)m_value).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)m_value).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)m_value).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)m_value).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)m_value).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)m_value).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)m_value).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)m_value).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)m_value).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)m_value).ToType(conversionType, provider);
     }
 #endif
 
@@ -1125,5 +1732,168 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator uintptr(NilType nil) => default;
+    }
+
+    public static partial class builtin
+    {
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@bool"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@bool"/>.</returns>
+        public static @bool @bool(object value) => (bool)Convert.ChangeType(value, TypeCode.Boolean);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@byte"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@byte"/>.</returns>
+        public static @byte @byte(object value) => (byte)Convert.ChangeType(value, TypeCode.Byte);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="rune"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="rune"/>.</returns>
+        public static rune rune(object value) => (int32)(int)Convert.ChangeType(value, TypeCode.Int32);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="uint8"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="uint8"/>.</returns>
+        public static uint8 uint8(object value) => (byte)Convert.ChangeType(value, TypeCode.Byte);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="uint16"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="uint16"/>.</returns>
+        public static uint16 uint16(object value) => (ushort)Convert.ChangeType(value, TypeCode.UInt16);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="uint32"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="uint32"/>.</returns>
+        public static uint32 uint32(object value) => (uint)Convert.ChangeType(value, TypeCode.UInt32);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="uint64"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="uint64"/>.</returns>
+        public static uint64 uint64(object value) => (ulong)Convert.ChangeType(value, TypeCode.UInt64);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="int8"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="int8"/>.</returns>
+        public static int8 int8(object value) => (sbyte)Convert.ChangeType(value, TypeCode.SByte);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="int16"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="int16"/>.</returns>
+        public static int16 int16(object value) => (short)Convert.ChangeType(value, TypeCode.Int16);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="int32"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="int32"/>.</returns>
+        public static int32 int32(object value) => (int)Convert.ChangeType(value, TypeCode.Int32);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="int64"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="int64"/>.</returns>
+        public static int64 int64(object value) => (long)Convert.ChangeType(value, TypeCode.Int64);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="float32"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="float32"/>.</returns>
+        public static float32 float32(object value) => (float)Convert.ChangeType(value, TypeCode.Single);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="float64"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="float64"/>.</returns>
+        public static float64 float64(object value) => (double)Convert.ChangeType(value, TypeCode.Double);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="complex64"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="complex64"/>.</returns>
+        public static complex64 complex64(object value)
+        {
+            if (value is complex128 dcomplex)
+                return (complex64)dcomplex;
+
+            if (!(value is complex64 fcomplex))
+                return (float)Convert.ChangeType(value, TypeCode.Single);
+
+            return fcomplex;
+        }
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="complex128"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="complex128"/>.</returns>
+        public static complex128 complex128(object value)
+        {
+            if (value is complex64 fcomplex)
+                return fcomplex;
+
+            if (!(value is complex128 dcomplex))
+                return (double)Convert.ChangeType(value, TypeCode.Double);
+
+            return dcomplex;
+        }
+
+#if Target32Bit
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@uint"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@uint"/>.</returns>
+        public static @uint @uint(object value) => (uint)Convert.ChangeType(value, TypeCode.UInt32);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@int"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@int"/>.</returns>
+        public static @int @int(object value) => (int)Convert.ChangeType(value, TypeCode.Int32);
+#else
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@uint"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@uint"/>.</returns>
+        public static @uint @uint(object value) => (ulong)Convert.ChangeType(value, TypeCode.UInt64);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@int"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@int"/>.</returns>
+        public static @int @int(object value) => (long)Convert.ChangeType(value, TypeCode.Int64);
+#endif
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="uintptr"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="uintptr"/>.</returns>
+        public static uintptr uintptr(object value) => (UIntPtr)Convert.ChangeType(value, TypeCode.UInt64);
     }
 }
