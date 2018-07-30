@@ -658,7 +658,7 @@ private string GetParameterNames(FunctionSignature function)
 
 private string GetConstructorParameterNames()
 {
-    return string.Join(", ", StructFields.Select(field => $"value.{field.Type.TypeName}"));
+    return string.Join(", ", StructFields.Select(field => $"{(field.Type.IsPointer ? "ref " : "")}value.{field.Name}"));
 }
 
 private string GetParameterTypes(FunctionSignature function)
