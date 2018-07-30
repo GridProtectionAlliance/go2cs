@@ -23,7 +23,6 @@
 // ReSharper disable CheckNamespace
 
 using System.Runtime.CompilerServices;
-using static go.builtin;
 
 namespace go
 {
