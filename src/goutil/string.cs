@@ -21,10 +21,12 @@
 //
 //******************************************************************************************************
 // ReSharper disable CheckNamespace
+// ReSharper disable SpecifyACultureInStringConversionExplicitly
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -33,10 +35,11 @@ namespace go
     /// <summary>
     /// Represents a structure that behaves like a Go string.
     /// </summary>
-    public struct @string : EmptyInterface, IReadOnlyList<@byte>, IEnumerable<rune>, IEnumerable<(int index, rune rune)>, IEnumerable<byte>
+    public struct @string : EmptyInterface, IReadOnlyList<@byte>, IEnumerable<rune>, IEnumerable<(int index, rune rune)>, IEnumerable<byte>, IEnumerable<char>, IConvertible
     {
         private readonly byte[] m_value;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public @string(@byte[] value)
         {
             if ((object)value == null)
@@ -50,6 +53,7 @@ namespace go
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public @string(byte[] value)
         {
             if ((object)value == null)
@@ -63,20 +67,28 @@ namespace go
             }
         }
 
-        public @string(slice<@byte> value)
-        {
-            m_value = new byte[value.Length];
-            Array.Copy(value.Array, value.Low, m_value, 0, value.Length);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public @string(char[] value) : this(new string(value)) { }
 
-        public @string(slice<byte> value)
-        {
-            m_value = new byte[value.Length];
-            value.CopyTo(m_value, 0);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public @string(rune[] value) : this(new string(value.Select(item => (char)item).ToArray())) { }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public @string(slice<@byte> value) : this(value.ToArray()) { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public @string(slice<byte> value) : this(value.ToArray()) { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public @string(slice<char> value) : this(value.ToArray()) { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public @string(slice<rune> value) : this(value.ToArray()) { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public @string(string value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public @string(@string value) : this(value.m_value) { }
         
         private byte[] Value
@@ -89,8 +101,10 @@ namespace go
 
         public @byte this[int index] => Value[index];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString() => Encoding.UTF8.GetString(Value);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(@string other) => BytesAreEqual(Value, other.Value);
 
         public override bool Equals(object obj)
@@ -108,24 +122,67 @@ namespace go
             return false;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode() => ToString().GetHashCode();
 
+        public string ToString(IFormatProvider provider) => ToString().ToString(provider);
+
+        public TypeCode GetTypeCode() => TypeCode.String;
+
+        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)ToString()).ToBoolean(provider);
+
+        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)ToString()).ToChar(provider);
+
+        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)ToString()).ToSByte(provider);
+
+        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)ToString()).ToByte(provider);
+
+        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)ToString()).ToInt16(provider);
+
+        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)ToString()).ToUInt16(provider);
+
+        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)ToString()).ToInt32(provider);
+
+        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)ToString()).ToUInt32(provider);
+
+        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)ToString()).ToInt64(provider);
+
+        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)ToString()).ToUInt64(provider);
+
+        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)ToString()).ToSingle(provider);
+
+        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)ToString()).ToDouble(provider);
+
+        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)ToString()).ToDecimal(provider);
+
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)ToString()).ToDateTime(provider);
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)ToString()).ToType(conversionType, provider);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator IEnumerable.GetEnumerator() => Value.GetEnumerator();
 
-        IEnumerator<byte> IEnumerable<byte>.GetEnumerator() => (IEnumerator<byte>)Value.GetEnumerator();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        IEnumerator<byte> IEnumerable<byte>.GetEnumerator() => ((IEnumerable<byte>)Value).GetEnumerator();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator<@byte> IEnumerable<@byte>.GetEnumerator()
         {
             foreach (byte item in Value)
                 yield return item;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator<rune> IEnumerable<rune>.GetEnumerator()
         {
             foreach (char item in ToString())
                 yield return item;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        IEnumerator<char> IEnumerable<char>.GetEnumerator() => ToString().GetEnumerator();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerator<(int index, rune rune)> GetEnumerator()
         {
             Decoder decoder = Encoding.UTF8.GetDecoder();
@@ -149,6 +206,7 @@ namespace go
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private unsafe bool Decode(Decoder decoder, byte[] value, int index, int byteCount, char[] rune)
         {
             bool completed;
@@ -177,6 +235,48 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator slice<byte>(@string value) => new slice<byte>(value.m_value);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator @string(slice<@byte> value) => new @string(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator slice<@byte>(@string value) => new slice<@byte>(value.m_value.Select(item => (@byte)item).ToArray());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator @string(slice<rune> value) => new @string(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator slice<rune>(@string value) =>  new slice<rune>(((IEnumerable<rune>)value).ToArray());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator @string(slice<char> value) => new @string(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator slice<char>(@string value) => new slice<char>(((IEnumerable<char>)value).ToArray());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator byte[](@string value) => value.m_value;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator @string(byte[] value) => new @string(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator @byte[](@string value) => value.m_value.Select(item => (@byte)item).ToArray();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator @string(@byte[] value) => new @string(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator rune[](@string value) => ((IEnumerable<rune>)value).ToArray();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator @string(rune[] value) => new @string(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator char[](@string value) => ((IEnumerable<char>)value).ToArray();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator @string(char[] value) => new @string(value);
+
         // Enable comparisons between nil and @string struct
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(@string value, NilType nil) => value.Equals(default);
@@ -193,6 +293,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @string(NilType nil) => Default;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe bool BytesAreEqual(byte[] data1, byte[] data2)
         {
             if (data1 == data2)
@@ -233,6 +334,88 @@ namespace go
 
                 return true;
             }
+        }
+    }
+
+    public static partial class builtin
+    {
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@string"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@string"/>.</returns>
+        public static @string @string(object value)
+        {
+            // Only reference types can be null, therefore "" is its default value
+            if (value == null)
+                return "";
+
+            Type itemType = value.GetType();
+
+            if (!itemType.IsValueType)
+                return itemType.ToString();
+
+            // Handle common types
+            IConvertible convertible = value as IConvertible;
+            bool isIntValue = false;
+            ulong intValue = 0UL;
+
+            if ((object)convertible != null)
+            {
+                switch (convertible.GetTypeCode())
+                {
+                    case TypeCode.Char:
+                    case TypeCode.Boolean:
+                    case TypeCode.SByte:
+                    case TypeCode.Byte:
+                    case TypeCode.Int16:
+                    case TypeCode.UInt16:
+                    case TypeCode.Int32:
+                    case TypeCode.UInt32:
+                    case TypeCode.Int64:
+                    case TypeCode.UInt64:
+                        intValue = (ulong)value;
+                        isIntValue = true;
+                        break;
+                }
+            }
+
+            if (isIntValue)
+            {
+                char charValue = '\uFFFD';
+
+                if (intValue >= char.MinValue && intValue <= char.MaxValue)
+                    charValue = (char)intValue;
+
+                return new string(charValue, 1);
+            }
+
+            if (itemType == typeof(@byte[]))
+                return new @string((@byte[])value);
+
+            if (itemType == typeof(slice<@byte>))
+                return new @string((slice<@byte>)value);
+
+            if (itemType == typeof(byte[]))
+                return new @string((byte[])value);
+
+            if (itemType == typeof(slice<byte>))
+                return new @string((slice<byte>)value);
+
+            if (itemType == typeof(char[]))
+                return new @string((char[])value);
+
+            if (itemType == typeof(slice<char>))
+                return new @string((slice<char>)value);
+
+            if (itemType == typeof(rune[]))
+                return new @string((rune[])value);
+
+            if (itemType == typeof(slice<rune>))
+                return new @string((slice<rune>)value);
+
+            // Handle custom value types
+            return value.ToString();
         }
     }
 }

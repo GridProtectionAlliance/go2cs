@@ -23,12 +23,12 @@
 // ReSharper disable CheckNamespace
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
+// ReSharper disable SpecifyACultureInStringConversionExplicitly
 
 using System;
 using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-// ReSharper disable SpecifyACultureInStringConversionExplicitly
 
 #pragma warning disable CS0660, CS0661
 
