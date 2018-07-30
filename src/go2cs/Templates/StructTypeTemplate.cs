@@ -572,8 +572,14 @@ if (!NamespacePrefix.Equals("go")) {
             
             #line default
             #line hidden
-            this.Write(");\r\n        }\r\n    }\r\n\r\n    public static partial class builtin\r\n    {\r\n        p" +
-                    "rivate static ");
+            this.Write(");\r\n        }\r\n    }\r\n\r\n    public static partial class builtin\r\n    {\r\n        ");
+            
+            #line 174 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(Scope));
+            
+            #line default
+            #line hidden
+            this.Write(" static ");
             
             #line 174 "C:\Projects\go2cs\src\go2cs\Templates\StructTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));

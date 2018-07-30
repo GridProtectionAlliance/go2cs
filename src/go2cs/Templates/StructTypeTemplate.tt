@@ -171,7 +171,7 @@ using go;
 
     public static partial class builtin
     {
-        private static <#=PackageName#>_package.<#=StructName#> <#=StructName#>(dynamic value)
+        <#=Scope#> static <#=PackageName#>_package.<#=StructName#> <#=StructName#>(dynamic value)
         {
             return new <#=PackageName#>_package.<#=StructName#>(<#=GetConstructorParameterNames()#>);
         }
