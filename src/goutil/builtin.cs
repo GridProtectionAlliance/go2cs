@@ -37,7 +37,7 @@ using static System.Math;
 
 namespace go
 {
-    public static class builtin
+    public static partial class builtin
     {
         /// <summary>
         /// The built-in error interface type is the conventional interface for representing an
@@ -405,7 +405,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static T func<TRef1, T>(ref TRef1 ref1, GoFunc<TRef1, T>.GoRefFunction function) => new GoFunc<TRef1, T>(function).Execute(ref ref1);
 
-        #region [ func<TRef1, TRef2, ... TRef16> Implementations ]
+#region [ func<TRef1, TRef2, ... TRef16> Implementations ]
 
         /*  The following code was generated using the "GenGoFuncRefInstances" utility: */
 
@@ -889,9 +889,9 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16);
 
-        #endregion
+#endregion
 
-        #region [ error interface implementation ]
+#region [ error interface implementation ]
 
         public struct error<T> : error
         {
@@ -955,10 +955,10 @@ namespace go
         }
 
 
-        #endregion
+#endregion
     }
 
-    #region [ error interface type assertions ]
+#region [ error interface nil comparisons and type assertions ]
 
     public partial class NilType
     {
@@ -1043,5 +1043,5 @@ namespace go
         }
     }
 
-    #endregion
+#endregion
 }
