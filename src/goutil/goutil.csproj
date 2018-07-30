@@ -35,11 +35,17 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BuiltInFunctions.cs" />
+    <Compile Include="builtin.cs" />
+    <Compile Include="DefinedTypes.cs" />
     <Compile Include="GoFunc.cs" />
     <Compile Include="NilType.cs" />
     <Compile Include="PanicException.cs" />
-    <Compile Include="Slice.cs" />
+    <Compile Include="PromotedStructAttribute.cs" />
+    <Compile Include="Ptr.cs" />
+    <Compile Include="Ref.cs" />
+    <Compile Include="slice.cs" />
+    <Compile Include="string.cs" />
+    <Compile Include="SwitchExpression.cs" />
     <Compile Include="TypeExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
