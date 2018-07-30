@@ -22,7 +22,7 @@ namespace go
         }
 
         // errorString is a trivial implementation of error.
-        private partial struct errorString
+        internal partial struct errorString
         {
             public @string s;
         }

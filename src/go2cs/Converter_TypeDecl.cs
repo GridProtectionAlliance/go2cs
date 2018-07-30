@@ -129,6 +129,10 @@ namespace go2cs
 
                 SearchPromotedStructFields(context, originalIdentifier, structInfo, inheritedTypeNames, promotedFields, promotedStructs);
 
+                // Mark private structures as internal so that conversion function can be accessed from builtin functions
+                if (scope.Equals("private"))
+                    scope = "internal";
+
                 using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
                 {
                     writer.Write(new StructTypeTemplate

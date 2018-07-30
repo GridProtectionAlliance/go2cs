@@ -7,7 +7,6 @@
 //     Generated on 2018 July 21 15:02:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
-using System;
 using System.CodeDom.Compiler;
 using System.Runtime.CompilerServices;
 
@@ -17,7 +16,7 @@ namespace go
     public static partial class errors_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        private partial struct errorString : EmptyInterface
+        internal partial struct errorString : EmptyInterface
         {
             // Constructors
             public errorString(NilType _)
@@ -45,6 +44,14 @@ namespace go
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator errorString(NilType nil) => default(errorString);
+        }
+    }
+
+    public static partial class builtin
+    {
+        private static errors_package.errorString errorString(dynamic value)
+        {
+            return new errors_package.errorString(value.s);
         }
     }
 }

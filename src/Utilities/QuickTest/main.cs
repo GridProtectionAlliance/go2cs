@@ -16,6 +16,12 @@ namespace go
             EmptyInterface eb = b;
             EmptyInterface ai = (@int)12;
 
+            //@string y1 = 0x266c;
+
+            //char x = '\x266c';
+
+            //Console.WriteLine(x);
+
             Main1();
             Main2();
             Main3();
