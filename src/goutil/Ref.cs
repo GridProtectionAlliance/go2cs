@@ -50,6 +50,10 @@ namespace go
 
         public Ref(ref T value) => m_value = value;
 
+        public Ref(NilType _) => m_value = default;
+
+        public Ref(ref NilType _) => m_value = default;
+
         public override string ToString() => m_value?.ToString() ?? "nil";
     }
 }

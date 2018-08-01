@@ -56,6 +56,10 @@ namespace go
 
         public Ptr(ref Ptr<T> value) => Value = value.Value;
 
+        public Ptr(NilType nil) => Value = new Ref<T>(nil);
+
+        public Ptr(ref NilType nil) => Value = new Ref<T>(ref nil);
+
         public override string ToString() => $"->{base.ToString()}";
     }
 }
