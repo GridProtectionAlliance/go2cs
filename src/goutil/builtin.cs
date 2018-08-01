@@ -37,7 +37,7 @@ using static System.Math;
 
 namespace go
 {
-    public static partial class builtin
+    public static class builtin
     {
         /// <summary>
         /// The built-in error interface type is the conventional interface for representing an
@@ -336,6 +336,247 @@ namespace go
         /// <param name="args">Arguments to display.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public static void println(params object[] args) => Console.Error.WriteLine(string.Join(" ", args.Select(arg => arg.ToString())));
+
+        // ** Conversion Functions **
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@bool"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@bool"/>.</returns>
+        public static @bool @bool(object value) => (bool)Convert.ChangeType(value, TypeCode.Boolean);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@byte"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@byte"/>.</returns>
+        public static @byte @byte(object value) => (byte)Convert.ChangeType(value, TypeCode.Byte);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="rune"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="rune"/>.</returns>
+        public static rune rune(object value) => (int32)(int)Convert.ChangeType(value, TypeCode.Int32);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="uint8"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="uint8"/>.</returns>
+        public static uint8 uint8(object value) => (byte)Convert.ChangeType(value, TypeCode.Byte);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="uint16"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="uint16"/>.</returns>
+        public static uint16 uint16(object value) => (ushort)Convert.ChangeType(value, TypeCode.UInt16);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="uint32"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="uint32"/>.</returns>
+        public static uint32 uint32(object value) => (uint)Convert.ChangeType(value, TypeCode.UInt32);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="uint64"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="uint64"/>.</returns>
+        public static uint64 uint64(object value) => (ulong)Convert.ChangeType(value, TypeCode.UInt64);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="int8"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="int8"/>.</returns>
+        public static int8 int8(object value) => (sbyte)Convert.ChangeType(value, TypeCode.SByte);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="int16"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="int16"/>.</returns>
+        public static int16 int16(object value) => (short)Convert.ChangeType(value, TypeCode.Int16);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="int32"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="int32"/>.</returns>
+        public static int32 int32(object value) => (int)Convert.ChangeType(value, TypeCode.Int32);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="int64"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="int64"/>.</returns>
+        public static int64 int64(object value) => (long)Convert.ChangeType(value, TypeCode.Int64);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="float32"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="float32"/>.</returns>
+        public static float32 float32(object value) => (float)Convert.ChangeType(value, TypeCode.Single);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="float64"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="float64"/>.</returns>
+        public static float64 float64(object value) => (double)Convert.ChangeType(value, TypeCode.Double);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="complex64"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="complex64"/>.</returns>
+        public static complex64 complex64(object value)
+        {
+            if (value is complex128 dcomplex)
+                return (complex64)dcomplex;
+
+            if (!(value is complex64 fcomplex))
+                return (float)Convert.ChangeType(value, TypeCode.Single);
+
+            return fcomplex;
+        }
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="complex128"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="complex128"/>.</returns>
+        public static complex128 complex128(object value)
+        {
+            if (value is complex64 fcomplex)
+                return fcomplex;
+
+            if (!(value is complex128 dcomplex))
+                return (double)Convert.ChangeType(value, TypeCode.Double);
+
+            return dcomplex;
+        }
+
+#if Target32Bit
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@uint"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@uint"/>.</returns>
+        public static @uint @uint(object value) => (uint)Convert.ChangeType(value, TypeCode.UInt32);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@int"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@int"/>.</returns>
+        public static @int @int(object value) => (int)Convert.ChangeType(value, TypeCode.Int32);
+#else
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@uint"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@uint"/>.</returns>
+        public static @uint @uint(object value) => (ulong)Convert.ChangeType(value, TypeCode.UInt64);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@int"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@int"/>.</returns>
+        public static @int @int(object value) => (long)Convert.ChangeType(value, TypeCode.Int64);
+#endif
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="uintptr"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="uintptr"/>.</returns>
+        public static uintptr uintptr(object value) => (UIntPtr)Convert.ChangeType(value, TypeCode.UInt64);
+
+        /// <summary>
+        /// Converts <paramref name="value"/> to a <see cref="@string"/>.
+        /// </summary>
+        /// <param name="value">Value to convert.</param>
+        /// <returns><paramref name="value"/> converted to a <see cref="@string"/>.</returns>
+        public static @string @string(object value)
+        {
+            // Only reference types can be null, therefore "" is its default value
+            if (value == null)
+                return "";
+
+            Type itemType = value.GetType();
+
+            if (!itemType.IsValueType)
+                return itemType.ToString();
+
+            // Handle common types
+            IConvertible convertible = value as IConvertible;
+            bool isIntValue = false;
+            ulong intValue = 0UL;
+
+            if ((object)convertible != null)
+            {
+                switch (convertible.GetTypeCode())
+                {
+                    case TypeCode.Char:
+                    case TypeCode.Boolean:
+                    case TypeCode.SByte:
+                    case TypeCode.Byte:
+                    case TypeCode.Int16:
+                    case TypeCode.UInt16:
+                    case TypeCode.Int32:
+                    case TypeCode.UInt32:
+                    case TypeCode.Int64:
+                    case TypeCode.UInt64:
+                        intValue = (ulong)value;
+                        isIntValue = true;
+                        break;
+                }
+            }
+
+            if (isIntValue)
+            {
+                char charValue = '\uFFFD';
+
+                if (intValue >= char.MinValue && intValue <= char.MaxValue)
+                    charValue = (char)intValue;
+
+                return new string(charValue, 1);
+            }
+
+            if (itemType == typeof(@byte[]))
+                return new @string((@byte[])value);
+
+            if (itemType == typeof(slice<@byte>))
+                return new @string((slice<@byte>)value);
+
+            if (itemType == typeof(byte[]))
+                return new @string((byte[])value);
+
+            if (itemType == typeof(slice<byte>))
+                return new @string((slice<byte>)value);
+
+            if (itemType == typeof(char[]))
+                return new @string((char[])value);
+
+            if (itemType == typeof(slice<char>))
+                return new @string((slice<char>)value);
+
+            if (itemType == typeof(rune[]))
+                return new @string((rune[])value);
+
+            if (itemType == typeof(slice<rune>))
+                return new @string((slice<rune>)value);
+
+            // Handle custom value types
+            return value.ToString();
+        }
 
         // ** Helper Functions **
 
