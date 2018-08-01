@@ -167,13 +167,11 @@ using go;
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator <#=StructName#>(NilType nil) => default(<#=StructName#>);
         }
-    }
 
-    public static partial class builtin
-    {
-        <#=Scope#> static <#=PackageName#>_package.<#=StructName#> <#=StructName#>(dynamic value)
+        [<#=GeneratedCodeAttribute#>]
+        <#=Scope#> static <#=StructName#> <#=StructName#>_cast(dynamic value)
         {
-            return new <#=PackageName#>_package.<#=StructName#>(<#=GetConstructorParameterNames()#>);
+            return new <#=StructName#>(<#=GetConstructorParameterNames()#>);
         }
     }
 <#=NamespaceFooter#><#+

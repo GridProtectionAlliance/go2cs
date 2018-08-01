@@ -16,7 +16,7 @@ namespace go
     public static partial class errors_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        internal partial struct errorString : EmptyInterface
+        private partial struct errorString : EmptyInterface
         {
             // Constructors
             public errorString(NilType _)
@@ -45,13 +45,11 @@ namespace go
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator errorString(NilType nil) => default(errorString);
         }
-    }
 
-    public static partial class builtin
-    {
-        private static errors_package.errorString errorString(dynamic value)
+        [GeneratedCode("go2cs", "0.1.1.0")]
+        private static errorString errorString_cast(dynamic value)
         {
-            return new errors_package.errorString(value.s);
+            return new errorString(value.s);
         }
     }
 }
