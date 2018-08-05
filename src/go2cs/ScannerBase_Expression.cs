@@ -170,7 +170,9 @@ namespace go2cs
                     {
                         if (typeInfo.IsPointer)
                             PrimaryExpressions[context] = $"new Ptr<{typeInfo.TypeName}>({expression})";
-                        else if (typeInfo.TypeClass == TypeClass.Struct || typeInfo.TypeClass == TypeClass.Simple)
+                        else if (typeInfo.TypeClass == TypeClass.Struct)
+                            PrimaryExpressions[context] = $"{typeInfo.TypeName}_cast({expression})";
+                        else if (typeInfo.TypeClass == TypeClass.Simple)
                             PrimaryExpressions[context] = $"{typeInfo.TypeName}({expression})";
                         else
                             PrimaryExpressions[context] = $"({typeInfo.TypeName}){expression}";
