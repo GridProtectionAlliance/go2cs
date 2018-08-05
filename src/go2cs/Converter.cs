@@ -71,6 +71,9 @@ namespace go2cs
             // Base class walks parse tree
             base.Scan(showParseTree);
 
+            if (!WroteLineFeed)
+                m_targetFile.AppendLine();
+
             // Close class and namespaces as begun during Converter_TopLevelDecl visit
             m_targetFile.AppendLine($"{Spacing(indentLevel: 1)}}}");
             m_targetFile.AppendLine(m_namespaceFooter);
