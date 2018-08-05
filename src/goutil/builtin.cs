@@ -534,7 +534,7 @@ namespace go
                     case TypeCode.UInt32:
                     case TypeCode.Int64:
                     case TypeCode.UInt64:
-                        intValue = (ulong)value;
+                        intValue = (ulong)Convert.ChangeType(value, TypeCode.UInt64);
                         isIntValue = true;
                         break;
                 }
