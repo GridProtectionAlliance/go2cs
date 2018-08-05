@@ -162,9 +162,19 @@ namespace go2cs
                 if (Types.TryGetValue(context.conversion().type(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.conversion().expression(), out string expression))
                 {
                     if (typeInfo.TypeName.StartsWith("*(*"))
+                    {
+                        // TODO: Complex pointer expression needs special handling consideration - could opt for unsafe implementation
                         PrimaryExpressions[context] = $"{typeInfo.TypeName}{expression}";
+                    }
                     else
-                        PrimaryExpressions[context] = $"({typeInfo.TypeName}){expression}";
+                    {
+                        if (typeInfo.IsPointer)
+                            PrimaryExpressions[context] = $"new Ptr<{typeInfo.TypeName}>({expression})";
+                        else if (typeInfo.TypeClass == TypeClass.Struct || typeInfo.TypeClass == TypeClass.Simple)
+                            PrimaryExpressions[context] = $"{typeInfo.TypeName}({expression})";
+                        else
+                            PrimaryExpressions[context] = $"({typeInfo.TypeName}){expression}";
+                    }
                 }
                 else
                 {
