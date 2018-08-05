@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 17 05:02:48 UTC
+//     Generated on 2018 August 05 14:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -66,6 +66,12 @@ namespace go
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Record(NilType nil) => default(Record);
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0")]
+        public static Record Record_cast(dynamic value)
+        {
+            return new Record(value.Person, value.Employee);
         }
     }
 }

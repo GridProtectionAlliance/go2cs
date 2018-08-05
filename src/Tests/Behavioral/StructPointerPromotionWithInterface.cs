@@ -1,6 +1,5 @@
-// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// package main -- go2cs converted at 2018 August 05 14:35:29 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructPointerPromotionWithInterface.go
-
 using fmt = go.fmt_package;
 using time = go.time_package;
 using static go.builtin;
@@ -26,8 +25,6 @@ namespace go
             public Abser Abser;
             public ref MyError MyError => ref MyError_ptr;
         }
-
-
         private static void Main()
         {
             var e = MyError{time.Now(),"Hello"};

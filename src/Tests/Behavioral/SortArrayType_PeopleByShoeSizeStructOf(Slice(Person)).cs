@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 17 05:02:48 UTC
+//     Generated on 2018 August 05 14:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System.CodeDom.Compiler;
@@ -15,7 +15,7 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial struct PeopleByShoeSize : go.EmptyInterface
+        public partial struct PeopleByShoeSize : EmptyInterface
         {
             // Value of the PeopleByShoeSize struct
             private readonly slice<Person> m_value;

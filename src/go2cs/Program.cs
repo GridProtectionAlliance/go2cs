@@ -57,26 +57,22 @@ namespace go2cs
                 Console.WriteLine($"Processing time: {DateTime.UtcNow - startTime}");
             }
 #if DEBUG
-            //Console.ReadKey();
+            Console.ReadKey();
 #endif
             return exitCode;
         }
 
         private static int RunConversion(Options options)
         {
-#if DEBUG
-            Common.RestoreGoUtilSources(options.TargetGoSrcPath);
-            PreScanner.Scan(options);
-            Converter.Convert(options);
-            return 0;
-#else
             int exitCode = 0;
-
+#if !DEBUG
             try
             {
+#endif
                 Common.RestoreGoUtilSources(options.TargetGoSrcPath);
                 PreScanner.Scan(options);
                 Converter.Convert(options);
+#if !DEBUG
             }
             catch (TypeInitializationException ex)
             {
@@ -88,9 +84,8 @@ namespace go2cs
                 Console.Error.WriteLine($"{Environment.NewLine}Error: {ex.Message}");
                 exitCode = 3;
             }
-
-            return exitCode;
 #endif
+            return exitCode;
         }
     }
 }

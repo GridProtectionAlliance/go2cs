@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 17 05:02:48 UTC
+//     Generated on 2018 August 05 14:35:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -46,6 +46,12 @@ namespace go
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator MyError(NilType nil) => default(MyError);
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0")]
+        public static MyError MyError_cast(dynamic value)
+        {
+            return new MyError(value.description);
         }
     }
 }

@@ -1,6 +1,5 @@
-// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// package main -- go2cs converted at 2018 August 05 14:35:28 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceInheritance.go
-
 using fmt = go.fmt_package;
 using static go.builtin;
 using System.Collections.Generic;
@@ -14,20 +13,16 @@ namespace go
             public @string name;
         }
 
-
         public static void M(this T1 t)
         {
         }
-
         public static void N(this T1 t)
         {
         }
-
         public static @string String(this T1 t)
         {
             return "";
         }
-
         public static @string Error(this T1 t)
         {
             return "";
@@ -38,20 +33,16 @@ namespace go
             public @string name;
         }
 
-
         public static void M(this T2 t)
         {
         }
-
         public static void N(this T2 t)
         {
         }
-
         public static @string String(this T2 t)
         {
             return "";
         }
-
         public static @string Error(this T2 t)
         {
             return "";
@@ -62,12 +53,10 @@ namespace go
             void M();
         }
 
-
         public partial interface V : I, fmt.Stringer, error
         {
             void N();
         }
-
 
         private static void Main()
         {

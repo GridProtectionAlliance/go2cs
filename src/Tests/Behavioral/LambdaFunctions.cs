@@ -1,6 +1,5 @@
-// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// package main -- go2cs converted at 2018 August 05 14:35:28 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\LambdaFunctions.go
-
 using fmt = go.fmt_package;
 using static go.builtin;
 
@@ -25,17 +24,16 @@ namespace go
             return () =>
             {
                 fmt.Printf("Inner stringy function\n");
-                return "bar"; // have to return a string to be stringy
-            };
+                return "bar";// have to return a string to be stringy
+            }
+;
         }
 
         private static void Main()
         {
             takesAFunction(foo);
-            Stringy f = returnsAFunction();
-            f();
-            Stringy baz = () => "anonymous stringy\n";
-            fmt.Printf(baz());
+            Stringy f = returnsAFunction();            f();
+            Stringy baz = () => "anonymous stringy\n";            fmt.Printf(baz());
         }
     }
 }

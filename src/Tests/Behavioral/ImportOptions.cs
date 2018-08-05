@@ -1,6 +1,5 @@
-// package main -- go2cs converted at 2018 July 17 05:02:47 UTC
+// package main -- go2cs converted at 2018 August 05 14:35:28 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\ImportOptions.go
-
 using fmt = go.fmt_package;
 using _math_ = go.math_package;
 using _file_ = go.path.file_package;

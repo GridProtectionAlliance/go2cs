@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 July 29 23:58:04 UTC
+// package main -- go2cs converted at 2018 August 05 14:35:29 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\TypeConversion.go
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -25,5 +25,6 @@ namespace go
             fmt.Println(mine == person.Deref);
 
             fmt.Println((slice<rune>)@string("白鵬翔"));
-        }    }
+        }
+    }
 }

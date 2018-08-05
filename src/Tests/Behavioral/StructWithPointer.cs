@@ -1,6 +1,5 @@
-// package main -- go2cs converted at 2018 July 17 05:02:49 UTC
+// package main -- go2cs converted at 2018 August 05 14:35:29 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructWithPointer.go
-
 using fmt = go.fmt_package;
 using static go.builtin;
 
@@ -15,7 +14,6 @@ namespace go
             public Ptr<ColorList> Next;
             public Ptr<Ptr<ColorList>> NextNext;
         }
-
 
         private static void Main()
         {

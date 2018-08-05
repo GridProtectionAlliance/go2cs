@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 17 05:02:49 UTC
+//     Generated on 2018 August 05 14:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -52,6 +52,12 @@ namespace go
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator ColorList(NilType nil) => default(ColorList);
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0")]
+        public static ColorList ColorList_cast(dynamic value)
+        {
+            return new ColorList(value.Total, value.Color, ref value.Next, ref value.NextNext);
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 17 05:02:49 UTC
+//     Generated on 2018 August 05 14:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,6 +32,8 @@ namespace go
         public struct Abser<T> : Abser
         {
             private T m_target;
+
+            public T Target => m_target;
 
             private delegate float64 AbsByVal(T value);
             private delegate float64 AbsByRef(ref T value);
@@ -67,7 +69,7 @@ namespace go
 
             // Enable comparisons between nil and Abser<T> interface instance
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(Abser<T> value, NilType nil) => (object)value == null || Activator.CreateInstance<Abser<T>>().Equals(value);
+            public static bool operator ==(Abser<T> value, NilType nil) => Activator.CreateInstance<Abser<T>>().Equals(value);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(Abser<T> value, NilType nil) => !(value == nil);
@@ -117,12 +119,7 @@ namespace go
         {
             try
             {
-                go.main_package.Abser<T> test = (go.main_package.Abser<T>)target;
-                return (T)target;
-            }
-            catch (InvalidCastException)
-            {
-                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}");
+                return ((go.main_package.Abser<T>)target).Target;
             }
             catch (NotImplementedException ex)
             {
@@ -153,9 +150,10 @@ namespace go
                 MethodInfo conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(go.main_package.Abser<>).GetExplicitGenericConversionOperator(type));
 
                 if ((object)conversionOperator == null)
-                    throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {type.FullName}");
+                    throw new PanicException($"panic: interface conversion: failed to create converter for {target.GetType().FullName} to {type.FullName}");
 
-                return conversionOperator.Invoke(null, new object[] { target });
+                dynamic result = conversionOperator.Invoke(null, new object[] { target });
+                return result.Target;
             }
             catch (NotImplementedException ex)
             {

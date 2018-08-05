@@ -37,7 +37,6 @@ namespace go2cs
             m_iota = 0;
         }
 
-        // TODO: This needs work - need to use an expression type evaluator
         public override void ExitConstSpec(GolangParser.ConstSpecContext context)
         {
             // constSpec

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 17 05:02:48 UTC
+//     Generated on 2018 August 05 14:35:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,6 +32,8 @@ namespace go
         {
             private T m_target;
 
+            public T Target => m_target;
+
             private delegate void NByVal(T value);
             private delegate void NByRef(ref T value);
 
@@ -50,14 +52,14 @@ namespace go
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void M() => s_MByRef?.Invoke(ref m_target) ?? s_MByVal(m_target);
 
-            private delegate string ErrorByVal(T value);
-            private delegate string ErrorByRef(ref T value);
+            private delegate @string ErrorByVal(T value);
+            private delegate @string ErrorByRef(ref T value);
 
             private static readonly ErrorByVal s_ErrorByVal;
             private static readonly ErrorByRef s_ErrorByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public string Error() => s_ErrorByRef?.Invoke(ref m_target) ?? s_ErrorByVal(m_target);
+            public @string Error() => s_ErrorByRef?.Invoke(ref m_target) ?? s_ErrorByVal(m_target);
 
             [DebuggerStepperBoundary]
             static V()
@@ -110,7 +112,7 @@ namespace go
 
             // Enable comparisons between nil and V<T> interface instance
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(V<T> value, NilType nil) => (object)value == null || Activator.CreateInstance<V<T>>().Equals(value);
+            public static bool operator ==(V<T> value, NilType nil) => Activator.CreateInstance<V<T>>().Equals(value);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(V<T> value, NilType nil) => !(value == nil);
@@ -160,12 +162,7 @@ namespace go
         {
             try
             {
-                go.main_package.V<T> test = (go.main_package.V<T>)target;
-                return (T)target;
-            }
-            catch (InvalidCastException)
-            {
-                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}");
+                return ((go.main_package.V<T>)target).Target;
             }
             catch (NotImplementedException ex)
             {
@@ -196,9 +193,10 @@ namespace go
                 MethodInfo conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(go.main_package.V<>).GetExplicitGenericConversionOperator(type));
 
                 if ((object)conversionOperator == null)
-                    throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {type.FullName}");
+                    throw new PanicException($"panic: interface conversion: failed to create converter for {target.GetType().FullName} to {type.FullName}");
 
-                return conversionOperator.Invoke(null, new object[] { target });
+                dynamic result = conversionOperator.Invoke(null, new object[] { target });
+                return result.Target;
             }
             catch (NotImplementedException ex)
             {

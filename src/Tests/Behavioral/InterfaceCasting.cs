@@ -1,6 +1,5 @@
-// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// package main -- go2cs converted at 2018 August 05 14:35:28 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceCasting.go
-
 using fmt = go.fmt_package;
 using static go.builtin;
 
@@ -12,7 +11,6 @@ namespace go
         {
             public @string description;
         }
-
 
         public static @string Error(this MyError err)
         {
@@ -27,7 +25,7 @@ namespace go
 
         private static void Main()
         {
-            fmt.Printf("%v\n", f()); // error: foo
+            fmt.Printf("%v\n", f());// error: foo
         }
     }
 }

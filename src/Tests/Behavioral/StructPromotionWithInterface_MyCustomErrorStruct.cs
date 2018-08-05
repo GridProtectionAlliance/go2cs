@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 July 17 05:02:49 UTC
+//     Generated on 2018 August 05 14:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,14 +33,14 @@ namespace go
             public float64 Abs() => s_AbsByRef?.Invoke(ref this) ?? s_AbsByVal?.Invoke(this) ?? Abser?.Abs() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // error.Error function promotion
-            private delegate string ErrorByVal(T value);
-            private delegate string ErrorByRef(ref T value);
+            private delegate @string ErrorByVal(T value);
+            private delegate @string ErrorByRef(ref T value);
 
             private static readonly ErrorByVal s_ErrorByVal;
             private static readonly ErrorByRef s_ErrorByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public string Error() => s_ErrorByRef?.Invoke(ref this) ?? s_ErrorByVal?.Invoke(this) ?? error?.Error() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public @string Error() => s_ErrorByRef?.Invoke(ref this) ?? s_ErrorByVal?.Invoke(this) ?? error?.Error() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // MyError structure promotion - sourced from value copy
             private readonly Ref<MyError> m_MyErrorRef;
@@ -110,6 +110,12 @@ namespace go
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator MyCustomError(NilType nil) => default(MyCustomError);
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0")]
+        public static MyCustomError MyCustomError_cast(dynamic value)
+        {
+            return new MyCustomError(value.Message, value.Abser, value.MyError, value.error);
         }
     }
 }

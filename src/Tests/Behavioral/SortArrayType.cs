@@ -1,6 +1,5 @@
-// package main -- go2cs converted at 2018 July 17 05:02:48 UTC
+// package main -- go2cs converted at 2018 August 05 14:35:29 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\SortArrayType.go
-
 using fmt = go.fmt_package;
 using sort = go.sort_package;
 using static go.builtin;
@@ -15,7 +14,6 @@ namespace go
             public @int Age;
             public float32 ShoeSize;
         }
-
 
         public partial struct PeopleByShoeSize // : slice<Person>
         {
