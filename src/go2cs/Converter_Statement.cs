@@ -32,6 +32,7 @@ namespace go2cs
     public partial class Converter
     {
         public const string IfElseMarker = ">>MARKER:IFELSE_LEVEL_{0}<<";
+        public const string IfElseBreakMarker = ">>MARKER:IFELSEBREAK_LEVEL_{0}<<";
         public const string IfExpressionMarker = ">>MARKER:IFEXPR_LEVEL_{0}<<";
         public const string IfStatementMarker = ">>MARKER:IFSTATEMENT_LEVEL_{0}<<";
         public const string ExprSwitchExpressionMarker = ">>MARKER:EXPRSWITCH_LEVEL_{0}<<";
@@ -414,16 +415,16 @@ namespace go2cs
                 m_targetFile.Append(string.Format(IfStatementMarker, m_ifExpressionLevel));
             }
 
-            m_targetFile.AppendLine($"{Spacing()}{string.Format(IfElseMarker, m_ifExpressionLevel)}if ({string.Format(IfExpressionMarker, m_ifExpressionLevel)})");
+            m_targetFile.AppendLine($"{string.Format(IfElseBreakMarker, m_ifExpressionLevel)}{Spacing()}{string.Format(IfElseMarker, m_ifExpressionLevel)}if ({string.Format(IfExpressionMarker, m_ifExpressionLevel)})");
 
             if (context.block().Length == 2)
             {
-                PushBlockSuffix(Environment.NewLine);
-                PushBlockSuffix($"{Environment.NewLine}{Spacing()}else{Environment.NewLine}");
+                PushBlockSuffix(null);  // For current block
+                PushBlockSuffix($"{Environment.NewLine}{Spacing()}else{(LineTerminatorAhead(context.block(0)) ? "" : Environment.NewLine)}");
             }
-            else if (context.Parent is GolangParser.IfStmtContext)
+            else
             {
-                PushBlockPrefix(Environment.NewLine);
+                PushBlockSuffix(null);  // For current block
             }
         }
 
@@ -434,9 +435,12 @@ namespace go2cs
 
             if (Expressions.TryGetValue(context.expression(), out string expression))
             {
+                bool isElseIf =context.Parent is GolangParser.IfStmtContext;
+
                 // Replace if markers
                 m_targetFile.Replace(string.Format(IfExpressionMarker, m_ifExpressionLevel), expression);
-                m_targetFile.Replace(string.Format(IfElseMarker, m_ifExpressionLevel), context.Parent is GolangParser.IfStmtContext ? "else " : "");
+                m_targetFile.Replace(string.Format(IfElseBreakMarker, m_ifExpressionLevel), isElseIf  ? Environment.NewLine : "");
+                m_targetFile.Replace(string.Format(IfElseMarker, m_ifExpressionLevel), isElseIf ? "else " : "");
             }
             else
             {
@@ -495,9 +499,9 @@ namespace go2cs
             //     : 'case' expressionList | 'default'
 
             if (context.exprSwitchCase().expressionList() == null)
-                m_exprSwitchDefaultCase.Peek().Append($"{Environment.NewLine}{Spacing()}.Default(() =>{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
+                m_exprSwitchDefaultCase.Peek().Append($"{Environment.NewLine}{Spacing()}.Default(() =>{Environment.NewLine}{Spacing()}{{{CheckForBodyCommentsLeft(context.statementList(), 1)}");
             else
-                m_targetFile.Append($"{Environment.NewLine}{Spacing()}.Case({string.Format(ExprSwitchCaseTypeMarker, m_exprSwitchExpressionLevel)})(() =>{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
+                m_targetFile.Append($"{Environment.NewLine}{Spacing()}.Case({string.Format(ExprSwitchCaseTypeMarker, m_exprSwitchExpressionLevel)})(() =>{Environment.NewLine}{Spacing()}{{{CheckForBodyCommentsLeft(context.statementList(), 1)}");
 
             IndentLevel++;
 

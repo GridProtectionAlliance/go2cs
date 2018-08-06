@@ -62,14 +62,42 @@ namespace go2cs
             return string.Join(Environment.NewLine, lines.Select((line, index) => string.IsNullOrWhiteSpace(line) ? "" : $"{(index > 0 || !firstIsEOLComment ? forwardSpacing : "")}{(autoTrim ? line.Trim() : line)}"));
         }
 
+        protected bool LineTerminatorAhead(ParserRuleContext context, int tokenOffset = 0)
+        {
+            int tokenIndex = context.Stop.TokenIndex + tokenOffset;
+            IList<IToken> hiddenChannel = TokenStream.GetHiddenTokensToRight(tokenIndex, TokenConstants.HiddenChannel);
+
+            if (hiddenChannel?.Count > 0)
+            {
+                foreach (IToken token in hiddenChannel)
+                {
+                    if (token.Text.IndexOf('\n') > -1)
+                        return true;
+                }
+            }
+
+            IList<IToken> lineCommentChannel = TokenStream.GetHiddenTokensToRight(tokenIndex, GolangLexer.LineCommentChannel);
+
+            if (lineCommentChannel?.Count > 0)
+            {
+                foreach (IToken token in lineCommentChannel)
+                {
+                    if (token.Text.IndexOf('\n') > -1)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         protected string CheckForBodyCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = true)
         {
-            return FixForwardSpacing(CheckForCommentsLeft(context, offsetLevel, indentLevel, preserveLineFeeds), firstIsEOLComment: IsEndOfLineComment(context));
+            return FixForwardSpacing(CheckForCommentsLeft(context, offsetLevel, indentLevel, preserveLineFeeds), offsetLevel, indentLevel, firstIsEOLComment: IsEndOfLineComment(context));
         }
 
         protected string CheckForBodyCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = true)
         {
-            return FixForwardSpacing(CheckForCommentsRight(context, offsetLevel, indentLevel, preserveLineFeeds), firstIsEOLComment: IsEndOfLineComment(context));
+            return FixForwardSpacing(CheckForCommentsRight(context, offsetLevel, indentLevel, preserveLineFeeds), offsetLevel, indentLevel, firstIsEOLComment: IsEndOfLineComment(context));
         }
 
         protected string CheckForCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = false)

@@ -100,7 +100,6 @@ namespace go2cs.Metadata
             FullTypeName = "go.EmptyInterface",
             TypeClass = TypeClass.Simple
         };
-
     }
 
     [Serializable]
