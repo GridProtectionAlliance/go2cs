@@ -152,7 +152,7 @@ namespace go2cs
 
             if (Operands.TryGetValue(context.operand(), out string operand))
             {
-                PrimaryExpressions[context] = operand;
+                PrimaryExpressions[context] = SanitizedIdentifier(operand);
             }
             else if (context.conversion() != null)
             {
@@ -369,7 +369,7 @@ namespace go2cs
             }
 
             // TODO: Update to handle in-line type constructions
-            Operands[operandContext] = context.GetText();
+            Operands[operandContext] = SanitizedIdentifier(context.GetText());
         }
 
         public override void ExitFunctionLit(GolangParser.FunctionLitContext context)
@@ -395,7 +395,7 @@ namespace go2cs
             //     : 'func' function
 
             // This is a place-holder for base class - derived classes, e.g., Converter, have to properly handle function content
-            Operands[operandContext] = context.GetText();
+            Operands[operandContext] = SanitizedIdentifier(context.GetText());
         }
 
         public override void ExitOperandName(GolangParser.OperandNameContext context)

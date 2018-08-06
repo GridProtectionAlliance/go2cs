@@ -254,6 +254,7 @@ namespace go2cs
             }
             else
             {
+                // TODO: Turn into a strongly typed object and declare prior to function
                 // All other intra-function scoped declared interfaces
                 // are defined as dynamic so they can behave like ducks
                 Types[context.Parent.Parent] = TypeInfo.DynamicType;
@@ -262,6 +263,7 @@ namespace go2cs
 
         public override void ExitStructType(GolangParser.StructTypeContext context)
         {
+            // TODO: Turn into a strongly typed object and declare prior to function
             // All intra-function scoped declared structures are
             // defined as dynamic so they can behave like ducks
             Types[context.Parent.Parent] = TypeInfo.DynamicType;
