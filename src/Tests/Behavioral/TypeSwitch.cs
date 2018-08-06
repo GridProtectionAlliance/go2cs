@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 August 05 14:35:29 UTC
+// package main -- go2cs converted at 2018 August 06 03:29:33 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\TypeSwitch.go
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -46,22 +46,19 @@ namespace go
             EmptyInterface s = S{"you"};
 
             Switch(s)
-                .Case(typeof(I))(() =>
-                {
-
-                    fmt.Println("S is an I!!");
-                })
-                .Case(typeof(NilType), typeof(@int))(() =>
-                {
-
-                    fmt.Println("S is nil or an int");
-                })
-                .Default(() =>
-                {
-
-                    fmt.Println("S is not an I");
-                })
-;        }
+            .Case(typeof(I))(() =>
+            {
+                fmt.Println("S is an I!!");
+            })
+            .Case(typeof(NilType), typeof(@int))(() =>
+            {
+                fmt.Println("S is nil or an int");
+            })
+            .Default(() =>
+            {
+                fmt.Println("S is not an I");
+            });
+        }
 
         private static void f(I y)
         {

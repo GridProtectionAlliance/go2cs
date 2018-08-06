@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 August 05 14:35:28 UTC
+// package main -- go2cs converted at 2018 August 06 03:29:32 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceInheritance.go
 using fmt = go.fmt_package;
 using static go.builtin;

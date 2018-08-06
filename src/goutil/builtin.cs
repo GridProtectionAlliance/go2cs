@@ -608,6 +608,13 @@ namespace go
         /// <summary>
         /// Creates a new switch expression that behaves like a Go switch statement.
         /// </summary>
+        /// <returns>New switch object that behaves like a Go switch statement.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static SwitchExpression<object> Switch() => new SwitchExpression<object>(null);
+
+        /// <summary>
+        /// Creates a new switch expression that behaves like a Go switch statement.
+        /// </summary>
         /// <param name="value">Switch target value.</param>
         /// <returns>New switch object that behaves like a Go switch statement.</returns>
         /// <typeparam name="T">Target type of the switch statement.</typeparam>

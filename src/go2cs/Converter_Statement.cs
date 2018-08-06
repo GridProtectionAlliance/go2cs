@@ -34,6 +34,8 @@ namespace go2cs
         public const string IfElseMarker = ">>MARKER:IFELSE_LEVEL_{0}<<";
         public const string IfExpressionMarker = ">>MARKER:IFEXPR_LEVEL_{0}<<";
         public const string IfStatementMarker = ">>MARKER:IFSTATEMENT_LEVEL_{0}<<";
+        public const string ExprSwitchExpressionMarker = ">>MARKER:EXPRSWITCH_LEVEL_{0}<<";
+        public const string ExprSwitchCaseTypeMarker = ">>MARKER:EXPRSWITCHCASE_LEVEL_{0}<<";
         public const string TypeSwitchExpressionMarker = ">>MARKER:TYPESWITCH_LEVEL_{0}<<";
         public const string TypeSwitchCaseTypeMarker = ">>MARKER:TYPESWITCHCASE_LEVEL_{0}<<";
 
@@ -44,6 +46,7 @@ namespace go2cs
         private readonly Stack<StringBuilder> m_exprSwitchDefaultCase = new Stack<StringBuilder>();
         private readonly Stack<StringBuilder> m_typeSwitchDefaultCase = new Stack<StringBuilder>();
         private int m_ifExpressionLevel;
+        private int m_exprSwitchExpressionLevel;
         private int m_typeSwitchExpressionLevel;
         private bool m_fallThrough;
 
@@ -469,9 +472,18 @@ namespace go2cs
                 m_targetFile.AppendLine($"{Spacing()}{{");
                 IndentLevel++;
             }
+
+            m_exprSwitchExpressionLevel++;
+
+            if (context.expression() != null)
+                m_targetFile.Append($"{Spacing()}Switch({string.Format(ExprSwitchExpressionMarker, m_exprSwitchExpressionLevel)})");
+            else
+                m_targetFile.Append($"{Spacing()}Switch()");
+
+            m_exprSwitchDefaultCase.Push(new StringBuilder());
         }
 
-        public override void ExitExprSwitchStmt(GolangParser.ExprSwitchStmtContext context)
+        public override void EnterExprCaseClause(GolangParser.ExprCaseClauseContext context)
         {
             // exprSwitchStmt
             //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
@@ -482,12 +494,82 @@ namespace go2cs
             // exprSwitchCase
             //     : 'case' expressionList | 'default'
 
+            if (context.exprSwitchCase().expressionList() == null)
+                m_exprSwitchDefaultCase.Peek().Append($"{Environment.NewLine}{Spacing()}.Default(() =>{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
+            else
+                m_targetFile.Append($"{Environment.NewLine}{Spacing()}.Case({string.Format(ExprSwitchCaseTypeMarker, m_exprSwitchExpressionLevel)})(() =>{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
+
+            IndentLevel++;
+
+            PushBlock();
+        }
+
+        public override void ExitExprCaseClause(GolangParser.ExprCaseClauseContext context)
+        {
+            // exprSwitchStmt
+            //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
+
+            // exprCaseClause
+            //     : exprSwitchCase ':' statementList
+
+            // exprSwitchCase
+            //     : 'case' expressionList | 'default'
+
+            IndentLevel--;
+
+            GolangParser.ExpressionListContext expressionList = context.exprSwitchCase().expressionList();
+
+            if (expressionList == null)
+            {
+                m_exprSwitchDefaultCase.Peek().Append($"{PopBlock(false)}{Spacing()}}})");
+            }
+            else
+            {
+                PopBlock();
+                m_targetFile.Append($"{Spacing()}}}{(m_fallThrough ? ", fallthrough" : "")})");
+
+                if (!ExpressionLists.TryGetValue(expressionList, out string[] expressions))
+                    AddWarning(expressionList, $"Failed to find expression list for switch case statement: {context.exprSwitchCase().GetText()}");
+
+                // Replace switch expression case type marker
+                m_targetFile.Replace(string.Format(ExprSwitchCaseTypeMarker, m_exprSwitchExpressionLevel), string.Join(", ", expressions ?? new string[0]));
+            }
+
+            // Reset fallthrough flag at the end of each case clause
+            m_fallThrough = false;
+        }
+
+        public override void ExitExprSwitchStmt(GolangParser.ExprSwitchStmtContext context)
+        {
+            // exprSwitchStmt
+            //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
+
+            // Default case always needs to be last case clause in SwitchExpression - Go allows its declaration anywhere
+            m_targetFile.Append($"{m_exprSwitchDefaultCase.Pop()};");
+
+            if (context.expression() != null)
+            {
+                if (Expressions.TryGetValue(context.expression(), out string expression))
+                {
+                    // Replace type switch expression marker
+                    m_targetFile.Replace(string.Format(ExprSwitchExpressionMarker, m_exprSwitchExpressionLevel), expression);
+                }
+                else
+                {
+                    AddWarning(context, $"Failed to find expression for expression based switch statement: {context.expression().GetText()}");
+                }
+            }
+
+            m_exprSwitchExpressionLevel--;
+
             if (context.simpleStmt() != null && context.simpleStmt().shortVarDecl() != null)
             {
                 // Close any locally scoped declared variable sub-block
                 IndentLevel--;
                 m_targetFile.AppendLine($"{Spacing()}}}");
             }
+
+            m_targetFile.Append(CheckForBodyCommentsRight(context));
         }
 
         public override void EnterTypeSwitchStmt(GolangParser.TypeSwitchStmtContext context)
@@ -513,14 +595,12 @@ namespace go2cs
 
                 m_targetFile.AppendLine($"{Spacing()}var {identifier} = {string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)};");
                 m_targetFile.AppendLine();
-                m_targetFile.AppendLine($"{Spacing()}Switch({identifier})");
+                m_targetFile.Append($"{Spacing()}Switch({identifier})");
             }
             else
             {
-                m_targetFile.AppendLine($"{Spacing()}Switch({string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)})");
+                m_targetFile.Append($"{Spacing()}Switch({string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)})");
             }
-
-            IndentLevel++;
 
             m_typeSwitchDefaultCase.Push(new StringBuilder());
         }
@@ -537,9 +617,9 @@ namespace go2cs
             //     : type ( ',' type )*
 
             if (context.typeSwitchCase().typeList() == null)
-                m_typeSwitchDefaultCase.Peek().AppendLine($"{Spacing()}.Default(() =>{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
+                m_typeSwitchDefaultCase.Peek().Append($"{Environment.NewLine}{Spacing()}.Default(() =>{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
             else
-                m_targetFile.AppendLine($"{Spacing()}.Case({string.Format(TypeSwitchCaseTypeMarker, m_typeSwitchExpressionLevel)})(() =>{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
+                m_targetFile.Append($"{Environment.NewLine}{Spacing()}.Case({string.Format(TypeSwitchCaseTypeMarker, m_typeSwitchExpressionLevel)})(() =>{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
             
             IndentLevel++;
 
@@ -561,12 +641,12 @@ namespace go2cs
 
             if (context.typeSwitchCase().typeList() == null)
             {
-                m_typeSwitchDefaultCase.Peek().AppendLine($"{PopBlock(false)}{Spacing()}}})");
+                m_typeSwitchDefaultCase.Peek().Append($"{PopBlock(false)}{Spacing()}}})");
             }
             else
             {
                 PopBlock();
-                m_targetFile.AppendLine($"{Spacing()}}}{(m_fallThrough ? ", fallthrough" : "")})");
+                m_targetFile.Append($"{Spacing()}}}{(m_fallThrough ? ", fallthrough" : "")})");
 
                 GolangParser.TypeListContext typeList = context.typeSwitchCase().typeList();
                 List<string> types = new List<string>();
@@ -604,8 +684,6 @@ namespace go2cs
             // typeSwitchGuard
             //     : ( IDENTIFIER ':=' )? primaryExpr '.' '(' 'type' ')'
 
-            IndentLevel--;
-
             // Default case always needs to be last case clause in SwitchExpression - Go allows its declaration anywhere
             m_targetFile.Append($"{m_typeSwitchDefaultCase.Pop()};");
 
@@ -627,6 +705,8 @@ namespace go2cs
                 IndentLevel--;
                 m_targetFile.AppendLine($"{Spacing()}}}");
             }
+
+            m_targetFile.Append(CheckForBodyCommentsRight(context));
         }
 
         public override void ExitSelectStmt(GolangParser.SelectStmtContext context)
