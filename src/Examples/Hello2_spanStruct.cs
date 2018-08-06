@@ -4,35 +4,39 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 16 17:46:02 UTC
+//     Generated on 2018 August 06 15:38:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
 using System.Runtime.CompilerServices;
+using static go.builtin;
+using fmt = go.fmt_package;
+using rand = go.math.rand_package;
+using another = go.another_package;
+using noy = go.test.and.two.noy_package;
 
 namespace go
 {
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        private partial struct span
+        private partial struct span : EmptyInterface
         {
+            // Constructors
             public span(NilType _)
             {
-                // Field instance values
-                //public DateTime When;
-                //public string What = ""; <- string initialized to empty
-                // Inherited interface initializations (set to null / default)
-                // Inherited structure initializations
+                this.start = default;
+                this.end = default;
+                this.another = default;
             }
 
-            // Only include constructor if struct contains fields
-            //public span(params)
-            //{
-            //    this.Field = Field,
-            //    // Inherited interface initializations
-            //    // Inherited structure initializations
-            //}
+            public span(@int start, @int end, @int another)
+            {
+                this.start = start;
+                this.end = end;
+                this.another = another;
+            }
 
             // Enable comparisons between nil and span struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -49,6 +53,12 @@ namespace go
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator span(NilType nil) => default(span);
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0")]
+        private static span span_cast(dynamic value)
+        {
+            return new span(value.start, value.end, value.another);
         }
     }
 }

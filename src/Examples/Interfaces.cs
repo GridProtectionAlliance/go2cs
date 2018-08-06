@@ -1,9 +1,9 @@
-// package main -- go2cs converted at 2018 June 26 19:23:09 UTC
+// package main -- go2cs converted at 2018 August 06 15:38:07 UTC
 // Original source: D:\Projects\go2cs\src\Examples\Interfaces.go
-
 using fmt = go.fmt_package;
 using math = go.math_package;
-using static go.BuiltInFunctions;
+using static go.builtin;
+using System.ComponentModel;
 
 namespace go
 {
@@ -11,24 +11,45 @@ namespace go
     {
         public partial interface Abser
         {
-            double Abs();
+            float64 Abs();
         }
 
         private static void Main()
         {
-            varaAbserf:=MyFloat(-math.Sqrt2)v:=Vertex{3,4}a=fa=&vfmt.Println(a.Abs())
+            Abser a;
+            var f = MyFloat(-math.Sqrt2);
+            var v = Vertex{3,4};
+
+            a = f;// a MyFloat implements Abser
+            a = ref v;// a *Vertex implements Abser
+
+            fmt.Println(a.Abs());
         }
 
-
-        public static double Abs(this MyFloat f)
+        public partial struct MyFloat // : float64
         {
-            iff<0{returnfloat64(-f)}returnfloat64(f)
         }
 
-
-        public static double Abs(this ref Vertex v)
+        public static float64 Abs(this MyFloat f)
         {
-            returnmath.Sqrt(v.X*v.X+v.Y*v.Y)
+            if (f < 0)
+            {
+                return float64(-f);
+            }
+            return float64(f);
+        }
+
+        public partial struct Vertex
+        {
+            [Description("\"X\" Description")]
+            public float64 X; /* X Comment */
+            [Description("`Y` Description")]
+            public float64 Y; // Y Comment
+        }
+
+        private static float64 Abs(this ref Vertex v)
+        {
+            return math.Sqrt(v.X * v.X + v.Y * v.Y);
         }
     }
 }

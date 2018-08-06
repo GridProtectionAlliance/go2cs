@@ -1,8 +1,7 @@
-// package main -- go2cs converted at 2018 June 26 19:23:08 UTC
+// package main -- go2cs converted at 2018 August 06 15:38:06 UTC
 // Original source: D:\Projects\go2cs\src\Examples\Append.go
-
 using fmt = go.fmt_package;
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {
@@ -10,12 +9,25 @@ namespace go
     {
         private static void Main()
         {
-            vars[]intprintSlice(s)s=append(s,0)printSlice(s)s=append(s,1)printSlice(s)s=append(s,2,3,4)printSlice(s)
+            slice<@int> s;
+            printSlice(s);
+
+            // append works on nil slices.
+            s = append(s, 0);
+            printSlice(s);
+
+            // The slice grows as needed.
+            s = append(s, 1);
+            printSlice(s);
+
+            // We can add more than one element at a time.
+            s = append(s, 2, 3, 4);
+            printSlice(s);
         }
 
-        private static void printSlice(Slice<long> s)
+        private static void printSlice(slice<@int> s)
         {
-            fmt.Printf("len=%d cap=%d %v\n",len(s),cap(s),s)
+            fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s);
         }
     }
 }

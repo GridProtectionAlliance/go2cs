@@ -4,35 +4,49 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 16 17:46:02 UTC
+//     Generated on 2018 August 06 15:38:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
 using System.Runtime.CompilerServices;
+using static go.builtin;
+using fmt = go.fmt_package;
+using rand = go.math.rand_package;
+using another = go.another_package;
+using noy = go.test.and.two.noy_package;
 
 namespace go
 {
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial struct Employee
+        [PromotedStruct(typeof(User))]
+        public partial struct Employee : EmptyInterface
         {
+            // User structure promotion - sourced from value copy
+            private readonly Ref<User> m_UserRef;
+
+            private ref User User_val => ref m_UserRef.Value;
+
+            public ref @int Id => ref m_UserRef.Value.Id;
+
+            public ref @string Name => ref m_UserRef.Value.Name;
+
+            // Constructors
             public Employee(NilType _)
             {
-                // Field instance values
-                //public DateTime When;
-                //public string What = ""; <- string initialized to empty
-                // Inherited interface initializations (set to null / default)
-                // Inherited structure initializations
+                this.m_UserRef = new Ref<User>(new User(nil));
+                this.Title = default;
+                this.Department = default;
             }
 
-            // Only include constructor if struct contains fields
-            //public Employee(params)
-            //{
-            //    this.Field = Field,
-            //    // Inherited interface initializations
-            //    // Inherited structure initializations
-            //}
+            public Employee(User User, @string Title, @string Department)
+            {
+                this.m_UserRef = new Ref<User>(User);
+                this.Title = Title;
+                this.Department = Department;
+            }
 
             // Enable comparisons between nil and Employee struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -49,6 +63,12 @@ namespace go
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Employee(NilType nil) => default(Employee);
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0")]
+        public static Employee Employee_cast(dynamic value)
+        {
+            return new Employee(value.User, value.Title, value.Department);
         }
     }
 }

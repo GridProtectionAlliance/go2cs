@@ -4,35 +4,34 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 16 17:46:02 UTC
+//     Generated on 2018 August 06 15:38:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
 using System.Runtime.CompilerServices;
+using static go.builtin;
+using fmt = go.fmt_package;
 
 namespace go
 {
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial struct Account
+        public partial struct Account : EmptyInterface
         {
+            // Constructors
             public Account(NilType _)
             {
-                // Field instance values
-                //public DateTime When;
-                //public string What = ""; <- string initialized to empty
-                // Inherited interface initializations (set to null / default)
-                // Inherited structure initializations
+                this.User = default;
+                this.MyFloat = default;
             }
 
-            // Only include constructor if struct contains fields
-            //public Account(params)
-            //{
-            //    this.Field = Field,
-            //    // Inherited interface initializations
-            //    // Inherited structure initializations
-            //}
+            public Account(User User, @int MyFloat)
+            {
+                this.User = User;
+                this.MyFloat = MyFloat;
+            }
 
             // Enable comparisons between nil and Account struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -49,6 +48,12 @@ namespace go
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Account(NilType nil) => default(Account);
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0")]
+        public static Account Account_cast(dynamic value)
+        {
+            return new Account(value.User, value.MyFloat);
         }
     }
 }

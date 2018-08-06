@@ -106,21 +106,63 @@ func FieldsFunc(s string, f func(rune) bool) []string {
 	// Find the field start and end indices.
 	wasField := false
 	fromIndex := 0
-	/*
-	for i, rune := range s {
+	
+	//for i, rune := range s {
 		if f(rune) {
 			if wasField {
 				spans = append(spans, span{start: fromIndex, end: i})
 				wasField = false
+				
+				if len(spans) < 3 {
+					return 0, syntaxError(fnParseUint, s0)
+				} else if len(spans) < 2 {
+					return 0, syntaxError(fnParseUint, s0)
+				} else if len(spans) < 1 {
+					return 0, syntaxError(fnParseUint, s0)
+				}
+				else {
+					wasField = true
+				}
 			}
 		} else {
 			if !wasField {
 				fromIndex = i
 				wasField = true
 			}
+			else {
+				s0 := s
+				switch {
+				case 2 <= base && base <= 36:
+					// valid base; nothing to do
+
+				case base == 0:
+					// Look for octal, hex prefix.
+					switch {
+					case s[0] == '0' && len(s) > 1 && (s[1] == 'x' || s[1] == 'X'):
+						if len(s) < 3 {
+							return 0, syntaxError(fnParseUint, s0)
+						} else if len(s) < 2 {
+							return 0, syntaxError(fnParseUint, s0)
+						} else if len(s) < 1 {
+							return 0, syntaxError(fnParseUint, s0)
+						}
+						else {
+							base = 16
+							s = s[2:]
+						}
+					case s[0] == '0':
+						base = 8
+						s = s[1:]
+					default:
+						base = 10
+					}
+
+				default:
+					return 0, baseError(fnParseUint, s0, base)
+				}			
+			}
 		}
-	}
-	*/
+	//}
 
 	// Last field might end at EOF.
 	if wasField {

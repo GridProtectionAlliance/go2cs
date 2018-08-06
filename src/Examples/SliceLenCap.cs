@@ -1,8 +1,7 @@
-// package main -- go2cs converted at 2018 June 26 19:23:09 UTC
+// package main -- go2cs converted at 2018 August 06 15:38:07 UTC
 // Original source: D:\Projects\go2cs\src\Examples\SliceLenCap.go
-
 using fmt = go.fmt_package;
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {
@@ -10,12 +9,25 @@ namespace go
     {
         private static void Main()
         {
-            s:=[]int{2,3,5,7,11,13}printSlice(s)s=s[:0]printSlice(s)s=s[:4]printSlice(s)s=s[2:]printSlice(s)
+            var s = []int{2,3,5,7,11,13};
+            printSlice(s);
+
+            // Slice the slice to give it zero length.
+            s = s.slice(high:0);
+            printSlice(s);
+
+            // Extend its length.
+            s = s.slice(high:4);
+            printSlice(s);
+
+            // Drop its first two values.
+            s = s.slice(2);
+            printSlice(s);
         }
 
-        private static void printSlice(Slice<long> s)
+        private static void printSlice(slice<@int> s)
         {
-            fmt.Printf("len=%d cap=%d %v\n",len(s),cap(s),s)
+            fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s);
         }
     }
 }

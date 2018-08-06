@@ -37,8 +37,13 @@ namespace go2cs
         public const string IfStatementMarker = ">>MARKER:IFSTATEMENT_LEVEL_{0}<<";
         public const string ExprSwitchExpressionMarker = ">>MARKER:EXPRSWITCH_LEVEL_{0}<<";
         public const string ExprSwitchCaseTypeMarker = ">>MARKER:EXPRSWITCHCASE_LEVEL_{0}<<";
+        public const string ExprSwitchStatementMarker = ">>MARKER:EXPRSWITCHSTATEMENT_LEVEL_{0}<<";
         public const string TypeSwitchExpressionMarker = ">>MARKER:TYPESWITCH_LEVEL_{0}<<";
         public const string TypeSwitchCaseTypeMarker = ">>MARKER:TYPESWITCHCASE_LEVEL_{0}<<";
+        public const string TypeSwitchStatementMarker = ">>MARKER:TYPESWITCHSTATEMENT_LEVEL_{0}<<";
+        public const string ForExpressionMarker = ">>MARKER:FOREXPRESSION_LEVEL_{0}<<";
+        public const string ForRangeExpressionsMarker = ">>MARKER:FORRANGEEXPRESSIONS_LEVEL_{0}<<";
+        public const string ForStatementMarker = ">>MARKER:FORSTATEMENT_LEVEL_{0}<<";
 
         private readonly ParseTreeValues<string> m_simpleStatements = new ParseTreeValues<string>();
         private readonly Dictionary<string, bool> m_labels = new Dictionary<string, bool>(StringComparer.Ordinal);
@@ -49,16 +54,17 @@ namespace go2cs
         private int m_ifExpressionLevel;
         private int m_exprSwitchExpressionLevel;
         private int m_typeSwitchExpressionLevel;
+        private int m_forExpressionLevel;
         private bool m_fallThrough;
 
         public override void ExitStatement(GolangParser.StatementContext context)
         {
             if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
             {
-                if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statememt))
-                    m_targetFile.Append(statememt);
+                if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
+                    m_targetFile.Append(statement);
                 else
-                    AddWarning(context, $"Failed to find simple statement for: {context.GetText()}");
+                    AddWarning(context, $"Failed to find simple statement for: {context.simpleStmt().GetText()}");
             }
         }
 
@@ -435,11 +441,11 @@ namespace go2cs
 
             if (Expressions.TryGetValue(context.expression(), out string expression))
             {
-                bool isElseIf =context.Parent is GolangParser.IfStmtContext;
+                bool isElseIf = context.Parent is GolangParser.IfStmtContext;
 
                 // Replace if markers
                 m_targetFile.Replace(string.Format(IfExpressionMarker, m_ifExpressionLevel), expression);
-                m_targetFile.Replace(string.Format(IfElseBreakMarker, m_ifExpressionLevel), isElseIf  ? Environment.NewLine : "");
+                m_targetFile.Replace(string.Format(IfElseBreakMarker, m_ifExpressionLevel), isElseIf ? Environment.NewLine : "");
                 m_targetFile.Replace(string.Format(IfElseMarker, m_ifExpressionLevel), isElseIf ? "else " : "");
             }
             else
@@ -449,10 +455,10 @@ namespace go2cs
 
             if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
             {
-                if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statememt))
-                    m_targetFile.Replace(string.Format(IfStatementMarker, m_ifExpressionLevel), statememt + Environment.NewLine);
+                if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
+                    m_targetFile.Replace(string.Format(IfStatementMarker, m_ifExpressionLevel), statement + Environment.NewLine);
                 else
-                    AddWarning(context, $"Failed to find simple statement for if statement: {context.GetText()}");
+                    AddWarning(context, $"Failed to find simple statement for if statement: {context.simpleStmt().GetText()}");
                 
                 // Close any locally scoped declared variable sub-block
                 if (context.simpleStmt().shortVarDecl() != null)
@@ -470,14 +476,19 @@ namespace go2cs
             // exprSwitchStmt
             //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
 
-            if (context.simpleStmt() != null && context.simpleStmt().shortVarDecl() != null)
-            {
-                // Any declared variable will be scoped to switch statement, so create a sub-block for it
-                m_targetFile.AppendLine($"{Spacing()}{{");
-                IndentLevel++;
-            }
-
             m_exprSwitchExpressionLevel++;
+
+            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
+            {
+                if (context.simpleStmt().shortVarDecl() != null)
+                {
+                    // Any declared variable will be scoped to switch statement, so create a sub-block for it
+                    m_targetFile.AppendLine($"{Spacing()}{{");
+                    IndentLevel++;
+                }
+
+                m_targetFile.Append(string.Format(ExprSwitchStatementMarker, m_exprSwitchExpressionLevel));
+            }
 
             if (context.expression() != null)
                 m_targetFile.Append($"{Spacing()}Switch({string.Format(ExprSwitchExpressionMarker, m_exprSwitchExpressionLevel)})");
@@ -555,23 +566,31 @@ namespace go2cs
             {
                 if (Expressions.TryGetValue(context.expression(), out string expression))
                 {
-                    // Replace type switch expression marker
+                    // Replace switch expression marker
                     m_targetFile.Replace(string.Format(ExprSwitchExpressionMarker, m_exprSwitchExpressionLevel), expression);
                 }
                 else
                 {
-                    AddWarning(context, $"Failed to find expression for expression based switch statement: {context.expression().GetText()}");
+                    AddWarning(context, $"Failed to find expression for switch statement: {context.expression().GetText()}");
+                }
+            }
+
+            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
+            {
+                if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
+                    m_targetFile.Replace(string.Format(ExprSwitchStatementMarker, m_exprSwitchExpressionLevel), statement + Environment.NewLine);
+                else
+                    AddWarning(context, $"Failed to find simple statement for expression based switch statement: {context.simpleStmt().GetText()}");
+
+                // Close any locally scoped declared variable sub-block
+                if (context.simpleStmt().shortVarDecl() != null)
+                {
+                    IndentLevel--;
+                    m_targetFile.AppendLine($"{Spacing()}}}");
                 }
             }
 
             m_exprSwitchExpressionLevel--;
-
-            if (context.simpleStmt() != null && context.simpleStmt().shortVarDecl() != null)
-            {
-                // Close any locally scoped declared variable sub-block
-                IndentLevel--;
-                m_targetFile.AppendLine($"{Spacing()}}}");
-            }
 
             m_targetFile.Append(CheckForBodyCommentsRight(context));
         }
@@ -579,19 +598,24 @@ namespace go2cs
         public override void EnterTypeSwitchStmt(GolangParser.TypeSwitchStmtContext context)
         {
             // typeSwitchStmt
-            //     : 'switch'(simpleStmt ';') ? typeSwitchGuard '{' typeCaseClause * '}'
+            //     : 'switch' (simpleStmt ';') ? typeSwitchGuard '{' typeCaseClause * '}'
 
             // typeSwitchGuard
             //     : ( IDENTIFIER ':=' )? primaryExpr '.' '(' 'type' ')'
 
-            if (context.simpleStmt() != null && context.simpleStmt().shortVarDecl() != null)
-            {
-                // Any declared variable will be scoped to switch statement, so create a sub-block for it
-                m_targetFile.AppendLine($"{Spacing()}{{");
-                IndentLevel++;
-            }
-
             m_typeSwitchExpressionLevel++;
+
+            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
+            {
+                if (context.simpleStmt().shortVarDecl() != null)
+                {
+                    // Any declared variable will be scoped to switch statement, so create a sub-block for it
+                    m_targetFile.AppendLine($"{Spacing()}{{");
+                    IndentLevel++;
+                }
+
+                m_targetFile.Append(string.Format(TypeSwitchStatementMarker, m_typeSwitchExpressionLevel));
+            }
 
             if (context.typeSwitchGuard().IDENTIFIER() != null)
             {
@@ -701,14 +725,22 @@ namespace go2cs
                 AddWarning(context, $"Failed to find primary expression for type switch statement: {context.typeSwitchGuard().GetText()}");
             }
 
-            m_typeSwitchExpressionLevel--;
-
-            if (context.simpleStmt() != null && context.simpleStmt().shortVarDecl() != null)
+            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
             {
+                if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
+                    m_targetFile.Replace(string.Format(TypeSwitchStatementMarker, m_typeSwitchExpressionLevel), statement + Environment.NewLine);
+                else
+                    AddWarning(context, $"Failed to find simple statement for type switch statement: {context.simpleStmt().GetText()}");
+
                 // Close any locally scoped declared variable sub-block
-                IndentLevel--;
-                m_targetFile.AppendLine($"{Spacing()}}}");
+                if (context.simpleStmt().shortVarDecl() != null)
+                {
+                    IndentLevel--;
+                    m_targetFile.AppendLine($"{Spacing()}}}");
+                }
             }
+
+            m_typeSwitchExpressionLevel--;
 
             m_targetFile.Append(CheckForBodyCommentsRight(context));
         }
@@ -719,10 +751,161 @@ namespace go2cs
             //     : 'select' '{' commClause * '}'
         }
 
+        public override void EnterForStmt(GolangParser.ForStmtContext context)
+        {
+            // forStmt
+            //     : 'for' (expression | forClause | rangeClause) ? block
+
+            m_forExpressionLevel++;
+
+            GolangParser.ForClauseContext forClause = context.forClause();
+
+            if (context.expression() != null || forClause != null && forClause.simpleStmt()?.Length == 0)
+            {
+                // Handle while style statement
+                m_targetFile.AppendLine($"{Spacing()}while({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
+            }
+            else if (forClause != null)
+            {
+                // forClause
+                //     : simpleStmt? ';' expression? ';' simpleStmt?
+
+                if (HasInitialStatement(forClause, out GolangParser.SimpleStmtContext simpleStatement))
+                {
+                    // Any declared variable will be scoped to for statement, so create a sub-block for it
+                    if (simpleStatement.shortVarDecl() != null)
+                    {
+                        m_targetFile.AppendLine($"{Spacing()}{{");
+                        IndentLevel++;
+                    }
+
+                    m_targetFile.Append(string.Format(ForStatementMarker, m_forExpressionLevel));
+                }
+
+                // Handle for loop style statement - since Go's initial and post statements are more
+                // free-form, a while loop is used instead
+
+                m_targetFile.AppendLine($"{Spacing()}while({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
+            }
+            else
+            {
+                // rangeClause
+                //     : (expressionList '=' | identifierList ':=' )? 'range' expression
+
+                if (context.rangeClause().identifierList() != null)
+                {
+                    // Any declared variable will be scoped to for statement, so create a sub-block for it
+                    m_targetFile.AppendLine($"{Spacing()}{{");
+                    IndentLevel++;
+                }
+
+                // Handle item iteration style statement - since Go's iteration variables are mutable and
+                // can be pre-declared, a standard for loop is used instead of a foreach
+            }
+        }
+
         public override void ExitForStmt(GolangParser.ForStmtContext context)
         {
             // forStmt
-            //     : 'for'(expression | forClause | rangeClause) ? block
+            //     : 'for' (expression | forClause | rangeClause) ? block
+
+            GolangParser.ForClauseContext forClause = context.forClause();
+
+            if (context.expression() != null || forClause != null && forClause.simpleStmt()?.Length == 0)
+            {
+                Expressions.TryGetValue(context.expression() ?? forClause.expression(), out string expression);
+                m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression ?? "true");
+                m_targetFile.Append(CheckForBodyCommentsRight(context));
+            }
+            else if (forClause != null)
+            {
+                // forClause
+                //     : simpleStmt? ';' expression? ';' simpleStmt?
+
+                if (HasPostStatement(forClause, out GolangParser.SimpleStmtContext simpleStatement))
+                {
+                    if (m_simpleStatements.TryGetValue(simpleStatement, out string statement))
+                        m_targetFile.AppendLine(statement);
+                    else
+                        AddWarning(context, $"Failed to find simple post statement in for clause: {simpleStatement.GetText()}");
+                }
+
+                if (Expressions.TryGetValue(forClause.expression(), out string expression))
+                    m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression);
+                else
+                    AddWarning(context, $"Failed to find expression in for statement: {context.GetText()}");
+
+                m_targetFile.Append(CheckForBodyCommentsRight(context));
+
+                if (HasInitialStatement(forClause, out simpleStatement))
+                {
+                    if (m_simpleStatements.TryGetValue(simpleStatement, out string statement))
+                        m_targetFile.Replace(string.Format(ForStatementMarker, m_forExpressionLevel), statement + Environment.NewLine);
+                    else
+                        AddWarning(context, $"Failed to find simple initial statement in for clause: {simpleStatement.GetText()}");
+
+                    // Close any locally scoped declared variable sub-block
+                    if (simpleStatement.shortVarDecl() != null)
+                    {
+                        IndentLevel--;
+                        m_targetFile.AppendLine($"{Spacing()}}}");
+                    }
+                }
+            }
+            else
+            {
+                // rangeClause
+                //     : (expressionList '=' | identifierList ':=' )? 'range' expression
+
+                m_targetFile.Append(CheckForBodyCommentsRight(context));
+
+                if (context.rangeClause().identifierList() != null)
+                {
+                    // Close any locally scoped declared variable sub-block
+                    IndentLevel--;
+                    m_targetFile.AppendLine($"{Spacing()}}}");
+                }
+            }
+
+            m_forExpressionLevel--;
+        }
+
+        private bool HasInitialStatement(GolangParser.ForClauseContext forClause, out GolangParser.SimpleStmtContext simpleStatement)
+        {
+            simpleStatement = null;
+
+            if (forClause.simpleStmt()?.Length == 0)
+                return false;
+
+            simpleStatement = forClause.simpleStmt(0);
+
+            return
+                simpleStatement != null &&
+                simpleStatement.emptyStmt() == null &&
+                forClause.children[forClause.children.Count - 1] != simpleStatement;
+        }
+
+        private bool HasPostStatement(GolangParser.ForClauseContext forClause, out GolangParser.SimpleStmtContext simpleStatement)
+        {
+            simpleStatement = null;
+
+            if (forClause.simpleStmt()?.Length == 0)
+                return false;
+
+            simpleStatement = forClause.simpleStmt(0);
+
+            if (forClause.simpleStmt().Length == 1)
+                return
+                    simpleStatement != null &&
+                    simpleStatement.emptyStmt() == null &&
+                    forClause.children[forClause.children.Count - 1] == simpleStatement;
+
+            simpleStatement = forClause.simpleStmt(1);
+
+            return
+                simpleStatement != null &&
+                simpleStatement.emptyStmt() == null &&
+                forClause.children[forClause.children.Count - 1] == simpleStatement;
         }
 
         public override void ExitDeferStmt(GolangParser.DeferStmtContext context)

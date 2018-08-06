@@ -1,8 +1,8 @@
 // _Switch statements_ express conditionals across many
 // branches.
 
-// package main -- go2cs converted at 2018 August 06 03:29:32 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\ExprSwitch.go
+// package main -- go2cs converted at 2018 August 06 14:33:08 UTC
+// Original source: D:\Projects\go2cs\src\Tests\Behavioral\ExprSwitch.go
 using fmt = go.fmt_package;
 using time = go.time_package;
 using static go.builtin;

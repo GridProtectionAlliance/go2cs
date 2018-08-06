@@ -1,23 +1,30 @@
-// package main -- go2cs converted at 2018 June 26 19:23:09 UTC
+// package main -- go2cs converted at 2018 August 06 15:38:07 UTC
 // Original source: D:\Projects\go2cs\src\Examples\Methods2.go
-
 using fmt = go.fmt_package;
 using math = go.math_package;
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {
     public static partial class main_package
     {
-
-        public static double Abs(this MyFloat f)
+        public partial struct MyFloat // : float64
         {
-            iff<0{returnfloat64(-f)}returnfloat64(f)
+        }
+
+        public static float64 Abs(this MyFloat f)
+        {
+            if (f < 0)
+            {
+                return float64(-f);
+            }
+            return float64(f);
         }
 
         private static void Main()
         {
-            f:=MyFloat(-math.Sqrt2)fmt.Println(f.Abs())
+            var f = MyFloat(-math.Sqrt2);
+            fmt.Println(f.Abs());
         }
     }
 }

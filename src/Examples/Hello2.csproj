@@ -36,12 +36,27 @@
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Numerics" />
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Hello_UserStruct.cs" />
+    <Compile Include="Hello_MyFloatStructOf(float64).cs" />
+    <Compile Include="Hello_AccountStruct.cs" />
     <Compile Include="Hello2.cs" />
+    <Compile Include="Hello2_PersonStructOf(Dictionary(@string, @string)).cs" />
+    <Compile Include="Hello2_JobStructOf(Dictionary(@string, @string)).cs" />
+    <Compile Include="Hello2_spanStruct.cs" />
+    <Compile Include="Hello2_UserStruct.cs" />
+    <Compile Include="Hello2_EmployeeStruct.cs" />
     <Compile Include="Interfaces_AbserInterface.cs" />
+    <Compile Include="Interfaces_MyFloatStructOf(float64).cs" />
+    <Compile Include="Interfaces_VertexStruct.cs" />
+    <Compile Include="Methods2_MyFloatStructOf(float64).cs" />
+    <Compile Include="MethodsPointers_VertexStruct.cs" />
+    <Compile Include="StructPromoted_DoDadStruct.cs" />
+    <Compile Include="StructPromoted_VertexStruct.cs" />
     <Compile Include="Hello2_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,8 +1,7 @@
-// package main -- go2cs converted at 2018 June 26 19:23:09 UTC
+// package main -- go2cs converted at 2018 August 06 15:38:07 UTC
 // Original source: D:\Projects\go2cs\src\Examples\NilSlices.go
-
 using fmt = go.fmt_package;
-using static go.BuiltInFunctions;
+using static go.builtin;
 
 namespace go
 {
@@ -10,7 +9,11 @@ namespace go
     {
         private static void Main()
         {
-            vars[]intfmt.Println(s,len(s),cap(s))ifs==nil{fmt.Println("nil!")}
-        }
+            slice<@int> s;
+            fmt.Println(s, len(s), cap(s));
+            if (s == nil)
+            {
+                fmt.Println("nil!");
+            }        }
     }
 }

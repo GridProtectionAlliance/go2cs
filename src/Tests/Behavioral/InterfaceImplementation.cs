@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 August 06 03:29:32 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceImplementation.go
+// package main -- go2cs converted at 2018 August 06 14:33:08 UTC
+// Original source: D:\Projects\go2cs\src\Tests\Behavioral\InterfaceImplementation.go
 using fmt = go.fmt_package;
 using static go.builtin;
 

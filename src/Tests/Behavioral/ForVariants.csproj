@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{c8f5248d-31e7-427d-8c6e-d924c142793c}</ProjectGuid>
+    <ProjectGuid>{ba47c62b-fcf4-4f24-8c0f-0cf9fbd8fb6d}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>SliceLenCap</AssemblyName>
+    <AssemblyName>ForVariants</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -41,23 +41,8 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Hello_UserStruct.cs" />
-    <Compile Include="Hello_MyFloatStructOf(float64).cs" />
-    <Compile Include="Hello_AccountStruct.cs" />
-    <Compile Include="Hello2_PersonStructOf(Dictionary(@string, @string)).cs" />
-    <Compile Include="Hello2_JobStructOf(Dictionary(@string, @string)).cs" />
-    <Compile Include="Hello2_spanStruct.cs" />
-    <Compile Include="Hello2_UserStruct.cs" />
-    <Compile Include="Hello2_EmployeeStruct.cs" />
-    <Compile Include="Interfaces_AbserInterface.cs" />
-    <Compile Include="Interfaces_MyFloatStructOf(float64).cs" />
-    <Compile Include="Interfaces_VertexStruct.cs" />
-    <Compile Include="Methods2_MyFloatStructOf(float64).cs" />
-    <Compile Include="MethodsPointers_VertexStruct.cs" />
-    <Compile Include="SliceLenCap.cs" />
-    <Compile Include="StructPromoted_DoDadStruct.cs" />
-    <Compile Include="StructPromoted_VertexStruct.cs" />
-    <Compile Include="SliceLenCap_AssemblyInfo.cs" />
+    <Compile Include="ForVariants.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

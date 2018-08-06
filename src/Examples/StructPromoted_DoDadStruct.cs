@@ -4,35 +4,36 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 June 16 17:46:03 UTC
+//     Generated on 2018 August 06 15:38:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
 using System.Runtime.CompilerServices;
+using static go.builtin;
+using fmt = go.fmt_package;
 
 namespace go
 {
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial struct DoDad
+        public partial struct DoDad : EmptyInterface
         {
+            // Constructors
             public DoDad(NilType _)
             {
-                // Field instance values
-                //public DateTime When;
-                //public string What = ""; <- string initialized to empty
-                // Inherited interface initializations (set to null / default)
-                // Inherited structure initializations
+                this.I = default;
+                this.O = default;
+                this.a = default;
             }
 
-            // Only include constructor if struct contains fields
-            //public DoDad(params)
-            //{
-            //    this.Field = Field,
-            //    // Inherited interface initializations
-            //    // Inherited structure initializations
-            //}
+            public DoDad(@int I, @string O, @string[][] a)
+            {
+                this.I = I;
+                this.O = O;
+                this.a = a;
+            }
 
             // Enable comparisons between nil and DoDad struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -49,6 +50,12 @@ namespace go
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator DoDad(NilType nil) => default(DoDad);
+        }
+
+        [GeneratedCode("go2cs", "0.1.1.0")]
+        public static DoDad DoDad_cast(dynamic value)
+        {
+            return new DoDad(value.I, value.O, value.a);
         }
     }
 }

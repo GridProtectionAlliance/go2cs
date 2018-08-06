@@ -15,35 +15,35 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial struct MyFloat : EmptyInterface
+        public partial struct Job : EmptyInterface
         {
-            // Value of the MyFloat struct
-            private readonly float64 m_value;
+            // Value of the Job struct
+            private readonly Dictionary<@string, @string> m_value;
 
-            public MyFloat(float64 value) => m_value = value;
+            public Job(Dictionary<@string, @string> value) => m_value = value;
 
-            // Enable implicit conversions between float64 and MyFloat struct
+            // Enable implicit conversions between Dictionary<@string, @string> and Job struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator MyFloat(float64 value) => new MyFloat(value);
+            public static implicit operator Job(Dictionary<@string, @string> value) => new Job(value);
             
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator float64(MyFloat value) => value.m_value;
+            public static implicit operator Dictionary<@string, @string>(Job value) => value.m_value;
             
-            // Enable comparisons between nil and MyFloat struct
+            // Enable comparisons between nil and Job struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(MyFloat value, NilType nil) => value.Equals(default(MyFloat));
+            public static bool operator ==(Job value, NilType nil) => value.Equals(default(Job));
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(MyFloat value, NilType nil) => !(value == nil);
+            public static bool operator !=(Job value, NilType nil) => !(value == nil);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, MyFloat value) => value == nil;
+            public static bool operator ==(NilType nil, Job value) => value == nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, MyFloat value) => value != nil;
+            public static bool operator !=(NilType nil, Job value) => value != nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator MyFloat(NilType nil) => default(MyFloat);
+            public static implicit operator Job(NilType nil) => default(Job);
         }
     }
 }
