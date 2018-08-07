@@ -30,8 +30,10 @@ namespace go2cs
     public partial class Converter
     {
         private readonly Stack<StringBuilder> m_blocks = new Stack<StringBuilder>();
-        private readonly Stack<String> m_blockPrefixInjection = new Stack<string>();
-        private readonly Stack<String> m_blockSuffixInjection = new Stack<string>();
+        private readonly Stack<String> m_blockInnerPrefixInjection = new Stack<string>();
+        private readonly Stack<String> m_blockInnerSuffixInjection = new Stack<string>();
+        private readonly Stack<String> m_blockOuterPrefixInjection = new Stack<string>();
+        private readonly Stack<String> m_blockOuterSuffixInjection = new Stack<string>();
         private bool m_firstStatementIsReturn;
 
         private void PushBlock()
@@ -59,14 +61,24 @@ namespace go2cs
             return block;
         }
 
-        private void PushBlockPrefix(string prefix)
+        private void PushInnerBlockPrefix(string prefix)
         {
-            m_blockPrefixInjection.Push(prefix);
+            m_blockInnerPrefixInjection.Push(prefix);
         }
 
-        private void PushBlockSuffix(string suffix)
+        private void PushInnerBlockSuffix(string suffix)
         {
-            m_blockSuffixInjection.Push(suffix);
+            m_blockInnerSuffixInjection.Push(suffix);
+        }
+
+        private void PushOuterBlockPrefix(string prefix)
+        {
+            m_blockOuterPrefixInjection.Push(prefix);
+        }
+
+        private void PushOuterBlockSuffix(string suffix)
+        {
+            m_blockOuterSuffixInjection.Push(suffix);
         }
 
         public override void EnterBlock(GolangParser.BlockContext context)
@@ -79,10 +91,13 @@ namespace go2cs
 
             PushBlock();
 
-            if (m_blockPrefixInjection.Count > 0)
-                m_targetFile.Append(m_blockPrefixInjection.Pop());
+            if (m_blockOuterPrefixInjection.Count > 0)
+                m_targetFile.Append(m_blockOuterPrefixInjection.Pop());
 
             m_targetFile.Append($"{Spacing()}{{");
+
+            if (m_blockInnerPrefixInjection.Count > 0)
+                m_targetFile.Append(m_blockInnerPrefixInjection.Pop());
 
             string comments = CheckForCommentsLeft(context.statementList(), preserveLineFeeds: true);
 
@@ -112,10 +127,13 @@ namespace go2cs
             if (statementListContext.statement().Length > 0)
                 m_firstStatementIsReturn = statementListContext.statement(0).returnStmt() != null;
 
+            if (m_blockInnerSuffixInjection.Count > 0)
+                m_targetFile.Append(m_blockInnerSuffixInjection.Pop());
+
             m_targetFile.Append($"{Spacing()}}}");
 
-            if (m_blockSuffixInjection.Count > 0)
-                m_targetFile.Append(m_blockSuffixInjection.Pop());
+            if (m_blockOuterSuffixInjection.Count > 0)
+                m_targetFile.Append(m_blockOuterSuffixInjection.Pop());
 
             if (!m_firstTopLevelDeclaration && IndentLevel > 2)
                 m_targetFile.Append(CheckForBodyCommentsRight(context));
