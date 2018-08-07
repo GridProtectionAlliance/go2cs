@@ -42,8 +42,9 @@ namespace go2cs
         public const string TypeSwitchCaseTypeMarker = ">>MARKER:TYPESWITCHCASE_LEVEL_{0}<<";
         public const string TypeSwitchStatementMarker = ">>MARKER:TYPESWITCHSTATEMENT_LEVEL_{0}<<";
         public const string ForExpressionMarker = ">>MARKER:FOREXPRESSION_LEVEL_{0}<<";
+        public const string ForInitStatementMarker = ">>MARKER:FORINITSTATEMENT_LEVEL_{0}<<";
+        public const string ForPostStatementMarker = ">>MARKER:FORPOSTSTATEMENT_LEVEL_{0}<<";
         public const string ForRangeExpressionsMarker = ">>MARKER:FORRANGEEXPRESSIONS_LEVEL_{0}<<";
-        public const string ForStatementMarker = ">>MARKER:FORSTATEMENT_LEVEL_{0}<<";
 
         private readonly ParseTreeValues<string> m_simpleStatements = new ParseTreeValues<string>();
         private readonly Dictionary<string, bool> m_labels = new Dictionary<string, bool>(StringComparer.Ordinal);
@@ -62,7 +63,7 @@ namespace go2cs
             if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
             {
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
-                    m_targetFile.Append(statement);
+                    m_targetFile.Append($"{statement}{(LineTerminatorAhead(context.simpleStmt()) ? "" : Environment.NewLine)}");
                 else
                     AddWarning(context, $"Failed to find simple statement for: {context.simpleStmt().GetText()}");
             }
@@ -140,7 +141,7 @@ namespace go2cs
             }
         }
 
-        public override void EnterIncDecStmt(GolangParser.IncDecStmtContext context)
+        public override void ExitIncDecStmt(GolangParser.IncDecStmtContext context)
         {
             // incDecStmt
             //     : expression('++' | '--')
@@ -425,12 +426,12 @@ namespace go2cs
 
             if (context.block().Length == 2)
             {
-                PushBlockSuffix(null);  // For current block
-                PushBlockSuffix($"{Environment.NewLine}{Spacing()}else{(LineTerminatorAhead(context.block(0)) ? "" : Environment.NewLine)}");
+                PushOuterBlockSuffix(null);  // For current block
+                PushOuterBlockSuffix($"{Environment.NewLine}{Spacing()}else{(LineTerminatorAhead(context.block(0)) ? "" : Environment.NewLine)}");
             }
             else
             {
-                PushBlockSuffix(null);  // For current block
+                PushOuterBlockSuffix(null);  // For current block
             }
         }
 
@@ -455,6 +456,7 @@ namespace go2cs
 
             if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
             {
+                // TODO: Handle case where short val declaration re-declares a variable already defined in current scope - C# does not allow this. One option: cache current variable value and restore below
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
                     m_targetFile.Replace(string.Format(IfStatementMarker, m_ifExpressionLevel), statement + Environment.NewLine);
                 else
@@ -577,6 +579,7 @@ namespace go2cs
 
             if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
             {
+                // TODO: Handle case where short val declaration re-declares a variable already defined in current scope - C# does not allow this. One option: cache current variable value and restore below
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
                     m_targetFile.Replace(string.Format(ExprSwitchStatementMarker, m_exprSwitchExpressionLevel), statement + Environment.NewLine);
                 else
@@ -727,6 +730,7 @@ namespace go2cs
 
             if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
             {
+                // TODO: Handle case where short val declaration re-declares a variable already defined in current scope - C# does not allow this. One option: cache current variable value and restore below
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
                     m_targetFile.Replace(string.Format(TypeSwitchStatementMarker, m_typeSwitchExpressionLevel), statement + Environment.NewLine);
                 else
@@ -779,8 +783,11 @@ namespace go2cs
                         IndentLevel++;
                     }
 
-                    m_targetFile.Append(string.Format(ForStatementMarker, m_forExpressionLevel));
+                    m_targetFile.Append(string.Format(ForInitStatementMarker, m_forExpressionLevel));
                 }
+
+                if (HasPostStatement(forClause, out _))
+                    PushInnerBlockSuffix($"{Spacing(indentLevel: 1)}{string.Format(ForPostStatementMarker, m_forExpressionLevel)}");
 
                 // Handle for loop style statement - since Go's initial and post statements are more
                 // free-form, a while loop is used instead
@@ -800,7 +807,9 @@ namespace go2cs
                 }
 
                 // Handle item iteration style statement - since Go's iteration variables are mutable and
-                // can be pre-declared, a standard for loop is used instead of a foreach
+                // can be pre-declared, a standard for loop is used instead of a foreach. The exception
+                // is for an index and rune iteration over a string which in C# a foreach works fine because
+                // the inferred tuple can be readonly since it would not be referenced by Go code.
             }
         }
 
@@ -822,14 +831,6 @@ namespace go2cs
                 // forClause
                 //     : simpleStmt? ';' expression? ';' simpleStmt?
 
-                if (HasPostStatement(forClause, out GolangParser.SimpleStmtContext simpleStatement))
-                {
-                    if (m_simpleStatements.TryGetValue(simpleStatement, out string statement))
-                        m_targetFile.AppendLine(statement);
-                    else
-                        AddWarning(context, $"Failed to find simple post statement in for clause: {simpleStatement.GetText()}");
-                }
-
                 if (Expressions.TryGetValue(forClause.expression(), out string expression))
                     m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression);
                 else
@@ -837,10 +838,11 @@ namespace go2cs
 
                 m_targetFile.Append(CheckForBodyCommentsRight(context));
 
-                if (HasInitialStatement(forClause, out simpleStatement))
+                if (HasInitialStatement(forClause, out GolangParser.SimpleStmtContext simpleStatement))
                 {
+                    // TODO: Handle case where short val declaration re-declares a variable already defined in current scope - C# does not allow this. One option: cache current variable value and restore below
                     if (m_simpleStatements.TryGetValue(simpleStatement, out string statement))
-                        m_targetFile.Replace(string.Format(ForStatementMarker, m_forExpressionLevel), statement + Environment.NewLine);
+                        m_targetFile.Replace(string.Format(ForInitStatementMarker, m_forExpressionLevel), statement + Environment.NewLine);
                     else
                         AddWarning(context, $"Failed to find simple initial statement in for clause: {simpleStatement.GetText()}");
 
@@ -850,6 +852,14 @@ namespace go2cs
                         IndentLevel--;
                         m_targetFile.AppendLine($"{Spacing()}}}");
                     }
+                }
+
+                if (HasPostStatement(forClause, out simpleStatement))
+                {
+                    if (m_simpleStatements.TryGetValue(simpleStatement, out string statement))
+                        m_targetFile.Replace(string.Format(ForPostStatementMarker, m_forExpressionLevel), statement);
+                    else
+                        AddWarning(context, $"Failed to find simple post statement in for clause: {simpleStatement.GetText()}");
                 }
             }
             else
