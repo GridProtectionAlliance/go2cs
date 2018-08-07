@@ -59,7 +59,7 @@ namespace go2cs
             string forwardSpacing = Spacing(0, indentLevel);
             string[] lines = source.Split(NewLineDelimeters, StringSplitOptions.None);
            
-            return string.Join(Environment.NewLine, lines.Select((line, index) => string.IsNullOrWhiteSpace(line) ? "" : $"{(index > 0 || !firstIsEOLComment ? forwardSpacing : "")}{(autoTrim ? line.Trim() : line)}"));
+            return string.Join(Environment.NewLine, lines.Select((line, index) => string.IsNullOrWhiteSpace(line) ? "" : $"{(index > 0 || !firstIsEOLComment ? forwardSpacing : "")}{(autoTrim ? index == 0 && firstIsEOLComment ? line.Replace("\t", $"{Spacing(indentLevel: 1)}") : line.Trim() : line)}"));
         }
 
         protected bool LineTerminatorAhead(ParserRuleContext context, int tokenOffset = 0)
@@ -92,12 +92,12 @@ namespace go2cs
 
         protected string CheckForBodyCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = true)
         {
-            return FixForwardSpacing(CheckForCommentsLeft(context, offsetLevel, indentLevel, preserveLineFeeds), offsetLevel, indentLevel, firstIsEOLComment: IsEndOfLineComment(context));
+            return FixForwardSpacing(CheckForCommentsLeft(context, offsetLevel, indentLevel, preserveLineFeeds), offsetLevel, indentLevel, firstIsEOLComment: IsEndOfLineCommentLeft(context));
         }
 
         protected string CheckForBodyCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = true)
         {
-            return FixForwardSpacing(CheckForCommentsRight(context, offsetLevel, indentLevel, preserveLineFeeds), offsetLevel, indentLevel, firstIsEOLComment: IsEndOfLineComment(context));
+            return FixForwardSpacing(CheckForCommentsRight(context, offsetLevel, indentLevel, preserveLineFeeds), offsetLevel, indentLevel, firstIsEOLComment: IsEndOfLineCommentRight(context));
         }
 
         protected string CheckForCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = false)
@@ -145,9 +145,19 @@ namespace go2cs
             return comments.ToString();
         }
 
-        protected bool IsEndOfLineComment(ParserRuleContext context)
+        protected bool IsEndOfLineCommentLeft(ParserRuleContext context)
         {
-            IList<IToken> lineCommentChannel = TokenStream.GetHiddenTokensToRight(context.Stop.TokenIndex, GolangLexer.LineCommentChannel);
+            return IsEndOfLineComment(context.Start.TokenIndex, TokenStream.GetHiddenTokensToLeft);
+        }
+
+        protected bool IsEndOfLineCommentRight(ParserRuleContext context)
+        {
+            return IsEndOfLineComment(context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight);
+        }
+
+        private bool IsEndOfLineComment(int tokenIndex, Func<int, int, IList<IToken>> getHiddenTokens)
+        {
+            IList<IToken> lineCommentChannel = getHiddenTokens(tokenIndex, GolangLexer.LineCommentChannel);
 
             if (lineCommentChannel?.Count > 0)
             {
@@ -164,6 +174,7 @@ namespace go2cs
         private string CheckForComments(int indentLevel, int tokenIndex, Func<int, int, IList<IToken>> getHiddenTokens, bool preserveLineFeeds)
         {
             StringBuilder comments = new StringBuilder();
+            StringBuilder lineFeeds = new StringBuilder();
             IList<IToken> hiddenChannel = getHiddenTokens(tokenIndex, TokenConstants.HiddenChannel);
             IList<IToken> lineCommentChannel = getHiddenTokens(tokenIndex, GolangLexer.LineCommentChannel);
 
@@ -191,7 +202,7 @@ namespace go2cs
 
                         if (hiddenText.Length > 0)
                         {
-                            comments.Append(hiddenText);
+                            lineFeeds.Append(hiddenText);
 
                             if (!WroteLineFeed)
                                 WroteLineFeed = EndsWithLineFeed(hiddenText);
@@ -214,6 +225,9 @@ namespace go2cs
                             comments.Append(commentText);
 
                         WroteLineFeed = true;
+
+                        comments.Append(lineFeeds);
+                        lineFeeds.Clear();
                     }
                     else if (preserveLineFeeds)
                     {
@@ -229,6 +243,8 @@ namespace go2cs
                     }
                 }
             }
+
+            comments.Insert(0, lineFeeds);
 
             return comments.ToString();
         }
@@ -255,9 +271,22 @@ namespace go2cs
             return priorToken != null && EndsWithLineFeed(priorToken.Text);
         }
 
-        private string PreserveOnlyLineFeeds(string line)
+        protected string PreserveOnlyLineFeeds(string line)
         {
             return new string(Array.FindAll(line.ToCharArray(), c => c == '\r' || c == '\n'));
+        }
+
+        protected string RemoveLastLineFeed(string line)
+        {
+            int index = line.LastIndexOf("\r\n", StringComparison.Ordinal);
+
+            if (index == -1)
+                index = line.LastIndexOf('\n');
+
+            if (index > -1)
+                line = line.Substring(0, index);
+
+            return line;
         }
     }
 }

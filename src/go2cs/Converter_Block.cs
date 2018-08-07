@@ -99,14 +99,14 @@ namespace go2cs
             if (m_blockInnerPrefixInjection.Count > 0)
                 m_targetFile.Append(m_blockInnerPrefixInjection.Pop());
 
-            string comments = CheckForCommentsLeft(context.statementList(), preserveLineFeeds: true);
+            string comments = CheckForBodyCommentsLeft(context.statementList(), 1);
 
             if (!string.IsNullOrEmpty(comments?.Trim()))
             {
-                m_targetFile.Append($"{(WroteLineFeed ? "" : Environment.NewLine)}{FixForwardSpacing(comments, 1)}");
+                if (comments.Trim().StartsWith("//"))
+                    comments = RemoveLastLineFeed(comments);
 
-                if (!WroteLineFeed)
-                    m_targetFile.AppendLine();
+                m_targetFile.Append($"{Environment.NewLine}{comments}");
             }
             else
             {
@@ -129,6 +129,9 @@ namespace go2cs
 
             if (m_blockInnerSuffixInjection.Count > 0)
                 m_targetFile.Append(m_blockInnerSuffixInjection.Pop());
+
+            if (!EndsWithLineFeed(m_targetFile.ToString()))
+                m_targetFile.AppendLine();
 
             m_targetFile.Append($"{Spacing()}}}");
 

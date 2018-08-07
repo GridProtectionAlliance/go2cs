@@ -330,18 +330,18 @@ namespace go2cs
                     foreach (HashSet<string> blockBreaks in m_blockLabeledBreaks)
                         blockBreaks.Add(label);
 
-                    m_targetFile.Append($"_break{label} = true;{CheckForBodyCommentsRight(context)}");
+                    m_targetFile.Append($"{Spacing()}_break{label} = true;{CheckForBodyCommentsRight(context)}");
 
                     if (!WroteLineFeed)
                         m_targetFile.AppendLine();
 
-                    m_targetFile.AppendLine("break;");
+                    m_targetFile.AppendLine($"{Spacing()}break;");
                 }
             }
 
             if (!breakHandled)
             {
-                m_targetFile.Append($"break;{CheckForBodyCommentsRight(context)}");
+                m_targetFile.Append($"{Spacing()}break;{CheckForBodyCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     m_targetFile.AppendLine();
@@ -366,18 +366,18 @@ namespace go2cs
                     foreach (HashSet<string> blockContinues in m_blockLabeledContinues)
                         blockContinues.Add(label);
 
-                    m_targetFile.Append($"_continue{label} = true;{CheckForBodyCommentsRight(context)}");
+                    m_targetFile.Append($"{Spacing()}_continue{label} = true;{CheckForBodyCommentsRight(context)}");
 
                     if (!WroteLineFeed)
                         m_targetFile.AppendLine();
 
-                    m_targetFile.AppendLine("break;");
+                    m_targetFile.AppendLine($"{Spacing()}break;");
                 }
             }
 
             if (!continueHandled)
             {
-                m_targetFile.Append($"continue;{CheckForBodyCommentsRight(context)}");
+                m_targetFile.Append($"{Spacing()}continue;{CheckForBodyCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     m_targetFile.AppendLine();
@@ -758,13 +758,13 @@ namespace go2cs
         public override void EnterForStmt(GolangParser.ForStmtContext context)
         {
             // forStmt
-            //     : 'for' (expression | forClause | rangeClause) ? block
+            //     : 'for' (expression | forClause | rangeClause)? block
 
             m_forExpressionLevel++;
 
             GolangParser.ForClauseContext forClause = context.forClause();
 
-            if (context.expression() != null || forClause != null && forClause.simpleStmt()?.Length == 0)
+            if (context.expression() != null || forClause != null && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
             {
                 // Handle while style statement
                 m_targetFile.AppendLine($"{Spacing()}while({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
@@ -774,7 +774,7 @@ namespace go2cs
                 // forClause
                 //     : simpleStmt? ';' expression? ';' simpleStmt?
 
-                if (HasInitialStatement(forClause, out GolangParser.SimpleStmtContext simpleStatement))
+                if (ForHasInitStatement(forClause, out GolangParser.SimpleStmtContext simpleStatement))
                 {
                     // Any declared variable will be scoped to for statement, so create a sub-block for it
                     if (simpleStatement.shortVarDecl() != null)
@@ -786,18 +786,17 @@ namespace go2cs
                     m_targetFile.Append(string.Format(ForInitStatementMarker, m_forExpressionLevel));
                 }
 
-                if (HasPostStatement(forClause, out _))
+                if (ForHasPostStatement(forClause, out _))
                     PushInnerBlockSuffix($"{Spacing(indentLevel: 1)}{string.Format(ForPostStatementMarker, m_forExpressionLevel)}");
 
                 // Handle for loop style statement - since Go's initial and post statements are more
                 // free-form, a while loop is used instead
-
                 m_targetFile.AppendLine($"{Spacing()}while({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
             }
             else
             {
                 // rangeClause
-                //     : (expressionList '=' | identifierList ':=' )? 'range' expression
+                //     : ( expressionList '=' | identifierList ':=' )? 'range' expression
 
                 if (context.rangeClause().identifierList() != null)
                 {
@@ -816,13 +815,13 @@ namespace go2cs
         public override void ExitForStmt(GolangParser.ForStmtContext context)
         {
             // forStmt
-            //     : 'for' (expression | forClause | rangeClause) ? block
+            //     : 'for' (expression | forClause | rangeClause)? block
 
             GolangParser.ForClauseContext forClause = context.forClause();
 
-            if (context.expression() != null || forClause != null && forClause.simpleStmt()?.Length == 0)
+            if (context.expression() != null || forClause != null && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
             {
-                Expressions.TryGetValue(context.expression() ?? forClause.expression(), out string expression);
+                Expressions.TryGetValue(context.expression() ?? forClause?.expression(), out string expression);
                 m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression ?? "true");
                 m_targetFile.Append(CheckForBodyCommentsRight(context));
             }
@@ -836,9 +835,20 @@ namespace go2cs
                 else
                     AddWarning(context, $"Failed to find expression in for statement: {context.GetText()}");
 
-                m_targetFile.Append(CheckForBodyCommentsRight(context));
+                string comments = CheckForBodyCommentsRight(context);
+                string lineFeeds = PreserveOnlyLineFeeds(comments);
 
-                if (HasInitialStatement(forClause, out GolangParser.SimpleStmtContext simpleStatement))
+                comments = comments.TrimEnd();
+
+                if (comments.Trim().Length > 0)
+                {
+                    comments += Environment.NewLine;
+                    lineFeeds = RemoveLastLineFeed(lineFeeds);
+                }
+
+                m_targetFile.Append(comments);
+
+                if (ForHasInitStatement(forClause, out GolangParser.SimpleStmtContext simpleStatement))
                 {
                     // TODO: Handle case where short val declaration re-declares a variable already defined in current scope - C# does not allow this. One option: cache current variable value and restore below
                     if (m_simpleStatements.TryGetValue(simpleStatement, out string statement))
@@ -850,17 +860,26 @@ namespace go2cs
                     if (simpleStatement.shortVarDecl() != null)
                     {
                         IndentLevel--;
+
+                        if (comments.Trim().Length == 0)
+                        {
+                            m_targetFile.AppendLine();
+                            lineFeeds = RemoveLastLineFeed(lineFeeds);
+                        }
+                           
                         m_targetFile.AppendLine($"{Spacing()}}}");
                     }
                 }
 
-                if (HasPostStatement(forClause, out simpleStatement))
+                if (ForHasPostStatement(forClause, out simpleStatement))
                 {
                     if (m_simpleStatements.TryGetValue(simpleStatement, out string statement))
-                        m_targetFile.Replace(string.Format(ForPostStatementMarker, m_forExpressionLevel), statement);
+                        m_targetFile.Replace(string.Format(ForPostStatementMarker, m_forExpressionLevel), statement.TrimEnd());
                     else
                         AddWarning(context, $"Failed to find simple post statement in for clause: {simpleStatement.GetText()}");
                 }
+
+                m_targetFile.Append(lineFeeds);
             }
             else
             {
@@ -873,6 +892,10 @@ namespace go2cs
                 {
                     // Close any locally scoped declared variable sub-block
                     IndentLevel--;
+
+                    if (!WroteLineFeed)
+                        m_targetFile.AppendLine();
+
                     m_targetFile.AppendLine($"{Spacing()}}}");
                 }
             }
@@ -880,7 +903,7 @@ namespace go2cs
             m_forExpressionLevel--;
         }
 
-        private bool HasInitialStatement(GolangParser.ForClauseContext forClause, out GolangParser.SimpleStmtContext simpleStatement)
+        private bool ForHasInitStatement(GolangParser.ForClauseContext forClause, out GolangParser.SimpleStmtContext simpleStatement)
         {
             simpleStatement = null;
 
@@ -895,7 +918,7 @@ namespace go2cs
                 forClause.children[forClause.children.Count - 1] != simpleStatement;
         }
 
-        private bool HasPostStatement(GolangParser.ForClauseContext forClause, out GolangParser.SimpleStmtContext simpleStatement)
+        private bool ForHasPostStatement(GolangParser.ForClauseContext forClause, out GolangParser.SimpleStmtContext simpleStatement)
         {
             simpleStatement = null;
 
