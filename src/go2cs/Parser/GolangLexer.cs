@@ -70,8 +70,8 @@ public partial class GolangLexer : Lexer {
 	};
 
 
-		// Line comment channel
-		public const int LineCommentChannel = 2;
+	    // Line comment channel
+	    public const int LineCommentChannel = 2;
 
 	    // The most recently produced token
 	    private IToken lastToken = null;

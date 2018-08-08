@@ -37,8 +37,8 @@ grammar Golang;
     /// Determines if on the current index of the parser's token stream a token exists on the
     /// <c>HiddenChannel</c> which either is a line terminator, or is a multi line comment that
     /// contains a line terminator. Also checks for <c>LineCommentChannel</c> which will always
-	/// indicate that a line terminator exists.
-	/// </summary>
+    /// indicate that a line terminator exists.
+    /// </summary>
     /// <returns>
     /// <c>true</c> if on the current index of the parser's token stream a token exists on the
     /// <c>HiddenChannel</c> which either is a line terminator, or is a multi line comment that
@@ -92,22 +92,22 @@ grammar Golang;
     /// <paramref name="tokenOffset"/> and the prior one on the hidden
     /// channel; otherwise, <c>false</c>.
     /// </returns>
-	private bool noTerminatorBetween(int tokenOffset)
-	{
-		BufferedTokenStream stream = TokenStream as BufferedTokenStream;		
+    private bool noTerminatorBetween(int tokenOffset)
+    {
+        BufferedTokenStream stream = TokenStream as BufferedTokenStream;		
         IList<IToken> tokens = stream.GetHiddenTokensToLeft(stream.LT(tokenOffset).TokenIndex);
 
         if (tokens == null)
             return true;
 
-		foreach (IToken token in tokens)
-		{
+        foreach (IToken token in tokens)
+        {
             if (token.Text.Contains("\n"))
                 return false;
-		}
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     /// <summary>
     /// Determines if no line terminator exists after any encountered
@@ -122,7 +122,7 @@ grammar Golang;
     /// </returns>
     private bool noTerminatorAfterParams(int tokenOffset)
     {
-		BufferedTokenStream stream = TokenStream as BufferedTokenStream;
+        BufferedTokenStream stream = TokenStream as BufferedTokenStream;
         int leftParams = 1;
         int rightParams = 0;
 
@@ -149,8 +149,8 @@ grammar Golang;
 }
 
 @lexer::members {
-	// Line comment channel
-	public const int LineCommentChannel = 2;
+    // Line comment channel
+    public const int LineCommentChannel = 2;
 
     // The most recently produced token
     private IToken lastToken = null;
@@ -567,7 +567,8 @@ functionType
     ;
 
 signature
-    : parameters result?
+    : {noTerminatorAfterParams(1)}? parameters result
+    | parameters
     ;
 
 result
