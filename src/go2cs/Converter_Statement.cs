@@ -470,6 +470,8 @@ namespace go2cs
                 }
             }
 
+            m_targetFile.Append(CheckForBodyCommentsRight(context));
+
             m_ifExpressionLevel--;
         }
 
@@ -593,9 +595,9 @@ namespace go2cs
                 }
             }
 
-            m_exprSwitchExpressionLevel--;
-
             m_targetFile.Append(CheckForBodyCommentsRight(context));
+
+            m_exprSwitchExpressionLevel--;
         }
 
         public override void EnterTypeSwitchStmt(GolangParser.TypeSwitchStmtContext context)
@@ -744,9 +746,9 @@ namespace go2cs
                 }
             }
 
-            m_typeSwitchExpressionLevel--;
-
             m_targetFile.Append(CheckForBodyCommentsRight(context));
+
+            m_typeSwitchExpressionLevel--;
         }
 
         public override void ExitSelectStmt(GolangParser.SelectStmtContext context)
@@ -791,6 +793,7 @@ namespace go2cs
 
                 // Handle for loop style statement - since Go's initial and post statements are more
                 // free-form, a while loop is used instead
+                // TODO: Consider changing to a standard for loop where simple cases are identified - this includes verification that any declared initial statement remains readonly within its scope
                 m_targetFile.AppendLine($"{Spacing()}while({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
             }
             else
@@ -823,7 +826,6 @@ namespace go2cs
             {
                 Expressions.TryGetValue(context.expression() ?? forClause?.expression(), out string expression);
                 m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression ?? "true");
-                m_targetFile.Append(CheckForBodyCommentsRight(context));
             }
             else if (forClause != null)
             {
@@ -834,19 +836,6 @@ namespace go2cs
                     m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression);
                 else
                     AddWarning(context, $"Failed to find expression in for statement: {context.GetText()}");
-
-                string comments = CheckForBodyCommentsRight(context);
-                string lineFeeds = PreserveOnlyLineFeeds(comments);
-
-                comments = comments.TrimEnd();
-
-                if (comments.Trim().Length > 0)
-                {
-                    comments += Environment.NewLine;
-                    lineFeeds = RemoveLastLineFeed(lineFeeds);
-                }
-
-                m_targetFile.Append(comments);
 
                 if (ForHasInitStatement(forClause, out GolangParser.SimpleStmtContext simpleStatement))
                 {
@@ -860,13 +849,6 @@ namespace go2cs
                     if (simpleStatement.shortVarDecl() != null)
                     {
                         IndentLevel--;
-
-                        if (comments.Trim().Length == 0)
-                        {
-                            m_targetFile.AppendLine();
-                            lineFeeds = RemoveLastLineFeed(lineFeeds);
-                        }
-                           
                         m_targetFile.AppendLine($"{Spacing()}}}");
                     }
                 }
@@ -878,15 +860,11 @@ namespace go2cs
                     else
                         AddWarning(context, $"Failed to find simple post statement in for clause: {simpleStatement.GetText()}");
                 }
-
-                m_targetFile.Append(lineFeeds);
             }
             else
             {
                 // rangeClause
                 //     : (expressionList '=' | identifierList ':=' )? 'range' expression
-
-                m_targetFile.Append(CheckForBodyCommentsRight(context));
 
                 if (context.rangeClause().identifierList() != null)
                 {
@@ -899,6 +877,8 @@ namespace go2cs
                     m_targetFile.AppendLine($"{Spacing()}}}");
                 }
             }
+
+            m_targetFile.Append(CheckForBodyCommentsRight(context));
 
             m_forExpressionLevel--;
         }
