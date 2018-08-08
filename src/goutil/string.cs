@@ -203,6 +203,8 @@ namespace go
 
                 if (completed)
                     yield return (index, rune[0]);
+                else
+                    yield return (index, '\uFFFD');
             }
         }
 
