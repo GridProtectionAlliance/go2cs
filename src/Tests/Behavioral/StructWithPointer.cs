@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 August 06 03:29:33 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructWithPointer.go
+// package main -- go2cs converted at 2018 August 08 21:28:03 UTC
+// Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructWithPointer.go
 using fmt = go.fmt_package;
 using static go.builtin;
 

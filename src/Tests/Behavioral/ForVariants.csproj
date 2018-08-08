@@ -42,7 +42,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ForVariants.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="InterfaceCasting_MyErrorStruct.cs" />
+    <Compile Include="InterfaceImplementation_AnimalInterface.cs" />
+    <Compile Include="InterfaceImplementation_DogStruct.cs" />
+    <Compile Include="InterfaceImplementation_FrogStruct.cs" />
+    <Compile Include="InterfaceInheritance_T1Struct.cs" />
+    <Compile Include="InterfaceInheritance_T2Struct.cs" />
+    <Compile Include="InterfaceInheritance_IInterface.cs" />
+    <Compile Include="InterfaceInheritance_VInterface.cs" />
+    <Compile Include="SortArrayType_PersonStruct.cs" />
+    <Compile Include="SortArrayType_PeopleByShoeSizeStructOf(slice(Person)).cs" />
+    <Compile Include="StructPointerPromotionWithInterface_AbserInterface.cs" />
+    <Compile Include="StructPointerPromotionWithInterface_MyErrorStruct.cs" />
+    <Compile Include="StructPointerPromotionWithInterface_MyCustomErrorStruct.cs" />
+    <Compile Include="StructPromotion_PersonStruct.cs" />
+    <Compile Include="StructPromotion_EmployeeStruct.cs" />
+    <Compile Include="StructPromotion_RecordStruct.cs" />
+    <Compile Include="StructPromotionWithInterface_AbserInterface.cs" />
+    <Compile Include="StructPromotionWithInterface_MyErrorStruct.cs" />
+    <Compile Include="StructPromotionWithInterface_MyCustomErrorStruct.cs" />
+    <Compile Include="StructWithDelegate_PersonStruct.cs" />
+    <Compile Include="StructWithPointer_ColorListStruct.cs" />
+    <Compile Include="TypeConversion_PersonStruct.cs" />
+    <Compile Include="TypeSwitch_IInterface.cs" />
+    <Compile Include="TypeSwitch_TStruct.cs" />
+    <Compile Include="TypeSwitch_SStruct.cs" />
+    <Compile Include="ForVariants_AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

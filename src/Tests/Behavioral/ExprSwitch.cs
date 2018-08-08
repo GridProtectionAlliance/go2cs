@@ -1,7 +1,7 @@
 // _Switch statements_ express conditionals across many
 // branches.
 
-// package main -- go2cs converted at 2018 August 06 14:33:08 UTC
+// package main -- go2cs converted at 2018 August 08 21:28:02 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\ExprSwitch.go
 using fmt = go.fmt_package;
 using time = go.time_package;
@@ -80,7 +80,7 @@ namespace go
                     fmt.Printf("Don't know type %T\n", t);
                 });
             };
-            whatAmI(true);
+            whatAmI(@true);
             whatAmI(1);
             whatAmI("hey");
         }

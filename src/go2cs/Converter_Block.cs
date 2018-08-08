@@ -99,19 +99,10 @@ namespace go2cs
             if (m_blockInnerPrefixInjection.Count > 0)
                 m_targetFile.Append(m_blockInnerPrefixInjection.Pop());
 
-            string comments = CheckForBodyCommentsLeft(context.statementList(), 1);
+            m_targetFile.Append(CheckForBodyCommentsLeft(context.statementList(), 1));
 
-            if (!string.IsNullOrEmpty(comments?.Trim()))
-            {
-                if (comments.Trim().StartsWith("//"))
-                    comments = RemoveLastLineFeed(comments);
-
-                m_targetFile.Append($"{Environment.NewLine}{comments}");
-            }
-            else
-            {
+            if (!WroteLineFeed)
                 m_targetFile.AppendLine();
-            }
 
             m_firstStatementIsReturn = false;
 

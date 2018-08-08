@@ -50,5 +50,6 @@ func main() {
 func f(y I) {
 	//s := y.(string)        // illegal: string does not implement I (missing method m)
 	//r := y.(io.Reader)     // r has type io.Reader and the dynamic type of y must implement both I and io.Reader
+	
 	fmt.Println(y.m())
 }

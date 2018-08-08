@@ -60,6 +60,7 @@
     <Compile Include="StructPromotionWithInterface_AbserInterface.cs" />
     <Compile Include="StructPromotionWithInterface_MyErrorStruct.cs" />
     <Compile Include="StructPromotionWithInterface_MyCustomErrorStruct.cs" />
+    <Compile Include="StructWithDelegate_PersonStruct.cs" />
     <Compile Include="StructWithPointer_ColorListStruct.cs" />
     <Compile Include="TypeConversion_PersonStruct.cs" />
     <Compile Include="TypeSwitch.cs" />

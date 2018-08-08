@@ -181,7 +181,7 @@ namespace go2cs
             if (!Directory.Exists(GoPath))
                 Directory.CreateDirectory(GoPath);
 
-            NewLineDelimeters = new[] { "\r\n", "\r", "\n" };
+            NewLineDelimeters = new[] { "\r\n", "\n" };
 
             s_processedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             s_processedImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

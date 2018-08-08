@@ -180,6 +180,8 @@ namespace go2cs
 
             WroteLineFeed = false;
 
+            // TODO: Sort both channels together by token index
+
             if (hiddenChannel?.Count > 0)
             {
                 foreach (IToken token in hiddenChannel)
@@ -220,16 +222,13 @@ namespace go2cs
                     if (commentText.Trim().StartsWith("//"))
                     {
                         if (CommentOnNewLine(lineCommentChannel, token))
-                            comments.Append(FixForwardSpacing(commentText, 0, indentLevel, false));
+                            comments.Append(FixForwardSpacing(commentText, 0, indentLevel, false, true));
                         else
                             comments.Append(commentText);
 
                         WroteLineFeed = true;
-
-                        comments.Append(lineFeeds);
-                        lineFeeds.Clear();
                     }
-                    else if (preserveLineFeeds)
+                    else if (preserveLineFeeds && lineFeeds.Length == 0)
                     {
                         commentText = PreserveOnlyLineFeeds(commentText);
 

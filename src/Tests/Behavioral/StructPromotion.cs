@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 August 06 03:29:33 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructPromotion.go
+// package main -- go2cs converted at 2018 August 08 21:28:03 UTC
+// Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructPromotion.go
 using fmt = go.fmt_package;
 using static go.builtin;
 
@@ -37,18 +37,18 @@ namespace go
         private static void Main()
         {
             var person = Person{name:"Michał",age:29};
-            fmt.Println(person);// {Michał 29}
+            fmt.Println(person);  // {Michał 29}
             var record = Record{};
             record.name = "Michał";
             record.age = 29;
             record.position = "software engineer";
 
-            fmt.Println(record);// {{Michał 29} {software engineer}}
-            fmt.Println(record.name);// Michał
-            fmt.Println(record.age);// 29
-            fmt.Println(record.position);// software engineer
-            fmt.Println(record.IsAdult());// true
-            fmt.Println(record.IsManager());// false
+            fmt.Println(record); // {{Michał 29} {software engineer}}
+            fmt.Println(record.name); // Michał
+            fmt.Println(record.age); // 29
+            fmt.Println(record.position); // software engineer
+            fmt.Println(record.IsAdult()); // true
+            fmt.Println(record.IsManager()); // false
         }
     }
 }

@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 August 06 03:29:33 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\TypeSwitch.go
+// package main -- go2cs converted at 2018 August 08 21:28:03 UTC
+// Original source: D:\Projects\go2cs\src\Tests\Behavioral\TypeSwitch.go
 using fmt = go.fmt_package;
 using static go.builtin;
 
@@ -35,8 +35,8 @@ namespace go
 
         private static void Main()
         {
-            EmptyInterface x = 7;// x has dynamic type int and value 7
-            var i = x.TypeAssert<@int>();// i has type int and value 7
+            EmptyInterface x = 7;          // x has dynamic type int and value 7
+            var i = x.TypeAssert<@int>();                   // i has type int and value 7
             fmt.Println(i);
 
             T y;            y.name = "Me";
@@ -62,6 +62,7 @@ namespace go
 
         private static void f(I y)
         {
+
             //s := y.(string)        // illegal: string does not implement I (missing method m)
             //r := y.(io.Reader)     // r has type io.Reader and the dynamic type of y must implement both I and io.Reader
             fmt.Println(y.m());
