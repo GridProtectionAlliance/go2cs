@@ -466,7 +466,8 @@ namespace go2cs
                 if (context.simpleStmt().shortVarDecl() != null)
                 {
                     IndentLevel--;
-                    m_targetFile.AppendLine($"{Spacing()}}}");
+                    m_targetFile.AppendLine();
+                    m_targetFile.Append($"{Spacing()}}}");
                 }
             }
 
@@ -591,7 +592,8 @@ namespace go2cs
                 if (context.simpleStmt().shortVarDecl() != null)
                 {
                     IndentLevel--;
-                    m_targetFile.AppendLine($"{Spacing()}}}");
+                    m_targetFile.AppendLine();
+                    m_targetFile.Append($"{Spacing()}}}");
                 }
             }
 
@@ -742,7 +744,8 @@ namespace go2cs
                 if (context.simpleStmt().shortVarDecl() != null)
                 {
                     IndentLevel--;
-                    m_targetFile.AppendLine($"{Spacing()}}}");
+                    m_targetFile.AppendLine();
+                    m_targetFile.Append($"{Spacing()}}}");
                 }
             }
 
@@ -849,7 +852,8 @@ namespace go2cs
                     if (simpleStatement.shortVarDecl() != null)
                     {
                         IndentLevel--;
-                        m_targetFile.AppendLine($"{Spacing()}}}");
+                        m_targetFile.AppendLine();
+                        m_targetFile.Append($"{Spacing()}}}");
                     }
                 }
 
@@ -870,11 +874,8 @@ namespace go2cs
                 {
                     // Close any locally scoped declared variable sub-block
                     IndentLevel--;
-
-                    if (!WroteLineFeed)
-                        m_targetFile.AppendLine();
-
-                    m_targetFile.AppendLine($"{Spacing()}}}");
+                    m_targetFile.AppendLine();
+                    m_targetFile.Append($"{Spacing()}}}");
                 }
             }
 
