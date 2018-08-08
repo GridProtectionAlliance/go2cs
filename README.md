@@ -109,7 +109,7 @@ Note that code converted from Go to C# will also target .NET 4.7.1 and compile u
 
 > C# pointers do not always work as a replacement for Go pointers since with C# (1) pointer types in structures cannot not refer to types that contain heap-allocated elements (e.g., arrays or slices that reference an array) as this would prevent pointer arithmetic for ambiguously sized elements, and (2) returning standard pointers to stack-allocated structures from a function is not allowed, instead you need to allocate the structure on the heap by creating a reference-type wrapper and then safely return a pointer to the reference.
 
-* Conversion of Go slices is based on the [`Slice<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/Slice.cs) structure defined in the [`goutils`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/goutil) shared project. For example, the following Go code using slice operations:
+* Conversion of Go slices is based on the [`slice<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/Slice.cs) structure defined in the [`goutils`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/goutil) shared project. For example, the following Go code using slice operations:
 
 ```Go
 package main
@@ -155,10 +155,10 @@ namespace go
         private static void Main()
         {
             // Create a tic-tac-toe board.
-            var board = new Slice<Slice<string>>(new[] {
-                new Slice<string>(new[] {"_", "_", "_"}),
-                new Slice<string>(new[] {"_", "_", "_"}),
-                new Slice<string>(new[] {"_", "_", "_"}),
+            var board = new slice<slice<@string>>(new[] {
+                new slice<@string>(new[] {"_", "_", "_"}),
+                new slice<@string>(new[] {"_", "_", "_"}),
+                new slice<@string>(new[] {"_", "_", "_"}),
             });
 
             // The players take turns.
@@ -168,15 +168,19 @@ namespace go
             board[1][0] = "O";
             board[0][2] = "X";
 
-            for (var i = 0; i < len(board); i++) {
-                fmt.Printf("%s\n", strings.Join(board[i], " "));
+            {
+                var i = 0;
+
+                while (i < len(board))
+                {
+                    fmt.Printf("%s\n", strings.Join(board[i], " "));
+                    i++
+                }
             }
         }
     }
 }
 ```
-
-* Function conversions are wrapped in a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/GoFunc.cs#L62) to support the [defer](https://golang.org/ref/spec#Defer_statements) call stack and [panic](https://golang.org/pkg/builtin/#panic) / [recover](https://golang.org/pkg/builtin/#recover) exception handling. Currently functions are always wrapped, see [optimizations](#optimizations) section below.
 
 * Conversion always tries to target managed code, this way code is more portable. If there is no possible way for managed code to accomplish a specific task, an option always exists to create a [native interop library](http://www.mono-project.com/docs/advanced/pinvoke/) that works on multiple platforms, i.e., importing code from a `.dll`/`.so`/`.dylib`. Even so, the philosophy is to always attempt to use managed code, i.e., not to lean towards native code libraries, regardless of possible performance implications. Simple first.
 
@@ -199,12 +203,12 @@ namespace go
 
             public fmtFlags fmtFlags;
 
-            public int wid;  // width
-            public int prec; // precision
+            public @int wid;  // width
+            public @int prec; // precision
 
             // intbuf is large enough to store %b of an int64 with a sign and
             // avoids padding at the end of the struct on 32 bit architectures.
-            public fixed byte intbuf[68];
+            public fixed @byte intbuf[68];
         }
 
         private static void clearFlags(ref this fmt _this)
@@ -217,7 +221,8 @@ namespace go
 
 ## Optimizations
 
-Currently code conversions blindly create a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/GoFunc.cs#L47) for every converted Go function. The function execution context is required in order to create a [defer](https://golang.org/ref/spec#Defer_statements) call stack and [panic](https://golang.org/pkg/builtin/#panic) / [recover](https://golang.org/pkg/builtin/#recover) exception handling. As an example, consider the following Go code:
+Code conversions only create a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/GoFunc.cs#L47) for converted Go function that reference `defer`, `panic`, or `recover`.
+The function execution context is required in order to create a [defer](https://golang.org/ref/spec#Defer_statements) call stack and [panic](https://golang.org/pkg/builtin/#panic) / [recover](https://golang.org/pkg/builtin/#recover) exception handling. As an example, consider the following Go code:
 ```Go
 package main
 
@@ -292,7 +297,7 @@ public static partial class main_package
 }
 ```
 
-Certainly for functions that call `defer`, `panic` or `recover`, the Go function execution context will be required. However, if the function does not _directly_ call the functions, nor _indirectly_ call the functions through a lambda, then you should be able to safely remove the wrapping function execution context. For example, in the converted C# code above the `main` function does not directly nor indirectly call `defer`, `panic` or `recover` so the function can be safely simplified as follows:
+Certainly for functions that call `defer`, `panic` or `recover`, the Go function execution context is required. However, if the function does not _directly_ call the functions, nor _indirectly_ call the functions through a lambda, then you should be able to safely remove the wrapping function execution context. For example, in the converted C# code above the `main` function does not directly nor indirectly call `defer`, `panic` or `recover` so the function will be safely simplified as follows:
 
 ```CSharp
 private static void main() {
@@ -300,5 +305,3 @@ private static void main() {
     fmt.Println("Returned normally from f.");
 }
 ```
-
-Future implementations of the converter may attempt to remove unnecessary function wrapping by evaluating the code context as the functions are converted, but for now code can be manually optimized by removing the unneeded function execution contexts.
