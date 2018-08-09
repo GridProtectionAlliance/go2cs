@@ -57,10 +57,16 @@ namespace go2cs
             if (!m_firstImportSpec)
             {
                 if (!string.IsNullOrEmpty(m_lastImportSpecComment))
+                {
                     m_targetFile.Append(m_lastImportSpecComment);
 
-                if (!WroteLineFeed)
+                    if (!EndsWithLineFeed(m_lastImportSpecComment))
+                        m_targetFile.AppendLine();
+                }
+                else if (!WroteLineFeed)
+                {
                     m_targetFile.AppendLine();
+                }
             }
 
             KeyValuePair<string, (string targetImport, string targetUsing)> importAlias = ImportAliases.FirstOrDefault(import => import.Value.targetImport.Equals(CurrentImportPath));

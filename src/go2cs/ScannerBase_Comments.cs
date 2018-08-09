@@ -176,7 +176,6 @@ namespace go2cs
             IList<IToken> hiddenChannel = getHiddenTokens(tokenIndex, TokenConstants.HiddenChannel) ?? new List<IToken>();
             IList<IToken> lineCommentChannel = getHiddenTokens(tokenIndex, GolangLexer.LineCommentChannel) ?? new List<IToken>();
             StringBuilder comments = new StringBuilder();
-            string hiddenText = null;
 
             IEnumerable<IToken> hiddenTokens =
                 hiddenChannel
@@ -187,7 +186,7 @@ namespace go2cs
 
             foreach (IToken token in hiddenTokens)
             {
-                hiddenText = token.Text;
+                string hiddenText = token.Text;
                 string hiddenTrimmed = hiddenText.TrimStart();
 
                 if (token.Channel == TokenConstants.HiddenChannel && hiddenTrimmed.StartsWith("/*"))
@@ -212,7 +211,7 @@ namespace go2cs
                         comments.Append(hiddenText);
                 }
 
-                if (!WroteLineFeed && hiddenText?.Length > 0)
+                if (hiddenText.Length > 0)
                     WroteLineFeed = EndsWithLineFeed(hiddenText);
             }
 
