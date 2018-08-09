@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 August 08 21:28:03 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\TypeSwitch.go
+// package main -- go2cs converted at 2018 August 09 01:21:20 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\TypeSwitch.go
 using fmt = go.fmt_package;
 using static go.builtin;
 
@@ -62,9 +62,9 @@ namespace go
 
         private static void f(I y)
         {
-
             //s := y.(string)        // illegal: string does not implement I (missing method m)
             //r := y.(io.Reader)     // r has type io.Reader and the dynamic type of y must implement both I and io.Reader
+
             fmt.Println(y.m());
         }
     }

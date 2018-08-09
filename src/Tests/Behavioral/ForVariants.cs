@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 August 08 21:28:02 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\ForVariants.go
+// package main -- go2cs converted at 2018 August 09 01:21:19 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\ForVariants.go
 using fmt = go.fmt_package;
 using static go.builtin;
 
@@ -18,8 +18,8 @@ namespace go
                 f(i); // Call function
                 // Increment i
                 i++; // Post i comment
-            }
-            // Post for comment
+            } // Post for comment
+
             fmt.Println();
             fmt.Println("i =", i);
             fmt.Println();
@@ -55,8 +55,8 @@ namespace go
                     f(i); // b
                     i++;
                 }
-            }
-            //c
+            } //c
+
             fmt.Println();
             fmt.Println("i =", i);
             fmt.Println();

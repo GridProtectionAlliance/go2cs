@@ -173,77 +173,48 @@ namespace go2cs
 
         private string CheckForComments(int indentLevel, int tokenIndex, Func<int, int, IList<IToken>> getHiddenTokens, bool preserveLineFeeds)
         {
+            IList<IToken> hiddenChannel = getHiddenTokens(tokenIndex, TokenConstants.HiddenChannel) ?? new List<IToken>();
+            IList<IToken> lineCommentChannel = getHiddenTokens(tokenIndex, GolangLexer.LineCommentChannel) ?? new List<IToken>();
             StringBuilder comments = new StringBuilder();
-            StringBuilder lineFeeds = new StringBuilder();
-            IList<IToken> hiddenChannel = getHiddenTokens(tokenIndex, TokenConstants.HiddenChannel);
-            IList<IToken> lineCommentChannel = getHiddenTokens(tokenIndex, GolangLexer.LineCommentChannel);
+            string hiddenText = null;
+
+            IEnumerable<IToken> hiddenTokens =
+                hiddenChannel
+                .Concat(lineCommentChannel)
+                .OrderBy(token => token.StartIndex);
 
             WroteLineFeed = false;
 
-            // TODO: Sort both channels together by token index
-
-            if (hiddenChannel?.Count > 0)
+            foreach (IToken token in hiddenTokens)
             {
-                foreach (IToken token in hiddenChannel)
+                hiddenText = token.Text;
+                string hiddenTrimmed = hiddenText.TrimStart();
+
+                if (token.Channel == TokenConstants.HiddenChannel && hiddenTrimmed.StartsWith("/*"))
                 {
-                    string hiddenText = token.Text;
-
-                    if (hiddenText.Trim().StartsWith("/*"))
-                    {
-                        if (CommentOnNewLine(hiddenChannel, token))
-                            comments.Append(FixForwardSpacing(hiddenText, 0, indentLevel, false));
-                        else
-                            comments.Append(hiddenText);
-
-                        if (!WroteLineFeed)
-                            WroteLineFeed = EndsWithLineFeed(hiddenText);
-                    }
-                    else if (preserveLineFeeds)
-                    {
-                        hiddenText = PreserveOnlyLineFeeds(hiddenText);
-
-                        if (hiddenText.Length > 0)
-                        {
-                            lineFeeds.Append(hiddenText);
-
-                            if (!WroteLineFeed)
-                                WroteLineFeed = EndsWithLineFeed(hiddenText);
-                        }
-                    }
+                    if (CommentOnNewLine(hiddenChannel, token))
+                        comments.Append(FixForwardSpacing(hiddenText, 0, indentLevel, false));
+                    else
+                        comments.Append(hiddenText);
                 }
-            }
-
-            if (lineCommentChannel?.Count > 0)
-            {
-                foreach (IToken token in lineCommentChannel)
+                else if (token.Channel == GolangLexer.LineCommentChannel && hiddenTrimmed.StartsWith("//"))
                 {
-                    string commentText = token.Text;
-
-                    if (commentText.Trim().StartsWith("//"))
-                    {
-                        if (CommentOnNewLine(lineCommentChannel, token))
-                            comments.Append(FixForwardSpacing(commentText, 0, indentLevel, false, true));
-                        else
-                            comments.Append(commentText);
-
-                        WroteLineFeed = true;
-                    }
-                    else if (preserveLineFeeds && lineFeeds.Length == 0)
-                    {
-                        commentText = PreserveOnlyLineFeeds(commentText);
-
-                        if (commentText.Length > 0)
-                        {
-                            comments.Append(commentText);
-
-                            if (!WroteLineFeed)
-                                WroteLineFeed = EndsWithLineFeed(commentText);
-                        }
-                    }
+                    if (CommentOnNewLine(lineCommentChannel, token))
+                        comments.Append(FixForwardSpacing(hiddenText, 0, indentLevel, false, true));
+                    else
+                        comments.Append(hiddenText);
                 }
-            }
+                else if (preserveLineFeeds)
+                {
+                    hiddenText = PreserveOnlyLineFeeds(hiddenText);
 
-            comments.Insert(0, lineFeeds);
+                    if (hiddenText.Length > 0)
+                        comments.Append(hiddenText);
+                }
+
+                if (!WroteLineFeed && hiddenText?.Length > 0)
+                    WroteLineFeed = EndsWithLineFeed(hiddenText);
+            }
 
             return comments.ToString();
         }
