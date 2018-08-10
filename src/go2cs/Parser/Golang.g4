@@ -54,7 +54,7 @@ grammar Golang;
         if (ahead == null)
             return false;
 
-        if (ahead.Channel != TokenConstants.HiddenChannel && ahead.Channel != GolangLexer.LineCommentChannel)
+        if (ahead.Channel != TokenConstants.HiddenChannel)
         {
             // We're only interested in tokens on the HIDDEN channels.
             return false;
@@ -149,9 +149,6 @@ grammar Golang;
 }
 
 @lexer::members {
-    // Line comment channel
-    public const int LineCommentChannel = 2;
-
     // The most recently produced token
     private IToken lastToken = null;
 
@@ -1326,5 +1323,5 @@ TERMINATOR
 	;
 
 LINE_COMMENT
-    :   [ \t]* '//' ~[\r\n]* [\r\n]+ -> channel(2)
+    :   [ \t]* '//' ~[\r\n]* [\r\n]+ -> channel(HIDDEN)
     ;

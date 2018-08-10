@@ -163,7 +163,7 @@ public partial class GolangParser : Parser {
 	        if (ahead == null)
 	            return false;
 
-	        if (ahead.Channel != TokenConstants.HiddenChannel && ahead.Channel != GolangLexer.LineCommentChannel)
+	        if (ahead.Channel != TokenConstants.HiddenChannel)
 	        {
 	            // We're only interested in tokens on the HIDDEN channels.
 	            return false;

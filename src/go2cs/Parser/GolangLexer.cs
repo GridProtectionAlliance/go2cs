@@ -70,9 +70,6 @@ public partial class GolangLexer : Lexer {
 	};
 
 
-	    // Line comment channel
-	    public const int LineCommentChannel = 2;
-
 	    // The most recently produced token
 	    private IToken lastToken = null;
 
@@ -943,13 +940,13 @@ public partial class GolangLexer : Lexer {
 		'\x2', '\x2', '\x2', '\x342', '\x343', '\x3', '\x2', '\x2', '\x2', '\x343', 
 		'\x341', '\x3', '\x2', '\x2', '\x2', '\x343', '\x344', '\x3', '\x2', '\x2', 
 		'\x2', '\x344', '\x345', '\x3', '\x2', '\x2', '\x2', '\x345', '\x346', 
-		'\b', '\x64', '\x3', '\x2', '\x346', '\xC8', '\x3', '\x2', '\x2', '\x2', 
+		'\b', '\x64', '\x2', '\x2', '\x346', '\xC8', '\x3', '\x2', '\x2', '\x2', 
 		'(', '\x2', '\x1BD', '\x1BF', '\x243', '\x24C', '\x258', '\x264', '\x269', 
 		'\x26E', '\x274', '\x27B', '\x283', '\x288', '\x28B', '\x293', '\x295', 
 		'\x29A', '\x29E', '\x2A4', '\x2AB', '\x2B3', '\x2B7', '\x2DC', '\x2E2', 
 		'\x2E4', '\x2EE', '\x2F0', '\x2F7', '\x304', '\x307', '\x30C', '\x313', 
-		'\x31C', '\x325', '\x32D', '\x334', '\x33D', '\x343', '\x4', '\x2', '\x3', 
-		'\x2', '\x2', '\x4', '\x2',
+		'\x31C', '\x325', '\x32D', '\x334', '\x33D', '\x343', '\x3', '\x2', '\x3', 
+		'\x2',
 	};
 
 	public static readonly ATN _ATN =
