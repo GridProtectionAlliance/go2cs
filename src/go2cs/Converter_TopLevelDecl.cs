@@ -58,21 +58,18 @@ namespace go2cs
 
                 // Begin class
                 m_targetFile.AppendLine($"{Spacing()}public static {UnsafeMarker}partial class {Package}{ClassSuffix}");
-                m_targetFile.AppendLine($"{Spacing()}{{");
+                m_targetFile.Append($"{Spacing()}{{");
 
                 // Check for comments before initial declaration
-                string initialDeclComments = CheckForCommentsLeft(context);
+                string initialDeclComments = CheckForCommentsLeft(context, 1);
 
                 // Write any initial declaration comments post any final EOL comments in Converter_ImportDecl visit 
-                if (!string.IsNullOrWhiteSpace(initialDeclComments))
+                if (!initialDeclComments.Equals(m_lastEolImportSpecComment))
                 {
-                    if (!initialDeclComments.Equals(m_lastEolImportSpecComment))
-                    {
-                        if (initialDeclComments.StartsWith(m_lastEolImportSpecComment))
-                            initialDeclComments = initialDeclComments.Substring(m_lastEolImportSpecComment.Length);
+                    if (initialDeclComments.StartsWith(m_lastEolImportSpecComment))
+                        initialDeclComments = initialDeclComments.Substring(m_lastEolImportSpecComment.Length);
 
-                        m_targetFile.Append(FixForwardSpacing(initialDeclComments.TrimStart(), 1));
-                    }
+                    m_targetFile.Append(RemoveFirstDuplicateLineFeed(RemoveLastDuplicateLineFeed(initialDeclComments)));
                 }
 
                 // End class and namespace "}" occur as a last step in Convert() method

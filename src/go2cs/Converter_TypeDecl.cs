@@ -36,13 +36,13 @@ namespace go2cs
 {
     public partial class Converter
     {
-        private bool m_firstTypeSpec;
+        //private bool m_firstTypeSpec;
 
         // TODO: Consider strongly typing sub-function type declarations with function name prefix declared directly prior to function definition - sub-function type declarations are syntactically invalid in C#
 
         public override void EnterTypeDecl(GolangParser.TypeDeclContext context)
         {
-            m_firstTypeSpec = !m_inFunction;
+            //m_firstTypeSpec = !m_inFunction;
         }
 
         public override void ExitTypeSpec(GolangParser.TypeSpecContext context)
@@ -50,15 +50,11 @@ namespace go2cs
             // typeSpec
             //     : IDENTIFIER type
 
-            if (m_firstTypeSpec)
-            {
-                m_firstTypeSpec = false;
-
-                string comments = CheckForCommentsLeft(context, preserveLineFeeds: m_inFunction);
-
-                if (!string.IsNullOrEmpty(comments))
-                    m_targetFile.Append(FixForwardSpacing(comments));
-            }
+            //if (m_firstTypeSpec)
+            //{
+            //    m_firstTypeSpec = false;
+            //    m_targetFile.Append(CheckForCommentsLeft(context));
+            //}
 
             string originalIdentifier = context.IDENTIFIER().GetText();
             string scope = char.IsUpper(originalIdentifier[0]) ? "public" : "private";
@@ -109,10 +105,10 @@ namespace go2cs
 
                 foreach (FunctionSignature function in localFunctions)
                 {
-                    m_targetFile.Append($"{Spacing(1)}{function.Signature.GenerateResultSignature()} {SanitizedIdentifier(function.Name)}({function.Signature.GenerateParametersSignature(false)});{(string.IsNullOrEmpty(function.Comments) ? Environment.NewLine : function.Comments)}");
+                    m_targetFile.Append($"{Spacing(1)}{function.Signature.GenerateResultSignature()} {SanitizedIdentifier(function.Name)}({function.Signature.GenerateParametersSignature(false)});{(string.IsNullOrWhiteSpace(function.Comments) ? Environment.NewLine : $" {function.Comments.TrimStart()}")}");
                 }
 
-                m_targetFile.Append($"{Spacing()}}}{CheckForBodyCommentsRight(context)}");
+                m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
             }
             else if (Metadata.Structs.TryGetValue(originalIdentifier, out StructInfo structInfo))
             {
@@ -188,11 +184,11 @@ namespace go2cs
                         }
                     }
 
-                    fieldDecl.Append($"{Spacing(1)}public {field.Type.TypeName} {field.Name};{(string.IsNullOrEmpty(field.Comments) ? Environment.NewLine : field.Comments)}");
+                    fieldDecl.Append($"{Spacing(1)}public {field.Type.TypeName} {field.Name};{(string.IsNullOrWhiteSpace(field.Comments) ? Environment.NewLine : $" {field.Comments.TrimStart()}")}");
                     m_targetFile.Append(fieldDecl);
                 }
 
-                m_targetFile.Append($"{Spacing()}}}{CheckForBodyCommentsRight(context)}");
+                m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
             }
             else if (Types.TryGetValue(context.type(), out TypeInfo typeInfo))
             {
@@ -206,13 +202,13 @@ namespace go2cs
                     if (signature.Equals("Action", StringComparison.Ordinal))
                     {
                         m_targetFile.Append($"{Spacing()}public delegate void {identifier}();");
-                        m_targetFile.Append(CheckForBodyCommentsRight(context));
+                        m_targetFile.Append(CheckForCommentsRight(context));
                     }
                     else if (signature.StartsWith("Action<", StringComparison.Ordinal))
                     {
                         signature = RemoveSurrounding(signature.Substring(6), "<", ">");
                         m_targetFile.Append($"{Spacing()}public delegate void {identifier}({signature});");
-                        m_targetFile.Append(CheckForBodyCommentsRight(context));
+                        m_targetFile.Append(CheckForCommentsRight(context));
                     }
                     else if (signature.StartsWith("Func<", StringComparison.Ordinal))
                     {
@@ -225,7 +221,7 @@ namespace go2cs
                             signature = string.Join(", ", parts.Take(parts.Length - 1));
 
                             m_targetFile.Append($"{Spacing()}public delegate {result} {identifier}({signature});");
-                            m_targetFile.Append(CheckForBodyCommentsRight(context));
+                            m_targetFile.Append(CheckForCommentsRight(context));
                         }
                         else
                         {
@@ -263,7 +259,7 @@ namespace go2cs
 
                     m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // : {typeInfo.TypeName}");
                     m_targetFile.AppendLine($"{Spacing()}{{");
-                    m_targetFile.Append($"{Spacing()}}}{CheckForBodyCommentsRight(context)}");
+                    m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
                 }
             }
         }

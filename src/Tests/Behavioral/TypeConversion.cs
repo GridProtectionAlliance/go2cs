@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 August 09 01:21:20 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\TypeConversion.go
+// package main -- go2cs converted at 2018 August 09 13:23:04 UTC
+// Original source: D:\Projects\go2cs\src\Tests\Behavioral\TypeConversion.go
 using fmt = go.fmt_package;
 using static go.builtin;
 

@@ -19,6 +19,9 @@ type (
 	}
 	// Weirdly placed comment
 
+	/* Hello 1
+	 * Hello 2
+	 * Hello 3 */
 	MyCustomError struct {
 		Message string // My custom error message
 		Abser

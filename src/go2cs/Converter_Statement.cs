@@ -89,7 +89,7 @@ namespace go2cs
             string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
             string statement = PopBlock(false);
 
-            m_targetFile.Append($"{label}:{CheckForBodyCommentsRight(context)}");
+            m_targetFile.Append($"{label}:{CheckForCommentsRight(context)}");
 
             if (!WroteLineFeed)
                 m_targetFile.AppendLine();
@@ -106,7 +106,7 @@ namespace go2cs
             {
                 StringBuilder statement = new StringBuilder();
 
-                statement.Append($"{Spacing()}{channel}.Send({value});{CheckForBodyCommentsRight(context)}");
+                statement.Append($"{Spacing()}{channel}.Send({value});{CheckForCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     statement.AppendLine();
@@ -128,7 +128,7 @@ namespace go2cs
             {
                 StringBuilder statement = new StringBuilder();
 
-                statement.Append($"{Spacing()}{expression};{CheckForBodyCommentsRight(context)}");
+                statement.Append($"{Spacing()}{expression};{CheckForCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     statement.AppendLine();
@@ -150,7 +150,7 @@ namespace go2cs
             {
                 StringBuilder statement = new StringBuilder();
 
-                statement.Append($"{Spacing()}{expression}{context.children[1].GetText()};{CheckForBodyCommentsRight(context)}");
+                statement.Append($"{Spacing()}{expression}{context.children[1].GetText()};{CheckForCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     statement.AppendLine();
@@ -212,7 +212,7 @@ namespace go2cs
                     }
                     else
                     {
-                        statement.Append(CheckForBodyCommentsRight(context));
+                        statement.Append(CheckForCommentsRight(context));
 
                         if (!WroteLineFeed)
                             statement.AppendLine();
@@ -257,7 +257,7 @@ namespace go2cs
                     }
                     else
                     {
-                        statement.Append(CheckForBodyCommentsRight(context));
+                        statement.Append(CheckForCommentsRight(context));
 
                         if (!WroteLineFeed)
                             statement.AppendLine();
@@ -280,7 +280,7 @@ namespace go2cs
             if (Expressions.TryGetValue(context.expression(), out string expression))
             {
                 RequiredUsings.Add("System.Threading");
-                m_targetFile.Append($"{Spacing()}ThreadPool.QueueUserWorkItem(state => {expression});{CheckForBodyCommentsRight(context)}");
+                m_targetFile.Append($"{Spacing()}ThreadPool.QueueUserWorkItem(state => {expression});{CheckForCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     m_targetFile.AppendLine();
@@ -306,7 +306,7 @@ namespace go2cs
                     m_targetFile.Append($" {expressions[0]}");
             }
 
-            m_targetFile.Append($";{CheckForBodyCommentsRight(context)}");
+            m_targetFile.Append($";{CheckForCommentsRight(context)}");
 
             if (!WroteLineFeed)
                 m_targetFile.AppendLine();
@@ -330,7 +330,7 @@ namespace go2cs
                     foreach (HashSet<string> blockBreaks in m_blockLabeledBreaks)
                         blockBreaks.Add(label);
 
-                    m_targetFile.Append($"{Spacing()}_break{label} = true;{CheckForBodyCommentsRight(context)}");
+                    m_targetFile.Append($"{Spacing()}_break{label} = true;{CheckForCommentsRight(context)}");
 
                     if (!WroteLineFeed)
                         m_targetFile.AppendLine();
@@ -341,7 +341,7 @@ namespace go2cs
 
             if (!breakHandled)
             {
-                m_targetFile.Append($"{Spacing()}break;{CheckForBodyCommentsRight(context)}");
+                m_targetFile.Append($"{Spacing()}break;{CheckForCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     m_targetFile.AppendLine();
@@ -366,7 +366,7 @@ namespace go2cs
                     foreach (HashSet<string> blockContinues in m_blockLabeledContinues)
                         blockContinues.Add(label);
 
-                    m_targetFile.Append($"{Spacing()}_continue{label} = true;{CheckForBodyCommentsRight(context)}");
+                    m_targetFile.Append($"{Spacing()}_continue{label} = true;{CheckForCommentsRight(context)}");
 
                     if (!WroteLineFeed)
                         m_targetFile.AppendLine();
@@ -377,7 +377,7 @@ namespace go2cs
 
             if (!continueHandled)
             {
-                m_targetFile.Append($"{Spacing()}continue;{CheckForBodyCommentsRight(context)}");
+                m_targetFile.Append($"{Spacing()}continue;{CheckForCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     m_targetFile.AppendLine();
@@ -389,7 +389,7 @@ namespace go2cs
             // gotoStmt
             //     : 'goto' IDENTIFIER
 
-            m_targetFile.Append($"{Spacing()}goto {SanitizedIdentifier(context.IDENTIFIER().GetText())};{CheckForBodyCommentsRight(context)}");
+            m_targetFile.Append($"{Spacing()}goto {SanitizedIdentifier(context.IDENTIFIER().GetText())};{CheckForCommentsRight(context)}");
 
             if (!WroteLineFeed)
                 m_targetFile.AppendLine();
@@ -471,7 +471,8 @@ namespace go2cs
                 }
             }
 
-            m_targetFile.Append(CheckForBodyCommentsRight(context));
+            if (!EndsWithLineFeed(m_targetFile.ToString()))
+                m_targetFile.AppendLine();
 
             m_ifExpressionLevel--;
         }
@@ -515,9 +516,9 @@ namespace go2cs
             //     : 'case' expressionList | 'default'
 
             if (context.exprSwitchCase().expressionList() == null)
-                m_exprSwitchDefaultCase.Peek().Append($"{Environment.NewLine}{Spacing()}.Default(() =>{Environment.NewLine}{Spacing()}{{{CheckForBodyCommentsLeft(context.statementList(), 1)}");
+                m_exprSwitchDefaultCase.Peek().Append($"{Environment.NewLine}{Spacing()}.Default(() =>{Environment.NewLine}{Spacing()}{{{CheckForCommentsLeft(context.statementList(), 1)}");
             else
-                m_targetFile.Append($"{Environment.NewLine}{Spacing()}.Case({string.Format(ExprSwitchCaseTypeMarker, m_exprSwitchExpressionLevel)})(() =>{Environment.NewLine}{Spacing()}{{{CheckForBodyCommentsLeft(context.statementList(), 1)}");
+                m_targetFile.Append($"{Environment.NewLine}{Spacing()}.Case({string.Format(ExprSwitchCaseTypeMarker, m_exprSwitchExpressionLevel)})(() =>{Environment.NewLine}{Spacing()}{{{CheckForCommentsLeft(context.statementList(), 1)}");
 
             IndentLevel++;
 
@@ -565,7 +566,7 @@ namespace go2cs
             //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
 
             // Default case always needs to be last case clause in SwitchExpression - Go allows its declaration anywhere
-            m_targetFile.Append($"{m_exprSwitchDefaultCase.Pop()};");
+            m_targetFile.Append($"{m_exprSwitchDefaultCase.Pop()};{CheckForCommentsRight(context)}");
 
             if (context.expression() != null)
             {
@@ -596,8 +597,6 @@ namespace go2cs
                     m_targetFile.Append($"{Spacing()}}}");
                 }
             }
-
-            m_targetFile.Append(CheckForBodyCommentsRight(context));
 
             m_exprSwitchExpressionLevel--;
         }
@@ -720,7 +719,7 @@ namespace go2cs
             //     : ( IDENTIFIER ':=' )? primaryExpr '.' '(' 'type' ')'
 
             // Default case always needs to be last case clause in SwitchExpression - Go allows its declaration anywhere
-            m_targetFile.Append($"{m_typeSwitchDefaultCase.Pop()};");
+            m_targetFile.Append($"{m_typeSwitchDefaultCase.Pop()};{CheckForCommentsRight(context)}");
 
             if (PrimaryExpressions.TryGetValue(context.typeSwitchGuard().primaryExpr(), out string expression))
             {
@@ -748,8 +747,6 @@ namespace go2cs
                     m_targetFile.Append($"{Spacing()}}}");
                 }
             }
-
-            m_targetFile.Append(CheckForBodyCommentsRight(context));
 
             m_typeSwitchExpressionLevel--;
         }
@@ -879,7 +876,7 @@ namespace go2cs
                 }
             }
 
-            m_targetFile.Append(CheckForBodyCommentsRight(context));
+            m_targetFile.Append(CheckForCommentsRight(context));
 
             m_forExpressionLevel--;
         }
@@ -929,7 +926,7 @@ namespace go2cs
 
             if (Expressions.TryGetValue(context.expression(), out string expression))
             {
-                m_targetFile.Append($"{Spacing()}defer({expression});{CheckForBodyCommentsRight(context)}");
+                m_targetFile.Append($"{Spacing()}defer({expression});{CheckForCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     m_targetFile.AppendLine();

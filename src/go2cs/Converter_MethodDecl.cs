@@ -126,7 +126,7 @@ namespace go2cs
             else if (signatureOnly)
                 m_targetFile.Append(";");
 
-            m_targetFile.Append(CheckForBodyCommentsRight(context));
+            m_targetFile.Append(CheckForCommentsRight(context));
         }
     }
 }

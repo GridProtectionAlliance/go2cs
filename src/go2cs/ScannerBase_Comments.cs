@@ -49,19 +49,6 @@ namespace go2cs
             return new string(' ', BaseSpacing * indentLevel);
         }
 
-        protected string FixForwardSpacing(string source, int offsetLevel = 0, int indentLevel = -1, bool autoTrim = true, bool firstIsEOLComment = false)
-        {
-            if (indentLevel < 0)
-                indentLevel = IndentLevel;
-
-            indentLevel += offsetLevel;
-
-            string forwardSpacing = Spacing(0, indentLevel);
-            string[] lines = source.Split(NewLineDelimeters, StringSplitOptions.None);
-           
-            return string.Join(Environment.NewLine, lines.Select((line, index) => string.IsNullOrWhiteSpace(line) ? "" : $"{(index > 0 || !firstIsEOLComment ? forwardSpacing : "")}{(autoTrim ? index == 0 && firstIsEOLComment ? line.Replace("\t", $"{Spacing(indentLevel: 1)}") : line.Trim() : line)}"));
-        }
-
         protected bool LineTerminatorAhead(ParserRuleContext context, int tokenOffset = 0)
         {
             int tokenIndex = context.Stop.TokenIndex + tokenOffset;
@@ -76,54 +63,23 @@ namespace go2cs
                 }
             }
 
-            IList<IToken> lineCommentChannel = TokenStream.GetHiddenTokensToRight(tokenIndex, GolangLexer.LineCommentChannel);
-
-            if (lineCommentChannel?.Count > 0)
-            {
-                foreach (IToken token in lineCommentChannel)
-                {
-                    if (token.Text.IndexOf('\n') > -1)
-                        return true;
-                }
-            }
-
             return false;
         }
 
-        protected string CheckForBodyCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = true)
+        protected string CheckForCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
         {
-            return FixForwardSpacing(CheckForCommentsLeft(context, offsetLevel, indentLevel, preserveLineFeeds), offsetLevel, indentLevel, firstIsEOLComment: IsEndOfLineCommentLeft(context));
+            return CheckForComments(context.Start.TokenIndex, TokenStream.GetHiddenTokensToLeft, offsetLevel, indentLevel);
         }
 
-        protected string CheckForBodyCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = true)
+        protected string CheckForCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
         {
-            return FixForwardSpacing(CheckForCommentsRight(context, offsetLevel, indentLevel, preserveLineFeeds), offsetLevel, indentLevel, firstIsEOLComment: IsEndOfLineCommentRight(context));
-        }
-
-        protected string CheckForCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = false)
-        {
-            if (indentLevel < 0)
-                indentLevel = IndentLevel;
-
-            indentLevel += offsetLevel;
-
-            return CheckForComments(indentLevel, context.Start.TokenIndex, TokenStream.GetHiddenTokensToLeft, preserveLineFeeds);
-        }
-
-        protected string CheckForCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1, bool preserveLineFeeds = false)
-        {
-            if (indentLevel < 0)
-                indentLevel = IndentLevel;
-
-            indentLevel += offsetLevel;
-
-            return CheckForComments(indentLevel, context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight, preserveLineFeeds);
+            return CheckForComments(context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight, offsetLevel, indentLevel);
         }
 
         protected string CheckForEndOfLineComment(ParserRuleContext context)
         {
             StringBuilder comments = new StringBuilder();
-            IList<IToken> lineCommentChannel = TokenStream.GetHiddenTokensToRight(context.Stop.TokenIndex, GolangLexer.LineCommentChannel);
+            IList<IToken> lineCommentChannel = TokenStream.GetHiddenTokensToRight(context.Stop.TokenIndex, TokenConstants.HiddenChannel);
 
             if (lineCommentChannel?.Count > 0)
             {
@@ -145,104 +101,20 @@ namespace go2cs
             return comments.ToString();
         }
 
-        protected bool IsEndOfLineCommentLeft(ParserRuleContext context)
-        {
-            return IsEndOfLineComment(context.Start.TokenIndex, TokenStream.GetHiddenTokensToLeft);
-        }
-
-        protected bool IsEndOfLineCommentRight(ParserRuleContext context)
-        {
-            return IsEndOfLineComment(context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight);
-        }
-
-        private bool IsEndOfLineComment(int tokenIndex, Func<int, int, IList<IToken>> getHiddenTokens)
-        {
-            IList<IToken> lineCommentChannel = getHiddenTokens(tokenIndex, GolangLexer.LineCommentChannel);
-
-            if (lineCommentChannel?.Count > 0)
-            {
-                IToken token = lineCommentChannel[0];
-                string commentText = token.Text;
-
-                if (commentText.Trim().StartsWith("//"))
-                    return !CommentOnNewLine(TokenStream.GetHiddenTokensToLeft(token.TokenIndex), token);
-            }
-
-            return false;
-        }
-
-        private string CheckForComments(int indentLevel, int tokenIndex, Func<int, int, IList<IToken>> getHiddenTokens, bool preserveLineFeeds)
-        {
-            IList<IToken> hiddenChannel = getHiddenTokens(tokenIndex, TokenConstants.HiddenChannel) ?? new List<IToken>();
-            IList<IToken> lineCommentChannel = getHiddenTokens(tokenIndex, GolangLexer.LineCommentChannel) ?? new List<IToken>();
-            StringBuilder comments = new StringBuilder();
-
-            IEnumerable<IToken> hiddenTokens =
-                hiddenChannel
-                .Concat(lineCommentChannel)
-                .OrderBy(token => token.StartIndex);
-
-            WroteLineFeed = false;
-
-            foreach (IToken token in hiddenTokens)
-            {
-                string hiddenText = token.Text;
-                string hiddenTrimmed = hiddenText.TrimStart();
-
-                if (token.Channel == TokenConstants.HiddenChannel && hiddenTrimmed.StartsWith("/*"))
-                {
-                    if (CommentOnNewLine(hiddenChannel, token))
-                        comments.Append(FixForwardSpacing(hiddenText, 0, indentLevel, false));
-                    else
-                        comments.Append(hiddenText);
-                }
-                else if (token.Channel == GolangLexer.LineCommentChannel && hiddenTrimmed.StartsWith("//"))
-                {
-                    if (CommentOnNewLine(lineCommentChannel, token))
-                        comments.Append(FixForwardSpacing(hiddenText, 0, indentLevel, false, true));
-                    else
-                        comments.Append(hiddenText);
-                }
-                else if (preserveLineFeeds)
-                {
-                    hiddenText = PreserveOnlyLineFeeds(hiddenText);
-
-                    if (hiddenText.Length > 0)
-                        comments.Append(hiddenText);
-                }
-
-                if (hiddenText.Length > 0)
-                    WroteLineFeed = EndsWithLineFeed(hiddenText);
-            }
-
-            return comments.ToString();
-        }
-
         protected bool EndsWithLineFeed(string line)
         {
-            int lastLineFeed = line.LastIndexOf('\n');
+            int index = line.LastIndexOf('\n');
 
-            if (lastLineFeed == -1)
+            if (index == -1)
                 return false;
 
-            if (lastLineFeed == line.Length - 1)
+            if (index == line.Length - 1)
                 return true;
 
-            if (line.Substring(lastLineFeed + 1).Trim().Length == 0)
+            if (line.Substring(index + 1).Trim().Length == 0)
                 return true;
 
             return false;
-        }
-
-        private bool CommentOnNewLine(IList<IToken> hiddenChannel, IToken testToken)
-        {
-            IToken priorToken = hiddenChannel?.FirstOrDefault(token => token.StopIndex == testToken.StartIndex - 1);
-            return priorToken != null && EndsWithLineFeed(priorToken.Text);
-        }
-
-        protected string PreserveOnlyLineFeeds(string line)
-        {
-            return new string(Array.FindAll(line.ToCharArray(), c => c == '\r' || c == '\n'));
         }
 
         protected string RemoveLastLineFeed(string line)
@@ -257,5 +129,156 @@ namespace go2cs
 
             return line;
         }
+
+        private string CheckForComments(int tokenIndex, Func<int, IList<IToken>> getHiddenTokens, int offsetLevel, int indentLevel)
+        {
+            IList<IToken> hiddenTokens = getHiddenTokens(tokenIndex) ?? new List<IToken>();
+            StringBuilder comments = new StringBuilder();
+            int firstComment = -1;
+            string hiddenText, hiddenTrimmed;
+
+            WroteLineFeed = false;
+
+            for (int i = 0; i < hiddenTokens.Count; i++)
+            {
+                hiddenText = hiddenTokens[i].Text.Replace("\t", Spacing(indentLevel: 1));
+                hiddenTrimmed = hiddenText.TrimStart();
+
+                if (hiddenTrimmed.StartsWith("/*") || hiddenTrimmed.StartsWith("//"))
+                {
+                    if (firstComment == -1)
+                        firstComment = i;
+
+                    comments.Append(hiddenText);
+                }
+                else
+                {
+                    hiddenText = new string(Array.FindAll(hiddenText.ToCharArray(), c => c == '\r' || c == '\n'));
+
+                    if (hiddenText.Length > 0)
+                        comments.Append(hiddenText);
+                }
+            }
+
+            bool firstIsEOLComment = false;
+
+            hiddenText = comments.ToString();
+
+            // If there is no first comment, all hidden tokens are whitespace, so no need to fix forward spacing
+            if (firstComment > -1)
+            {
+                hiddenTrimmed = hiddenText.TrimStart();
+
+                if (hiddenTrimmed.StartsWith("//") || hiddenTrimmed.StartsWith("/*") && hiddenTrimmed.Count(c => c == '\n') < 2)
+                    firstIsEOLComment = firstComment == 0 || !hiddenTokens[firstComment - 1].Text.EndsWith("\n");
+
+                hiddenText = FixForwardSpacing(hiddenText, offsetLevel, indentLevel, firstIsEOLComment);
+            }
+
+            if (hiddenText.Length > 0)
+                WroteLineFeed = EndsWithLineFeed(hiddenText);
+
+            return hiddenText;
+        }
+
+        private string FixForwardSpacing(string source, int offsetLevel = 0, int indentLevel = -1, bool firstIsEOLComment = false)
+        {
+            string forwardSpacing = Spacing(offsetLevel, indentLevel);
+            string[] lines = source.Split(NewLineDelimeters, StringSplitOptions.None);
+            List<string> fixedLines = new List<string>();
+            string[] workLines;
+
+            if (firstIsEOLComment)
+            {
+                fixedLines.Add($" {lines[0].TrimStart()}");
+                workLines = lines.Skip(1).ToArray();
+            }
+            else
+            {
+                workLines = lines;
+            }
+
+            int commonIndex = -1;
+            bool hasCommonWhiteSpace = true;
+
+            while (hasCommonWhiteSpace)
+            {
+                char lastChar = char.MinValue;
+                bool tested = false;
+                commonIndex++;
+
+                foreach (string line in workLines)
+                {
+                    if (line.Length == 0)
+                        continue;
+
+                    tested = true;
+
+                    if (lastChar == char.MinValue)
+                    {
+                        lastChar = line[commonIndex];
+
+                        if (!char.IsWhiteSpace(lastChar))
+                        {
+                            hasCommonWhiteSpace = false;
+                            break;
+                        }
+                    }
+                    else if (line[commonIndex] != lastChar)
+                    {
+                        hasCommonWhiteSpace = false;
+                        break;
+                    }
+                }
+
+                if (!tested)
+                    break;
+            }
+
+            if (commonIndex > 0)
+            {
+                for (int i = 0; i < workLines.Length; i++)
+                {
+                    if (workLines[i].Length > commonIndex)
+                        workLines[i] = workLines[i].Substring(commonIndex);
+                }
+            }
+
+            fixedLines.AddRange(workLines.Select(line => line.Trim().Length > 0 ? $"{forwardSpacing}{line}" : ""));
+
+            return string.Join(Environment.NewLine, fixedLines);
+        }
+
+        private bool CommentOnNewLine(IList<IToken> hiddenChannel, IToken testToken)
+        {
+            IToken priorToken = hiddenChannel?.FirstOrDefault(token => token.StopIndex == testToken.StartIndex - 1);
+            return priorToken != null && EndsWithLineFeed(priorToken.Text);
+        }
+
+        //protected bool IsEndOfLineCommentLeft(ParserRuleContext context)
+        //{
+        //    return IsEndOfLineComment(context.Start.TokenIndex, TokenStream.GetHiddenTokensToLeft);
+        //}
+
+        //protected bool IsEndOfLineCommentRight(ParserRuleContext context)
+        //{
+        //    return IsEndOfLineComment(context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight);
+        //}
+
+        //private bool IsEndOfLineComment(int tokenIndex, Func<int, int, IList<IToken>> getHiddenTokens)
+        //{
+        //    IList<IToken> lineCommentChannel = getHiddenTokens(tokenIndex, GolangLexer.LineCommentChannel);
+
+        //    if (lineCommentChannel?.Count > 0)
+        //    {
+        //        IToken token = lineCommentChannel[0];
+        //        string commentText = token.Text;
+
+        //        if (commentText.Trim().StartsWith("//"))
+        //            return !CommentOnNewLine(TokenStream.GetHiddenTokensToLeft(token.TokenIndex), token);
+        //    }
+
+        //    return false;
+        //}
     }
 }

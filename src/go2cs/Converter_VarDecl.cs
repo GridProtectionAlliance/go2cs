@@ -29,11 +29,11 @@ namespace go2cs
 {
     public partial class Converter
     {
-        private bool m_firstVarSpec;
+        //private bool m_firstVarSpec;
 
         public override void EnterVarDecl(GolangParser.VarDeclContext context)
         {
-            m_firstVarSpec = !m_inFunction;
+            //m_firstVarSpec = !m_inFunction;
         }
 
         public override void ExitVarSpec(GolangParser.VarSpecContext context)
@@ -41,15 +41,11 @@ namespace go2cs
             // varSpec
             //     : identifierList(type('=' expressionList) ? | '=' expressionList)
 
-            if (m_firstVarSpec)
-            {
-                m_firstVarSpec = false;
-
-                string comments = CheckForCommentsLeft(context, preserveLineFeeds: m_inFunction);
-
-                if (!string.IsNullOrEmpty(comments))
-                    m_targetFile.Append(FixForwardSpacing(comments));
-            }
+            //if (m_firstVarSpec)
+            //{
+            //    m_firstVarSpec = false;
+            //    m_targetFile.Append(CheckForCommentsLeft(context));
+            //}
 
             if (!Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
             {
@@ -95,7 +91,7 @@ namespace go2cs
                 if (i < length - 1)
                     m_targetFile.AppendLine(";");
                 else
-                    m_targetFile.Append($";{CheckForBodyCommentsRight(context)}");
+                    m_targetFile.Append($";{CheckForCommentsRight(context)}");
             }
         }
     }

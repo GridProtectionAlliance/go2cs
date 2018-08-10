@@ -42,19 +42,13 @@ namespace go2cs
             m_targetFile = new StringBuilder();
         }
 
-        private string PopBlock(bool appendToPrevious = true, string prefix = null, string suffix = null)
+        private string PopBlock(bool appendToPrevious = true)
         {
             StringBuilder lastTarget = m_blocks.Pop();
-            string block = m_targetFile.ToString();
-
-            if (!string.IsNullOrEmpty(prefix))
-                lastTarget.Append(prefix);
+            string block = RemoveLastDuplicateLineFeed(m_targetFile.ToString());
 
             if (appendToPrevious)
                 lastTarget.Append(block);
-
-            if (!string.IsNullOrEmpty(suffix))
-                lastTarget.Append(suffix);
 
             m_targetFile = lastTarget;
 
@@ -99,7 +93,7 @@ namespace go2cs
             if (m_blockInnerPrefixInjection.Count > 0)
                 m_targetFile.Append(m_blockInnerPrefixInjection.Pop());
 
-            m_targetFile.Append(CheckForBodyCommentsLeft(context.statementList(), 1));
+            m_targetFile.Append(RemoveFirstDuplicateLineFeed(CheckForCommentsLeft(context.statementList(), 1)));
 
             if (!WroteLineFeed)
                 m_targetFile.AppendLine();
@@ -130,9 +124,44 @@ namespace go2cs
                 m_targetFile.Append(m_blockOuterSuffixInjection.Pop());
 
             if (!m_firstTopLevelDeclaration && IndentLevel > 2)
-                m_targetFile.Append(CheckForBodyCommentsRight(context));
+                m_targetFile.Append(CheckForCommentsRight(context));
 
             PopBlock();
+        }
+
+
+        private string RemoveFirstDuplicateLineFeed(string line)
+        {
+            string trimmedLine = line.TrimStart(' ', '\t');
+
+            int index = trimmedLine.IndexOf("\r\n\r\n", StringComparison.Ordinal);
+
+            if (index == 0)
+                return trimmedLine.Substring(2);
+
+            index = trimmedLine.IndexOf("\n\n", StringComparison.Ordinal);
+
+            if (index == 0)
+                return trimmedLine.Substring(1);
+
+            return line;
+        }
+
+        private string RemoveLastDuplicateLineFeed(string line)
+        {
+            string trimmedLine = line.TrimEnd(' ', '\t');
+
+            int index = trimmedLine.LastIndexOf("\r\n\r\n", StringComparison.Ordinal);
+
+            if (index == trimmedLine.Length - 4)
+                return trimmedLine.Substring(0, trimmedLine.Length - 2);
+
+            index = trimmedLine.LastIndexOf("\n\n", StringComparison.Ordinal);
+
+            if (index == trimmedLine.Length - 2)
+                return trimmedLine.Substring(0, trimmedLine.Length - 1);
+
+            return line;
         }
     }
 }

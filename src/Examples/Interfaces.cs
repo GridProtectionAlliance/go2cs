@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 August 06 15:38:07 UTC
+// package main -- go2cs converted at 2018 August 10 20:17:57 UTC
 // Original source: D:\Projects\go2cs\src\Examples\Interfaces.go
 using fmt = go.fmt_package;
 using math = go.math_package;
@@ -20,8 +20,8 @@ namespace go
             var f = MyFloat(-math.Sqrt2);
             var v = Vertex{3,4};
 
-            a = f;// a MyFloat implements Abser
-            a = ref v;// a *Vertex implements Abser
+            a = f; // a MyFloat implements Abser
+            a = ref v; // a *Vertex implements Abser
 
             fmt.Println(a.Abs());
         }

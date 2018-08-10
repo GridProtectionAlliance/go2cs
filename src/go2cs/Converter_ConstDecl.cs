@@ -28,13 +28,21 @@ namespace go2cs
 {
     public partial class Converter
     {
-        private bool m_firstConstSpec;
+        //private bool m_firstConstSpec;
         private int m_iota;
+        private int m_constIdentifierCount;
 
         public override void EnterConstDecl(GolangParser.ConstDeclContext context)
         {
-            m_firstConstSpec = !m_inFunction;
+            //m_firstConstSpec = !m_inFunction;
+            m_constIdentifierCount = 0;
             m_iota = 0;
+        }
+
+        public override void ExitConstDecl(GolangParser.ConstDeclContext context)
+        {
+            if (m_constIdentifierCount > 1)
+                m_targetFile.Append(RemoveLastLineFeed(CheckForCommentsRight(context)));
         }
 
         public override void ExitConstSpec(GolangParser.ConstSpecContext context)
@@ -42,15 +50,11 @@ namespace go2cs
             // constSpec
             //     : identifierList ( type ? '=' expressionList ) ?
 
-            if (m_firstConstSpec)
-            {
-                m_firstConstSpec = false;
-
-                string comments = CheckForCommentsLeft(context, preserveLineFeeds: m_inFunction);
-
-                if (!string.IsNullOrEmpty(comments))
-                    m_targetFile.Append(FixForwardSpacing(comments));
-            }
+            //if (m_firstConstSpec)
+            //{
+            //    m_firstConstSpec = false;
+            //    m_targetFile.Append(CheckForCommentsLeft(context));
+            //}
 
             if (!Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
             {
@@ -86,8 +90,10 @@ namespace go2cs
                 if (i < length - 1)
                     m_targetFile.AppendLine();
                 else
-                    m_targetFile.Append(CheckForBodyCommentsRight(context));
+                    m_targetFile.Append(CheckForCommentsRight(context));
             }
+
+            m_constIdentifierCount++;
         }
 
         //lastType = type;

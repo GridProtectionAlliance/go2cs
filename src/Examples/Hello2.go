@@ -31,7 +31,7 @@ const (
 )
 
 const (
-	test = iota // hey, hey
+	test = iota /* hey, hey */
 	test2       // now, now
 )
 
@@ -64,6 +64,8 @@ type Employee struct {
 
 /* comment before function */
 func main() {
+
+	// Hello world...
 	fmt.Println("Hello, 世界") /* eol comment */
 	test(12)
     
@@ -149,19 +151,19 @@ func FieldsFunc(s string, f func(rune) bool) []string {
 						else {
 							base = 16
 							s = s[2:]
-						}
-					case s[0] == '0':
+						} // end of if
+					case s[0] == '0': // start of case
 						base = 8
-						s = s[1:]
-					default:
+						s = s[1:] // end of case
+					default: // start of default
 						base = 10
 					}
 
 				default:
 					return 0, baseError(fnParseUint, s0, base)
-				}			
-			}
-		}
+				} // end of switch			
+			} // end of else if
+		} // end of else
 	//}
 
 	// Last field might end at EOF.
@@ -182,9 +184,9 @@ func FieldsFunc(s string, f func(rune) bool) []string {
 }
 /* last comment
 
-more
+    more
 
-more 
+      more 
 
-more
+    more
 */

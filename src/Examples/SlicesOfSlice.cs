@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 August 06 15:38:07 UTC
+// package main -- go2cs converted at 2018 August 10 20:17:57 UTC
 // Original source: D:\Projects\go2cs\src\Examples\SlicesOfSlice.go
 using fmt = go.fmt_package;
 using strings = go.strings_package;
@@ -21,7 +21,14 @@ namespace go
             board[0][2] = "X";
 
             {
-                fmt.Printf("%s\n", strings.Join(board[i], " "));
-            }        }
+                var i = 0;
+
+                while(i < len(board))
+                {
+                    fmt.Printf("%s\n", strings.Join(board[i], " "));
+                    i++;
+                }
+            }
+        }
     }
 }
