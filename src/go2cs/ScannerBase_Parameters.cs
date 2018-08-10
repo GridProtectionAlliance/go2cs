@@ -74,11 +74,20 @@ namespace go2cs
 
                     if (i == identifiers.Length - 1 && hasVariadicParameter)
                     {
+                        TypeInfo variadicType = ConvertByRefToBasicPointer(typeInfo.Clone());
+
+                        if (variadicType.TypeClass != TypeClass.Array)
+                        {
+                            variadicType.TypeClass = TypeClass.Array;
+                            variadicType.TypeName += "[]";
+                            variadicType.FullTypeName += "[]";
+                        }
+
                         parameters.Add(new ParameterInfo
                         {
                             Name = identifier,
-                            Type = ConvertByRefToBasicPointer(typeInfo),
-                            IsVariadic = true
+                            Type = variadicType,
+                            IsVariadic = true,                            
                         });
                     }
                     else

@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 August 10 20:34:32 UTC
+// package main -- go2cs converted at 2018 August 10 20:52:23 UTC
 // Original source: D:\Projects\go2cs\src\Examples\Variadic.go
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -9,7 +9,7 @@ namespace go
     {
         // Here's a function that will take an arbitrary number
         // of `int`s as arguments.
-        private static void sum(@int nums)
+        private static void sum(params @int[] nums)
         {
             fmt.Print(nums, " ");
             var total = 0;

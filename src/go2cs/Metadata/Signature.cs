@@ -44,7 +44,7 @@ namespace go2cs.Metadata
 
         public IEnumerable<String> GetParameters(bool prefixByRef)
         {
-            return Parameters.Select(parameter => $"{parameter.Type.TypeName} {(prefixByRef && parameter.Type.IsByRefPointer ? "_" : "")}{parameter.Name}");
+            return Parameters.Select(parameter => $"{(parameter.IsVariadic ? "params " : "")}{parameter.Type.TypeName} {(prefixByRef && parameter.Type.IsByRefPointer ? "_" : "")}{parameter.Name}");
         }
 
         public IEnumerable<String> GetByRefParameters(bool includeType)
