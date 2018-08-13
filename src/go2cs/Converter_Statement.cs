@@ -768,33 +768,48 @@ namespace go2cs
 
             if (context.expression() != null || forClause != null && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
             {
-                // Handle while style statement
-                m_targetFile.AppendLine($"{Spacing()}while({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
+                // Handle while-style statement
+                m_targetFile.AppendLine($"{Spacing()}while ({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
             }
             else if (forClause != null)
             {
                 // forClause
                 //     : simpleStmt? ';' expression? ';' simpleStmt?
 
-                if (ForHasInitStatement(forClause, out GolangParser.SimpleStmtContext simpleStatement))
+                bool hasInitStatement = ForHasInitStatement(forClause, out GolangParser.SimpleStmtContext simpleInitStatement);
+                bool hasPostStatement = ForHasPostStatement(forClause, out GolangParser.SimpleStmtContext simplePostStatement);
+
+                if (hasInitStatement)
                 {
                     // Any declared variable will be scoped to for statement, so create a sub-block for it
-                    if (simpleStatement.shortVarDecl() != null)
+                    if (simpleInitStatement.shortVarDecl() != null)
                     {
                         m_targetFile.AppendLine($"{Spacing()}{{");
                         IndentLevel++;
                     }
-
-                    m_targetFile.Append(string.Format(ForInitStatementMarker, m_forExpressionLevel));
                 }
 
-                if (ForHasPostStatement(forClause, out _))
-                    PushInnerBlockSuffix($"{Spacing(indentLevel: 1)}{string.Format(ForPostStatementMarker, m_forExpressionLevel)}");
+                if (hasInitStatement && (simpleInitStatement.shortVarDecl() != null || simpleInitStatement.assignment() != null) &&
+                    hasPostStatement && (simplePostStatement.incDecStmt() != null || simplePostStatement.expressionStmt() != null))
+                {
+                    // TODO: Must verify that any declared initial statement (shortVarDecl) remains readonly within its scope (C# for-loop constraint)
+                    // Use standard for-style statement for simple constructs
+                    m_targetFile.AppendLine($"{Spacing()}for ({string.Format(ForInitStatementMarker, m_forExpressionLevel)}; {string.Format(ForExpressionMarker, m_forExpressionLevel)}; {string.Format(ForPostStatementMarker, m_forExpressionLevel)})");
+                    PushInnerBlockSuffix(null);
+                }
+                else
+                {
+                    if (hasInitStatement)
+                        m_targetFile.Append(string.Format(ForInitStatementMarker, m_forExpressionLevel));
 
-                // Handle for loop style statement - since Go's initial and post statements are more
-                // free-form, a while loop is used instead
-                // TODO: Consider changing to a standard for loop where simple cases are identified - this includes verification that any declared initial statement remains readonly within its scope
-                m_targetFile.AppendLine($"{Spacing()}while({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
+                    if (hasPostStatement)
+                        PushInnerBlockSuffix($"{Spacing(indentLevel: 1)}{string.Format(ForPostStatementMarker, m_forExpressionLevel)}");
+                    else
+                        PushInnerBlockSuffix(null);
+
+                    // Use loop-style statement for more free-form for constructs
+                    m_targetFile.AppendLine($"{Spacing()}while ({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
+                }
             }
             else
             {
@@ -837,16 +852,38 @@ namespace go2cs
                 else
                     AddWarning(context, $"Failed to find expression in for statement: {context.GetText()}");
 
-                if (ForHasInitStatement(forClause, out GolangParser.SimpleStmtContext simpleStatement))
+                bool hasInitStatement = ForHasInitStatement(forClause, out GolangParser.SimpleStmtContext simpleInitStatement);
+                bool hasPostStatement = ForHasPostStatement(forClause, out GolangParser.SimpleStmtContext simplePostStatement);
+                bool useForStyleStatement =
+                    hasInitStatement && (simpleInitStatement.shortVarDecl() != null || simpleInitStatement.assignment() != null) &&
+                    hasPostStatement && (simplePostStatement.incDecStmt() != null || simplePostStatement.expressionStmt() != null);
+
+                if (hasInitStatement)
                 {
                     // TODO: Handle case where short val declaration re-declares a variable already defined in current scope - C# does not allow this. One option: cache current variable value and restore below
-                    if (m_simpleStatements.TryGetValue(simpleStatement, out string statement))
-                        m_targetFile.Replace(string.Format(ForInitStatementMarker, m_forExpressionLevel), statement + Environment.NewLine);
+                    if (m_simpleStatements.TryGetValue(simpleInitStatement, out string statement))
+                    {
+                        if (useForStyleStatement)
+                        {
+                            statement = statement.Trim();
+
+                            if (statement.EndsWith(";", StringComparison.Ordinal))
+                                statement = statement.Substring(0, statement.Length - 1);
+                        }
+                        else
+                        {
+                            statement = statement + Environment.NewLine;
+                        }
+
+                        m_targetFile.Replace(string.Format(ForInitStatementMarker, m_forExpressionLevel), statement);
+                    }
                     else
-                        AddWarning(context, $"Failed to find simple initial statement in for clause: {simpleStatement.GetText()}");
+                    {
+                        AddWarning(context, $"Failed to find simple initial statement in for clause: {simpleInitStatement.GetText()}");
+                    }
 
                     // Close any locally scoped declared variable sub-block
-                    if (simpleStatement.shortVarDecl() != null)
+                    if (simpleInitStatement.shortVarDecl() != null)
                     {
                         IndentLevel--;
                         m_targetFile.AppendLine();
@@ -854,12 +891,28 @@ namespace go2cs
                     }
                 }
 
-                if (ForHasPostStatement(forClause, out simpleStatement))
+                if (hasPostStatement)
                 {
-                    if (m_simpleStatements.TryGetValue(simpleStatement, out string statement))
-                        m_targetFile.Replace(string.Format(ForPostStatementMarker, m_forExpressionLevel), statement.TrimEnd());
+                    if (m_simpleStatements.TryGetValue(simplePostStatement, out string statement))
+                    {
+                        if (useForStyleStatement)
+                        {
+                            statement = statement.Trim();
+
+                            if (statement.EndsWith(";", StringComparison.Ordinal))
+                                statement = statement.Substring(0, statement.Length - 1);
+                        }
+                        else
+                        {
+                            statement = statement.TrimEnd();
+                        }
+
+                        m_targetFile.Replace(string.Format(ForPostStatementMarker, m_forExpressionLevel), statement);
+                    }
                     else
-                        AddWarning(context, $"Failed to find simple post statement in for clause: {simpleStatement.GetText()}");
+                    {
+                        AddWarning(context, $"Failed to find simple post statement in for clause: {simplePostStatement.GetText()}");
+                    }
                 }
             }
             else
