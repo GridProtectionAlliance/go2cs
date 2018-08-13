@@ -778,11 +778,14 @@ namespace go2cs
 
                 bool hasInitStatement = ForHasInitStatement(forClause, out GolangParser.SimpleStmtContext simpleInitStatement);
                 bool hasPostStatement = ForHasPostStatement(forClause, out GolangParser.SimpleStmtContext simplePostStatement);
+                bool useForStyleStatement =
+                    hasInitStatement && (simpleInitStatement.shortVarDecl() != null || simpleInitStatement.assignment() != null) &&
+                    hasPostStatement && (simplePostStatement.incDecStmt() != null || simplePostStatement.expressionStmt() != null);
 
                 if (hasInitStatement)
                 {
                     // Any declared variable will be scoped to for statement, so create a sub-block for it
-                    if (simpleInitStatement.shortVarDecl() != null)
+                    if (!useForStyleStatement && simpleInitStatement.shortVarDecl() != null)
                     {
                         m_targetFile.AppendLine($"{Spacing()}{{");
                         IndentLevel++;
@@ -883,7 +886,7 @@ namespace go2cs
                     }
 
                     // Close any locally scoped declared variable sub-block
-                    if (simpleInitStatement.shortVarDecl() != null)
+                    if (!useForStyleStatement && simpleInitStatement.shortVarDecl() != null)
                     {
                         IndentLevel--;
                         m_targetFile.AppendLine();
