@@ -250,7 +250,10 @@ namespace go2cs
             if (context.methodSpec()?.Length == 0)
             {
                 // Handle empty interface type as a special case
-                Types[context.Parent.Parent] = TypeInfo.EmptyInterfaceType;
+                Types[context.Parent.Parent] = TypeInfo.ObjectType;
+
+                // Object is more universal than EmptyInterface - which is handy when literals are involved
+                //Types[context.Parent.Parent] = TypeInfo.EmptyInterfaceType;
             }
             else
             {
