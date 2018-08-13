@@ -35,7 +35,7 @@ namespace go
     /// <summary>
     /// Represents a structure that behaves like a Go string.
     /// </summary>
-    public struct @string : EmptyInterface, IReadOnlyList<@byte>, IEnumerable<rune>, IEnumerable<(int index, rune rune)>, IEnumerable<byte>, IEnumerable<char>, IConvertible
+    public readonly struct @string : EmptyInterface, IReadOnlyList<@byte>, IEnumerable<rune>, IEnumerable<(int index, rune rune)>, IEnumerable<byte>, IEnumerable<char>, IConvertible
     {
         private readonly byte[] m_value;
 

@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 August 09 13:23:03 UTC
+// package main -- go2cs converted at 2018 August 13 18:06:21 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructPointerPromotionWithInterface.go
 using fmt = go.fmt_package;
 using time = go.time_package;

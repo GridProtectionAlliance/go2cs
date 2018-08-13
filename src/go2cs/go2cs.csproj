@@ -110,8 +110,11 @@
     <EmbeddedResource Include="..\goutil\goutil.projitems">
       <Link>goutil\goutil.projitems</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\goutil\builtIn.cs">
-      <Link>goutil\builtIn.cs</Link>
+      <EmbeddedResource Include="..\goutil\array.cs">
+          <Link>goutil\array.cs</Link>
+      </EmbeddedResource>
+      <EmbeddedResource Include="..\goutil\builtin.cs">
+      <Link>goutil\builtin.cs</Link>
     </EmbeddedResource>
     <EmbeddedResource Include="..\goutil\DefinedTypes.cs">
       <Link>goutil\DefinedTypes.cs</Link>

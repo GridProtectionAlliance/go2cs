@@ -795,7 +795,6 @@ namespace go2cs
                 if (hasInitStatement && (simpleInitStatement.shortVarDecl() != null || simpleInitStatement.assignment() != null) &&
                     hasPostStatement && (simplePostStatement.incDecStmt() != null || simplePostStatement.expressionStmt() != null))
                 {
-                    // TODO: Must verify that any declared initial statement (shortVarDecl) remains readonly within its scope (C# for-loop constraint)
                     // Use standard for-style statement for simple constructs
                     m_targetFile.AppendLine($"{Spacing()}for ({string.Format(ForInitStatementMarker, m_forExpressionLevel)}; {string.Format(ForExpressionMarker, m_forExpressionLevel)}; {string.Format(ForPostStatementMarker, m_forExpressionLevel)})");
                     PushInnerBlockSuffix(null);
@@ -829,7 +828,7 @@ namespace go2cs
                 // Handle item iteration style statement - since Go's iteration variables are mutable and
                 // can be pre-declared, a standard for loop is used instead of a foreach. The exception
                 // is for an index and rune iteration over a string which in C# a foreach works fine because
-                // the inferred tuple can be readonly since it would not be referenced by Go code.
+                // the inferred tuple instance can be readonly since it would not be referenced by Go code.
             }
         }
 

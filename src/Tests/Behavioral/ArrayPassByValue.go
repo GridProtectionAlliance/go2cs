@@ -28,6 +28,7 @@ func main() {
 
 // Arrays are passed by value (a full copy)
 func test(a [2]string) {
+	// Update to array will be local
 	fmt.Println(a[0], a[1])
 	a[0] = "Goodbye"
 	fmt.Println(a[0], a[1])

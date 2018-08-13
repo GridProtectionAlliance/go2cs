@@ -34,7 +34,7 @@ using static go.builtin;
 
 namespace go
 {
-    public interface ISlice : EmptyInterface
+    public interface ISlice : IArray
     {
         Array Array { get; }
 
@@ -42,19 +42,15 @@ namespace go
 
         int High { get; }
 
-        int Length { get; }
-
         int Capacity { get; }
 
         int Available { get; }
-
-        object this[int index] { get; set; }
     }
 
     // Span<T> considered for slices: https://github.com/dotnet/corefxlab/blob/master/docs/specs/span.md#relationship-to-array-slicing
 
     [Serializable]
-    public struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEquatable<slice<T>>, IEquatable<ISlice>
+    public readonly struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEnumerable<(int index, T value)>, IEquatable<slice<T>>, IEquatable<ISlice>
     {
         private readonly T[] m_array;
         private readonly int m_low;
@@ -64,7 +60,7 @@ namespace go
         public slice(T[] array)
         {
             if ((object)array == null)
-                throw new ArgumentNullException(nameof(array), "Slice array reference is null.");
+                throw new ArgumentNullException(nameof(array), "slice array reference is null.");
 
             m_array = array;
             m_low = 0;
@@ -72,10 +68,13 @@ namespace go
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public slice(array<T> array) : this((T[])array) { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public slice(T[] array, int low = 0, int high = -1)
         {
             if ((object)array == null)
-                throw new ArgumentNullException(nameof(array), "Slice array reference is null.");
+                throw new ArgumentNullException(nameof(array), "slice array reference is null.");
 
             if (low < 0)
                 throw new ArgumentOutOfRangeException(nameof(low), "Value is less than zero.");
@@ -92,6 +91,9 @@ namespace go
             m_low = low;
             m_length = length;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public slice(array<T> array, int low = 0, int high = -1) : this((T[])array, low, high) { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public slice(int length, int capacity = -1, int low = 0)
@@ -129,7 +131,7 @@ namespace go
             get
             {
                 if ((object)m_array == null)
-                    throw new InvalidOperationException("Slice array reference is null.");
+                    throw new InvalidOperationException("slice array reference is null.");
 
                 if (index < 0 || index >= m_length)
                     throw new ArgumentOutOfRangeException(nameof(index));
@@ -142,7 +144,7 @@ namespace go
         public int IndexOf(T item)
         {
             if ((object)m_array == null)
-                throw new InvalidOperationException("Slice array reference is null.");
+                throw new InvalidOperationException("slice array reference is null.");
 
             int index = System.Array.IndexOf(m_array, item, m_low, m_length);
 
@@ -153,7 +155,7 @@ namespace go
         public bool Contains(T item)
         {
             if ((object)m_array == null)
-                throw new InvalidOperationException("Slice array reference is null.");
+                throw new InvalidOperationException("slice array reference is null.");
 
             return System.Array.IndexOf(m_array, item, m_low, m_length) >= 0;
         }
@@ -162,7 +164,7 @@ namespace go
         public void CopyTo(T[] array, int arrayIndex)
         {
             if ((object)m_array == null)
-                throw new InvalidOperationException("Slice array reference is null.");
+                throw new InvalidOperationException("slice array reference is null.");
 
             System.Array.Copy(m_array, m_low, array, arrayIndex, m_length);
         }
@@ -175,7 +177,17 @@ namespace go
             return array;
         }
 
-        public override string ToString() => $"[{string.Join(" ", this.Take(5))}{(Length > 5 ? " ..." : "")}]";
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerator<(int index, T value)> GetEnumerator()
+        {
+            SliceEnumerator enumerator = new SliceEnumerator(this);
+            int index = 0;
+
+            while (enumerator.MoveNext())
+                yield return (index++, enumerator.Current);
+        }
+
+        public override string ToString() => $"[{string.Join(" ", ((IEnumerable<T>)this).Take(20))}{(Length > 20 ? " ..." : "")}]";
 
         public override int GetHashCode() => (object)m_array == null ? 0 : m_array.GetHashCode() ^ m_low ^ m_length;
 
@@ -190,14 +202,28 @@ namespace go
 
         #region [ Equality Operators ]
 
-        // Slice<T> to Slice<T> comparisons
+        // Enable implicit conversions between slice<T> and T[]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator slice<T>(T[] value) => new slice<T>(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator T[](slice<T> value) => value.ToArray();
+
+        // Enable implicit conversions between slice<T> and array<T>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator slice<T>(array<T> value) => new slice<T>(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator array<T>(slice<T> value) => new array<T>(value.ToArray());
+
+        // slice<T> to slice<T> comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(slice<T> a, slice<T> b) => a.Equals(b);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(slice<T> a, slice<T> b) => !(a == b);
 
-        // Slice<T> to ISlice comparisons
+        // slice<T> to ISlice comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(ISlice a, slice<T> b) => a?.Equals(b) ?? false;
 
@@ -210,7 +236,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(slice<T> a, ISlice b) => !(a == b);
 
-        // Slice<T> to nil comparisons
+        // slice<T> to nil comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(slice<T> slice, NilType nil) => slice.Length == 0 && slice.Capacity == 0 && slice.Array == null;
 
@@ -232,7 +258,7 @@ namespace go
 
         Array ISlice.Array => m_array;
 
-        object ISlice.this[int index]
+        object IArray.this[int index]
         {
             get => this[index];
             set => this[index] = (T)value;
@@ -247,7 +273,7 @@ namespace go
             set
             {
                 if ((object)m_array == null)
-                    throw new InvalidOperationException("Slice array reference is null.");
+                    throw new InvalidOperationException("slice array reference is null.");
 
                 if (index < 0 || index >= m_length)
                     throw new ArgumentOutOfRangeException(nameof(index));
@@ -274,9 +300,9 @@ namespace go
 
         bool ICollection<T>.Remove(T item) => throw new NotSupportedException();
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => new SliceEnumerator(ref this);
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => new SliceEnumerator(this);
 
-        IEnumerator IEnumerable.GetEnumerator() => new SliceEnumerator(ref this);
+        IEnumerator IEnumerable.GetEnumerator() => new SliceEnumerator(this);
 
         [Serializable]
         private sealed class SliceEnumerator : IEnumerator<T>
@@ -286,10 +312,10 @@ namespace go
             private readonly int m_end;
             private int m_current;
 
-            internal SliceEnumerator(ref slice<T> slice)
+            internal SliceEnumerator(slice<T> slice)
             {
                 if (slice != nil && (object)slice.m_array == null)
-                    throw new InvalidOperationException("Slice array reference is null.");
+                    throw new InvalidOperationException("slice array reference is null.");
 
                 m_array = slice.m_array;
                 m_start = slice.m_low;
@@ -311,10 +337,10 @@ namespace go
                 get
                 {
                     if (m_current < m_start)
-                        throw new InvalidOperationException("Slice enumeration not started.");
+                        throw new InvalidOperationException("slice enumeration not started.");
 
                     if (m_current >= m_end)
-                        throw new InvalidOperationException("Slice enumeration has ended.");
+                        throw new InvalidOperationException("slice enumeration has ended.");
 
                     return m_array[m_current];
                 }
@@ -330,8 +356,6 @@ namespace go
         }
 
         #endregion
-
-        public static readonly slice<T> Nil = default;
 
         public static slice<T> Append(ref slice<T> slice, params object[] elems)
         {
@@ -394,18 +418,18 @@ namespace go
 
     public static class SliceExtensions
     {
-        // Slice of a slice helper function:
-        //      s = s[2:]    => s = s.Slice(2)
-        //      s = s[3:5]   => s = s.Slice(3, 5);
-        //      s = s[:4]    => s = s.Slice(high:4)
-        //      s = s[1:3:5] => s = s.Slice(1, 3, 5) // Full slice expression
+        // slice of a slice helper function:
+        //      s = s[2:]    => s = s.slice(2)
+        //      s = s[3:5]   => s = s.slice(3, 5);
+        //      s = s[:4]    => s = s.slice(high:4)
+        //      s = s[1:3:5] => s = s.slice(1, 3, 5) // Full slice expression
         public static slice<T> slice<T>(this ref slice<T> slice, int low = -1, int high = -1, int max = -1)
         {
             return slice.Array.slice(low == -1 ? slice.Low : low, high == -1 ? slice.High : high, max);
         }
 
-        // Slice of an array helper function
-        public static slice<T> slice<T>(this T[] array , int low = -1, int high = -1, int max = -1)
+        // slice of an array helper function
+        public static slice<T> slice<T>(this T[] array, int low = -1, int high = -1, int max = -1)
         {
             if (low == -1)
                 low = 0;
@@ -426,7 +450,12 @@ namespace go
             return new slice<T>(array, low, high);
         }
 
-        // Slice of a string helper function
+        public static slice<T> slice<T>(this array<T> array, int low = -1, int high = -1, int max = -1)
+        {
+            return ((T[])array).slice(low, high, max);
+        }
+
+        // slice of a string helper function
         public static slice<@byte> slice(this @string source, int low = -1, int high = -1, int max = -1)
         {
             return ((IReadOnlyList<@byte>)source).ToArray().slice(low, high, max);

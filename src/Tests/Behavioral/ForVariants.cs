@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 August 09 13:23:02 UTC
+// package main -- go2cs converted at 2018 August 13 18:06:20 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\ForVariants.go
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -9,10 +9,9 @@ namespace go
     {
         private static void Main()
         {
-
             var i = 0;
 
-            while(i < 10)
+            while (i < 10)
             {
                 // Inner comment
                 f(i); // Call function
@@ -24,44 +23,32 @@ namespace go
             fmt.Println("i =", i);
             fmt.Println();
 
-            i = 0;
 
-            while(i < 10)
+            for (i = 0; i < 10; i++)
             {
                 f(i);
 
+                for (var j = 0; j < 3; j++)
                 {
-                    var j = 0;
-
-                    while(j < 3)
-                    {
-                        f(i + j);
-                        j++;
-                    }
+                    f(i + j);
                 }
                 fmt.Println();
-                i++;
             }
 
             fmt.Println("i =", i);
             fmt.Println();
 
+            for (var i = 0; i < 5; i++)
             {
-                var i = 0;
-
-                while(i < 5)
-                {
-                    // a
-                    f(i); // b
-                    i++;
-                }
+                // a
+                f(i); // b
             } //c
 
             fmt.Println();
             fmt.Println("i =", i);
             fmt.Println();
 
-            while(true)
+            while (true)
             {
                 i++;
                 f(i);

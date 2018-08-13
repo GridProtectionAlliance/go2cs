@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 August 09 13:23:03 UTC
+// package main -- go2cs converted at 2018 August 13 18:06:21 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructPromotionWithInterface.go
 using fmt = go.fmt_package;
 using time = go.time_package;
@@ -9,7 +9,6 @@ namespace go
     public static partial class main_package
     {
         // Above type comment
-        // Top inner type comment
         public partial interface Abser
         {
             float64 Abs(); // To the right comments
@@ -24,8 +23,8 @@ namespace go
         // Weirdly placed comment
 
         /* Hello 1
-        * Hello 2
-        * Hello 3 */
+         * Hello 2
+         * Hello 3 */
         public partial struct MyCustomError : Abser, error
         {
             public @string Message; // My custom error message

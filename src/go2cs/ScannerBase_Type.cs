@@ -178,8 +178,8 @@ namespace go2cs
             Types[context.Parent.Parent] = new ArrayTypeInfo
             {
                 Name = name,
-                TypeName = $"{typeInfo.TypeName}[]",
-                FullTypeName = $"{typeInfo.FullTypeName}[]",
+                TypeName = $"array<{typeInfo.TypeName}>",
+                FullTypeName = $"go.array<{typeInfo.FullTypeName}>",
                 TypeClass = TypeClass.Array,
                 Length = length
             };

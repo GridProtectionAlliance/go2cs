@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 August 09 13:23:02 UTC
+// package main -- go2cs converted at 2018 August 13 21:08:11 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue.go
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -9,7 +9,7 @@ namespace go
     {
         private static void Main()
         {
-            @string[] a;
+            array<@string> a;
 
             a[0] = "Hello";
             a[1] = "World";
@@ -33,14 +33,17 @@ namespace go
         }
 
         // Arrays are passed by value (a full copy)
-        private static void test(@string[] a)
+        private static void test(array<@string> a)
         {
+            a = a.Clone();
+
+            // Update to array will be local
             fmt.Println(a[0], a[1]);
             a[0] = "Goodbye";
             fmt.Println(a[0], a[1]);
         }
 
-        private static void test2(ref @string[] a)
+        private static void test2(ref array<@string> a)
         {
             fmt.Println(a[0], a[1]);
             a[0] = "Goodbye";

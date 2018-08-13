@@ -550,25 +550,25 @@ namespace go
                 return new string(charValue, 1);
             }
 
-            if (itemType == typeof(@byte[]))
+            if (itemType == typeof(array<@byte>) || itemType == typeof(@byte[]))
                 return new @string((@byte[])value);
 
             if (itemType == typeof(slice<@byte>))
                 return new @string((slice<@byte>)value);
 
-            if (itemType == typeof(byte[]))
+            if (itemType == typeof(array<byte>) || itemType == typeof(byte[]))
                 return new @string((byte[])value);
 
             if (itemType == typeof(slice<byte>))
                 return new @string((slice<byte>)value);
 
-            if (itemType == typeof(char[]))
+            if (itemType == typeof(array<char>) || itemType == typeof(char[]))
                 return new @string((char[])value);
 
             if (itemType == typeof(slice<char>))
                 return new @string((slice<char>)value);
 
-            if (itemType == typeof(rune[]))
+            if (itemType == typeof(array<rune>) || itemType == typeof(rune[]))
                 return new @string((rune[])value);
 
             if (itemType == typeof(slice<rune>))

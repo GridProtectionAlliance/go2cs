@@ -37,6 +37,8 @@ namespace go
 
             Console.WriteLine("Ref int out2 = {0}", value);
 
+            Main10();
+
             Console.ReadLine();
         }
 
@@ -262,7 +264,7 @@ namespace go
             Console.WriteLine("Type asserted ab = " + err.GetType().Name);
 
             //GoString test1 = ab.TypeAssert<GoString>();
-            bool ok = ab.TryTypeAssert(out @string test);
+            //bool ok = ab.TryTypeAssert(out @string test);
 
             Console.WriteLine(ab.Abs());
         }
@@ -517,6 +519,55 @@ namespace go
         public static void PrintVertex(ref Vertex v)
         {
             Console.WriteLine("Value of vertex X = {0}\n", v.X);
+        }
+
+        private static void Main10()
+        {
+            array<@string> a = new array<@string>(2);
+
+            a[0] = "Hello";
+            a[1] = "World";
+
+            test(a);
+            Console.WriteLine("{0} {1}", a[0], a[1]);
+            Console.WriteLine();
+
+            a[0] = "Hello";
+            test2(ref a);
+            Console.WriteLine("{0} {1}", a[0], a[1]);
+            Console.WriteLine();
+
+            a[0] = "Hello";
+            test3(a.slice());
+            Console.WriteLine("{0} {1}", a[0], a[1]);
+            Console.WriteLine();
+
+            var primes = new array<int>(new[] { 2, 3, 5, 7, 11, 13 });
+            Console.WriteLine(primes);
+        }
+
+        // Arrays are passed by value (a full copy)
+        private static void test(array<@string> a)
+        {
+            a = a.Clone();
+
+            Console.WriteLine("{0} {1}", a[0], a[1]);
+            a[0] = "Goodbye";
+            Console.WriteLine("{0} {1}", a[0], a[1]);
+        }
+
+        private static void test2(ref array<@string> a)
+        {
+            Console.WriteLine("{0} {1}", a[0], a[1]);
+            a[0] = "Goodbye";
+            Console.WriteLine("{0} {1}", a[0], a[1]);
+        }
+
+        private static void test3(slice<@string> a)
+        {
+            Console.WriteLine("{0} {1}", a[0], a[1]);
+            a[0] = "Goodbye";
+            Console.WriteLine("{0} {1}", a[0], a[1]);
         }
     }
 }

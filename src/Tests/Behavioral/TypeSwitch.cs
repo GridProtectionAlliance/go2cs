@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 August 09 13:23:04 UTC
+// package main -- go2cs converted at 2018 August 13 18:06:21 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\TypeSwitch.go
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -35,15 +35,15 @@ namespace go
 
         private static void Main()
         {
-            EmptyInterface x = 7;          // x has dynamic type int and value 7
-            var i = x.TypeAssert<@int>();                   // i has type int and value 7
+            object x = 7; // x has dynamic type int and value 7
+            var i = x.TypeAssert<@int>(); // i has type int and value 7
             fmt.Println(i);
 
             T y;            y.name = "Me";
 
             f(y);
 
-            EmptyInterface s = S{"you"};
+            object s = S{"you"};
 
             Switch(s)
             .Case(typeof(I))(() =>

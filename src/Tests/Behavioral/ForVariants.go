@@ -19,9 +19,8 @@ func main() {
 	fmt.Println("i =", i)
 	fmt.Println()
 	
-	i = 0
 	
-	for ; i < 10; i++ {
+	for i = 0; i < 10; i++ {
 		f(i)
 		
 		for j := 0; j < 3; j++ {

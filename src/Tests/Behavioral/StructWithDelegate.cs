@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2018 August 09 13:23:03 UTC
+// package main -- go2cs converted at 2018 August 13 18:06:21 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\StructWithDelegate.go
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -18,7 +18,7 @@ namespace go
         private static void Main()
         {
             var person = Person{work:nil,name:"Michał",age:29};
-            fmt.Println(person);  // {<nil> Michał 29}
+            fmt.Println(person); // {<nil> Michał 29}
         }
     }
 }

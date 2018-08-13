@@ -1,9 +1,10 @@
-// _Switch statements_ express conditionals across many
+ // _Switch statements_ express conditionals across many
 // branches.
 
-// package main -- go2cs converted at 2018 August 09 13:23:02 UTC
+// package main -- go2cs converted at 2018 August 13 18:06:20 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\ExprSwitch.go
-using fmt = go.fmt_package;using time = go.time_package;
+using fmt = go.fmt_package;
+using time = go.time_package;
 using static go.builtin;
 
 namespace go
@@ -12,7 +13,6 @@ namespace go
     {
         private static void Main()
         {
-
             // Here's a basic `switch`.
             var i = 2;
             fmt.Print("Write ", i, " as ");
