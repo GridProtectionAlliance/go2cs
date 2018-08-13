@@ -25,6 +25,7 @@ using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using static go2cs.Common;
 
 namespace go2cs
@@ -34,6 +35,7 @@ namespace go2cs
         public const string FunctionResultTypeMarker = ">>MARKER:FUNCTION_{0}_RESULTTYPE<<";
         public const string FunctionParametersMarker = ">>MARKER:FUNCTION_{0}_PARAMETERS<<";
         public const string FunctionExecContextMarker = ">>MARKER:FUNCTION_{0}_EXEC_CONTEXT<<";
+        public const string FunctionBlockPrefixMarker = ">>MARKER:FUNCTION_{0}_BLOCK_PREFIX<<";
 
         private bool m_inFunction;
         private FunctionInfo m_currentFunction;
@@ -66,6 +68,7 @@ namespace go2cs
             m_functionResultTypeMarker = string.Format(FunctionResultTypeMarker, m_currentFunctionName);
             m_functionParametersMarker = string.Format(FunctionParametersMarker, m_currentFunctionName);
             m_functionExecContextMarker = string.Format(FunctionExecContextMarker, m_currentFunctionName);
+            PushInnerBlockPrefix(string.Format(FunctionBlockPrefixMarker, m_currentFunctionName));
 
             m_targetFile.AppendLine($"{Spacing()}{scope} static {m_functionResultTypeMarker} {m_currentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
         }
@@ -120,6 +123,28 @@ namespace go2cs
             {
                 m_targetFile.Replace(m_functionExecContextMarker, "");
             }
+
+            string blockPrefix = "";
+
+            if (!signatureOnly)
+            {
+                // For any array parameters, Go copies the array by value
+                StringBuilder arrayClones = new StringBuilder();
+
+                foreach (ParameterInfo parameter in signature.Parameters)
+                {
+                    if (parameter.Type.TypeClass == TypeClass.Array)
+                        arrayClones.AppendLine($"{Spacing(1)}{parameter.Name} = {parameter.Name}.Clone();");
+                }
+
+                if (arrayClones.Length > 0)
+                {
+                    arrayClones.Insert(0, Environment.NewLine);
+                    blockPrefix = arrayClones.ToString();
+                }
+            }
+
+            m_targetFile.Replace(string.Format(FunctionBlockPrefixMarker, m_currentFunctionName), blockPrefix);
 
             m_currentFunction = null;
             m_currentFunctionName = null;
