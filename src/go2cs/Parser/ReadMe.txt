@@ -8,7 +8,7 @@ Specific grammar and embedded code changes:
     /// Determines if on the current index of the parser's token stream a token exists on the
     /// <c>HiddenChannel</c> which either is a line terminator, or is a multi line comment that
     /// contains a line terminator. Also checks for <c>LineCommentChannel</c> which will always
-	/// indicate that a line terminator exists.
+    /// indicate that a line terminator exists.
     /// </summary>
     /// <returns>
     /// <c>true</c> if on the current index of the parser's token stream a token exists on the
@@ -25,7 +25,7 @@ Specific grammar and embedded code changes:
         if (ahead == null)
             return false;
 
-        if (ahead.Channel != TokenConstants.HiddenChannel && ahead.Channel != GolangLexer.LineCommentChannel)
+        if (ahead.Channel != TokenConstants.HiddenChannel)
         {
             // We're only interested in tokens on the HIDDEN channels.
             return false;
@@ -63,22 +63,22 @@ Specific grammar and embedded code changes:
     /// <paramref name="tokenOffset"/> and the prior one on the hidden
     /// channel; otherwise, <c>false</c>.
     /// </returns>
-	private bool noTerminatorBetween(int tokenOffset)
-	{
-		BufferedTokenStream stream = TokenStream as BufferedTokenStream;		
+    private bool noTerminatorBetween(int tokenOffset)
+    {
+        BufferedTokenStream stream = TokenStream as BufferedTokenStream;		
         IList<IToken> tokens = stream.GetHiddenTokensToLeft(stream.LT(tokenOffset).TokenIndex);
 
         if (tokens == null)
             return true;
 
-		foreach (IToken token in tokens)
-		{
+        foreach (IToken token in tokens)
+        {
             if (token.Text.Contains("\n"))
                 return false;
-		}
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     /// <summary>
     /// Determines if no line terminator exists after any encountered
@@ -93,7 +93,7 @@ Specific grammar and embedded code changes:
     /// </returns>
     private bool noTerminatorAfterParams(int tokenOffset)
     {
-		BufferedTokenStream stream = TokenStream as BufferedTokenStream;
+        BufferedTokenStream stream = TokenStream as BufferedTokenStream;
         int leftParams = 1;
         int rightParams = 0;
 
@@ -120,9 +120,6 @@ Specific grammar and embedded code changes:
 }
 
 @lexer::members {
-	// Line comment channel
-	public const int LineCommentChannel = 2;
-
     // The most recently produced token
     private IToken lastToken = null;
 
@@ -147,11 +144,6 @@ Specific grammar and embedded code changes:
     }
 }
 
-//raw_string_lit         = "`" { unicode_char | newline } "`" .
-fragment RAW_STRING_LIT
-    : '`' ( UNICODE_CHAR | NEWLINE | [~`] )*? '`'
-    ;
-
 eos
     : ';'
     | EOF
@@ -160,9 +152,9 @@ eos
     ;
 
 COMMENT
-	:   [ \t]* '/*' .*? '*/' [\r\n]* -> channel(HIDDEN)
+    :   [ \t]* '/*' .*? '*/' [\r\n]* -> channel(HIDDEN)
 	;
 
 LINE_COMMENT
-    :   [ \t]* '//' ~[\r\n]* [\r\n]+ -> channel(2)
+    :   [ \t]* '//' ~[\r\n]* [\r\n]+ -> channel(HIDDEN)
     ;
