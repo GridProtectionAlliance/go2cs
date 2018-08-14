@@ -86,6 +86,8 @@ namespace go2cs
 
                 if ((object)expression != null)
                     m_targetFile.Append($" = {expression}");
+                else if (typeInfo?.TypeClass == TypeClass.Array && typeInfo is ArrayTypeInfo arrayTypeInfo)
+                    m_targetFile.Append($" = new {type}({arrayTypeInfo.Length.Text})");
 
                 // Since multiple specifications can be on one line, only check for comments after last specification
                 if (i < length - 1)
