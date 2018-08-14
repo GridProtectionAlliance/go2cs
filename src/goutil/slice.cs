@@ -258,6 +258,8 @@ namespace go
 
         #region [ Interface Implementations ]
 
+        object ICloneable.Clone() => MemberwiseClone();
+
         Array ISlice.Array => m_array;
 
         object IArray.this[int index]
@@ -301,8 +303,6 @@ namespace go
         void ICollection<T>.Clear() => throw new NotSupportedException();
 
         bool ICollection<T>.Remove(T item) => throw new NotSupportedException();
-
-        object ICloneable.Clone() => MemberwiseClone();
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => new SliceEnumerator(this);
 
