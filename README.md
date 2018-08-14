@@ -260,13 +260,16 @@ using goutil;
 
 public static partial class main_package
 {
-    private static void main() => func((defer, panic, recover) => {
+    private static void main()
+    {
         f();
         fmt.Println("Returned normally from f.");
-    });
+    }
 
-    private static void f() => func((defer, panic, recover) => {
-        defer(() => {
+    private static void f() => func((defer, _, recover) =>
+    {
+        defer(() =>
+        {
             {
                 var r = recover();
 
@@ -280,8 +283,10 @@ public static partial class main_package
         fmt.Println("Returned normally from g.");
     });
 
-    private static void g(int i) => func((defer, panic, recover) => {
-        if (i > 3) {
+    private static void g(int i) => func((defer, panic, _) => 
+    {
+        if (i > 3)
+        {
             fmt.Println("Panicking!");
             panic(fmt.Sprintf("%v", i));
         }
@@ -293,10 +298,11 @@ public static partial class main_package
 }
 ```
 
-Certainly for functions that call `defer`, `panic` or `recover`, the Go function execution context is required. However, if the function does not _directly_ call the functions, nor _indirectly_ call the functions through a lambda, then you should be able to safely remove the wrapping function execution context. For example, in the converted C# code above the `main` function does not directly nor indirectly call `defer`, `panic` or `recover` so the function will be safely simplified as follows:
+Certainly for functions that call `defer`, `panic` or `recover`, the Go function execution context is required. However, if the function does not _directly_ call the functions, nor _indirectly_ call the functions through a lambda, then you should be able to safely remove the wrapping function execution context. For example, in the converted C# code above the `main` function does not directly nor indirectly call `defer`, `panic` or `recover` so the function is safely simplified as follows:
 
 ```CSharp
-private static void main() {
+private static void main()
+{
     f();
     fmt.Println("Returned normally from f.");
 }
