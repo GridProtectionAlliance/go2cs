@@ -1,5 +1,5 @@
-// package main -- go2cs converted at 2018 August 13 21:08:11 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue.go
+// package main -- go2cs converted at 2018 August 14 13:37:19 UTC
+// Original source: C:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue.go
 using fmt = go.fmt_package;
 using static go.builtin;
 
@@ -9,7 +9,7 @@ namespace go
     {
         private static void Main()
         {
-            array<@string> a;
+            array<@string> a = new array<@string>(2);
 
             a[0] = "Hello";
             a[1] = "World";
