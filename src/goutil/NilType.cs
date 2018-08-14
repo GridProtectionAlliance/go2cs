@@ -44,6 +44,8 @@ namespace go
                     return true;
                 case ISlice slice:
                     return slice == Default;
+                case IArray array:
+                    return array == Default;
                 case @string gostr:
                     return gostr == Default;
                 case string str:
@@ -54,9 +56,22 @@ namespace go
             return obj == null;
         }
 
+        // IArray to nil comparisons
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(IArray array, NilType nil) => array == null || array.Length == 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(IArray array, NilType nil) => !(array == nil);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(NilType nil, IArray array) => array == nil;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(NilType nil, IArray array) => array != nil;
+
         // ISlice to nil comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(ISlice slice, NilType nil) => slice == null || (slice.Length == 0 && slice.Capacity == 0 && slice.Array == null);
+        public static bool operator ==(ISlice slice, NilType nil) => slice == null || slice.Length == 0 && slice.Capacity == 0 && slice.Array == null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(ISlice slice, NilType nil) => !(slice == nil);
