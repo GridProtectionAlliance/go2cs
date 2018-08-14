@@ -361,6 +361,22 @@ namespace go
 
         #endregion
 
+        public static slice<T> From<TSource>(TSource[] array)
+        {
+            if ((object)array == null)
+                return new slice<T>(new T[0]);
+
+            if (array is T[] baseTypeArray)
+                return new slice<T>(baseTypeArray);
+
+            baseTypeArray = new T[array.Length];
+
+            for (int i = 0; i < array.Length; i++)
+                baseTypeArray[i] = (T)ConvertToGoType(array[i] as IConvertible);
+
+            return baseTypeArray;
+        }
+
         public static slice<T> Append(ref slice<T> slice, params object[] elems)
         {
             T[] newArray;
