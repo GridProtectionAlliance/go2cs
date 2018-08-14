@@ -36,8 +36,10 @@ namespace go
             value = Main9().Value;
 
             Console.WriteLine("Ref int out2 = {0}", value);
+            Console.WriteLine();
 
             Main10();
+            Main11();
 
             Console.ReadLine();
         }
@@ -322,12 +324,12 @@ namespace go
 
         private static void Main4()
         {
-            slice<slice<string>> board = new slice<slice<string>>(new[]
+            slice<slice<@string>> board = slice<slice<@string>>.From(new[]
             {
-            new slice<string>(new[] {"_", "_", "_"}),
-            new slice<string>(new[] {"_", "_", "_"}),
-            new slice<string>(new[] {"_", "_", "_"}),
-        });
+                slice<@string>.From(new[] {"_", "_", "_"}),
+                slice<@string>.From(new[] {"_", "_", "_"}),
+                slice<@string>.From(new[] {"_", "_", "_"})
+            });
 
             // The players take turns.
             board[0][0] = "X";
@@ -568,6 +570,35 @@ namespace go
             Console.WriteLine("{0} {1}", a[0], a[1]);
             a[0] = "Goodbye";
             Console.WriteLine("{0} {1}", a[0], a[1]);
+        }
+
+        private static void Main11()
+        {
+            @string a;
+
+            a = "Hello World";
+
+            test(a);
+            Console.WriteLine(a);
+            Console.WriteLine();
+
+            a = "Hello World";
+            test2(ref a);
+            Console.WriteLine(a);
+        }
+
+        private static void test(@string a)
+        {
+            Console.WriteLine(a);
+            a = "Goodbye World";
+            Console.WriteLine(a);
+        }
+
+        private static void test2(ref @string a)
+        {
+            Console.WriteLine(a);
+            a = "Goodbye World";
+            Console.WriteLine(a);
         }
     }
 }

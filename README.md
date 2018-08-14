@@ -155,10 +155,11 @@ namespace go
         private static void Main()
         {
             // Create a tic-tac-toe board.
-            var board = new slice<slice<@string>>(new[] {
-                new slice<@string>(new[] {"_", "_", "_"}),
-                new slice<@string>(new[] {"_", "_", "_"}),
-                new slice<@string>(new[] {"_", "_", "_"}),
+            var board = slice<slice<@string>>.From(new[]
+            {
+                slice<@string>.From(new[] {"_", "_", "_"}),
+                slice<@string>.From(new[] {"_", "_", "_"}),
+                slice<@string>.From(new[] {"_", "_", "_"})
             });
 
             // The players take turns.
@@ -168,14 +169,9 @@ namespace go
             board[1][0] = "O";
             board[0][2] = "X";
 
+            for (var i = 0; i < len(board); i++)
             {
-                var i = 0;
-
-                while (i < len(board))
-                {
-                    fmt.Printf("%s\n", strings.Join(board[i], " "));
-                    i++
-                }
+                fmt.Printf("%s\n", strings.Join(board[i], " "));
             }
         }
     }
