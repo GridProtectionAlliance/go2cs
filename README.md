@@ -31,17 +31,24 @@ If you were looking to "go" in the other direction, a full _code based_ conversi
 
 ## Project Status
 
-Right now this project is still in nascent stages in that there is a "ton" of work to do. Overall project level conversions are basically complete and the code will produce proper function signatures. Strategies exist for most Go functional constructs in C# (see QuickTest project and embedded resource templates), but more work will need to be done.
+Work is progressing briskly. Although much work remains, a majority of simple Go language constructs will now properly convert to C# code. Overall project level conversions are basically complete, but created project files still need to automatically reference required shared projects in order to properly compile (a manual step for now).
 
-Work is currently moving through all the basic code conversions using the [Golang ANTLR4 grammar](https://github.com/antlr/grammars-v4/tree/master/golang), however, initial attempts to convert all the Go Standard Library code found that the grammar needs some work. If you update the grammar file [in this project](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go2cs/Parser), please kindly make a PR to update the original grammar on the [ANTLR site](https://github.com/antlr/grammars-v4) as well.
+Strategies exist for most all Go functional constructs in C# (see QuickTest project and embedded resource templates). Remaining needed conversions:
 
-A "big" upcoming task will be to get the Go Standard Library operational by filling in behind code that normally compiles with [Go's Assembler](https://golang.org/doc/asm) (all those platform specific `.s` files) with equivalent .NET implementations. Please note that the strategy is to keep the code managed if at all possible, this way there are no external dependencies introduced, see [conversion strategies](#conversion-strategies) for more information.
+* Channel class
+* Map class
+* Switch "select" statement (related to channel)
+* For statement "range" construct (this will require `ExpressionInfo` detail, see below)
+
+Another upcoming major step in conversion process will be to change the `Expressions` tree to hold an [`ExpressionInfo`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go2cs/Metadata/ExpressionInfo.cs) instance instead of a string, this way the "type" of the expression will be known during conversion - there are a few places where this would be handy to know (see `TODO:` markers in the code for more detail). This may get interesting as the type will need be inferred in many cases.
+
+Several improvements have been made to the [Golang ANTLR4 grammar](https://github.com/antlr/grammars-v4/tree/master/golang). Even so, initial attempts to convert all the Go Standard Library code still finds that the grammar needs some more work. If you update the grammar file [in this project](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go2cs/Parser), please kindly make a PR to update the original grammar on the [ANTLR site](https://github.com/antlr/grammars-v4) as well.
+
+A known large upcoming task will be to get the Go Standard Library operational by filling in behind code that normally compiles with [Go's Assembler](https://golang.org/doc/asm) (all those platform specific `.s` files) with equivalent .NET implementations. Please note that the strategy is to keep the code managed if at all possible, this way there are no external dependencies introduced, see [conversion strategies](#conversion-strategies) for more information.
 
 The other item that is needed is a unit testing infrastructure. It is desirable to be able to create Go based behavioral tests then convert the tests to C# - this way the Go code could be ran along with the C# code to validate that the results are the same (somehow).
 
-In the future, code conversions should automatically not use a Go function execution context unless it is needed, see [optimizations](#optimizations) section below (this may be low hanging fruit).
-
-Currently the converted code targets traditional a .NET application, specifically version 4.7.1 and C# 7.2 to accommodate better return by-ref functionality for structures. However, a [.NET Core](https://docs.microsoft.com/en-us/dotnet/core/) version should be equally possible, preferably by command line option, e.g., `-c` for .NET Core.
+Currently the converted code targets traditional a .NET application, specifically version 4.7.1 and C# 7.3 to accommodate better return by-ref functionality for structures. However, a [.NET Core](https://docs.microsoft.com/en-us/dotnet/core/) version should be equally possible, preferably by command line option, e.g., `-c` for .NET Core.
 
 A new command line option to prefer `var` over explicit types would be handy, e.g., specifying `-x` would request explicit type definitions otherwise defaulting to use `var` where possible.
 
@@ -64,7 +71,7 @@ The `go2cs` program is a command line utility that requires .NET 4.7.1. You will
 * For Windows, use the [.NET 4.7.1](https://www.microsoft.com/en-us/download/confirmation.aspx?id=56115) installer
 * For other platforms, install the [latest version of Mono](https://www.mono-project.com/download/stable/#download-lin-ubuntu)
 
-Note that code converted from Go to C# will also target .NET 4.7.1 and compile using C# 7.2. [Visual Studio 2017](https://www.visualstudio.com/downloads/) is recommended in order to compile converted code, the free Community Edition should be fine. For non-Windows platforms, you can try [Visual Studio Code](https://code.visualstudio.com/).
+Note that code converted from Go to C# will also target .NET 4.7.1 and compile using C# 7.3. [Visual Studio 2017](https://www.visualstudio.com/downloads/) is recommended in order to compile converted code, the free Community Edition should be fine. For non-Windows platforms, you can try [Visual Studio Code](https://code.visualstudio.com/).
 
 ## Usage
 
@@ -105,7 +112,7 @@ Note that code converted from Go to C# will also target .NET 4.7.1 and compile u
 
 * Go types are converted to C# `struct` types and used on the stack to optimize memory use and reduce the need for garbage collection. The `struct` types can be wrapped by C# `class` types that reference the type so that heap-allocated instances of the type can exist as needed.
 
-* Conversion of pointer types will use the C# `ref` keyword where possible. When this strategy does not work, a heap allocated instance of the base type will be created (see [`Ref<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/Ref.cs#L37)) with an associated pointer to the heap allocated instance (see [`Ptr<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/Ptr.cs#L37), literally a reference to the reference). 
+* Conversion of pointer types will use the C# `ref` keyword where possible. When this strategy does not work, a heap allocated instance of the base type will be created (see [`Ref<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/Ref.cs#L39)) with an associated pointer to the heap allocated instance (see [`Ptr<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/goutil/Ptr.cs#L39), literally a reference to the reference). 
 
 > C# pointers do not always work as a replacement for Go pointers since with C# (1) pointer types in structures cannot not refer to types that contain heap-allocated elements (e.g., arrays or slices that reference an array) as this would prevent pointer arithmetic for ambiguously sized elements, and (2) returning standard pointers to stack-allocated structures from a function is not allowed, instead you need to allocate the structure on the heap by creating a reference-type wrapper and then safely return a pointer to the reference.
 
@@ -254,13 +261,12 @@ func g(i int) {
 The Go code gets converted into C# code like the following:
 ```CSharp
 using fmt = go.fmt_package;
-
 using static go.builtin;
-using goutil;
+
 
 public static partial class main_package
 {
-    private static void main()
+    private static void Main()
     {
         f();
         fmt.Println("Returned normally from f.");
@@ -273,8 +279,9 @@ public static partial class main_package
             {
                 var r = recover();
 
-                if (r != nil) {
-                  fmt.Println("Recovered in f", r);                  
+                if (r != nil)
+                {
+                    fmt.Println("Recovered in f", r);       
                 }
             }
         });
@@ -290,7 +297,6 @@ public static partial class main_package
             fmt.Println("Panicking!");
             panic(fmt.Sprintf("%v", i));
         }
-
         defer(() => fmt.Println("Defer in g", i));
         fmt.Println("Printing in g", i);
         g(i + 1);
