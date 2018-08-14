@@ -177,6 +177,8 @@ namespace go
             return array;
         }
 
+        public slice<T> Clone() => Array?.slice() ?? new slice<T>();
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerator<(int index, T value)> GetEnumerator()
         {
@@ -299,6 +301,8 @@ namespace go
         void ICollection<T>.Clear() => throw new NotSupportedException();
 
         bool ICollection<T>.Remove(T item) => throw new NotSupportedException();
+
+        object ICloneable.Clone() => MemberwiseClone();
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => new SliceEnumerator(this);
 

@@ -31,7 +31,7 @@ using System.Runtime.CompilerServices;
 
 namespace go
 {
-    public interface IArray : EmptyInterface
+    public interface IArray : EmptyInterface, ICloneable
     {
         int Length { get; }
 
@@ -149,6 +149,8 @@ namespace go
         #endregion
 
         #region [ Interface Implementations ]
+
+        object ICloneable.Clone() => m_array.Clone();
 
         object IArray.this[int index]
         {

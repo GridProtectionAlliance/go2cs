@@ -35,7 +35,7 @@ namespace go
     /// <summary>
     /// Represents a structure that behaves like a Go string.
     /// </summary>
-    public readonly struct @string : EmptyInterface, IReadOnlyList<@byte>, IEnumerable<rune>, IEnumerable<(int index, rune rune)>, IEnumerable<byte>, IEnumerable<char>, IConvertible
+    public readonly struct @string : EmptyInterface, IReadOnlyList<@byte>, IEnumerable<rune>, IEnumerable<(int index, rune rune)>, IEnumerable<byte>, IEnumerable<char>, IConvertible, ICloneable
     {
         private readonly byte[] m_value;
 
@@ -97,7 +97,11 @@ namespace go
             get => m_value ?? new byte[0];
         }
 
-        public int Count => Value.Length;
+        public int Length
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => Value.Length;
+        }
 
         public @byte this[int index] => Value[index];
 
@@ -128,6 +132,12 @@ namespace go
         public string ToString(IFormatProvider provider) => ToString().ToString(provider);
 
         public TypeCode GetTypeCode() => TypeCode.String;
+
+        public @string Clone() => new @string(this);
+
+        object ICloneable.Clone() => Clone();
+
+        int IReadOnlyCollection<@byte>.Count => Length;
 
         bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)ToString()).ToBoolean(provider);
 
@@ -256,7 +266,7 @@ namespace go
         public static implicit operator slice<char>(@string value) => new slice<char>(((IEnumerable<char>)value).ToArray());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator byte[](@string value) => value.m_value;
+        public static explicit operator byte[](@string value) => value.m_value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @string(byte[] value) => new @string(value);
@@ -274,7 +284,7 @@ namespace go
         public static implicit operator @string(rune[] value) => new @string(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator char[](@string value) => ((IEnumerable<char>)value).ToArray();
+        public static explicit operator char[](@string value) => ((IEnumerable<char>)value).ToArray();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @string(char[] value) => new @string(value);
