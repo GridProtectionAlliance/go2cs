@@ -36,25 +36,37 @@ namespace go2cs
 {
     public partial class Converter
     {
-        //private bool m_firstTypeSpec;
-
         // TODO: Consider strongly typing sub-function type declarations with function name prefix declared directly prior to function definition - sub-function type declarations are syntactically invalid in C#
+
+        private int m_typeIdentifierCount;
+        private bool m_typeMultipleDeclaration;
 
         public override void EnterTypeDecl(GolangParser.TypeDeclContext context)
         {
-            //m_firstTypeSpec = !m_inFunction;
+            // typeDecl
+            //     : 'type' ( typeSpec | '(' ( typeSpec eos )* ')' )
+
+            m_typeIdentifierCount = 0;
+            m_typeMultipleDeclaration = context.children.Count > 2;
+        }
+
+        public override void ExitTypeDecl(GolangParser.TypeDeclContext context)
+        {
+            // typeDecl
+            //     : 'type' ( typeSpec | '(' ( typeSpec eos )* ')' )
+
+            if (m_typeMultipleDeclaration && EndsWithLineFeed(m_targetFile.ToString()))
+            {
+                string removedLineFeed = RemoveLastLineFeed(m_targetFile.ToString());
+                m_targetFile.Clear();
+                m_targetFile.Append(removedLineFeed);
+            }
         }
 
         public override void ExitTypeSpec(GolangParser.TypeSpecContext context)
         {
             // typeSpec
             //     : IDENTIFIER type
-
-            //if (m_firstTypeSpec)
-            //{
-            //    m_firstTypeSpec = false;
-            //    m_targetFile.Append(CheckForCommentsLeft(context));
-            //}
 
             string originalIdentifier = context.IDENTIFIER().GetText();
             string scope = char.IsUpper(originalIdentifier[0]) ? "public" : "private";
@@ -64,6 +76,9 @@ namespace go2cs
             // TODO: Sub-function strategy, declare directly prior to function using PushBlock / PopBlock operations and a new replacement marker
             if (m_inFunction)
                 AddWarning(context, $"Type specification made from within function \"{m_currentFunctionName}\" - this is will not compile in C#");
+
+            if (m_typeIdentifierCount == 0 && m_typeMultipleDeclaration)
+                m_targetFile.Append(RemoveFirstLineFeed(CheckForCommentsLeft(context)));
 
             if (Metadata.Interfaces.TryGetValue(originalIdentifier, out InterfaceInfo interfaceInfo))
             {
@@ -262,6 +277,8 @@ namespace go2cs
                     m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
                 }
             }
+
+            m_typeIdentifierCount++;
         }
 
         private void RecurseInheritedInterfaces(GolangParser.TypeSpecContext context, string identifier, InterfaceInfo interfaceInfo, List<FunctionSignature> functions, List<string> inheritedTypeNames = null, bool useFullTypeName = false)

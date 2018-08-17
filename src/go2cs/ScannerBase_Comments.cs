@@ -121,11 +121,28 @@ namespace go2cs
         {
             int index = line.LastIndexOf("\r\n", StringComparison.Ordinal);
 
-            if (index == -1)
-                index = line.LastIndexOf('\n');
+            if (index == line.Length - 2)
+                return line.Substring(0, index);
 
-            if (index > -1)
+            index = line.LastIndexOf('\n');
+
+            if (index == line.Length - 1)
                 line = line.Substring(0, index);
+
+            return line;
+        }
+
+        protected string RemoveFirstLineFeed(string line)
+        {
+            int index = line.IndexOf("\r\n", StringComparison.Ordinal);
+
+            if (index == 0)
+                return line.Substring(index + 2);
+
+            index = line.IndexOf('\n');
+
+            if (index == 0)
+                line = line.Substring(index + 1);
 
             return line;
         }

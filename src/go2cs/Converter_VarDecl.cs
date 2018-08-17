@@ -29,23 +29,40 @@ namespace go2cs
 {
     public partial class Converter
     {
-        //private bool m_firstVarSpec;
+        private int m_varIdentifierCount;
+        private bool m_varMultipleDeclaration;
 
         public override void EnterVarDecl(GolangParser.VarDeclContext context)
         {
-            //m_firstVarSpec = !m_inFunction;
+            // varDecl
+            //     : 'var' ( varSpec | '(' ( varSpec eos )* ')' )
+
+            m_varIdentifierCount = 0;
+            m_varMultipleDeclaration = context.children.Count > 2;
+        }
+
+        public override void ExitVarDecl(GolangParser.VarDeclContext context)
+        {
+            // varDecl
+            //     : 'var' ( varSpec | '(' ( varSpec eos )* ')' )
+
+            if (m_varMultipleDeclaration && EndsWithLineFeed(m_targetFile.ToString()))
+            {
+                string removedLineFeed = RemoveLastLineFeed(m_targetFile.ToString());
+                m_targetFile.Clear();
+                m_targetFile.Append(removedLineFeed);
+            }
+
+            m_targetFile.Append(CheckForCommentsRight(context));
         }
 
         public override void ExitVarSpec(GolangParser.VarSpecContext context)
         {
             // varSpec
-            //     : identifierList(type('=' expressionList) ? | '=' expressionList)
+            //     : identifierList ( type ( '=' expressionList ) ? | '=' expressionList )
 
-            //if (m_firstVarSpec)
-            //{
-            //    m_firstVarSpec = false;
-            //    m_targetFile.Append(CheckForCommentsLeft(context));
-            //}
+            if (m_varIdentifierCount == 0 && m_varMultipleDeclaration)
+                m_targetFile.Append(RemoveFirstLineFeed(CheckForCommentsLeft(context)));
 
             if (!Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
             {
@@ -95,6 +112,8 @@ namespace go2cs
                 else
                     m_targetFile.Append($";{CheckForCommentsRight(context)}");
             }
+
+            m_varIdentifierCount++;
         }
     }
 }

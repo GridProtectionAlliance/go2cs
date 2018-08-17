@@ -28,21 +28,33 @@ namespace go2cs
 {
     public partial class Converter
     {
-        //private bool m_firstConstSpec;
         private int m_iota;
         private int m_constIdentifierCount;
+        private bool m_constMultipleDeclaration;
 
         public override void EnterConstDecl(GolangParser.ConstDeclContext context)
         {
-            //m_firstConstSpec = !m_inFunction;
+            // constDecl
+            //     : 'const' ( constSpec | '(' ( constSpec eos )* ')' )
+
             m_constIdentifierCount = 0;
+            m_constMultipleDeclaration = context.children.Count > 2;
             m_iota = 0;
         }
 
         public override void ExitConstDecl(GolangParser.ConstDeclContext context)
         {
-            if (m_constIdentifierCount > 1)
-                m_targetFile.Append(RemoveLastLineFeed(CheckForCommentsRight(context)));
+            // constDecl
+            //     : 'const' ( constSpec | '(' ( constSpec eos )* ')' )
+
+            if (m_constMultipleDeclaration && EndsWithLineFeed(m_targetFile.ToString()))
+            {
+                string removedLineFeed = RemoveLastLineFeed(m_targetFile.ToString());
+                m_targetFile.Clear();
+                m_targetFile.Append(removedLineFeed);
+            }
+
+            m_targetFile.Append(CheckForCommentsRight(context));
         }
 
         public override void ExitConstSpec(GolangParser.ConstSpecContext context)
@@ -50,11 +62,8 @@ namespace go2cs
             // constSpec
             //     : identifierList ( type ? '=' expressionList ) ?
 
-            //if (m_firstConstSpec)
-            //{
-            //    m_firstConstSpec = false;
-            //    m_targetFile.Append(CheckForCommentsLeft(context));
-            //}
+            if (m_constIdentifierCount == 0 && m_constMultipleDeclaration)
+                m_targetFile.Append(RemoveFirstLineFeed(CheckForCommentsLeft(context)));
 
             if (!Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
             {
