@@ -110,11 +110,14 @@
     <EmbeddedResource Include="..\goutil\goutil.projitems">
       <Link>goutil\goutil.projitems</Link>
     </EmbeddedResource>
-      <EmbeddedResource Include="..\goutil\array.cs">
-          <Link>goutil\array.cs</Link>
-      </EmbeddedResource>
-      <EmbeddedResource Include="..\goutil\builtin.cs">
+    <EmbeddedResource Include="..\goutil\array.cs">
+        <Link>goutil\array.cs</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\builtin.cs">
       <Link>goutil\builtin.cs</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\goutil\channel.cs">
+      <Link>goutil\channel.cs</Link>
     </EmbeddedResource>
     <EmbeddedResource Include="..\goutil\DefinedTypes.cs">
       <Link>goutil\DefinedTypes.cs</Link>

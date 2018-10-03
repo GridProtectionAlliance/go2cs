@@ -29,6 +29,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace go
 {
@@ -111,6 +112,26 @@ namespace go
                 types.AddRange(item.GetTypes());
 
             s_types = types.ToArray();
+        }
+
+        /// <summary>
+        /// Gets an object's pointer value, for display purposes, in hexadecimal format.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns>Object pointer value as string in hexadecimal format.</returns>
+        public static string PrintPointer(this object instance)
+        {
+            GCHandle handle = GCHandle.Alloc(instance, GCHandleType.Pinned);
+
+            try
+            {
+                IntPtr pointer = GCHandle.ToIntPtr(handle);
+                return "0x" + pointer.ToString("x");
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
 
         /// <summary>

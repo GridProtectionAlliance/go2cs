@@ -30,7 +30,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 using static System.Math;
 
 #pragma warning disable CS0660, CS0661
@@ -75,25 +74,6 @@ namespace go
         /// resliced to accommodate the new elements. If it does not, a new underlying array will be
         /// allocated.
         /// </summary>
-        /// <param name="slice">Destination slice.</param>
-        /// <param name="elems">Elements to append.</param>
-        /// <returns>New slice with specified values appended.</returns>
-        /// <remarks>
-        /// Append returns the updated slice. It is therefore necessary to store the result of append,
-        /// often in the variable holding the slice itself:
-        /// <code>
-        /// slice = append(slice, elem1, elem2)
-        /// slice = append(slice, anotherSlice...)
-        /// </code>
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static slice<T> append<T>(slice<T> slice, params object[] elems) => append(ref slice, elems);
-
-        /// <summary>
-        /// Appends elements to the end of a slice. If it has sufficient capacity, the destination is
-        /// resliced to accommodate the new elements. If it does not, a new underlying array will be
-        /// allocated.
-        /// </summary>
         /// <param name="slice">Destination slice pointer.</param>
         /// <param name="elems">Elements to append.</param>
         /// <returns>New slice with specified values appended.</returns>
@@ -109,20 +89,12 @@ namespace go
         public static slice<T> append<T>(ref slice<T> slice, params object[] elems) => slice<T>.Append(ref slice, elems);
 
         /// <summary>
-        /// Gets the length of the <paramref name="array"/> (same as <see cref="len{T}(T[])"/>).
+        /// Gets the length of the <paramref name="array"/> (same as <see cref="len{T}(ref array{T})"/>).
         /// </summary>
-        /// <param name="array">Target array.</param>
+        /// <param name="array">Target array pointer.</param>
         /// <returns>The length of the <paramref name="array"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int cap<T>(T[] array) => array?.Length ?? 0;
-
-        /// <summary>
-        /// Gets the maximum length the <paramref name="slice"/> can reach when resliced.
-        /// </summary>
-        /// <param name="slice">Target slice.</param>
-        /// <returns>The capacity of the <paramref name="slice"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int cap<T>(slice<T> slice) => cap(ref slice);
+        public static int cap<T>(ref array<T> array) => array.Length;
 
         /// <summary>
         /// Gets the maximum length the <paramref name="slice"/> can reach when resliced.
@@ -132,7 +104,19 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public static int cap<T>(ref slice<T> slice) => slice.Capacity;
 
-        //public static void close<T>(Channel<T> c) = c.Close();
+        /// <summary>
+        /// Gets the maximum capacity of the <paramref name="channel"/>.
+        /// </summary>
+        /// <param name="channel">Target channel pointer.</param>
+        /// <returns>The capacity of the <paramref name="channel"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
+        public static int cap<T>(ref channel<T> channel) => channel.Capacity;
+
+        /// <summary>
+        /// Closes the channel.
+        /// </summary>
+        /// <param name="channel">Target channel pointer.</param>
+        public static void close<T>(ref channel<T> channel) => channel.Close();
 
         /// <summary>
         /// Constructs a complex value from two floating-point values.
@@ -151,42 +135,6 @@ namespace go
         /// <returns>New complex value from specified <paramref name="realPart"/> and <paramref name="imaginaryPart"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public static complex128 complex(float64 realPart, float64 imaginaryPart) => new complex128(realPart, imaginaryPart);
-
-        /// <summary>
-        /// Copies elements from a source slice into a destination slice.
-        /// The source and destination may overlap.
-        /// </summary>
-        /// <param name="dst">Destination slice.</param>
-        /// <param name="src">Source slice.</param>
-        /// <returns>
-        /// The number of elements copied, which will be the minimum of len(src) and len(dst).
-        /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int copy<T1, T2>(slice<T1> dst, slice<T2> src) => copy(ref dst, ref src);
-
-        /// <summary>
-        /// Copies elements from a source slice into a destination slice.
-        /// The source and destination may overlap.
-        /// </summary>
-        /// <param name="dst">Destination slice pointer.</param>
-        /// <param name="src">Source slice.</param>
-        /// <returns>
-        /// The number of elements copied, which will be the minimum of len(src) and len(dst).
-        /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int copy<T1, T2>(ref slice<T1> dst, slice<T2> src) => copy(ref dst, ref src);
-
-        /// <summary>
-        /// Copies elements from a source slice into a destination slice.
-        /// The source and destination may overlap.
-        /// </summary>
-        /// <param name="dst">Destination slice.</param>
-        /// <param name="src">Source slice pointer.</param>
-        /// <returns>
-        /// The number of elements copied, which will be the minimum of len(src) and len(dst).
-        /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int copy<T1, T2>(slice<T1> dst, ref slice<T2> src) => copy(ref dst, ref src);
 
         /// <summary>
         /// Copies elements from a source slice into a destination slice.
@@ -218,21 +166,6 @@ namespace go
         /// Copies elements from a source slice into a destination slice.
         /// The source and destination may overlap.
         /// </summary>
-        /// <param name="dst">Destination slice.</param>
-        /// <param name="src">Source slice.</param>
-        /// <returns>
-        /// The number of elements copied, which will be the minimum of len(src) and len(dst).
-        /// </returns>
-        /// <remarks>
-        /// As a special case, it also will copy bytes from a string to a slice of bytes.
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int copy(slice<byte> dst, string src) => copy(ref dst, src);
-
-        /// <summary>
-        /// Copies elements from a source slice into a destination slice.
-        /// The source and destination may overlap.
-        /// </summary>
         /// <param name="dst">Destination slice pointer.</param>
         /// <param name="src">Source slice.</param>
         /// <returns>
@@ -242,10 +175,10 @@ namespace go
         /// As a special case, it also will copy bytes from a string to a slice of bytes.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int copy(ref slice<byte> dst, string src)
-        {
-            slice<byte> bytes = new slice<byte>(Encoding.UTF8.GetBytes(src));
-            return copy(dst, bytes);
+        public static int copy(ref slice<byte> dst, ref @string src)
+        {            
+            slice<byte> bytes = src;
+            return copy(ref dst, ref bytes);
         }
 
         //public static void delete<TKey, TValue>(Map<TKey, TValue> m, TKey key) => m.Delete(key);
@@ -259,39 +192,38 @@ namespace go
         public static double imag(complex64 c) => c.Imaginary;
 
         /// <summary>
-        /// 
+        /// Gets the length of the <paramref name="array"/>.
         /// </summary>
-        /// <param name="array"></param>
-        /// <returns></returns>
+        /// <param name="array">Target channel pointer.</param>
+        /// <returns>The length of the <paramref name="array"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int len<T>(T[] array) => array?.Length ?? 0;
+        public static int len<T>(ref array<T> array) => array.Length;
 
         /// <summary>
-        /// 
+        /// Gets the length of the <paramref name="slice"/>.
         /// </summary>
-        /// <param name="slice"></param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int len<T>(slice<T> slice) => len(ref slice);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="slice"></param>
-        /// <returns></returns>
+        /// <param name="slice">Target channel pointer.</param>
+        /// <returns>The length of the <paramref name="slice"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public static int len<T>(ref slice<T> slice) => slice.Length;
 
         /// <summary>
-        /// 
+        /// Gets the length of the <paramref name="str"/>.
         /// </summary>
-        /// <param name="s"></param>
-        /// <returns></returns>
+        /// <param name="str">Target channel pointer.</param>
+        /// <returns>The length of the <paramref name="str"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static int len(string s) => s?.Length ?? 0;
+        public static int len(ref @string str) => str.Length;
 
-        //public static int len<T>(Map<T> map) => map?.Length ?? 0;
+        //public static int len<T>(ref map<T> map) => map.Length;
 
-        //public static int len<T>(Channel<T> channel) => channel?.Length ?? 0;
+        /// <summary>
+        /// Gets the length of the <paramref name="channel"/>.
+        /// </summary>
+        /// <param name="channel">Target channel pointer.</param>
+        /// <returns>The length of the <paramref name="channel"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
+        public static int len<T>(ref channel<T> channel) => channel.Length;
 
         /// <summary>
         /// 
@@ -314,7 +246,7 @@ namespace go
 
         //public static Map<TKey, TValue> make<TKey, TValue>(Map<TKey, TValue> _, int initialCapacity = -1) => new Map<TKey, TValue>(initialCapacity);
 
-        //public static Channel<T> make<T>(Channel<T> _, capacity = 0) => new Channel<T>(capacity);
+        public static channel<T> make<T>(channel<T> _, int capacity = 0) => new channel<T>(capacity);
 
         /// <summary>
         /// Creates a pointer to a new type instance.

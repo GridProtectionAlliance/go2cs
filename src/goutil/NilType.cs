@@ -46,11 +46,13 @@ namespace go
                     return slice == Default;
                 case IArray array:
                     return array == Default;
+                case IChannel channel:
+                    return channel == Default;
                 case @string gostr:
                     return gostr == Default;
                 case string str:
                     return str == Default;
-                // TODO: Add map, channel, etc...
+                // TODO: Add map, etc...
             }
 
             return obj == null;
@@ -81,6 +83,19 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, ISlice slice) => slice != nil;
+
+        // IChannel to nil comparisons
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(IChannel channel, NilType nil) => channel == null || channel.Length == 0 && channel.Capacity == 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(IChannel channel, NilType nil) => !(channel == nil);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(NilType nil, IChannel channel) => channel == nil;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(NilType nil, IChannel channel) => channel != nil;
 
         // string to nil comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

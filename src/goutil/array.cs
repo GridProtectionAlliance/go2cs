@@ -87,6 +87,7 @@ namespace go
                 yield return (index++, item);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString() => $"[{string.Join(" ", ((IEnumerable<T>)this).Take(20))}{(Length > 20 ? " ..." : "")}]";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

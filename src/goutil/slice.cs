@@ -112,17 +112,41 @@ namespace go
             m_length = length;
         }
 
-        public T[] Array => m_array;
+        public T[] Array
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => m_array;
+        }
 
-        public int Low => m_low;
+        public int Low
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => m_low;
+        }
 
-        public int High => m_low + m_length;
+        public int High
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => m_low + m_length;
+        }
 
-        public int Length => m_length;
+        public int Length
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => m_length;
+        }
 
-        public int Capacity => (object)m_array == null ? 0 : m_array.Length - m_low;
+        public int Capacity
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => (object)m_array == null ? 0 : m_array.Length - m_low;
+        }
 
-        public int Available => (object)m_array == null ? 0 : m_array.Length - m_length;
+        public int Available
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => (object)m_array == null ? 0 : m_array.Length - m_length;
+        }
 
         // Returning by-ref value allows slice to be a struct instead of a class and still allow read and write
         public ref T this[int index]
@@ -177,6 +201,7 @@ namespace go
             return array;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public slice<T> Clone() => Array?.slice() ?? new slice<T>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -189,8 +214,10 @@ namespace go
                 yield return (index++, enumerator.Current);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString() => $"[{string.Join(" ", ((IEnumerable<T>)this).Take(20))}{(Length > 20 ? " ..." : "")}]";
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode() => (object)m_array == null ? 0 : m_array.GetHashCode() ^ m_low ^ m_length;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

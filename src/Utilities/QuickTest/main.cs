@@ -310,13 +310,13 @@ namespace go
 
         private static void printSlice(slice<int> s)
         {
-            Console.WriteLine("len={0} cap={1} {2}", len(s), cap(s), s);
+            Console.WriteLine("len={0} cap={1} {2}", len(ref s), cap(ref s), s);
         }
 
         private static void Main3()
         {
             slice<int> s = new slice<int>();
-            Console.WriteLine("{0} {1} {2}", s, len(s), cap(s));
+            Console.WriteLine("{0} {1} {2}", s, len(ref s), cap(ref s));
 
             if (s == nil)
                 Console.WriteLine("nil!");
@@ -338,7 +338,7 @@ namespace go
             board[1][0] = "O";
             board[0][2] = "X";
 
-            for (var i = 0; i < len(board); i++)
+            for (var i = 0; i < len(ref board); i++)
             {
                 Console.WriteLine("{0}", string.Join(" ", board[i]));
             }
@@ -359,15 +359,15 @@ namespace go
             printSlice(s);
 
             // append works on nil slices.
-            s = append(s, 0);
+            s = append(ref s, 0);
             printSlice(s);
 
             // The slice grows as needed.
-            s = append(s, 1);
+            s = append(ref s, 1);
             printSlice(s);
 
             // We can add more than one element at a time.
-            s = append(s, 2, 3, 4);
+            s = append(ref s, 2, 3, 4);
             printSlice(s);
         }
 
