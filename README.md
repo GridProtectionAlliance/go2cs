@@ -9,7 +9,7 @@ Converts source code developed using the Go programming language (see [Go Langua
 
 I'm pretty sure for many this was the first question asked when this project was discovered. Avoiding the cliché response of "[because I could](https://www.youtube.com/watch?v=mRNX6XJOeGU)", the real answer is more innocuous. I've been programming in C# for many years, even so, I try to keep an eye on new / cool tech being developed, regardless of language -- one common choice for new applications these days is Go. Often the easiest way for me to experiment with new technology is to integrate it with some of my existing C# code, hence the desire for this project -- besides, I figured I might learn something about building apps in Go in the process.
 
-Hopefully for those of you that code in Go all the time and have an occasion where you need to build a C# app, this conversion tool will provide you with a head start. You can pull in some of your existing code and even use the Go Standard Library functions that you are used to.
+Hopefully (once it's complete) for those of you that code in Go all the time and have an occasion where you need to build a C# app, this conversion tool will provide you with a head start. You can pull in some of your existing code and even use the Go Standard Library functions that you are used to.
 
 ### Elephant in the room
 
