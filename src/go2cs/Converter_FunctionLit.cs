@@ -21,8 +21,8 @@
 //
 //******************************************************************************************************
 
-using System;
 using go2cs.Metadata;
+using System;
 
 namespace go2cs
 {
@@ -30,20 +30,20 @@ namespace go2cs
     {
         public const string FunctionLiteralParametersMarker = ">>MARKER:FUNCTIONLIT_PARAMETERS<<";
 
-        public override void EnterFunctionLit(GolangParser.FunctionLitContext context)
+        public override void EnterFunctionLit(GoParser.FunctionLitContext context)
         {
             PushBlock();
             m_targetFile.AppendLine($"{FunctionLiteralParametersMarker} =>");
         }
 
-        public override void ExitFunctionLit(GolangParser.FunctionLitContext context)
+        public override void ExitFunctionLit(GoParser.FunctionLitContext context)
         {
             // functionLit
             //     : 'func' function
 
             string parametersSignature = "()";
 
-            if (Signatures.TryGetValue(context.function()?.signature(), out Signature signature))
+            if (Signatures.TryGetValue(context?.signature(), out Signature signature))
             {
                 parametersSignature = signature.GenerateParameterNameList();
 
@@ -69,7 +69,7 @@ namespace go2cs
             //     | compositeLit
             //     | functionLit
 
-            if (!(context.Parent.Parent is GolangParser.OperandContext operandContext))
+            if (!(context?.Parent.Parent is GoParser.OperandContext operandContext))
             {
                 AddWarning(context, $"Could not derive parent operand context from function literal inside \"{m_currentFunctionName}\" function: \"{context.GetText()}\"");
                 PopBlock();

@@ -28,7 +28,7 @@ namespace go2cs
 {
     public partial class PreScanner
     {
-        public override void EnterImportSpec(GolangParser.ImportSpecContext context)
+        public override void EnterImportSpec(GoParser.ImportSpecContext context)
         {
             // Base class parses current import package path
             base.EnterImportSpec(context);

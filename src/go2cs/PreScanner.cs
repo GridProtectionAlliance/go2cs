@@ -49,7 +49,7 @@ namespace go2cs
 
         public string FolderMetadataFileName { get; }
 
-        public PreScanner(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
+        public PreScanner(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
         {
             FolderMetadataFileName = GetFolderMetadataFileName(options, fileName);
         }
@@ -109,7 +109,7 @@ namespace go2cs
             TotalUpToDateMetadata = TotalProcessedFiles - TotalMetadataUpdates;
         }
 
-        private static ScannerBase CreateNewPreScanner(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName)
+        private static ScannerBase CreateNewPreScanner(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName)
         {
             return new PreScanner(tokenStream, parser, options, fileName);
         }

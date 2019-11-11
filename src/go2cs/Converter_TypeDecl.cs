@@ -41,7 +41,7 @@ namespace go2cs
         private int m_typeIdentifierCount;
         private bool m_typeMultipleDeclaration;
 
-        public override void EnterTypeDecl(GolangParser.TypeDeclContext context)
+        public override void EnterTypeDecl(GoParser.TypeDeclContext context)
         {
             // typeDecl
             //     : 'type' ( typeSpec | '(' ( typeSpec eos )* ')' )
@@ -50,7 +50,7 @@ namespace go2cs
             m_typeMultipleDeclaration = context.children.Count > 2;
         }
 
-        public override void ExitTypeDecl(GolangParser.TypeDeclContext context)
+        public override void ExitTypeDecl(GoParser.TypeDeclContext context)
         {
             // typeDecl
             //     : 'type' ( typeSpec | '(' ( typeSpec eos )* ')' )
@@ -63,7 +63,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitTypeSpec(GolangParser.TypeSpecContext context)
+        public override void ExitTypeSpec(GoParser.TypeSpecContext context)
         {
             // typeSpec
             //     : IDENTIFIER type
@@ -205,7 +205,7 @@ namespace go2cs
 
                 m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
             }
-            else if (Types.TryGetValue(context.type(), out TypeInfo typeInfo))
+            else if (Types.TryGetValue(context, out TypeInfo typeInfo))
             {
                 if (typeInfo.TypeClass == TypeClass.Function)
                 {
@@ -281,7 +281,7 @@ namespace go2cs
             m_typeIdentifierCount++;
         }
 
-        private void RecurseInheritedInterfaces(GolangParser.TypeSpecContext context, string identifier, InterfaceInfo interfaceInfo, List<FunctionSignature> functions, List<string> inheritedTypeNames = null, bool useFullTypeName = false)
+        private void RecurseInheritedInterfaces(GoParser.TypeSpecContext context, string identifier, InterfaceInfo interfaceInfo, List<FunctionSignature> functions, List<string> inheritedTypeNames = null, bool useFullTypeName = false)
         {
             foreach (string interfaceName in interfaceInfo.GetInheritedInterfaceNames())
             {
@@ -298,7 +298,7 @@ namespace go2cs
             }
         }
 
-        private void RecurseInheritedInterfaces(GolangParser.TypeSpecContext context, string identifier, StructInfo structInfo, Dictionary<string, List<FunctionSignature>> fieldFunctions, HashSet<string> inheritedTypeNames = null, bool useFullTypeName = false)
+        private void RecurseInheritedInterfaces(GoParser.TypeSpecContext context, string identifier, StructInfo structInfo, Dictionary<string, List<FunctionSignature>> fieldFunctions, HashSet<string> inheritedTypeNames = null, bool useFullTypeName = false)
         {
             foreach (FieldInfo field in structInfo.GetAnonymousFields())
             {
@@ -383,7 +383,7 @@ namespace go2cs
             return interfaceFileMetadata != null;
         }
 
-        private void SearchPromotedStructFields(GolangParser.TypeSpecContext context, string identifier, StructInfo structInfo, HashSet<string> inheritedTypeNames, Dictionary<string, List<FieldInfo>> promotedFields, HashSet<string> promotedStructTypeNames = null, bool useFullTypeName = false)
+        private void SearchPromotedStructFields(GoParser.TypeSpecContext context, string identifier, StructInfo structInfo, HashSet<string> inheritedTypeNames, Dictionary<string, List<FieldInfo>> promotedFields, HashSet<string> promotedStructTypeNames = null, bool useFullTypeName = false)
         {
             foreach (FieldInfo field in structInfo.GetAnonymousFields())
             {

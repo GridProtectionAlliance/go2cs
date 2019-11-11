@@ -32,16 +32,16 @@ namespace go2cs
         private readonly ParseTreeValues<List<FieldInfo>> m_structFields = new ParseTreeValues<List<FieldInfo>>();
         private readonly ParseTreeValues<List<FunctionSignature>> m_interfaceMethods = new ParseTreeValues<List<FunctionSignature>>();
 
-        public override void ExitStructType(GolangParser.StructTypeContext context)
+        public override void ExitStructType(GoParser.StructTypeContext context)
         {
             List<FieldInfo> fields = new List<FieldInfo>();
 
             for (int i = 0; i < context.fieldDecl().Length; i++)
             {
-                GolangParser.FieldDeclContext fieldDecl = context.fieldDecl(i);
-                string description = ToStringLiteral(fieldDecl.STRING_LIT()?.GetText());
+                GoParser.FieldDeclContext fieldDecl = context.fieldDecl(i);
+                string description = ToStringLiteral(fieldDecl.string_()?.GetText());
 
-                if (Identifiers.TryGetValue(fieldDecl.identifierList(), out string[] identifiers) && Types.TryGetValue(fieldDecl.type(), out TypeInfo typeInfo))
+                if (Identifiers.TryGetValue(fieldDecl.identifierList(), out string[] identifiers) && Types.TryGetValue(fieldDecl, out TypeInfo typeInfo))
                 {
                     foreach (string identifier in identifiers)
                     {
@@ -57,7 +57,7 @@ namespace go2cs
                 }
                 else
                 {
-                    GolangParser.AnonymousFieldContext anonymousField = fieldDecl.anonymousField();
+                    GoParser.AnonymousFieldContext anonymousField = fieldDecl.anonymousField();
 
                     if (Types.TryGetValue(anonymousField, out typeInfo))
                     {
@@ -82,7 +82,7 @@ namespace go2cs
             m_structFields[context] = fields;
         }
 
-        public override void EnterInterfaceType(GolangParser.InterfaceTypeContext context)
+        public override void EnterInterfaceType(GoParser.InterfaceTypeContext context)
         {
             Result = new List<ParameterInfo>(new[] { new ParameterInfo
             {
@@ -92,13 +92,13 @@ namespace go2cs
             }});
         }
 
-        public override void ExitInterfaceType(GolangParser.InterfaceTypeContext context)
+        public override void ExitInterfaceType(GoParser.InterfaceTypeContext context)
         {
             List<FunctionSignature> methods = new List<FunctionSignature>();
 
             for (int i = 0; i < context.methodSpec().Length; i++)
             {
-                GolangParser.MethodSpecContext methodSpec = context.methodSpec(i);
+                GoParser.MethodSpecContext methodSpec = context.methodSpec(i);
 
                 string identifier = methodSpec.IDENTIFIER()?.GetText();
 

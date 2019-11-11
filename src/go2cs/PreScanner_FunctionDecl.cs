@@ -42,14 +42,14 @@ namespace go2cs
             m_hasRecover = false;
         }
 
-        private FunctionInfo ExitMethod(GolangParser.IFunctionContext context)
+        private FunctionInfo ExitMethod(GoParser.IFunctionContext context)
         {
             string identifer = context.IDENTIFIER().GetText();
-            GolangParser.SignatureContext signatureContext = context.signature();
+            GoParser.SignatureContext signatureContext = context.signature();
 
             if (!Signatures.TryGetValue(signatureContext, out Signature signature))
             {
-                signatureContext = context.function().signature();
+                signatureContext = context.signature();
                 Signatures.TryGetValue(signatureContext, out signature);
             }
 
@@ -69,24 +69,24 @@ namespace go2cs
             };
         }
 
-        public override void EnterFunctionDecl(GolangParser.FunctionDeclContext context)
+        public override void EnterFunctionDecl(GoParser.FunctionDeclContext context)
         {
             EnterMethod();
         }
 
-        public override void EnterMethodDecl(GolangParser.MethodDeclContext context)
+        public override void EnterMethodDecl(GoParser.MethodDeclContext context)
         {
             EnterMethod();
         }
 
-        public override void ExitFunctionDecl(GolangParser.FunctionDeclContext context)
+        public override void ExitFunctionDecl(GoParser.FunctionDeclContext context)
         {
             FunctionInfo functionInfo = ExitMethod(context);
 
             m_functions.Add(GetUniqueIdentifier(m_functions, functionInfo.Signature.Generate()), functionInfo);
         }
 
-        public override void ExitMethodDecl(GolangParser.MethodDeclContext context)
+        public override void ExitMethodDecl(GoParser.MethodDeclContext context)
         {
             FunctionInfo functionInfo = ExitMethod(context);
 
@@ -101,11 +101,11 @@ namespace go2cs
             m_functions.Add(GetUniqueIdentifier(m_functions, functionInfo.Signature.Generate()), functionInfo);
         }
 
-        public override void ExitVarSpec(GolangParser.VarSpecContext context)
+        public override void ExitVarSpec(GoParser.VarSpecContext context)
         {
             if (Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
             {
-                if (!Types.TryGetValue(context.type(), out TypeInfo typeInfo))
+                if (!Types.TryGetValue(context, out TypeInfo typeInfo))
                     typeInfo = TypeInfo.VarType;
 
                 if (ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
@@ -128,7 +128,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitShortVarDecl(GolangParser.ShortVarDeclContext context)
+        public override void ExitShortVarDecl(GoParser.ShortVarDeclContext context)
         {
             if (Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
             {
@@ -155,7 +155,7 @@ namespace go2cs
         // TODO: Look for cases where a pointer is assigned to an address of a variable,
         //       in these cases the variable should be marked as HeapAllocated
 
-        public override void ExitAssignment(GolangParser.AssignmentContext context)
+        public override void ExitAssignment(GoParser.AssignmentContext context)
         {
             if (context.assign_op().GetText() == "=")
             {
@@ -163,12 +163,12 @@ namespace go2cs
             }
         }
 
-        public override void ExitDeferStmt(GolangParser.DeferStmtContext context)
+        public override void ExitDeferStmt(GoParser.DeferStmtContext context)
         {
             m_hasDefer = true;
         }
 
-        public override void ExitExpressionStmt(GolangParser.ExpressionStmtContext context)
+        public override void ExitExpressionStmt(GoParser.ExpressionStmtContext context)
         {
             // TODO: Better to directly find tokens in PrimaryExpressions tree values
             string expression = context.expression().GetText();

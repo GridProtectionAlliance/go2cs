@@ -36,7 +36,7 @@ namespace go2cs
         private string m_lastEolImportSpecComment = "";
         private readonly HashSet<string> m_usingStatements = new HashSet<string>(StringComparer.Ordinal);
 
-        public override void EnterImportDecl(GolangParser.ImportDeclContext context)
+        public override void EnterImportDecl(GoParser.ImportDeclContext context)
         {
             if (!string.IsNullOrWhiteSpace(m_packageLevelComments))
             {
@@ -49,7 +49,7 @@ namespace go2cs
             m_usingStatements.UnionWith(RequiredUsings.Select(usingType => $"using {usingType};"));
         }
 
-        public override void EnterImportSpec(GolangParser.ImportSpecContext context)
+        public override void EnterImportSpec(GoParser.ImportSpecContext context)
         {
             // Base class parses current import package path
             base.EnterImportSpec(context);
@@ -113,7 +113,7 @@ namespace go2cs
                 m_targetFile.Append(m_lastEolImportSpecComment);
         }
 
-        public override void ExitImportSpec(GolangParser.ImportSpecContext context)
+        public override void ExitImportSpec(GoParser.ImportSpecContext context)
         {
             // There can be only one... first import spec
             if (m_firstImportSpec)

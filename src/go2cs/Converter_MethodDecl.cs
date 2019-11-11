@@ -31,7 +31,7 @@ namespace go2cs
 {
     public partial class Converter
     {
-        public override void EnterMethodDecl(GolangParser.MethodDeclContext context)
+        public override void EnterMethodDecl(GoParser.MethodDeclContext context)
         {
             m_inFunction = true; // May need to scope certain objects, like consts, to current function
             m_originalFunctionName = context.IDENTIFIER().GetText();
@@ -46,7 +46,7 @@ namespace go2cs
             m_targetFile.AppendLine($"{Spacing()}{m_functionResultTypeMarker} {m_currentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
         }
 
-        public override void ExitMethodDecl(GolangParser.MethodDeclContext context)
+        public override void ExitMethodDecl(GoParser.MethodDeclContext context)
         {
             bool signatureOnly = false;
 
@@ -55,7 +55,7 @@ namespace go2cs
 
             if (Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> functionParameters) && (object)functionParameters != null)
                 signatureOnly = true;
-            else if (!Parameters.TryGetValue(context.function()?.signature()?.parameters(), out functionParameters) || (object)functionParameters == null)
+            else if (!Parameters.TryGetValue(context.signature()?.parameters(), out functionParameters) || (object)functionParameters == null)
                 functionParameters = new List<ParameterInfo>();
 
             IEnumerable<ParameterInfo> parameters = receiverParameters.Concat(functionParameters);

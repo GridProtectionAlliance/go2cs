@@ -32,7 +32,7 @@ namespace go2cs
         private int m_varIdentifierCount;
         private bool m_varMultipleDeclaration;
 
-        public override void EnterVarDecl(GolangParser.VarDeclContext context)
+        public override void EnterVarDecl(GoParser.VarDeclContext context)
         {
             // varDecl
             //     : 'var' ( varSpec | '(' ( varSpec eos )* ')' )
@@ -41,7 +41,7 @@ namespace go2cs
             m_varMultipleDeclaration = context.children.Count > 2;
         }
 
-        public override void ExitVarDecl(GolangParser.VarDeclContext context)
+        public override void ExitVarDecl(GoParser.VarDeclContext context)
         {
             // varDecl
             //     : 'var' ( varSpec | '(' ( varSpec eos )* ')' )
@@ -56,7 +56,7 @@ namespace go2cs
             m_targetFile.Append(CheckForCommentsRight(context));
         }
 
-        public override void ExitVarSpec(GolangParser.VarSpecContext context)
+        public override void ExitVarSpec(GoParser.VarSpecContext context)
         {
             // varSpec
             //     : identifierList ( type ( '=' expressionList ) ? | '=' expressionList )
@@ -78,7 +78,7 @@ namespace go2cs
                 return;
             }
 
-            Types.TryGetValue(context.type(), out TypeInfo typeInfo);
+            Types.TryGetValue(context, out TypeInfo typeInfo);
 
             string type = typeInfo?.TypeName ?? "var";
             int length = Math.Min(identifiers.Length, expressions?.Length ?? int.MaxValue);

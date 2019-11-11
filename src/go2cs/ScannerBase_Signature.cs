@@ -37,7 +37,7 @@ namespace go2cs
         protected readonly ParseTreeValues<Signature> Signatures = new ParseTreeValues<Signature>();
         protected List<ParameterInfo> Result;
 
-        public override void EnterSignature(GolangParser.SignatureContext context)
+        public override void EnterSignature(GoParser.SignatureContext context)
         {
             Result = new List<ParameterInfo>(new[] { new ParameterInfo
             {
@@ -47,7 +47,7 @@ namespace go2cs
             }});
         }
 
-        public override void ExitSignature(GolangParser.SignatureContext context)
+        public override void ExitSignature(GoParser.SignatureContext context)
         {
             Parameters.TryGetValue(context.parameters(), out List<ParameterInfo> parameters);
             Signatures[context] = new Signature
@@ -57,14 +57,14 @@ namespace go2cs
             };
         }
 
-        public override void ExitResult(GolangParser.ResultContext context)
+        public override void ExitResult(GoParser.ResultContext context)
         {
             //result
             //  : parameters
             //  | type
             if (!Parameters.TryGetValue(context.parameters(), out Result))
             {
-                if (Types.TryGetValue(context.type(), out TypeInfo typeInfo))
+                if (Types.TryGetValue(context, out TypeInfo typeInfo))
                 {
                     Result = new List<ParameterInfo>(new[] { new ParameterInfo
                     {

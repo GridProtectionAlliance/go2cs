@@ -75,7 +75,7 @@ namespace go2cs
             m_blockOuterSuffixInjection.Push(suffix);
         }
 
-        public override void EnterBlock(GolangParser.BlockContext context)
+        public override void EnterBlock(GoParser.BlockContext context)
         {
             // block
             //     : '{' statementList '}'
@@ -103,11 +103,11 @@ namespace go2cs
             IndentLevel++;
         }
 
-        public override void ExitBlock(GolangParser.BlockContext context)
+        public override void ExitBlock(GoParser.BlockContext context)
         {
             IndentLevel--;
 
-            GolangParser.StatementListContext statementListContext = context.statementList();
+            GoParser.StatementListContext statementListContext = context.statementList();
 
             if (statementListContext.statement().Length > 0)
                 m_firstStatementIsReturn = statementListContext.statement(0).returnStmt() != null;

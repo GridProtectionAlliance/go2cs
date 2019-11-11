@@ -23,13 +23,12 @@
 
 using Antlr4.Runtime.Tree;
 
-public partial class GolangParser
+// ReSharper disable once CheckNamespace
+public partial class GoParser
 {
     public interface IFunctionContext
     {
         ITerminalNode IDENTIFIER();
-
-        FunctionContext function();
 
         SignatureContext signature();
     }

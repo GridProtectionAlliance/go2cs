@@ -28,11 +28,11 @@ namespace go2cs
 {
     public partial class PreScanner
     {
-        public override void ExitTypeSpec(GolangParser.TypeSpecContext context)
+        public override void ExitTypeSpec(GoParser.TypeSpecContext context)
         {
             string identifier = context.IDENTIFIER().GetText();
 
-            if (m_interfaceMethods.TryGetValue(context.type()?.typeLit()?.interfaceType(), out List<FunctionSignature> methods))
+            if (m_interfaceMethods.TryGetValue(context.type_()?.typeLit()?.interfaceType(), out List<FunctionSignature> methods))
             {
                 m_interfaces.Add(GetUniqueIdentifier(m_interfaces, identifier), new InterfaceInfo
                 {
@@ -40,7 +40,7 @@ namespace go2cs
                     Methods = methods.ToArray()
                 });
             }
-            else if (m_structFields.TryGetValue(context.type()?.typeLit()?.structType(), out List<FieldInfo> fields))
+            else if (m_structFields.TryGetValue(context.type_()?.typeLit()?.structType(), out List<FieldInfo> fields))
             {
                 m_structs.Add(GetUniqueIdentifier(m_structs, identifier), new StructInfo
                 {

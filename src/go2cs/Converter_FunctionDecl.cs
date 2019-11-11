@@ -45,7 +45,7 @@ namespace go2cs
         private string m_functionParametersMarker;
         private string m_functionExecContextMarker;
 
-        public override void EnterFunctionDecl(GolangParser.FunctionDeclContext context)
+        public override void EnterFunctionDecl(GoParser.FunctionDeclContext context)
         {
             m_inFunction = true; // May need to scope certain objects, like consts, to current function
             m_originalFunctionName = context.IDENTIFIER().GetText();
@@ -73,13 +73,13 @@ namespace go2cs
             m_targetFile.AppendLine($"{Spacing()}{scope} static {m_functionResultTypeMarker} {m_currentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
         }
 
-        public override void ExitFunctionDecl(GolangParser.FunctionDeclContext context)
+        public override void ExitFunctionDecl(GoParser.FunctionDeclContext context)
         {
             bool signatureOnly = false;
 
             if (Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) && (object)parameters != null)
                 signatureOnly = true;
-            else if (!Parameters.TryGetValue(context.function()?.signature()?.parameters(), out parameters) || (object)parameters == null)
+            else if (!Parameters.TryGetValue(context.signature()?.parameters(), out parameters) || (object)parameters == null)
                 parameters = new List<ParameterInfo>();
 
             string functionSignature = FunctionSignature.Generate(m_originalFunctionName, parameters);
@@ -159,7 +159,7 @@ namespace go2cs
             m_targetFile.Append(CheckForCommentsRight(context));
         }
 
-        //public override void ExitFunction(GolangParser.FunctionContext context)
+        //public override void ExitFunction(GoParser.FunctionContext context)
         //{
         //    string tempBlock = RemoveSurrounding(context.block().GetText(), "{", "}");
 

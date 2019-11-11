@@ -33,7 +33,7 @@ namespace go2cs
         private string m_namespaceFooter;
 
         // TopLevelDecl is visited once per each encountered Declaration, FunctionDecl or MethodDecl
-        public override void EnterTopLevelDecl(GolangParser.TopLevelDeclContext context)
+        public override void EnterTopLevelDecl(GoParser.TopLevelDeclContext context)
         {
             IndentLevel++;
 
@@ -77,7 +77,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitTopLevelDecl(GolangParser.TopLevelDeclContext context)
+        public override void ExitTopLevelDecl(GoParser.TopLevelDeclContext context)
         {
             // There can be only one... first top level declaration
             if (m_firstTopLevelDeclaration)

@@ -45,18 +45,18 @@ namespace go2cs
         //  conversion (required)
         protected readonly ParseTreeValues<TypeInfo> Types = new ParseTreeValues<TypeInfo>();
 
-        public override void ExitType(GolangParser.TypeContext context)
+        public override void ExitType_(GoParser.Type_Context context)
         {
-            if (context.type() != null)
+            if (context != null)
             {
-                if (Types.TryGetValue(context.type(), out TypeInfo typeInfo))
+                if (Types.TryGetValue(context, out TypeInfo typeInfo))
                     Types[context] = typeInfo;
                 else
                     AddWarning(context, $"Failed to find sub-type in type expression \"{context.GetText()}\"");
             }
         }
 
-        public override void EnterTypeName(GolangParser.TypeNameContext context)
+        public override void EnterTypeName(GoParser.TypeNameContext context)
         {
             string type = context.GetText();
 
@@ -69,11 +69,11 @@ namespace go2cs
             };
         }
 
-        public override void ExitPointerType(GolangParser.PointerTypeContext context)
+        public override void ExitPointerType(GoParser.PointerTypeContext context)
         {
             string name = context.GetText();
 
-            if (!Types.TryGetValue(context.type(), out TypeInfo typeInfo))
+            if (!Types.TryGetValue(context, out TypeInfo typeInfo))
             {
                 AddWarning(context, $"Failed to find pointer type info for \"{name}\"");
                 return;
@@ -133,11 +133,11 @@ namespace go2cs
             }
         }
 
-        public override void ExitArrayType(GolangParser.ArrayTypeContext context)
+        public override void ExitArrayType(GoParser.ArrayTypeContext context)
         {
             string name = context.GetText();
 
-            if (!Types.TryGetValue(context.elementType().type(), out TypeInfo typeInfo))
+            if (!Types.TryGetValue(context.elementType(), out TypeInfo typeInfo))
             {
                 AddWarning(context, $"Failed to find array type info for \"{name}\"");
                 return;
@@ -185,16 +185,16 @@ namespace go2cs
             };
         }
 
-        public override void ExitMapType(GolangParser.MapTypeContext context)
+        public override void ExitMapType(GoParser.MapTypeContext context)
         {
             string type = context.GetText();
 
-            Types.TryGetValue(context.type(), out TypeInfo keyTypeInfo);
+            Types.TryGetValue(context, out TypeInfo keyTypeInfo);
 
             if (keyTypeInfo == null)
                 return; // throw new InvalidOperationException("Map key type undefined.");
 
-            Types.TryGetValue(context.elementType().type(), out TypeInfo elementTypeInfo);
+            Types.TryGetValue(context.elementType(), out TypeInfo elementTypeInfo);
 
             if (elementTypeInfo == null)
                 return; // throw new InvalidOperationException("Map element type undefined.");
@@ -212,9 +212,9 @@ namespace go2cs
             };
         }
 
-        public override void ExitSliceType(GolangParser.SliceTypeContext context)
+        public override void ExitSliceType(GoParser.SliceTypeContext context)
         {
-            Types.TryGetValue(context.elementType().type(), out TypeInfo typeInfo);
+            Types.TryGetValue(context.elementType(), out TypeInfo typeInfo);
 
             if (typeInfo == null)
                 typeInfo = TypeInfo.ObjectType;
@@ -228,10 +228,10 @@ namespace go2cs
             };
         }
 
-        public override void ExitChannelType(GolangParser.ChannelTypeContext context)
+        public override void ExitChannelType(GoParser.ChannelTypeContext context)
         {
             // TODO: Update to reference proper channel type name when added
-            Types.TryGetValue(context.elementType().type(), out TypeInfo typeInfo);
+            Types.TryGetValue(context.elementType(), out TypeInfo typeInfo);
 
             if (typeInfo == null)
                 typeInfo = TypeInfo.ObjectType;
@@ -245,7 +245,7 @@ namespace go2cs
             };
         }
 
-        public override void ExitInterfaceType(GolangParser.InterfaceTypeContext context)
+        public override void ExitInterfaceType(GoParser.InterfaceTypeContext context)
         {
             if (context.methodSpec()?.Length == 0)
             {
@@ -264,7 +264,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitStructType(GolangParser.StructTypeContext context)
+        public override void ExitStructType(GoParser.StructTypeContext context)
         {
             // TODO: Turn into a strongly typed object and declare prior to function
             // All intra-function scoped declared structures are
@@ -272,7 +272,7 @@ namespace go2cs
             Types[context.Parent.Parent] = TypeInfo.DynamicType;
         }
 
-        public override void ExitFunctionType(GolangParser.FunctionTypeContext context)
+        public override void ExitFunctionType(GoParser.FunctionTypeContext context)
         {
             Signatures.TryGetValue(context.signature(), out Signature signature);
 

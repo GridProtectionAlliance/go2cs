@@ -27,10 +27,10 @@ namespace go2cs
 {
     public partial class ScannerBase
     {
-        public override void EnterImportSpec(GolangParser.ImportSpecContext context)
+        public override void EnterImportSpec(GoParser.ImportSpecContext context)
         {
             // Remove quotes from package name
-            CurrentImportPath = RemoveSurrounding(ToStringLiteral(context.importPath().STRING_LIT().GetText()));
+            CurrentImportPath = RemoveSurrounding(ToStringLiteral(context.importPath().string_().GetText()));
 
             // Add package to import queue
             ImportQueue.Add(CurrentImportPath);

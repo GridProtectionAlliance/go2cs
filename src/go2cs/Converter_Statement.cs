@@ -58,7 +58,7 @@ namespace go2cs
         private int m_forExpressionLevel;
         private bool m_fallThrough;
 
-        public override void ExitStatement(GolangParser.StatementContext context)
+        public override void ExitStatement(GoParser.StatementContext context)
         {
             if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
             {
@@ -69,7 +69,7 @@ namespace go2cs
             }
         }
 
-        public override void EnterLabeledStmt(GolangParser.LabeledStmtContext context)
+        public override void EnterLabeledStmt(GoParser.LabeledStmtContext context)
         {
             // labeledStmt
             //     : IDENTIFIER ':' statement
@@ -81,7 +81,7 @@ namespace go2cs
             // Check labeled break in for loop, select and switch
         }
 
-        public override void ExitLabeledStmt(GolangParser.LabeledStmtContext context)
+        public override void ExitLabeledStmt(GoParser.LabeledStmtContext context)
         {
             // labeledStmt
             //     : IDENTIFIER ':' statement
@@ -97,7 +97,7 @@ namespace go2cs
             m_targetFile.Append(statement);
         }
 
-        public override void ExitSendStmt(GolangParser.SendStmtContext context)
+        public override void ExitSendStmt(GoParser.SendStmtContext context)
         {
             // sendStmt
             //     : expression '<-' expression
@@ -119,7 +119,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitExpressionStmt(GolangParser.ExpressionStmtContext context)
+        public override void ExitExpressionStmt(GoParser.ExpressionStmtContext context)
         {
             // expressionStmt
             //     : expression
@@ -141,7 +141,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitIncDecStmt(GolangParser.IncDecStmtContext context)
+        public override void ExitIncDecStmt(GoParser.IncDecStmtContext context)
         {
             // incDecStmt
             //     : expression('++' | '--')
@@ -163,7 +163,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitAssignment(GolangParser.AssignmentContext context)
+        public override void ExitAssignment(GoParser.AssignmentContext context)
         {
             // assignment
             //     : expressionList assign_op expressionList
@@ -227,7 +227,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitShortVarDecl(GolangParser.ShortVarDeclContext context)
+        public override void ExitShortVarDecl(GoParser.ShortVarDeclContext context)
         {
             // shortVarDecl
             //     : identifierList ':=' expressionList
@@ -272,7 +272,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitGoStmt(GolangParser.GoStmtContext context)
+        public override void ExitGoStmt(GoParser.GoStmtContext context)
         {
             // goStmt
             //     : 'go' expression
@@ -291,7 +291,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitReturnStmt(GolangParser.ReturnStmtContext context)
+        public override void ExitReturnStmt(GoParser.ReturnStmtContext context)
         {
             // returnStmt
             //     : 'return' expressionList?
@@ -312,7 +312,7 @@ namespace go2cs
                 m_targetFile.AppendLine();
         }
 
-        public override void ExitBreakStmt(GolangParser.BreakStmtContext context)
+        public override void ExitBreakStmt(GoParser.BreakStmtContext context)
         {
             // breakStmt
             //     : 'break' IDENTIFIER ?
@@ -348,7 +348,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitContinueStmt(GolangParser.ContinueStmtContext context)
+        public override void ExitContinueStmt(GoParser.ContinueStmtContext context)
         {
             // continueStmt
             //     : 'continue' IDENTIFIER ?
@@ -384,7 +384,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitGotoStmt(GolangParser.GotoStmtContext context)
+        public override void ExitGotoStmt(GoParser.GotoStmtContext context)
         {
             // gotoStmt
             //     : 'goto' IDENTIFIER
@@ -395,7 +395,7 @@ namespace go2cs
                 m_targetFile.AppendLine();
         }
 
-        public override void ExitFallthroughStmt(GolangParser.FallthroughStmtContext context)
+        public override void ExitFallthroughStmt(GoParser.FallthroughStmtContext context)
         {
             // fallthroughStmt
             //     : 'fallthrough'
@@ -403,7 +403,7 @@ namespace go2cs
             m_fallThrough = true;
         }
 
-        public override void EnterIfStmt(GolangParser.IfStmtContext context)
+        public override void EnterIfStmt(GoParser.IfStmtContext context)
         {
             // ifStmt
             //     : 'if '(simpleStmt ';') ? expression block ( 'else' ( ifStmt | block ) ) ?
@@ -435,14 +435,14 @@ namespace go2cs
             }
         }
 
-        public override void ExitIfStmt(GolangParser.IfStmtContext context)
+        public override void ExitIfStmt(GoParser.IfStmtContext context)
         {
             // ifStmt
             //     : 'if '(simpleStmt ';') ? expression block ( 'else' ( ifStmt | block ) ) ?
 
             if (Expressions.TryGetValue(context.expression(), out string expression))
             {
-                bool isElseIf = context.Parent is GolangParser.IfStmtContext;
+                bool isElseIf = context.Parent is GoParser.IfStmtContext;
 
                 // Replace if markers
                 m_targetFile.Replace(string.Format(IfExpressionMarker, m_ifExpressionLevel), expression);
@@ -477,7 +477,7 @@ namespace go2cs
             m_ifExpressionLevel--;
         }
 
-        public override void EnterExprSwitchStmt(GolangParser.ExprSwitchStmtContext context)
+        public override void EnterExprSwitchStmt(GoParser.ExprSwitchStmtContext context)
         {
             // exprSwitchStmt
             //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
@@ -504,7 +504,7 @@ namespace go2cs
             m_exprSwitchDefaultCase.Push(new StringBuilder());
         }
 
-        public override void EnterExprCaseClause(GolangParser.ExprCaseClauseContext context)
+        public override void EnterExprCaseClause(GoParser.ExprCaseClauseContext context)
         {
             // exprSwitchStmt
             //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
@@ -525,7 +525,7 @@ namespace go2cs
             PushBlock();
         }
 
-        public override void ExitExprCaseClause(GolangParser.ExprCaseClauseContext context)
+        public override void ExitExprCaseClause(GoParser.ExprCaseClauseContext context)
         {
             // exprSwitchStmt
             //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
@@ -538,7 +538,7 @@ namespace go2cs
 
             IndentLevel--;
 
-            GolangParser.ExpressionListContext expressionList = context.exprSwitchCase().expressionList();
+            GoParser.ExpressionListContext expressionList = context.exprSwitchCase().expressionList();
 
             if (expressionList == null)
             {
@@ -560,7 +560,7 @@ namespace go2cs
             m_fallThrough = false;
         }
 
-        public override void ExitExprSwitchStmt(GolangParser.ExprSwitchStmtContext context)
+        public override void ExitExprSwitchStmt(GoParser.ExprSwitchStmtContext context)
         {
             // exprSwitchStmt
             //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
@@ -601,7 +601,7 @@ namespace go2cs
             m_exprSwitchExpressionLevel--;
         }
 
-        public override void EnterTypeSwitchStmt(GolangParser.TypeSwitchStmtContext context)
+        public override void EnterTypeSwitchStmt(GoParser.TypeSwitchStmtContext context)
         {
             // typeSwitchStmt
             //     : 'switch' (simpleStmt ';') ? typeSwitchGuard '{' typeCaseClause * '}'
@@ -639,7 +639,7 @@ namespace go2cs
             m_typeSwitchDefaultCase.Push(new StringBuilder());
         }
 
-        public override void EnterTypeCaseClause(GolangParser.TypeCaseClauseContext context)
+        public override void EnterTypeCaseClause(GoParser.TypeCaseClauseContext context)
         {
             // typeCaseClause
             //     : typeSwitchCase ':' statementList
@@ -660,7 +660,7 @@ namespace go2cs
             PushBlock();
         }
 
-        public override void ExitTypeCaseClause(GolangParser.TypeCaseClauseContext context)
+        public override void ExitTypeCaseClause(GoParser.TypeCaseClauseContext context)
         {
             // typeCaseClause
             //     : typeSwitchCase ':' statementList
@@ -682,12 +682,12 @@ namespace go2cs
                 PopBlock();
                 m_targetFile.Append($"{Spacing()}}}{(m_fallThrough ? ", fallthrough" : "")})");
 
-                GolangParser.TypeListContext typeList = context.typeSwitchCase().typeList();
+                GoParser.TypeListContext typeList = context.typeSwitchCase().typeList();
                 List<string> types = new List<string>();
 
-                for (int i = 0; i < typeList.type().Length; i++)
+                for (int i = 0; i < typeList.ChildCount; i++)
                 {
-                    if (Types.TryGetValue(typeList.type(i), out TypeInfo typeInfo))
+                    if (Types.TryGetValue(typeList.GetChild(i), out TypeInfo typeInfo))
                     {
                         string typeName = typeInfo.TypeName;
 
@@ -710,7 +710,7 @@ namespace go2cs
             m_fallThrough = false;
         }
 
-        public override void ExitTypeSwitchStmt(GolangParser.TypeSwitchStmtContext context)
+        public override void ExitTypeSwitchStmt(GoParser.TypeSwitchStmtContext context)
         {
             // typeSwitchStmt
             //     : 'switch'(simpleStmt ';') ? typeSwitchGuard '{' typeCaseClause * '}'
@@ -751,20 +751,20 @@ namespace go2cs
             m_typeSwitchExpressionLevel--;
         }
 
-        public override void ExitSelectStmt(GolangParser.SelectStmtContext context)
+        public override void ExitSelectStmt(GoParser.SelectStmtContext context)
         {
             // selectStmt
             //     : 'select' '{' commClause * '}'
         }
 
-        public override void EnterForStmt(GolangParser.ForStmtContext context)
+        public override void EnterForStmt(GoParser.ForStmtContext context)
         {
             // forStmt
             //     : 'for' (expression | forClause | rangeClause)? block
 
             m_forExpressionLevel++;
 
-            GolangParser.ForClauseContext forClause = context.forClause();
+            GoParser.ForClauseContext forClause = context.forClause();
 
             if (context.expression() != null || forClause != null && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
             {
@@ -776,8 +776,8 @@ namespace go2cs
                 // forClause
                 //     : simpleStmt? ';' expression? ';' simpleStmt?
 
-                bool hasInitStatement = ForHasInitStatement(forClause, out GolangParser.SimpleStmtContext simpleInitStatement);
-                bool hasPostStatement = ForHasPostStatement(forClause, out GolangParser.SimpleStmtContext simplePostStatement);
+                bool hasInitStatement = ForHasInitStatement(forClause, out GoParser.SimpleStmtContext simpleInitStatement);
+                bool hasPostStatement = ForHasPostStatement(forClause, out GoParser.SimpleStmtContext simplePostStatement);
                 bool useForStyleStatement =
                     hasInitStatement && (simpleInitStatement.shortVarDecl() != null || simpleInitStatement.assignment() != null) &&
                     hasPostStatement && (simplePostStatement.incDecStmt() != null || simplePostStatement.expressionStmt() != null);
@@ -832,12 +832,12 @@ namespace go2cs
             }
         }
 
-        public override void ExitForStmt(GolangParser.ForStmtContext context)
+        public override void ExitForStmt(GoParser.ForStmtContext context)
         {
             // forStmt
             //     : 'for' (expression | forClause | rangeClause)? block
 
-            GolangParser.ForClauseContext forClause = context.forClause();
+            GoParser.ForClauseContext forClause = context.forClause();
 
             if (context.expression() != null || forClause != null && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
             {
@@ -854,8 +854,8 @@ namespace go2cs
                 else
                     AddWarning(context, $"Failed to find expression in for statement: {context.GetText()}");
 
-                bool hasInitStatement = ForHasInitStatement(forClause, out GolangParser.SimpleStmtContext simpleInitStatement);
-                bool hasPostStatement = ForHasPostStatement(forClause, out GolangParser.SimpleStmtContext simplePostStatement);
+                bool hasInitStatement = ForHasInitStatement(forClause, out GoParser.SimpleStmtContext simpleInitStatement);
+                bool hasPostStatement = ForHasPostStatement(forClause, out GoParser.SimpleStmtContext simplePostStatement);
                 bool useForStyleStatement =
                     hasInitStatement && (simpleInitStatement.shortVarDecl() != null || simpleInitStatement.assignment() != null) &&
                     hasPostStatement && (simplePostStatement.incDecStmt() != null || simplePostStatement.expressionStmt() != null);
@@ -936,7 +936,7 @@ namespace go2cs
             m_forExpressionLevel--;
         }
 
-        private bool ForHasInitStatement(GolangParser.ForClauseContext forClause, out GolangParser.SimpleStmtContext simpleStatement)
+        private bool ForHasInitStatement(GoParser.ForClauseContext forClause, out GoParser.SimpleStmtContext simpleStatement)
         {
             simpleStatement = null;
 
@@ -951,7 +951,7 @@ namespace go2cs
                 forClause.children[forClause.children.Count - 1] != simpleStatement;
         }
 
-        private bool ForHasPostStatement(GolangParser.ForClauseContext forClause, out GolangParser.SimpleStmtContext simpleStatement)
+        private bool ForHasPostStatement(GoParser.ForClauseContext forClause, out GoParser.SimpleStmtContext simpleStatement)
         {
             simpleStatement = null;
 
@@ -974,7 +974,7 @@ namespace go2cs
                 forClause.children[forClause.children.Count - 1] == simpleStatement;
         }
 
-        public override void ExitDeferStmt(GolangParser.DeferStmtContext context)
+        public override void ExitDeferStmt(GoParser.DeferStmtContext context)
         {
             // deferStmt
             //     : 'defer' expression

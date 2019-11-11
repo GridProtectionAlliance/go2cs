@@ -284,7 +284,7 @@ namespace go2cs
 
         //private bool IsEndOfLineComment(int tokenIndex, Func<int, int, IList<IToken>> getHiddenTokens)
         //{
-        //    IList<IToken> lineCommentChannel = getHiddenTokens(tokenIndex, GolangLexer.LineCommentChannel);
+        //    IList<IToken> lineCommentChannel = getHiddenTokens(tokenIndex, GoLexer.LineCommentChannel);
 
         //    if (lineCommentChannel?.Count > 0)
         //    {

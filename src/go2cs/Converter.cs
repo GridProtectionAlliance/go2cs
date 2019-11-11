@@ -52,7 +52,7 @@ namespace go2cs
 
         public Dictionary<string, FolderMetadata> ImportMetadata { get; }
 
-        public Converter(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
+        public Converter(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
         {
             FolderMetadata folderMetadata = GetFolderMetadata(Options, SourceFileName);
 
@@ -138,7 +138,7 @@ namespace go2cs
             WriteProjectFiles(options);
         }
 
-        private static ScannerBase CreateNewConverter(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName)
+        private static ScannerBase CreateNewConverter(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName)
         {
             return new Converter(tokenStream, parser, options, fileName);
         }

@@ -37,7 +37,7 @@ namespace go2cs
         //  fieldDecl (optional)
         protected readonly ParseTreeValues<string[]> Identifiers = new ParseTreeValues<string[]>();
 
-        public override void EnterIdentifierList(GolangParser.IdentifierListContext context)
+        public override void EnterIdentifierList(GoParser.IdentifierListContext context)
         {
             List<string> identifers = new List<string>();
 

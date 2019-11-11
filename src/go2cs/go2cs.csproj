@@ -58,11 +58,12 @@
     <Compile Include="Metadata\FileMetadata.cs" />
     <Compile Include="Metadata\StructInfo.cs" />
     <Compile Include="Metadata\VariableInfo.cs" />
+    <Compile Include="Parser\GoLexer.cs" />
+    <Compile Include="Parser\GoParser.cs" />
+    <Compile Include="Parser\GoParserBase.cs" />
+    <Compile Include="Parser\GoParserBaseListener.cs" />
+    <Compile Include="Parser\GoParserListener.cs" />
     <Compile Include="Parser\IFunctionContext.cs" />
-    <Compile Include="Parser\GolangBaseListener.cs" />
-    <Compile Include="Parser\GolangLexer.cs" />
-    <Compile Include="Parser\GolangListener.cs" />
-    <Compile Include="Parser\GolangParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Arguments.cs" />
     <Compile Include="Common.cs" />
@@ -100,8 +101,9 @@
     <Content Include="goutil\README.txt" />
     <Content Include="Parser\README.txt" />
     <None Include="Parser\CompileGrammar.bat" />
-    <None Include="Parser\Golang.g4" />
     <None Include="App.config" />
+    <None Include="Parser\GoLexer.g4" />
+    <None Include="Parser\GoParser.g4" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\goutil\goutil.shproj">
@@ -111,7 +113,7 @@
       <Link>goutil\goutil.projitems</Link>
     </EmbeddedResource>
     <EmbeddedResource Include="..\goutil\array.cs">
-        <Link>goutil\array.cs</Link>
+      <Link>goutil\array.cs</Link>
     </EmbeddedResource>
     <EmbeddedResource Include="..\goutil\builtin.cs">
       <Link>goutil\builtin.cs</Link>

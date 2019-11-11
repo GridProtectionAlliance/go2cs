@@ -32,7 +32,7 @@ namespace go2cs
 
         public string PackageImport { get; private set; }
 
-        public override void EnterPackageClause(GolangParser.PackageClauseContext context)
+        public override void EnterPackageClause(GoParser.PackageClauseContext context)
         {
             Package = SanitizedIdentifier(context.IDENTIFIER().GetText());
 

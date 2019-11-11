@@ -32,7 +32,7 @@ namespace go2cs
         private int m_constIdentifierCount;
         private bool m_constMultipleDeclaration;
 
-        public override void EnterConstDecl(GolangParser.ConstDeclContext context)
+        public override void EnterConstDecl(GoParser.ConstDeclContext context)
         {
             // constDecl
             //     : 'const' ( constSpec | '(' ( constSpec eos )* ')' )
@@ -42,7 +42,7 @@ namespace go2cs
             m_iota = 0;
         }
 
-        public override void ExitConstDecl(GolangParser.ConstDeclContext context)
+        public override void ExitConstDecl(GoParser.ConstDeclContext context)
         {
             // constDecl
             //     : 'const' ( constSpec | '(' ( constSpec eos )* ')' )
@@ -57,7 +57,7 @@ namespace go2cs
             m_targetFile.Append(CheckForCommentsRight(context));
         }
 
-        public override void ExitConstSpec(GolangParser.ConstSpecContext context)
+        public override void ExitConstSpec(GoParser.ConstSpecContext context)
         {
             // constSpec
             //     : identifierList ( type ? '=' expressionList ) ?
@@ -79,7 +79,7 @@ namespace go2cs
                 return;
             }
 
-            Types.TryGetValue(context.type(), out TypeInfo typeInfo);
+            Types.TryGetValue(context, out TypeInfo typeInfo);
 
             // TODO: Using dynamic type here is not ideal - need to use an expression type evaluator
             string type = typeInfo?.TypeName ?? "dynamic";

@@ -42,7 +42,7 @@ namespace go2cs
 
         private string m_packageLevelComments;
 
-        public override void EnterPackageClause(GolangParser.PackageClauseContext context)
+        public override void EnterPackageClause(GoParser.PackageClauseContext context)
         {
             // Go package clause is the first keyword encountered - cache details that
             // will be written out after imports. C# import statements (i.e., usings)

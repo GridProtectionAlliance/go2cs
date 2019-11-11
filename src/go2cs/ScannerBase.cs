@@ -39,7 +39,7 @@ using static go2cs.Common;
 
 namespace go2cs
 {
-    public delegate ScannerBase CreateNewScannerFunction(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName);
+    public delegate ScannerBase CreateNewScannerFunction(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName);
     public delegate bool FileNeedsScanFunction(Options options, string fileName, out string message);
     public delegate void SkippedFileScanFunction(Options options, string fileName, bool showParseTree);
 
@@ -51,7 +51,7 @@ namespace go2cs
     /// interfaces. This base class represents the common scanning code that is used by both the
     /// <see cref="PreScanner"/> and <see cref="Converter"/> classes.
     /// </remarks>
-    public abstract partial class ScannerBase : GolangBaseListener
+    public abstract partial class ScannerBase : GoParserBaseListener
     {
         public const string RootNamespace = "go";
         public const string ClassSuffix = "_package";
@@ -76,7 +76,7 @@ namespace go2cs
 
         public BufferedTokenStream TokenStream { get; }
 
-        public GolangParser Parser { get; }
+        public GoParser Parser { get; }
 
         public string SourceFileName { get; }
 
@@ -92,7 +92,7 @@ namespace go2cs
 
         protected bool UsesUnsafePointers { get; set; }
 
-        protected ScannerBase(BufferedTokenStream tokenStream, GolangParser parser, Options options, string fileName)
+        protected ScannerBase(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName)
         {
             Options = options;
 
@@ -274,9 +274,9 @@ namespace go2cs
             using (StreamReader reader = File.OpenText(fileName))
                 inputStream = new AntlrInputStream(reader);
 
-            GolangLexer lexer = new GolangLexer(inputStream);
+            GoLexer lexer = new GoLexer(inputStream);
             CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-            GolangParser parser = new GolangParser(tokenStream);
+            GoParser parser = new GoParser(tokenStream);
             ScannerBase scanner = createNewScanner(tokenStream, parser, options, fileName);
 
             parser.RemoveErrorListeners();

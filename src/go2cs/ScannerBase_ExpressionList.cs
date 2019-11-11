@@ -39,7 +39,7 @@ namespace go2cs
         //  arguments (optional)
         protected readonly ParseTreeValues<string[]> ExpressionLists = new ParseTreeValues<string[]>();
 
-        public override void ExitExpressionList(GolangParser.ExpressionListContext context)
+        public override void ExitExpressionList(GoParser.ExpressionListContext context)
         {
             List<string> expressions = new List<string>();
 

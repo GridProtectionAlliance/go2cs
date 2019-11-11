@@ -56,7 +56,7 @@ namespace go2cs
         protected readonly ParseTreeValues<string> PrimaryExpressions = new ParseTreeValues<string>();
         protected readonly ParseTreeValues<string> Operands = new ParseTreeValues<string>();
 
-        public override void ExitExpression(GolangParser.ExpressionContext context)
+        public override void ExitExpression(GoParser.ExpressionContext context)
         {
             // expression
             //     : unaryExpr
@@ -88,17 +88,17 @@ namespace go2cs
             }
         }
 
-        public override void ExitUnaryExpr(GolangParser.UnaryExprContext context)
+        public override void ExitUnaryExpr(GoParser.UnaryExprContext context)
         {
             // unaryExpr
             //     : primaryExpr
-            //     | ('+' | '-' | '!' | '^' | '*' | '&' | '<-') unaryExpr
+            //     | ('+' | '-' | '!' | '^' | '*' | '&' | '<-') expression
 
             if (PrimaryExpressions.TryGetValue(context.primaryExpr(), out string primaryExpression))
             {
                 UnaryExpressions[context] = primaryExpression;
             }
-            else if (context.unaryExpr() != null)
+            else if (context.expression() != null)
             {
                 string unaryOP = context.children[0].GetText();
 
@@ -110,23 +110,23 @@ namespace go2cs
                 {
                     // TODO: Handle channel value access (update when channel class is created):
                     unaryOP = null;
-                    UnaryExpressions[context] = $"{UnaryExpressions[context.unaryExpr()]}.Receive()";
+                    UnaryExpressions[context] = $"{UnaryExpressions[context.expression()]}.Receive()";
                 }
                 else if (unaryOP.Equals("&", StringComparison.Ordinal))
                 {
                     // TODO: Handle pointer acquisition context - may need to augment pre-scan metadata for heap allocation notation
                     unaryOP = null;
-                    UnaryExpressions[context] = $"ref {UnaryExpressions[context.unaryExpr()]}";
+                    UnaryExpressions[context] = $"ref {UnaryExpressions[context.expression()]}";
                 }
                 else if (unaryOP.Equals("*", StringComparison.Ordinal))
                 {
                     // TODO: Handle pointer dereference context - if this is a ref variable, Deref call is unnecessary
                     unaryOP = null;
-                    UnaryExpressions[context] = $"{UnaryExpressions[context.unaryExpr()]}.Deref";
+                    UnaryExpressions[context] = $"{UnaryExpressions[context.expression()]}.Deref";
                 }
 
                 if ((object)unaryOP != null)
-                    UnaryExpressions[context] = $"{unaryOP}{UnaryExpressions[context.unaryExpr()]}";
+                    UnaryExpressions[context] = $"{unaryOP}{UnaryExpressions[context.expression()]}";
             }
             else if (!UnaryExpressions.ContainsKey(context))
             {
@@ -134,7 +134,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitPrimaryExpr(GolangParser.PrimaryExprContext context)
+        public override void ExitPrimaryExpr(GoParser.PrimaryExprContext context)
         {
             // primaryExpr
             //     : operand
@@ -159,7 +159,7 @@ namespace go2cs
                 // conversion
                 //     : type '(' expression ',' ? ')'
 
-                if (Types.TryGetValue(context.conversion().type(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.conversion().expression(), out string expression))
+                if (Types.TryGetValue(context.conversion(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.conversion().expression(), out string expression))
                 {
                     if (typeInfo.TypeName.StartsWith("*(*"))
                     {
@@ -183,12 +183,12 @@ namespace go2cs
                     AddWarning(context, $"Failed to find type or sub-expression for the conversion expression in \"{context.GetText()}\"");
                 }
             }
-            else if (context.selector() != null)
+            else if (context.DOT() != null)
             {
                 // selector
                 //     : '.' IDENTIFIER
 
-                PrimaryExpressions[context] = $"{primaryExpression}.{SanitizedIdentifier(context.selector().IDENTIFIER().GetText())}";
+                PrimaryExpressions[context] = $"{primaryExpression}.{SanitizedIdentifier(context.IDENTIFIER().GetText())}";
             }
             else if (context.index() != null)
             {
@@ -205,7 +205,7 @@ namespace go2cs
                 // slice
                 //     : '['((expression ? ':' expression ? ) | (expression ? ':' expression ':' expression)) ']'
 
-                GolangParser.SliceContext sliceContext = context.slice();
+                GoParser.SliceContext sliceContext = context.slice();
 
                 if (sliceContext.children.Count == 3)
                 {
@@ -214,7 +214,7 @@ namespace go2cs
                 }
                 else if (sliceContext.children.Count == 4)
                 {
-                    bool expressionIsLeft = sliceContext.children[1] is GolangParser.ExpressionContext;
+                    bool expressionIsLeft = sliceContext.children[1] is GoParser.ExpressionContext;
 
                     // primaryExpr[low:] or primaryExpr[:high]
                     if (Expressions.TryGetValue(sliceContext.expression(0), out string expression))
@@ -224,7 +224,7 @@ namespace go2cs
                 }
                 else if (sliceContext.children.Count == 5)
                 {
-                    if (sliceContext.children[1] is GolangParser.ExpressionContext && sliceContext.children[3] is GolangParser.ExpressionContext)
+                    if (sliceContext.children[1] is GoParser.ExpressionContext && sliceContext.children[3] is GoParser.ExpressionContext)
                     {
                         // primaryExpr[low:high]
                         if (Expressions.TryGetValue(sliceContext.expression(0), out string lowExpression) && Expressions.TryGetValue(sliceContext.expression(1), out string highExpression))
@@ -259,7 +259,7 @@ namespace go2cs
                 // typeAssertion
                 //     : '.' '(' type ')'
 
-                if (Types.TryGetValue(context.typeAssertion().type(), out TypeInfo typeInfo))
+                if (Types.TryGetValue(context.typeAssertion(), out TypeInfo typeInfo))
                     PrimaryExpressions[context] = $"{primaryExpression}.TypeAssert<{typeInfo.TypeName}>()";
                 else
                     AddWarning(context, $"Failed to find type for the type assertion expression in \"{context.GetText()}\"");
@@ -269,10 +269,10 @@ namespace go2cs
                 // arguments
                 //     : '('((expressionList | type(',' expressionList) ? ) '...' ? ',' ? ) ? ')'
 
-                GolangParser.ArgumentsContext argumentsContext = context.arguments();
+                GoParser.ArgumentsContext argumentsContext = context.arguments();
                 List<string> arguments = new List<string>();
 
-                if (Types.TryGetValue(argumentsContext.type(), out TypeInfo typeInfo))
+                if (Types.TryGetValue(argumentsContext, out TypeInfo typeInfo))
                     arguments.Add($"typeof({typeInfo.TypeName})");
 
                 if (ExpressionLists.TryGetValue(argumentsContext.expressionList(), out string[] expressions))
@@ -286,7 +286,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitOperand( GolangParser.OperandContext context)
+        public override void ExitOperand( GoParser.OperandContext context)
         {
             // operand
             //     : literal
@@ -300,7 +300,7 @@ namespace go2cs
             // Remaining operands contexts handled below...
         }
 
-        public override void ExitBasicLit(GolangParser.BasicLitContext context)
+        public override void ExitBasicLit(GoParser.BasicLitContext context)
         {
             // operand
             //     : literal
@@ -313,7 +313,7 @@ namespace go2cs
             //     | compositeLit
             //     | functionLit
 
-            if (!(context.Parent.Parent is GolangParser.OperandContext operandContext))
+            if (!(context.Parent.Parent is GoParser.OperandContext operandContext))
             {
                 AddWarning(context, $"Could not derive parent operand context from basic literal: \"{context.GetText()}\"");
                 return;
@@ -337,9 +337,9 @@ namespace go2cs
             {
                 basicLiteral = ReplaceOctalBytes(context.RUNE_LIT().GetText());
             }
-            else if (context.STRING_LIT() != null)
+            else if (context.string_() != null)
             {
-                basicLiteral = ToStringLiteral(ReplaceOctalBytes(context.STRING_LIT().GetText()));
+                basicLiteral = ToStringLiteral(ReplaceOctalBytes(context.string_().GetText()));
             }
             else
             {
@@ -349,7 +349,7 @@ namespace go2cs
             Operands[operandContext] = basicLiteral;
         }
 
-        public override void ExitCompositeLit(GolangParser.CompositeLitContext context)
+        public override void ExitCompositeLit(GoParser.CompositeLitContext context)
         {
             // operand
             //     : literal
@@ -362,7 +362,7 @@ namespace go2cs
             //     | compositeLit
             //     | functionLit
 
-            if (!(context.Parent.Parent is GolangParser.OperandContext operandContext))
+            if (!(context.Parent.Parent is GoParser.OperandContext operandContext))
             {
                 AddWarning(context, $"Could not derive parent operand context from composite literal: \"{context.GetText()}\"");
                 return;
@@ -372,7 +372,7 @@ namespace go2cs
             Operands[operandContext] = SanitizedIdentifier(context.GetText());
         }
 
-        public override void ExitFunctionLit(GolangParser.FunctionLitContext context)
+        public override void ExitFunctionLit(GoParser.FunctionLitContext context)
         {
             // operand
             //     : literal
@@ -385,7 +385,7 @@ namespace go2cs
             //     | compositeLit
             //     | functionLit
 
-            if (!(context.Parent.Parent is GolangParser.OperandContext operandContext))
+            if (!(context.Parent.Parent is GoParser.OperandContext operandContext))
             {
                 AddWarning(context, $"Could not derive parent operand context from function literal: \"{context.GetText()}\"");
                 return;
@@ -398,7 +398,7 @@ namespace go2cs
             Operands[operandContext] = SanitizedIdentifier(context.GetText());
         }
 
-        public override void ExitOperandName(GolangParser.OperandNameContext context)
+        public override void ExitOperandName(GoParser.OperandNameContext context)
         {
             // operand
             //     : literal
@@ -406,7 +406,7 @@ namespace go2cs
             //     | methodExpr
             //     | '(' expression ')'
 
-            if (!(context.Parent is GolangParser.OperandContext operandContext))
+            if (!(context.Parent is GoParser.OperandContext operandContext))
             {
                 AddWarning(context, $"Could not derive parent operand context from operand name: \"{context.GetText()}\"");
                 return;
@@ -419,7 +419,7 @@ namespace go2cs
             Operands[operandContext] = context.GetText();
         }
 
-        public override void ExitMethodExpr([NotNull] GolangParser.MethodExprContext context)
+        public override void ExitMethodExpr([NotNull] GoParser.MethodExprContext context)
         {
             // operand
             //     : literal
@@ -427,7 +427,7 @@ namespace go2cs
             //     | methodExpr
             //     | '(' expression ')'
 
-            if (!(context.Parent is GolangParser.OperandContext operandContext))
+            if (!(context.Parent is GoParser.OperandContext operandContext))
             {
                 AddWarning(context, $"Could not derive parent operand context from method expression: \"{context.GetText()}\"");
                 return;
@@ -441,7 +441,7 @@ namespace go2cs
             //     | '(' '*' typeName ')'
             //     | '(' receiverType ')'
 
-            GolangParser.ReceiverTypeContext receiverType = context.receiverType();
+            GoParser.ReceiverTypeContext receiverType = context.receiverType();
 
             // TODO: Handle type name pointer dereference context - if this is a ref variable, Deref call is unnecessary
             if (receiverType?.children.Count == 4)
