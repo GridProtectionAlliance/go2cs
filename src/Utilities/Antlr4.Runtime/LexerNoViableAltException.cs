@@ -11,6 +11,7 @@ using Antlr4.Runtime.Sharpen;
 namespace Antlr4.Runtime
 {
     [System.Serializable]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2229:Implement serialization constructors", Justification = "<Pending>")]
     public class LexerNoViableAltException : RecognitionException
     {
         private const long serialVersionUID = -730999203913001726L;

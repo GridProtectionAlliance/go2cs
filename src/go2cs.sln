@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2037
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29424.173
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "go2cs", "go2cs\go2cs.csproj", "{DCB4FA2F-9CA3-4535-B9AE-082D076DFB97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "go2cs", "go2cs\go2cs.csproj", "{DCB4FA2F-9CA3-4535-B9AE-082D076DFB97}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root Files", "Root Files", "{E4417714-A721-45FD-B587-8A8A736AF2FA}"
 	ProjectSection(SolutionItems) = preProject
@@ -16,13 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{78E6A8DC-83D6-4536-BE17-211B1B1D0D97}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CommandLine", "Utilities\CommandLine\CommandLine.shproj", "{A058F6AB-A3A4-423C-922F-B7EC7816FE3E}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Antlr4.Runtime", "Utilities\Antlr4.Runtime\Antlr4.Runtime.shproj", "{263E377F-D039-41AA-B6C7-E4D92845D1C5}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "goutil", "goutil\goutil.shproj", "{948613FC-FD76-4C34-97AF-5CC7F5697952}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenGoFuncRefInstances", "Utilities\GenGoFuncRefInstances\GenGoFuncRefInstances.csproj", "{DD935F3A-701E-4C74-97A4-AEB8DA914E57}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenGoFuncRefInstances", "Utilities\GenGoFuncRefInstances\GenGoFuncRefInstances.csproj", "{DD935F3A-701E-4C74-97A4-AEB8DA914E57}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{7062EA78-E676-46F7-B555-C43641A2698F}"
 EndProject
@@ -35,16 +29,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{4D5DA6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6BC3FFAC-C517-49AC-85AB-87CD14858148}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonTests", "Tests\CommonTests\CommonTests.csproj", "{109341DA-4EDF-4BE0-8DB9-A710284C6AC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonTests", "Tests\CommonTests\CommonTests.csproj", "{109341DA-4EDF-4BE0-8DB9-A710284C6AC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickTest", "Utilities\QuickTest\QuickTest.csproj", "{3F91B351-7FB1-4466-8EDA-65777FE10C9B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuickTest", "Utilities\QuickTest\QuickTest.csproj", "{3F91B351-7FB1-4466-8EDA-65777FE10C9B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Antlr4.Runtime.dotnet", "Utilities\Antlr4.Runtime\Antlr4.Runtime.dotnet.csproj", "{6F74186C-18DC-4D9C-AC58-E22A67F4A040}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLine", "Utilities\CommandLine\CommandLine.csproj", "{23EED589-896E-4288-A241-4588EF7490B3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "goutil", "goutil\goutil.csproj", "{2C344A59-4B76-4531-B509-532613965E09}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Utilities\Antlr4.Runtime\Antlr4.Runtime.projitems*{263e377f-d039-41aa-b6c7-e4d92845d1c5}*SharedItemsImports = 13
 		goutil\goutil.projitems*{3f91b351-7fb1-4466-8eda-65777fe10c9b}*SharedItemsImports = 4
-		goutil\goutil.projitems*{948613fc-fd76-4c34-97af-5cc7f5697952}*SharedItemsImports = 13
-		Utilities\CommandLine\CommandLine.projitems*{a058f6ab-a3a4-423c-922f-b7ec7816fe3e}*SharedItemsImports = 13
 		Utilities\Antlr4.Runtime\Antlr4.Runtime.projitems*{dcb4fa2f-9ca3-4535-b9ae-082d076dfb97}*SharedItemsImports = 4
 		Utilities\CommandLine\CommandLine.projitems*{dcb4fa2f-9ca3-4535-b9ae-082d076dfb97}*SharedItemsImports = 4
 	EndGlobalSection
@@ -69,19 +66,31 @@ Global
 		{3F91B351-7FB1-4466-8EDA-65777FE10C9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F91B351-7FB1-4466-8EDA-65777FE10C9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F91B351-7FB1-4466-8EDA-65777FE10C9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F74186C-18DC-4D9C-AC58-E22A67F4A040}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F74186C-18DC-4D9C-AC58-E22A67F4A040}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F74186C-18DC-4D9C-AC58-E22A67F4A040}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F74186C-18DC-4D9C-AC58-E22A67F4A040}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23EED589-896E-4288-A241-4588EF7490B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23EED589-896E-4288-A241-4588EF7490B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23EED589-896E-4288-A241-4588EF7490B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23EED589-896E-4288-A241-4588EF7490B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C344A59-4B76-4531-B509-532613965E09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C344A59-4B76-4531-B509-532613965E09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C344A59-4B76-4531-B509-532613965E09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C344A59-4B76-4531-B509-532613965E09}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DCB4FA2F-9CA3-4535-B9AE-082D076DFB97} = {78E6A8DC-83D6-4536-BE17-211B1B1D0D97}
-		{A058F6AB-A3A4-423C-922F-B7EC7816FE3E} = {BC53B46E-B2FA-4174-A0A2-326DD554B237}
-		{263E377F-D039-41AA-B6C7-E4D92845D1C5} = {BC53B46E-B2FA-4174-A0A2-326DD554B237}
-		{948613FC-FD76-4C34-97AF-5CC7F5697952} = {78E6A8DC-83D6-4536-BE17-211B1B1D0D97}
 		{DD935F3A-701E-4C74-97A4-AEB8DA914E57} = {BC53B46E-B2FA-4174-A0A2-326DD554B237}
 		{4D5DA663-96C4-4BC0-822F-DBFC029296AD} = {7062EA78-E676-46F7-B555-C43641A2698F}
 		{109341DA-4EDF-4BE0-8DB9-A710284C6AC5} = {6BC3FFAC-C517-49AC-85AB-87CD14858148}
 		{3F91B351-7FB1-4466-8EDA-65777FE10C9B} = {BC53B46E-B2FA-4174-A0A2-326DD554B237}
+		{6F74186C-18DC-4D9C-AC58-E22A67F4A040} = {BC53B46E-B2FA-4174-A0A2-326DD554B237}
+		{23EED589-896E-4288-A241-4588EF7490B3} = {BC53B46E-B2FA-4174-A0A2-326DD554B237}
+		{2C344A59-4B76-4531-B509-532613965E09} = {78E6A8DC-83D6-4536-BE17-211B1B1D0D97}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

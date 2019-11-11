@@ -15,7 +15,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileTemplate.tt"
+    #line 1 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "15.0.0.0")]
     public partial class SharedProjectFileTemplate : SharedProjectFileTemplateBase
     {
@@ -26,16 +26,16 @@ namespace go2cs.Templates
         public virtual string TransformText()
         {
             
-            #line 1 "D:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileTemplate.tt"
+            #line 1 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileTemplate.tt"
  // This template creates a <PackageName>.shproj file 
             
             #line default
             #line hidden
-            this.Write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Project ToolsVersion=\"15.0\" xmlns=\"http:/" +
-                    "/schemas.microsoft.com/developer/msbuild/2003\">\n  <PropertyGroup Label=\"Globals\"" +
-                    ">\n    <ProjectGuid>");
+            this.Write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<Project ToolsVersion=\"15.0\" xmlns=\"http:" +
+                    "//schemas.microsoft.com/developer/msbuild/2003\">\r\n  <PropertyGroup Label=\"Global" +
+                    "s\">\r\n    <ProjectGuid>");
             
-            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileTemplate.tt"
+            #line 7 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(UniqueProjectID));
             
             #line default
@@ -49,18 +49,18 @@ namespace go2cs.Templates
   <PropertyGroup />
   <Import Project=""");
             
-            #line 4 "D:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileTemplate.tt"
+            #line 14 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PackageName));
             
             #line default
             #line hidden
-            this.Write(".projitems\" Label=\"Shared\" />\n  <Import Project=\"$(MSBuildExtensionsPath32)\\Micro" +
-                    "soft\\VisualStudio\\v$(VisualStudioVersion)\\CodeSharing\\Microsoft.CodeSharing.CSha" +
-                    "rp.targets\" />\n</Project>\n");
+            this.Write(".projitems\" Label=\"Shared\" />\r\n  <Import Project=\"$(MSBuildExtensionsPath32)\\Micr" +
+                    "osoft\\VisualStudio\\v$(VisualStudioVersion)\\CodeSharing\\Microsoft.CodeSharing.CSh" +
+                    "arp.targets\" />\r\n</Project>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 4 "D:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileTemplate.tt"
+        #line 17 "C:\Projects\go2cs\src\go2cs\Templates\SharedProjectFileTemplate.tt"
 
 // Template Parameters
 public string PackageName;

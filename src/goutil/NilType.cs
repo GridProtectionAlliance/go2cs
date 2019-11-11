@@ -22,6 +22,7 @@
 //******************************************************************************************************
 // ReSharper disable CheckNamespace
 
+using System;
 using System.Runtime.CompilerServices;
 
 namespace go
@@ -125,5 +126,29 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, object obj) => obj != null;
+    }
+
+    /// <summary>
+    /// Represents the "nil" type.
+    /// </summary>
+    public class NilType<T> : NilType where T : class
+    {
+        public override int GetHashCode() => 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Equals(object obj) => base.Equals(obj);
+
+        // Enable comparisons between nil and Abser interface
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(T value, NilType<T> nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(T value, NilType<T> nil) => !(value == nil);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(NilType<T> nil, T value) => value == nil;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(NilType<T> nil, T value) => value != nil;
     }
 }

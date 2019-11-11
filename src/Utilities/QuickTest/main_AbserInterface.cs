@@ -91,21 +91,21 @@ namespace go
 
 namespace go
 {
-    public partial class NilType
-    {
-        // Enable comparisons between nil and Abser interface
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(go.main_package.Abser value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
+    //public partial class NilType
+    //{
+    //    // Enable comparisons between nil and Abser interface
+    //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    //    public static bool operator ==(go.main_package.Abser value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(go.main_package.Abser value, NilType nil) => !(value == nil);
+    //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    //    public static bool operator !=(go.main_package.Abser value, NilType nil) => !(value == nil);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(NilType nil, go.main_package.Abser value) => value == nil;
+    //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    //    public static bool operator ==(NilType nil, go.main_package.Abser value) => value == nil;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(NilType nil, go.main_package.Abser value) => value != nil;
-    }
+    //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    //    public static bool operator !=(NilType nil, go.main_package.Abser value) => value != nil;
+    //}
 
     public static class main_AbserExtensions
     {
