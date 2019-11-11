@@ -205,7 +205,7 @@ namespace go2cs
 
                 m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
             }
-            else if (Types.TryGetValue(context, out TypeInfo typeInfo))
+            else if (Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
             {
                 if (typeInfo.TypeClass == TypeClass.Function)
                 {

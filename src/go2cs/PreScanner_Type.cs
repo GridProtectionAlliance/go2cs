@@ -41,7 +41,7 @@ namespace go2cs
                 GoParser.FieldDeclContext fieldDecl = context.fieldDecl(i);
                 string description = ToStringLiteral(fieldDecl.string_()?.GetText());
 
-                if (Identifiers.TryGetValue(fieldDecl.identifierList(), out string[] identifiers) && Types.TryGetValue(fieldDecl, out TypeInfo typeInfo))
+                if (Identifiers.TryGetValue(fieldDecl.identifierList(), out string[] identifiers) && Types.TryGetValue(fieldDecl.type_(), out TypeInfo typeInfo))
                 {
                     foreach (string identifier in identifiers)
                     {
@@ -104,7 +104,8 @@ namespace go2cs
 
                 if (string.IsNullOrEmpty(identifier))
                 {
-                    if (Types.TryGetValue(methodSpec, out TypeInfo typeInfo)){
+                    if (Types.TryGetValue(methodSpec, out TypeInfo typeInfo))
+                    {
                         methods.Add(new FunctionSignature
                         {
                             Name = GetValidIdentifierName(typeInfo.TypeName),

@@ -47,14 +47,19 @@ namespace go2cs
 
         public override void ExitType_(GoParser.Type_Context context)
         {
-            if (context != null)
+            if (context.type_() != null)
             {
-                if (Types.TryGetValue(context, out TypeInfo typeInfo))
+                if (Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
                     Types[context] = typeInfo;
                 else
                     AddWarning(context, $"Failed to find sub-type in type expression \"{context.GetText()}\"");
             }
         }
+
+        //public override void ExitElementType(GoParser.ElementTypeContext context)
+        //{
+        //    ExitType_(context.type_());
+        //}
 
         public override void EnterTypeName(GoParser.TypeNameContext context)
         {
@@ -73,7 +78,7 @@ namespace go2cs
         {
             string name = context.GetText();
 
-            if (!Types.TryGetValue(context, out TypeInfo typeInfo))
+            if (!Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
             {
                 AddWarning(context, $"Failed to find pointer type info for \"{name}\"");
                 return;
@@ -137,7 +142,7 @@ namespace go2cs
         {
             string name = context.GetText();
 
-            if (!Types.TryGetValue(context.elementType(), out TypeInfo typeInfo))
+            if (!Types.TryGetValue(context.elementType().type_(), out TypeInfo typeInfo))
             {
                 AddWarning(context, $"Failed to find array type info for \"{name}\"");
                 return;
@@ -189,12 +194,12 @@ namespace go2cs
         {
             string type = context.GetText();
 
-            Types.TryGetValue(context, out TypeInfo keyTypeInfo);
+            Types.TryGetValue(context.type_(), out TypeInfo keyTypeInfo);
 
             if (keyTypeInfo == null)
                 return; // throw new InvalidOperationException("Map key type undefined.");
 
-            Types.TryGetValue(context.elementType(), out TypeInfo elementTypeInfo);
+            Types.TryGetValue(context.elementType().type_(), out TypeInfo elementTypeInfo);
 
             if (elementTypeInfo == null)
                 return; // throw new InvalidOperationException("Map element type undefined.");
@@ -214,7 +219,7 @@ namespace go2cs
 
         public override void ExitSliceType(GoParser.SliceTypeContext context)
         {
-            Types.TryGetValue(context.elementType(), out TypeInfo typeInfo);
+            Types.TryGetValue(context.elementType().type_(), out TypeInfo typeInfo);
 
             if (typeInfo == null)
                 typeInfo = TypeInfo.ObjectType;
@@ -231,7 +236,7 @@ namespace go2cs
         public override void ExitChannelType(GoParser.ChannelTypeContext context)
         {
             // TODO: Update to reference proper channel type name when added
-            Types.TryGetValue(context.elementType(), out TypeInfo typeInfo);
+            Types.TryGetValue(context.elementType().type_(), out TypeInfo typeInfo);
 
             if (typeInfo == null)
                 typeInfo = TypeInfo.ObjectType;

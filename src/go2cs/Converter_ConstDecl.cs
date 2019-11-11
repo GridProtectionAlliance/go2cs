@@ -79,7 +79,7 @@ namespace go2cs
                 return;
             }
 
-            Types.TryGetValue(context, out TypeInfo typeInfo);
+            Types.TryGetValue(context.type_(), out TypeInfo typeInfo);
 
             // TODO: Using dynamic type here is not ideal - need to use an expression type evaluator
             string type = typeInfo?.TypeName ?? "dynamic";

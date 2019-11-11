@@ -78,7 +78,7 @@ namespace go2cs
                 return;
             }
 
-            Types.TryGetValue(context, out TypeInfo typeInfo);
+            Types.TryGetValue(context.type_(), out TypeInfo typeInfo);
 
             string type = typeInfo?.TypeName ?? "var";
             int length = Math.Min(identifiers.Length, expressions?.Length ?? int.MaxValue);

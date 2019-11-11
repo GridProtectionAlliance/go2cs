@@ -685,9 +685,9 @@ namespace go2cs
                 GoParser.TypeListContext typeList = context.typeSwitchCase().typeList();
                 List<string> types = new List<string>();
 
-                for (int i = 0; i < typeList.ChildCount; i++)
+                for (int i = 0; i < typeList.type_().Length; i++)
                 {
-                    if (Types.TryGetValue(typeList.GetChild(i), out TypeInfo typeInfo))
+                    if (Types.TryGetValue(typeList.type_(i), out TypeInfo typeInfo))
                     {
                         string typeName = typeInfo.TypeName;
 

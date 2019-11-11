@@ -105,7 +105,7 @@ namespace go2cs
         {
             if (Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
             {
-                if (!Types.TryGetValue(context, out TypeInfo typeInfo))
+                if (!Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
                     typeInfo = TypeInfo.VarType;
 
                 if (ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))

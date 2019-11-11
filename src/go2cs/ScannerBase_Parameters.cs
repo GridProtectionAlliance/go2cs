@@ -21,7 +21,6 @@
 //
 //******************************************************************************************************
 
-using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System.Collections.Generic;
 using static go2cs.Common;
@@ -38,7 +37,7 @@ namespace go2cs
 
         private readonly ParseTreeValues<List<ParameterInfo>> m_parameterDeclarations = new ParseTreeValues<List<ParameterInfo>>();
 
-        public override void ExitParameters([NotNull] GoParser.ParametersContext context)
+        public override void ExitParameters(GoParser.ParametersContext context)
         {
             List<ParameterInfo> parameters = new List<ParameterInfo>();
 
@@ -48,7 +47,7 @@ namespace go2cs
                     parameters.AddRange(parameterDeclarations);
             }
 
-            Parameters[context.Parent] = parameters;
+            Parameters[context] = parameters;
         }
 
         public override void ExitParameterDecl(GoParser.ParameterDeclContext context)
@@ -60,7 +59,7 @@ namespace go2cs
             // Check for variadic expression
             bool hasVariadicParameter = context.GetText().Contains("...");
 
-            if (!Types.TryGetValue(context, out TypeInfo typeInfo))
+            if (!Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
                 typeInfo = TypeInfo.ObjectType;
 
             if (identifiers != null)

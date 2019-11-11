@@ -1,6 +1,9 @@
-// package main -- go2cs converted at 2018 August 14 13:37:19 UTC
+// package main -- go2cs converted at 2019 November 11 05:54:01 UTC
 // Original source: C:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue.go
-using fmt = go.fmt_package;
+//using fmt = go.fmt_package;
+
+using System;
+using System.Linq;
 using static go.builtin;
 
 namespace go
@@ -14,47 +17,47 @@ namespace go
             a[0] = "Hello";
             a[1] = "World";
 
-            test(a);
-            fmt.Println(a[0], a[1]);
-            fmt.Println();
+            test(a.Clone());
+            Console.WriteLine("{0}, {1}", a[0], a[1]);
+            Console.WriteLine();
 
             a[0] = "Hello";
             test2(ref a);
-            fmt.Println(a[0], a[1]);
-            fmt.Println();
+            Console.WriteLine("{0}, {1}", a[0], a[1]);
+            Console.WriteLine();
 
             a[0] = "Hello";
             test3(a.slice());
-            fmt.Println(a[0], a[1]);
-            fmt.Println();
+            Console.WriteLine("{0}, {1}", a[0], a[1]);
+            Console.WriteLine();
 
-            var primes = [6]int{2,3,5,7,11,13};
-            fmt.Println(primes);
+            int[] primes = {2,3,5,7,11,13};
+            Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}", primes.Cast<object>().ToArray());
+
+            Console.ReadLine();
         }
 
         // Arrays are passed by value (a full copy)
         private static void test(array<@string> a)
-        {
-            a = a.Clone();
-
+        { 
             // Update to array will be local
-            fmt.Println(a[0], a[1]);
+            Console.WriteLine("{0}, {1}", a[0], a[1]);
             a[0] = "Goodbye";
-            fmt.Println(a[0], a[1]);
+            Console.WriteLine("{0}, {1}", a[0], a[1]);
         }
 
         private static void test2(ref array<@string> a)
         {
-            fmt.Println(a[0], a[1]);
+            Console.WriteLine("{0}, {1}", a[0], a[1]);
             a[0] = "Goodbye";
-            fmt.Println(a[0], a[1]);
+            Console.WriteLine("{0}, {1}", a[0], a[1]);
         }
 
         private static void test3(slice<@string> a)
         {
-            fmt.Println(a[0], a[1]);
-            a[0] = "Goodbye";
-            fmt.Println(a[0], a[1]);
+            Console.WriteLine("{0}, {1}", a[0], a[1]);
+            a[0] = "Goodbye2";
+            Console.WriteLine("{0}, {1}", a[0], a[1]);
         }
     }
 }

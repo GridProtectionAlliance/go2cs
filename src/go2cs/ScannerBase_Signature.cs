@@ -64,7 +64,7 @@ namespace go2cs
             //  | type
             if (!Parameters.TryGetValue(context.parameters(), out Result))
             {
-                if (Types.TryGetValue(context, out TypeInfo typeInfo))
+                if (Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
                 {
                     Result = new List<ParameterInfo>(new[] { new ParameterInfo
                     {

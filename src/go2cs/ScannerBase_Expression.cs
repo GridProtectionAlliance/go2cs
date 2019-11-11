@@ -59,8 +59,13 @@ namespace go2cs
         public override void ExitExpression(GoParser.ExpressionContext context)
         {
             // expression
-            //     : unaryExpr
-            //     | expression BINARY_OP expression
+            //     : primaryExpr
+            //     | unaryExpr
+            //     | expression('*' | '/' | '%' | '<<' | '>>' | '&' | '&^') expression
+            //     | expression('+' | '-' | '|' | '^') expression
+            //     | expression('==' | '!=' | '<' | '<=' | '>' | '>=') expression
+            //     | expression '&&' expression
+            //     | expression '||' expression
 
             if (context.expression()?.Length == 2)
             {
@@ -81,10 +86,24 @@ namespace go2cs
             }
             else
             {
-                if (UnaryExpressions.TryGetValue(context.unaryExpr(), out string unaryExpression))
-                    Expressions[context] = unaryExpression;
+                if (context.primaryExpr() != null)
+                {
+                    if (PrimaryExpressions.TryGetValue(context.primaryExpr(), out string primaryExpression))
+                        Expressions[context] = primaryExpression;
+                    else
+                        AddWarning(context, $"Failed to find primary expression \"{context.unaryExpr().GetText()}\" in the expression \"{context.GetText()}\"");
+                }
+                else if (context.unaryExpr() != null)
+                {
+                    if (UnaryExpressions.TryGetValue(context.unaryExpr(), out string unaryExpression))
+                        Expressions[context] = unaryExpression;
+                    else
+                        AddWarning(context, $"Failed to find unary expression \"{context.unaryExpr().GetText()}\" in the expression \"{context.GetText()}\"");
+                }
                 else
-                    AddWarning(context, $"Failed to find unary expression \"{context.unaryExpr().GetText()}\" in the expression \"{context.GetText()}\"");
+                {
+                    AddWarning(context, $"Unexpected expression \"{context.GetText()}\"");
+                }
             }
         }
 
@@ -110,23 +129,23 @@ namespace go2cs
                 {
                     // TODO: Handle channel value access (update when channel class is created):
                     unaryOP = null;
-                    UnaryExpressions[context] = $"{UnaryExpressions[context.expression()]}.Receive()";
+                    UnaryExpressions[context] = $"{Expressions[context.expression()]}.Receive()";
                 }
                 else if (unaryOP.Equals("&", StringComparison.Ordinal))
                 {
                     // TODO: Handle pointer acquisition context - may need to augment pre-scan metadata for heap allocation notation
                     unaryOP = null;
-                    UnaryExpressions[context] = $"ref {UnaryExpressions[context.expression()]}";
+                    UnaryExpressions[context] = $"ref {Expressions[context.expression()]}";
                 }
                 else if (unaryOP.Equals("*", StringComparison.Ordinal))
                 {
                     // TODO: Handle pointer dereference context - if this is a ref variable, Deref call is unnecessary
                     unaryOP = null;
-                    UnaryExpressions[context] = $"{UnaryExpressions[context.expression()]}.Deref";
+                    UnaryExpressions[context] = $"{Expressions[context.expression()]}.Deref";
                 }
 
                 if ((object)unaryOP != null)
-                    UnaryExpressions[context] = $"{unaryOP}{UnaryExpressions[context.expression()]}";
+                    UnaryExpressions[context] = $"{unaryOP}{Expressions[context.expression()]}";
             }
             else if (!UnaryExpressions.ContainsKey(context))
             {
@@ -159,7 +178,7 @@ namespace go2cs
                 // conversion
                 //     : type '(' expression ',' ? ')'
 
-                if (Types.TryGetValue(context.conversion(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.conversion().expression(), out string expression))
+                if (Types.TryGetValue(context.conversion().type_(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.conversion().expression(), out string expression))
                 {
                     if (typeInfo.TypeName.StartsWith("*(*"))
                     {
@@ -259,7 +278,7 @@ namespace go2cs
                 // typeAssertion
                 //     : '.' '(' type ')'
 
-                if (Types.TryGetValue(context.typeAssertion(), out TypeInfo typeInfo))
+                if (Types.TryGetValue(context.typeAssertion().type_(), out TypeInfo typeInfo))
                     PrimaryExpressions[context] = $"{primaryExpression}.TypeAssert<{typeInfo.TypeName}>()";
                 else
                     AddWarning(context, $"Failed to find type for the type assertion expression in \"{context.GetText()}\"");
@@ -272,7 +291,7 @@ namespace go2cs
                 GoParser.ArgumentsContext argumentsContext = context.arguments();
                 List<string> arguments = new List<string>();
 
-                if (Types.TryGetValue(argumentsContext, out TypeInfo typeInfo))
+                if (Types.TryGetValue(argumentsContext.type_(), out TypeInfo typeInfo))
                     arguments.Add($"typeof({typeInfo.TypeName})");
 
                 if (ExpressionLists.TryGetValue(argumentsContext.expressionList(), out string[] expressions))

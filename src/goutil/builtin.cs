@@ -186,10 +186,34 @@ namespace go
         /// <summary>
         /// Gets the imaginary part of the complex number <paramref name="c"/>.
         /// </summary>
-        /// <param name="c"></param>
+        /// <param name="c">Complex number.</param>
         /// <returns>Imaginary part of the complex number <paramref name="c"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-        public static double imag(complex64 c) => c.Imaginary;
+        public static float imag(complex64 c) => c.Imaginary;
+
+        /// <summary>
+        /// Gets the imaginary part of the complex number <paramref name="c"/>.
+        /// </summary>
+        /// <param name="c">Complex number.</param>
+        /// <returns>Imaginary part of the complex number <paramref name="c"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
+        public static double imag(complex128 c) => c.Imaginary;
+
+        /// <summary>
+        /// Gets the real part of the complex number <paramref name="c"/>.
+        /// </summary>
+        /// <param name="c">Complex number.</param>
+        /// <returns>Real part of the complex number <paramref name="c"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
+        public static float real(complex64 c) => c.Real;
+
+        /// <summary>
+        /// Gets the real part of the complex number <paramref name="c"/>.
+        /// </summary>
+        /// <param name="c">Complex number.</param>
+        /// <returns>Real part of the complex number <paramref name="c"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
+        public static double real(complex128 c) => c.Real;
 
         /// <summary>
         /// Gets the length of the <paramref name="array"/>.
