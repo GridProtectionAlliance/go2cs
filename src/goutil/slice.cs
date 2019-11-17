@@ -167,7 +167,7 @@ namespace go
 
         // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        T[] Slice(int start, int length)
+        public T[] Slice(int start, int length)
         {
             slice<T> target = this;
             return target.slice(start, start + length);
