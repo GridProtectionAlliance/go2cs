@@ -149,6 +149,7 @@ namespace go
         }
 
         // Returning by-ref value allows slice to be a struct instead of a class and still allow read and write
+        // Allows for implicit index support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support
         public ref T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -162,6 +163,14 @@ namespace go
 
                 return ref m_array[m_low + index];
             }
+        }
+
+        // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        T[] Slice(int start, int length)
+        {
+            slice<T> target = this;
+            return target.slice(start, start + length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -229,7 +238,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(slice<T> other) => other.m_array == m_array && other.m_low == m_low && other.m_length == m_length;
 
-        #region [ Equality Operators ]
+        #region [ Operators ]
 
         // Enable implicit conversions between slice<T> and T[]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
