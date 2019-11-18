@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon />
+    <StartupObject />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ArrayPassByValue-Goal.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="goutil">
+      <HintPath>..\..\..\goutil\bin\Debug\netcoreapp3.0\goutil.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
