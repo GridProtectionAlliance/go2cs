@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
@@ -47,6 +48,7 @@ namespace go2cs
         public const string ForRangeExpressionsMarker = ">>MARKER:FORRANGEEXPRESSIONS_LEVEL_{0}<<";
 
         private readonly ParseTreeValues<string> m_simpleStatements = new ParseTreeValues<string>();
+        private readonly ParseTreeValues<TypeInfo> m_elementTypes = new ParseTreeValues<TypeInfo>();
         private readonly Dictionary<string, bool> m_labels = new Dictionary<string, bool>(StringComparer.Ordinal);
         private readonly Stack<HashSet<string>> m_blockLabeledContinues = new Stack<HashSet<string>>();
         private readonly Stack<HashSet<string>> m_blockLabeledBreaks = new Stack<HashSet<string>>();
@@ -225,6 +227,29 @@ namespace go2cs
             {
                 AddWarning(context, $"Failed to find both left and right operand expressions for assignment statement: {context.GetText()}");
             }
+        }
+
+        public override void ExitElementType(GoParser.ElementTypeContext context)
+        {
+            if (Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
+                m_elementTypes[context] = typeInfo;
+            else
+                AddWarning(context, $"Failed to find type info for: {context.GetText()}");
+        }
+
+        public override void ExitArrayType(GoParser.ArrayTypeContext context)
+        {
+            //base.ExitArrayType(context);
+        }
+
+        public override void ExitLiteralType(GoParser.LiteralTypeContext context)
+        {
+            base.ExitLiteralType(context);
+        }
+
+        public override void ExitLiteralValue(GoParser.LiteralValueContext context)
+        {
+            base.ExitLiteralValue(context);
         }
 
         public override void ExitShortVarDecl(GoParser.ShortVarDeclContext context)
