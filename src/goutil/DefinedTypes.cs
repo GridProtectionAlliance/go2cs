@@ -78,9 +78,9 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @bool(NilType nil) => default;
 
-        public override string ToString() => m_value.ToString();
+        public override string ToString() => m_value.ToString().ToLowerInvariant();
 
-        public string ToString(IFormatProvider provider) => m_value.ToString(provider);
+        public string ToString(IFormatProvider provider) => m_value.ToString(provider).ToLowerInvariant();
 
         public TypeCode GetTypeCode() => m_value.GetTypeCode();
 
