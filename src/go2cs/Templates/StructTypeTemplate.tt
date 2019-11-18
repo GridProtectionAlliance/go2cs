@@ -129,7 +129,7 @@ using go;
             {#>
 
 
-            public <#=StructName#>(<#=string.Join(", ", StructFields.Select(field => $"{(field.Type.IsPointer ? "ref " : "")}{field.Type.TypeName} {field.Name}"))#>)
+            public <#=StructName#>(<#=string.Join(", ", StructFields.Select(field => $"{(field.Type.IsPointer ? "ref " : "")}{field.Type.TypeName} {field.Name} = default"))#>)
             {<#
             foreach (var decl in StructFields)
             {
