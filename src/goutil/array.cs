@@ -22,6 +22,8 @@
 //******************************************************************************************************
 // ReSharper disable CheckNamespace
 // ReSharper disable UnusedMember.Global
+// ReSharper disable InconsistentNaming
+#pragma warning disable IDE1006 // Naming Styles
 
 using System;
 using System.Collections;
@@ -31,7 +33,7 @@ using System.Runtime.CompilerServices;
 
 namespace go
 {
-    public interface IArray : EmptyInterface, ICloneable
+    public interface IArray : EmptyInterface, IEnumerable, ICloneable
     {
         int Length { get; }
 
@@ -102,7 +104,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(array<T> other) => m_array.Equals(other.m_array);
 
-        #region [ Equality Operators ]
+        #region [ Operators ]
 
         // Enable implicit conversions between array<T> and T[]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
