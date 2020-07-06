@@ -380,7 +380,7 @@ namespace Antlr4.Runtime.Sharpen
 
 		IEnumerator IEnumerable.GetEnumerator ()
 		{
-			return (IEnumerator)GetEnumeratorInternal ();
+			return GetEnumeratorInternal ();
 		}
 
 		IEnumerator<KeyValuePair<TKey, TValue>> GetEnumeratorInternal ()
