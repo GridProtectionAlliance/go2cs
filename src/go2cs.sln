@@ -24,6 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{4D5DA6
 	ProjectSection(SolutionItems) = preProject
 		..\docs\images\go2cs-large.png = ..\docs\images\go2cs-large.png
 		..\docs\images\go2cs-small.png = ..\docs\images\go2cs-small.png
+		..\docs\images\go2cs.ico = ..\docs\images\go2cs.ico
 		..\docs\images\README = ..\docs\images\README
 	EndProjectSection
 EndProject
@@ -40,11 +41,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "goutil", "goutil\goutil.csproj", "{2C344A59-4B76-4531-B509-532613965E09}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		goutil\goutil.projitems*{3f91b351-7fb1-4466-8eda-65777fe10c9b}*SharedItemsImports = 4
-		Utilities\Antlr4.Runtime\Antlr4.Runtime.projitems*{dcb4fa2f-9ca3-4535-b9ae-082d076dfb97}*SharedItemsImports = 4
-		Utilities\CommandLine\CommandLine.projitems*{dcb4fa2f-9ca3-4535-b9ae-082d076dfb97}*SharedItemsImports = 4
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
