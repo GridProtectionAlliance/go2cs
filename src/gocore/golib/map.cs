@@ -38,10 +38,8 @@ namespace go
     {
     }
 
-    // Pointers to this structure will need to use "refptr<T>" since it uses non-blittable types
     public struct map<TKey, TValue> : IMap, IDictionary<TKey, TValue> where TKey : notnull
     {
-        // Ideally map should be blittable
         private Dictionary<TKey, TValue>? m_map;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

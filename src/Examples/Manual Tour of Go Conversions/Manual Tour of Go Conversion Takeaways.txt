@@ -306,15 +306,6 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
 	that come at an IL level since all interactions with Go equivalent .NET native
 	types would need to be cast to and from C# native types via operator functions.
 	Going to try just using .NET "object" class for encountered "interface {}" types.
-	
-	The other caveat to consider here is that casting a native type to an object in C#
-	causes the value to be "boxed", that is to be heap allocated. We have already
-	established "ptr<T>" to handle type boxing / heap allocations in converted code,
-	will need to investigate edge cases here. To match things like a function accepting
-	a pointer to an interface we will need a new pointer-like type that will work with
-	references, i.e., .NET class instances, like "public class refptr<T>". In general
-	these conversions should be more simple since the refptr and value will already
-	point to the same value.
 
 15-type-assertions
 

@@ -81,8 +81,6 @@ namespace go
         }
     }
 
-    // Pointers to this structure will need to use "refptr<T>" since it uses non-blittable types
-
     /// <summary>
     /// Represents a concurrency primitive that operates like a Go channel.
     /// </summary>
@@ -380,9 +378,9 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerator<T> GetEnumerator(CancellationToken cancellationToken)
         {
-            //// Per spec, receiving from a nil channel blocks forever
-            //if (m_channel is null && ChannelBase<T>.Wait(cancellationToken))
-            //    yield break;
+            // Per spec, receiving from a nil channel blocks forever
+            if (m_queue is null && channel.Wait(cancellationToken))
+                yield break;
 
             while (!IsClosed)
             {
