@@ -64,6 +64,12 @@ namespace go
             get => ref m_array[index];
         }
 
+        public slice<T> this[Range source]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => new slice<T>(this, source.Start.Value, source.End.Value);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int IndexOf(T item)
         {
@@ -163,10 +169,7 @@ namespace go
 
         T IList<T>.this[int index]
         {
-            get
-            {
-                return this[index];
-            }
+            get => this[index];
             set
             {
                 if (index < 0 || index >= Length)

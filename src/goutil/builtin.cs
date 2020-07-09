@@ -476,7 +476,7 @@ namespace go
             bool isIntValue = false;
             ulong intValue = 0UL;
 
-            if ((object)convertible != null)
+            if (convertible != null)
             {
                 switch (convertible.GetTypeCode())
                 {
@@ -1199,7 +1199,7 @@ namespace go
     {
         // Enable comparisons between nil and error interface
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(builtin.error value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
+        public static bool operator ==(builtin.error value, NilType nil) => value == null || Activator.CreateInstance(value.GetType()).Equals(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(builtin.error value, NilType nil) => !(value == nil);

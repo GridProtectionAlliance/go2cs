@@ -109,7 +109,7 @@ namespace go
             if ((object)deferredAction == null)
                 return;
 
-            if ((object)Defers == null)
+            if (Defers == null)
                 Defers = new Stack<Action>();
 
             Defers.Push(deferredAction);
@@ -129,11 +129,11 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         protected void HandleFinally()
         {
-            if ((object)Defers != null)
+            if (Defers != null)
                 while (Defers.Count > 0)
                     Defers.Pop()();
 
-            if ((object)CapturedPanic.Value != null)
+            if (CapturedPanic.Value != null)
                 throw CapturedPanic.Value;
         }
     }

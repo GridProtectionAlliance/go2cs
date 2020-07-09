@@ -42,7 +42,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public @string(@byte[] value)
         {
-            if ((object)value == null)
+            if (value == null)
             {
                 m_value = new byte[0];
             }
@@ -56,7 +56,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public @string(byte[] value)
         {
-            if ((object)value == null)
+            if (value == null)
             {
                 m_value = new byte[0];
             }

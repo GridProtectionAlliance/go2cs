@@ -71,7 +71,8 @@ namespace go2cs
                 "internal", "is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override",
                 "params", "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short",
                 "sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true", "try", "typeof",
-                "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while"
+                "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while",
+                "__argslist", "__makeref", "__reftype", "__refvalue"
             },
             StringComparer.Ordinal);
 
@@ -94,7 +95,7 @@ namespace go2cs
             {
                 using (Stream resourceStream = EntryAssembly.GetManifestResourceStream(name))
                 {
-                    if ((object)resourceStream != null)
+                    if (resourceStream != null)
                     {
                         string targetFileName = Path.Combine(targetPath, name.Substring(prefix.Length));
                         bool restoreFile = true;
@@ -217,7 +218,7 @@ namespace go2cs
 
         public static string GetLastDirectoryName(string filePath)
         {
-            if ((object)filePath == null)
+            if (filePath == null)
                 throw new ArgumentNullException(nameof(filePath));
 
             int index;
@@ -273,15 +274,10 @@ namespace go2cs
             if (string.IsNullOrEmpty(source))
                 return source;
 
-            if (source.StartsWith(left) && source.EndsWith(right))
-            {
-                if (source.Length > left.Length + right.Length)
-                    return source.Substring(left.Length, source.Length - (left.Length + right.Length));
+            if (!source.StartsWith(left) || !source.EndsWith(right))
+                return source;
 
-                return "";
-            }
-
-            return source;
+            return source.Length > left.Length + right.Length ? source.Substring(left.Length, source.Length - (left.Length + right.Length)) : "";
         }
 
         public static string SanitizedIdentifier(string identifier)
@@ -294,16 +290,12 @@ namespace go2cs
             if (string.IsNullOrEmpty(input))
                 return "";
 
-            if (input.StartsWith("`"))
-            {
-                using (StringWriter writer = new StringWriter())
-                {
-                    s_provider.GenerateCodeFromExpression(new CodePrimitiveExpression(RemoveSurrounding(input, "`", "`")), writer, s_generatorOptions);
-                    return writer.ToString();
-                }
-            }
+            if (!input.StartsWith("`"))
+                return input;
 
-            return input;
+            using StringWriter writer = new StringWriter();
+            s_provider.GenerateCodeFromExpression(new CodePrimitiveExpression(RemoveSurrounding(input, "`", "`")), writer, s_generatorOptions);
+            return writer.ToString();
         }
 
         public static string ReplaceOctalBytes(string input)

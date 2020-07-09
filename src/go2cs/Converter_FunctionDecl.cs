@@ -77,9 +77,9 @@ namespace go2cs
         {
             bool signatureOnly = false;
 
-            if (Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) && (object)parameters != null)
+            if (Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) && parameters != null)
                 signatureOnly = true;
-            else if (!Parameters.TryGetValue(context.signature()?.parameters(), out parameters) || (object)parameters == null)
+            else if (!Parameters.TryGetValue(context.signature()?.parameters(), out parameters) || parameters == null)
                 parameters = new List<ParameterInfo>();
 
             string functionSignature = FunctionSignature.Generate(m_originalFunctionName, parameters);
@@ -89,7 +89,7 @@ namespace go2cs
 
             FunctionSignature function = m_currentFunction.Signature;
 
-            if ((object)function == null)
+            if (function == null)
                 throw new InvalidOperationException($"Failed to find signature metadata for function \"{m_currentFunctionName}\".");
 
             bool hasDefer = m_currentFunction.HasDefer;

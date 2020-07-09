@@ -124,7 +124,7 @@ namespace go2cs
 
             FolderMetadata folderMetadata = GetFolderMetadata(options, fileName);
 
-            if ((object)folderMetadata == null || !folderMetadata.Files.TryGetValue(fileName, out FileMetadata fileMetadata))
+            if (folderMetadata == null || !folderMetadata.Files.TryGetValue(fileName, out FileMetadata fileMetadata))
                 return true;
 
             if (File.GetLastWriteTimeUtc(fileName) > fileMetadata.LastUpdate)
@@ -145,7 +145,7 @@ namespace go2cs
             GetFilePaths(options, fileName, out string sourceFileName, out string _, out string _, out string _);
             FolderMetadata folderMetadata = GetFolderMetadata(options, sourceFileName);
 
-            if ((object)folderMetadata != null && folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata fileMetadata))
+            if (folderMetadata != null && folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata fileMetadata))
             {
                 ImportQueue.UnionWith(fileMetadata.ImportAliases.Select(import => import.Value.targetImport));
                 ScanImports(CreateNewPreScanner(null, null, options, fileName), showParseTree, CreateNewPreScanner, MetadataOutOfDate, HandleSkippedScan);

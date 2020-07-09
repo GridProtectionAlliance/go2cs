@@ -140,7 +140,7 @@ namespace go
 
         // Enable comparisons between nil and Abser interface
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(T value, NilType<T> nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
+        public static bool operator ==(T value, NilType<T> nil) => value == null || Activator.CreateInstance(value.GetType()).Equals(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(T value, NilType<T> nil) => !(value == nil);

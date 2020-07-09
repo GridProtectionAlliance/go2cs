@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <nullable>enable</nullable>
+    <NoWarn>660;661;1701;1702</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\gocore\golib\golib.csproj" />
+    <ProjectReference Include="..\..\..\..\gocore\fmt\fmt.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>slices_of_slice</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\gocore\fmt\fmt.csproj" />
+    <ProjectReference Include="..\..\..\..\gocore\golib\golib.csproj" />
+    <ProjectReference Include="..\..\..\..\gocore\strings\strings.csproj" />
+  </ItemGroup>
+
+</Project>

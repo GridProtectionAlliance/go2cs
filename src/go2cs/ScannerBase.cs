@@ -394,7 +394,7 @@ namespace go2cs
             if (!File.Exists(folderMetadataFileName))
                 return null;
 
-            if (folderMetadataFileName.Equals(s_currentFolderMetadataFileName, StringComparison.OrdinalIgnoreCase) && (object)s_currentFolderMetadata != null)
+            if (folderMetadataFileName.Equals(s_currentFolderMetadataFileName, StringComparison.OrdinalIgnoreCase) && s_currentFolderMetadata != null)
                 return s_currentFolderMetadata;
 
             FolderMetadata folderMetadata;
@@ -431,12 +431,12 @@ namespace go2cs
 
             metadata = GetFolderMetadata(options, goRootImport);
 
-            if ((object)metadata != null)
+            if (metadata != null)
                 return metadata;
 
             metadata = GetFolderMetadata(options, goPathImport);
 
-            if ((object)metadata != null)
+            if (metadata != null)
                 return metadata;
 
             StringBuilder loadWarning = new StringBuilder();

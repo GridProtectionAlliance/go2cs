@@ -469,7 +469,7 @@ namespace go2cs
 
         private string GetInheritedTypeList(HashSet<string> inheritedTypeNames)
         {
-            if ((object)inheritedTypeNames == null || inheritedTypeNames.Count == 0)
+            if (inheritedTypeNames == null || inheritedTypeNames.Count == 0)
                 return "";
 
             return $" : {string.Join(", ", inheritedTypeNames)}";

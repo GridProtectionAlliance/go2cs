@@ -50,12 +50,12 @@ namespace go2cs
         {
             bool signatureOnly = false;
 
-            if (!Parameters.TryGetValue(context.receiver()?.parameters(), out List<ParameterInfo> receiverParameters) || (object)receiverParameters == null)
+            if (!Parameters.TryGetValue(context.receiver()?.parameters(), out List<ParameterInfo> receiverParameters) || receiverParameters == null)
                 receiverParameters = new List<ParameterInfo>();
 
-            if (Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> functionParameters) && (object)functionParameters != null)
+            if (Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> functionParameters) && functionParameters != null)
                 signatureOnly = true;
-            else if (!Parameters.TryGetValue(context.signature()?.parameters(), out functionParameters) || (object)functionParameters == null)
+            else if (!Parameters.TryGetValue(context.signature()?.parameters(), out functionParameters) || functionParameters == null)
                 functionParameters = new List<ParameterInfo>();
 
             IEnumerable<ParameterInfo> parameters = receiverParameters.Concat(functionParameters);
@@ -67,7 +67,7 @@ namespace go2cs
 
             MethodSignature method = m_currentFunction.Signature as MethodSignature;
 
-            if ((object)method == null)
+            if (method == null)
                 throw new InvalidOperationException($"Failed to find signature metadata for method function \"{m_currentFunctionName}\".");
 
             bool hasDefer = m_currentFunction.HasDefer;

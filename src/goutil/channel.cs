@@ -92,7 +92,7 @@ namespace go
         public bool Send(T value)
         {
             // Per spec, sending on a nil channel blocks forever
-            if ((object)m_buffer == null)
+            if (m_buffer == null)
                 Monitor.Wait(this); // Pulse never expected
 
             try
@@ -112,7 +112,7 @@ namespace go
         public bool Receive(out T value)
         {
             // Per spec, receiving from a nil channel blocks forever
-            if ((object)m_buffer == null)
+            if (m_buffer == null)
                 Monitor.Wait(this); // Pulse never expected
 
             try
@@ -132,7 +132,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Close()
         {
-            if ((object)m_buffer == null)
+            if (m_buffer == null)
                 throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             if (m_buffer.IsAddingCompleted)

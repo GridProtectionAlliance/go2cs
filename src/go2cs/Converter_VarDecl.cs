@@ -72,7 +72,7 @@ namespace go2cs
 
             ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions);
 
-            if ((object)expressions != null && identifiers.Length != expressions.Length)
+            if (expressions != null && identifiers.Length != expressions.Length)
             {
                 AddWarning(context, $"Encountered count mismatch for identifiers and expressions in var specification expression: {context.GetText()}");
                 return;
