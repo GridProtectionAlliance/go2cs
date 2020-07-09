@@ -50,21 +50,21 @@ namespace go
 
         private class ChannelTimer
         {
-            private readonly channel<bool> m_notify;
+            private readonly channel<Time> m_notify;
             private readonly Timer m_timer;
 
             public ChannelTimer(long ticks, bool autoReset)
             {
-                m_notify = make_channel<bool>();
+                m_notify = make_channel<Time>();
                 m_timer = new Timer
                 {
                     Interval = ticks / (double)TimeSpan.TicksPerMillisecond,
                     AutoReset = autoReset
                 };
-                m_timer.Elapsed += (_, e) => m_notify.Send(true);
+                m_timer.Elapsed += (_, e) => m_notify.Send(Now());
             }
 
-            public channel<bool> Channel
+            public channel<Time> Channel
             {
                 get
                 {
@@ -80,8 +80,8 @@ namespace go
 
         public static void Sleep(long ticks) => Thread.Sleep((int)(ticks / TimeSpan.TicksPerMillisecond));
 
-        public static channel<bool> Tick(long ticks) => new ChannelTimer(ticks, true).Channel;
+        public static channel<Time> Tick(long ticks) => new ChannelTimer(ticks, true).Channel;
 
-        public static channel<bool> After(long ticks) => new ChannelTimer(ticks, false).Channel;
+        public static channel<Time> After(long ticks) => new ChannelTimer(ticks, false).Channel;
     }
 }
