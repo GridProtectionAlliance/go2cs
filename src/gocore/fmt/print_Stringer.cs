@@ -42,7 +42,6 @@ namespace go
         /// </summary>
         public partial interface Stringer : IFormattable
         {
-        #if !NETSTANDARD2_0
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
             public static Stringer As<T>(in T target) =>
                 (Stringer<T>)target;
@@ -54,7 +53,6 @@ namespace go
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
             public static Stringer? As(object target) =>
                 typeof(Stringer<>).CreateInterfaceHandler<Stringer>(target);
-        #endif
         }
 
         public class Stringer<T> : Stringer

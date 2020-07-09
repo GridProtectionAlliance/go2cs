@@ -22,52 +22,52 @@ func main() {
 }
 */
 
-using System;
+using go;
 using fmt = go.fmt_package;
-using time = System.DateTime;
+using time = go.time_package;
 
 static class main_package
 {
     static void Main() {
 		fmt.Println("When's Saturday?");
-		var today = (int)time.Now.DayOfWeek;
+		var today = time.Now().Weekday();
 
-        // Option 1:
+        // Option 1: - this would not be able to handle fallthrough
         //switch (true) {
-		//	  case true when (int)DayOfWeek.Saturday == (int)today + 0:
-		//		  fmt.Println("Today.");
-		//		  break;
-        //    case true when (int)DayOfWeek.Saturday == (int)today + 1:
+        //	  case true when time.Saturday == today + 0:
+        //		  fmt.Println("Today.");
+        //		  break;
+        //    case true when time.Saturday == today + 1:
         //        fmt.Println("Tomorrow.");
         //        break;
-        //    case true when (int)DayOfWeek.Saturday == (int)today + 2:
+        //    case true when time.Saturday == today + 2:
         //        fmt.Println("In two days.");
         //        break;
         //    default:
-		//		  fmt.Println("Too far away.");
-		//		  break;
-		//}
+        //		  fmt.Println("Too far away.");
+        //		  break;
+        //}
 
-        // Option 2:
-        if ((int)DayOfWeek.Saturday == today + 0) {
+        // Option 2: - handles fallthrough with "if" instead of "else if"
+        if (time.Saturday == today + 0) {
             fmt.Println("Today.");
         }
-        else if ((int)DayOfWeek.Saturday == today + 1) {
+        else if (time.Saturday == today + 1) {
             fmt.Println("Tomorrow.");
         }
-        else if ((int)DayOfWeek.Saturday == today + 2) {
+        else if (time.Saturday == today + 2) {
             fmt.Println("In two days.");
         }
         else {
             fmt.Println("Too far away.");
         }
 
-        // Option 3: with C# 9.0
-        //(int)DayOfWeek.Saturday switch
+        // Possible Option 3 with C# 9.0 - how to handle fallthrough?
+        //time.Saturday switch
         //{
-        //    == (int)today + 0 => fmt.Println("Today.");
-        //    == (int)today + 1 => fmt.Println("Tomorrow.");
-        //    == (int)today + 2 => fmt.Println("In two days.");
+        //    == today + 0 => fmt.Println("Today.");
+        //    == today + 1 => fmt.Println("Tomorrow.");
+        //    == today + 2 => fmt.Println("In two days.");
         //	  _ => fmt.Println("Too far away.");
         //};
     }

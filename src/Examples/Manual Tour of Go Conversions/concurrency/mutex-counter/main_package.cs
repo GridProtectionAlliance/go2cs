@@ -40,7 +40,6 @@ func main() {
 }
 
 */
-#pragma warning disable 8602
 #region source
 using go;
 using fmt = go.fmt_package;

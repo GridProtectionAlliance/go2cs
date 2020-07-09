@@ -186,6 +186,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "06-default-selection", "Exa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "09-mutex-counter", "Examples\Manual Tour of Go Conversions\concurrency\mutex-counter\09-mutex-counter.csproj", "{8C10AFFE-D273-438A-94D6-F99E94175146}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "time", "gocore\time\time.csproj", "{7E222F75-5002-47E9-A88B-BB8E7F5C5FF2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sync", "gocore\sync\sync.csproj", "{AF1BBF55-3145-4210-8B51-57EE089215CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -508,6 +512,14 @@ Global
 		{8C10AFFE-D273-438A-94D6-F99E94175146}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C10AFFE-D273-438A-94D6-F99E94175146}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C10AFFE-D273-438A-94D6-F99E94175146}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E222F75-5002-47E9-A88B-BB8E7F5C5FF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E222F75-5002-47E9-A88B-BB8E7F5C5FF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E222F75-5002-47E9-A88B-BB8E7F5C5FF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E222F75-5002-47E9-A88B-BB8E7F5C5FF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF1BBF55-3145-4210-8B51-57EE089215CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF1BBF55-3145-4210-8B51-57EE089215CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF1BBF55-3145-4210-8B51-57EE089215CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF1BBF55-3145-4210-8B51-57EE089215CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -599,6 +611,8 @@ Global
 		{C3FB87D2-48D7-4BF2-8269-9E9965CDE7F9} = {4DBE45FE-01CE-48BB-B4B9-51AA6C076230}
 		{2E13C4C8-3F48-4716-80A6-0376919C54B8} = {183561A8-263C-4860-965B-20831949A653}
 		{8C10AFFE-D273-438A-94D6-F99E94175146} = {183561A8-263C-4860-965B-20831949A653}
+		{7E222F75-5002-47E9-A88B-BB8E7F5C5FF2} = {7FB7FE65-290C-4718-BE45-934539B412C2}
+		{AF1BBF55-3145-4210-8B51-57EE089215CC} = {7FB7FE65-290C-4718-BE45-934539B412C2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EF0C750B-E868-445C-AEB3-2E863A655290}

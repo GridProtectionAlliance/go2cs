@@ -46,7 +46,6 @@ namespace go
         /// </summary>
         @string Error();
 
-     #if !NETSTANDARD2_0
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static error As<T>(in T target) => (error<T>)target;
 
@@ -56,7 +55,6 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static error? As(object target) =>
             typeof(error<>).CreateInterfaceHandler<error>(target);
-    #endif
     }
 
     public class error<T> : error

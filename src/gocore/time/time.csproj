@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>go</RootNamespace>
+    <AssemblyName>time_package</AssemblyName>
+    <ApplicationIcon>go2cs.ico</ApplicationIcon>
+    <PackageId>go.time</PackageId>
+    <Authors>Grid Protection Alliance</Authors>
+    <Company>Grid Protection Alliance</Company>
+    <Product>go2cs</Product>
+    <Title>go2cs time package</Title>
+    <PackageDescription>Go time package in .NET for use with go2cs</PackageDescription>
+    <Description>Go time package in .NET for use with go2cs</Description>
+    <Copyright>Copyright © 2020</Copyright>
+    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>go2cs.png</PackageIcon>
+    <PackageTags>go2cs;Golang;go</PackageTags>
+    <Nullable>enable</Nullable>
+    <NoWarn>660;661;1701;1702;IDE1006</NoWarn>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="go2cs.ico" Pack="true" PackagePath="" />
+    <None Include="go2cs.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\golib\golib.csproj" Condition="'$(Configuration)'=='Debug'" />
+    <PackageReference Include="go.lib" Version="0.1.0" Condition="'$(Configuration)'=='Release'" />
+  </ItemGroup>
+
+</Project>

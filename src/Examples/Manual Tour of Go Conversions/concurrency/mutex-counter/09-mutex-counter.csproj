@@ -8,8 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\gocore\fmt\fmt.csproj" />
     <ProjectReference Include="..\..\..\..\gocore\golib\golib.csproj" />
+    <ProjectReference Include="..\..\..\..\gocore\fmt\fmt.csproj" />
+    <ProjectReference Include="..\..\..\..\gocore\time\time.csproj" />
+    <ProjectReference Include="..\..\..\..\gocore\sync\sync.csproj" />
   </ItemGroup>
 
 </Project>

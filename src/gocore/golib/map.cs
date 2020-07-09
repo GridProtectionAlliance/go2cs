@@ -47,10 +47,8 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public map(int size) => m_map = new Dictionary<TKey, TValue>(size);
 
-    #if !NETSTANDARD2_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public map(IEnumerable<KeyValuePair<TKey, TValue>> map) => m_map = new Dictionary<TKey, TValue>(map);
-    #endif
 
         private Dictionary<TKey, TValue> Map
         {
@@ -116,10 +114,8 @@ namespace go
         #region [ Operators ]
 
         // Enable implicit conversions between map<TKey, TValue> and IDictionary<T>
-    #if !NETSTANDARD2_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator map<TKey, TValue>(Dictionary<TKey, TValue> value) => new map<TKey, TValue>(value);
-    #endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator Dictionary<TKey, TValue>(map<TKey, TValue> value) => value.m_map!;

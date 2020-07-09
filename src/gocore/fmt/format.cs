@@ -33,20 +33,12 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static @string ToString(object arg)
         {
-        #if NETSTANDARD2_0
-            Stringer? stringer = arg as Stringer ?? typeof(Stringer<>).CreateInterfaceHandler<Stringer>(arg);
-        #else
             Stringer? stringer = arg as Stringer ?? Stringer.As(arg);
-        #endif
 
             if (!(stringer is null))
                 return stringer.String();
 
-        #if NETSTANDARD2_0
-            error? err = arg as error ?? typeof(error<>).CreateInterfaceHandler<error>(arg);
-        #else
             error? err = arg as error ?? error.As(arg);
-        #endif
 
             if (!(err is null))
                 return err.Error();
