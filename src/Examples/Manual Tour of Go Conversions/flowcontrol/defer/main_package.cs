@@ -14,7 +14,7 @@ using static go.builtin;
 
 static class main_package
 {
-    static void Main() => func((defer, __, _) => {
+    static void Main() => func((defer, _, __) => {
         defer(() => { fmt.Println("world"); });
 
         fmt.Println("hello");

@@ -23,7 +23,7 @@ static class main_package
         fmt.Println("counting");
 
         for (int i = 0; i < 10; i++) {
-            // i escapes stack in defer below, so we need a pointer
+            // i escapes stack in defer below, so we use a pointer
             var i__ptr = ptr(i);
             defer(() => {
                 ref var i = ref i__ptr.Value;

@@ -1,4 +1,4 @@
-# Numeric Constants
+## Numeric Constants
 
 ```cs --region source --source-file ./main_package.cs
 ```
