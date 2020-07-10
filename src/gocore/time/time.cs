@@ -36,6 +36,8 @@ namespace go
 
         public static Time Now() => new Time { DateTime = DateTime.Now };
 
+        public static int Hour(this in Time time) => time.DateTime.Hour;
+
         public static int Weekday(this in Time time) => (int)time.DateTime.DayOfWeek;
 
         public static Time UTC(this in Time time) => new Time { DateTime = time.DateTime.ToUniversalTime() };
