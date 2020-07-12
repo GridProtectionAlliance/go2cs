@@ -1,0 +1,23 @@
+When converting examples from "go101", these were the big takeaways:
+
+>> Go Details
+
+defer-modify-results
+
+	When named return values are used in Defers, the defer can change the value -
+	this can produce an unexpected result, as the example on go101 shows. In order
+	to accomodate this properly the heap allocated pointer to the return value,
+	already required since locals leave the stack in the defer, should be returned
+	instead of the actual value. The value can be be dereferenced outside the 
+	defer/panic/recover function wrapper.
+
+	The conversion should likely monitor for named return values that ever leave
+	the stack, i.e., get a heap allocated pointer reference and are used in a defer.
+	More simply, named return values that have a pointer reference and are used	in
+	a defer should return the pointer instead of the value and defererence value on
+	the way out.
+
+import-package-multiple-times
+
+	Getting address of interface is not necessary in C# since interface is already
+	a reference. Only double indirection should result in use of ptr<interface>.

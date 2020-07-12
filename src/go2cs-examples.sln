@@ -29,6 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "16-numeric-constants", "Exa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "[ Notes ]", "[ Notes ]", "{B7C540FB-B29C-479D-A365-AB9E3331142A}"
 	ProjectSection(SolutionItems) = preProject
+		Examples\Manual go101 Conversions\Manual go101 Conversion Takeaways.txt = Examples\Manual go101 Conversions\Manual go101 Conversion Takeaways.txt
 		Examples\Manual Tour of Go Conversions\Manual Tour of Go Conversion Takeaways.txt = Examples\Manual Tour of Go Conversions\Manual Tour of Go Conversion Takeaways.txt
 	EndProjectSection
 EndProject
@@ -189,6 +190,14 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "maps-with-pointers1", "Examples\Miscellaneous\maps-with-pointers1\maps-with-pointers1.csproj", "{F63E1946-E1C5-43A3-AA08-EDB237464F67}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "maps-with-pointers2", "Examples\Miscellaneous\maps-with-pointers2\maps-with-pointers2.csproj", "{B1468ADB-3F4C-472A-8CBE-EBFCA73D3633}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "go101 -- Manual Conversions", "go101 -- Manual Conversions", "{04259A76-0770-4D31-A89B-99CD43A1E6D3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "defer-modify-results", "Examples\Manual go101 Conversions\defer-modify-results\defer-modify-results.csproj", "{36B35CD0-C2DB-4F82-9199-6ACE99BA421F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "import-package-multiple-times", "Examples\Manual go101 Conversions\import-package-multiple-times\import-package-multiple-times.csproj", "{7CB52CDD-98A0-4A91-B715-33672CF05215}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "default-branch-position", "Examples\Manual go101 Conversions\default-branch-position\default-branch-position.csproj", "{3568123D-071D-44EF-879D-C3B71132BFEB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -520,6 +529,18 @@ Global
 		{B1468ADB-3F4C-472A-8CBE-EBFCA73D3633}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1468ADB-3F4C-472A-8CBE-EBFCA73D3633}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1468ADB-3F4C-472A-8CBE-EBFCA73D3633}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36B35CD0-C2DB-4F82-9199-6ACE99BA421F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36B35CD0-C2DB-4F82-9199-6ACE99BA421F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36B35CD0-C2DB-4F82-9199-6ACE99BA421F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36B35CD0-C2DB-4F82-9199-6ACE99BA421F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CB52CDD-98A0-4A91-B715-33672CF05215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CB52CDD-98A0-4A91-B715-33672CF05215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CB52CDD-98A0-4A91-B715-33672CF05215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CB52CDD-98A0-4A91-B715-33672CF05215}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3568123D-071D-44EF-879D-C3B71132BFEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3568123D-071D-44EF-879D-C3B71132BFEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3568123D-071D-44EF-879D-C3B71132BFEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3568123D-071D-44EF-879D-C3B71132BFEB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -613,6 +634,9 @@ Global
 		{AF1BBF55-3145-4210-8B51-57EE089215CC} = {7FB7FE65-290C-4718-BE45-934539B412C2}
 		{F63E1946-E1C5-43A3-AA08-EDB237464F67} = {4AB1363D-DCBE-42DD-944F-4CE4F258AEFA}
 		{B1468ADB-3F4C-472A-8CBE-EBFCA73D3633} = {4AB1363D-DCBE-42DD-944F-4CE4F258AEFA}
+		{36B35CD0-C2DB-4F82-9199-6ACE99BA421F} = {04259A76-0770-4D31-A89B-99CD43A1E6D3}
+		{7CB52CDD-98A0-4A91-B715-33672CF05215} = {04259A76-0770-4D31-A89B-99CD43A1E6D3}
+		{3568123D-071D-44EF-879D-C3B71132BFEB} = {04259A76-0770-4D31-A89B-99CD43A1E6D3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EF0C750B-E868-445C-AEB3-2E863A655290}
