@@ -35,8 +35,8 @@ namespace go
     /// <para>
     /// If <typeparamref name="T"/> is a <see cref="System.ValueType"/>, e.g., a struct, note that
     /// value will be "boxed" for heap allocation. Since boxed value will be a new copy of original
-    /// value, make sure to use point <see cref="Value"/> for value updates instead of local stack
-    /// copy of value. See the <see cref="builtin.heap{T}"/> helper function and
+    /// value, make sure to use ref-based <see cref="Value"/> for updates instead of a local stack
+    /// copy of value. See the <see cref="builtin.heap{T}"/> helper function and notes on boxing:
     /// https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing
     /// </para>
     /// <para>
@@ -66,15 +66,27 @@ namespace go
         public override string ToString() => $"&{m_value?.ToString() ?? "nil"}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool Equals(in ptr<T> other)
+        private bool Equals(ptr<T>? other)
         {
-            if (m_value is null && other is null)
-                return true;
-
             if (other is null)
                 return false;
 
-            return !(m_value is null) && m_value.Equals(other.m_value);
+            if (ReferenceEquals(this, other))
+                return true;
+
+            if (IsReferenceType)
+            {
+                if (m_value is null && other.m_value is null)
+                    return true;
+
+                if (m_value is null || other.m_value is null)
+                    return false;
+
+                if (ReferenceEquals(m_value, other.m_value))
+                    return true;
+            }
+
+            return m_value!.Equals(other.m_value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,8 +96,31 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode() => m_value?.GetHashCode() ?? 0;
 
+        // WISH: Would be super cool if this operator supported "ref" return, like:
+        //     public static ref T operator ~(ptr<T> value) => ref value.m_value;
+        // or ideally C# supported an overloaded ref-based pointer operator, like:
+        //     public static ref T operator *(ptr<T> value) => ref value.m_value;
+        // or maybe even an overall "ref" operator for a class, like:
+        //     public static ref T operator ref(ptr<T> value) => ref value.m_value;
+        // Converted code like this:
+        //     var v = 2; var vp = ptr(v);
+        //     vp.Value = 999;
+        // Could then become:
+        //     var v = 2; var vp = ptr(v);
+        //     ~vp = 999; // or
+        //     *vp = 999; // or
+        //     ref vp = 999;
+        // As it stands, this operator just returns a copy of the structure value:
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T operator ~(ptr<T> value) => value.m_value;
+
+        // I posted a suggestion for at least the "ref" operator:
+        // https://github.com/dotnet/roslyn/issues/45881
+
+        // Also, the following unsafe return option is possible when T is unmanaged:
+        //     public static T* operator ~(ptr<T> value) => value.m_value;
+        // However, going down the fully unmanaged path creates a cascading set of
+        // issues, see header comments for the ptr<T> "experimental" implementation
 
         // Enable comparisons between nil and @ref<T> interface instance
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -99,5 +134,7 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, in ptr<T> value) => value != nil;
+
+        private static readonly bool IsReferenceType = default(T) == null;
     }
 }

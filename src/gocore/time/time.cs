@@ -32,6 +32,9 @@ namespace go
     {
         public struct Time {
             public DateTime DateTime;
+
+            public override string ToString() => 
+                DateTime.ToString("yyyy-MM-dd HH:mm:ss.fffffff K");
         }
 
         public static Time Now() => new Time { DateTime = DateTime.Now };
@@ -52,26 +55,32 @@ namespace go
 
         private class ChannelTimer
         {
-            private readonly channel<Time> m_notify;
+            private channel<Time> m_notify;
             private readonly Timer m_timer;
 
-            public ChannelTimer(long ticks, bool autoReset)
+            public ChannelTimer(long ticks, bool continuous)
             {
                 m_notify = make_channel<Time>();
                 m_timer = new Timer
                 {
                     Interval = ticks / (double)TimeSpan.TicksPerMillisecond,
-                    AutoReset = autoReset
+                    AutoReset = false
                 };
-                m_timer.Elapsed += (_, e) => m_notify.Send(Now());
+                m_timer.Elapsed += (_, e) =>
+                {
+                    m_notify.Send(Now());
+
+                    if (continuous)
+                        m_timer.Start();
+                };
             }
 
-            public channel<Time> Channel
+            public ref channel<Time> Channel
             {
                 get
                 {
                     m_timer.Start();
-                    return m_notify;
+                    return ref m_notify;
                 }
             }
         }
@@ -82,8 +91,8 @@ namespace go
 
         public static void Sleep(long ticks) => Thread.Sleep((int)(ticks / TimeSpan.TicksPerMillisecond));
 
-        public static channel<Time> Tick(long ticks) => new ChannelTimer(ticks, true).Channel;
+        public static ref channel<Time> Tick(long ticks) => ref new ChannelTimer(ticks, true).Channel;
 
-        public static channel<Time> After(long ticks) => new ChannelTimer(ticks, false).Channel;
+        public static ref channel<Time> After(long ticks) => ref new ChannelTimer(ticks, false).Channel;
     }
 }

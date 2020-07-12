@@ -85,12 +85,13 @@ namespace go
     /// Represents a concurrency primitive that operates like a Go channel.
     /// </summary>
     /// <typeparam name="T">Target type for channel.</typeparam>
-    public class channel<T> : IChannel, IEnumerable<T>
+    public struct channel<T> : IChannel, IEnumerable<T>
     {
         private readonly ManualResetEventSlim m_canAddEvent;
         private readonly ManualResetEventSlim m_canTakeEvent;
         private readonly ConcurrentQueue<T> m_queue;
         private readonly CancellationTokenSource m_enumeratorTokenSource;
+        private readonly ptr<bool> m_isClosed;
 
         /// <summary>
         /// Creates a new channel.
@@ -109,6 +110,7 @@ namespace go
             m_canTakeEvent = new ManualResetEventSlim(false);
             m_queue = new ConcurrentQueue<T>();
             m_enumeratorTokenSource = new CancellationTokenSource();
+            m_isClosed = new ptr<bool>(false);
 
             Capacity = size;
             IsClosed = false;
@@ -129,7 +131,7 @@ namespace go
         public int Length
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => m_queue.Count;
+            get => m_queue?.Count ?? 0;
         }
 
         public bool IsUnbuffered
@@ -141,22 +143,22 @@ namespace go
         public bool IsClosed
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get;
+            get => m_isClosed.Value;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            private set;
+            private set => m_isClosed.Value = value;
         }
 
         public bool SendIsReady
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => m_queue.Count != Capacity;
+            get => m_queue?.Count != Capacity;
         }
 
         public bool ReceiveIsReady
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => !m_queue.IsEmpty;
+            get => !m_queue?.IsEmpty ?? false;
         }
 
         /// <summary>
@@ -241,6 +243,10 @@ namespace go
             //if (IsUnbuffered && m_waitingReceivers <= 0)
             //    fatal("all goroutines are asleep - deadlock!", 2);
 
+            // Per spec, sending to a nil channel blocks forever
+            if (m_queue is null && channel.Wait(cancellationToken))
+                return;
+
             while (!SendIsReady)
             {
                 AssertChannelIsOpenForSend();
@@ -250,7 +256,7 @@ namespace go
 
             AssertChannelIsOpenForSend();
 
-            m_queue.Enqueue(value);
+            m_queue!.Enqueue(value);
             m_canTakeEvent.Set();
         }
 
@@ -288,6 +294,12 @@ namespace go
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            if (m_queue is null)
+            {
+                value = default!;
+                return false;
+            }
+
             if (!m_queue.TryDequeue(out value))
                 return false;
 
@@ -316,11 +328,15 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Receive(CancellationToken cancellationToken)
         {
+            // Per spec, receiving from a nil channel blocks forever
+            if (m_queue is null && channel.Wait(cancellationToken))
+                return default!;
+
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (m_queue.TryDequeue(out T value))
+                if (m_queue!.TryDequeue(out T value))
                 {
                     m_canAddEvent.Set();
                     return value;

@@ -131,6 +131,8 @@ namespace go
         /// Closes the channel.
         /// </summary>
         /// <param name="channel">Target channel pointer.</param>
+        // An "in" parameter works here because the close method operates on channel structure's
+        // private class-based member refererences, not on value types
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
         public static void close<T>(in channel<T> channel) => channel.Close();
 
