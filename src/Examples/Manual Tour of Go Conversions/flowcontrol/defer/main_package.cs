@@ -9,6 +9,7 @@ func main() {
 	fmt.Println("hello")
 }
 */
+#region source
 using fmt = go.fmt_package;
 using static go.builtin;
 
@@ -20,3 +21,4 @@ static class main_package
         fmt.Println("hello");
     });
 }
+#endregion

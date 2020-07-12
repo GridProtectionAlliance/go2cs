@@ -20,14 +20,14 @@ func main() {
 	}
 }
 */
-
-using System;
+#region source
 using fmt = go.fmt_package;
+using runtime = go.runtime_package;
 
 static class main_package
 {
     static void Main() {
-        fmt.Print("Go runs on ");
+        fmt.Print("go2cs runs on ");
         {
             var os = runtime.GOOS;
             switch (os) {
@@ -46,28 +46,4 @@ static class main_package
         }
     }
 }
-
-// runtime proxy function
-public static class runtime
-{
-    public static string GOOS
-    {
-        get
-        {
-            switch (Environment.OSVersion.Platform)
-            {
-                case PlatformID.Win32S:
-                case PlatformID.Win32Windows:
-                case PlatformID.Win32NT:
-                case PlatformID.WinCE:
-                    return "windows";
-                case PlatformID.Unix:
-                    return "linux";
-                case PlatformID.MacOSX:
-                    return "darwin";
-                default:
-                    return "undetermined";
-            }
-        }
-    }
-}
+#endregion

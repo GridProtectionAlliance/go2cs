@@ -15,7 +15,7 @@ func main() {
 }
 
 */
-
+#region source
 using go;
 using static go.builtin;
 using fmt = go.fmt_package;
@@ -33,3 +33,4 @@ public static class main_package
         fmt.Println(primes);
     }
 }
+#endregion

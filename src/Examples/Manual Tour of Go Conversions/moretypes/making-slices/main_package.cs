@@ -22,6 +22,7 @@ func printSlice(s string, x []int) {
 		s, len(x), cap(x), x)
 }
 */
+#region source
 using go;
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -47,3 +48,4 @@ static class main_package
             s, len(x), cap(x), x);
     }
 }
+#endregion

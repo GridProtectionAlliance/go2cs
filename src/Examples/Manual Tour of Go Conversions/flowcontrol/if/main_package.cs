@@ -17,12 +17,14 @@ func main() {
 	fmt.Println(sqrt(2), sqrt(-4))
 }
 */
+#region source
 using fmt = go.fmt_package;
 using math = System.Math;
+using float64 = System.Double;
 
 static class main_package
 {
-	static string sqrt(double x)  {
+	static string sqrt(float64 x)  {
         if (x < 0) {
 			return sqrt(-x) + "i";
         }
@@ -33,3 +35,4 @@ static class main_package
         fmt.Println(sqrt(2), sqrt(-4));
     }
 }
+#endregion

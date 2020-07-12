@@ -11,6 +11,7 @@ func main() {
 	fmt.Println(sum)
 }
 */
+#region source
 using fmt = go.fmt_package;
 
 static class main_package
@@ -24,4 +25,4 @@ static class main_package
         fmt.Println(sum);
     }
 }
-
+#endregion

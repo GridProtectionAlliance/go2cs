@@ -12,6 +12,7 @@ func main() {
 	fmt.Println(Vertex{1, 2})
 }
 */
+#region source
 using fmt = go.fmt_package;
 
 static partial class main_package
@@ -25,3 +26,4 @@ static partial class main_package
         fmt.Println(new Vertex(1, 2));
     }
 }
+#endregion

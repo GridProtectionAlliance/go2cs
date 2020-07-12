@@ -23,12 +23,14 @@ func main() {
 	)
 }
 */
+#region source
 using fmt = go.fmt_package;
 using math = System.Math;
+using float64 = System.Double;
 
 static class main_package
 {
-    static double pow(double x, double n, double lim) {
+    static float64 pow(float64 x, float64 n, float64 lim) {
         {
             var v = math.Pow(x, n);
             if (v < lim) {
@@ -48,3 +50,4 @@ static class main_package
         );
     }
 }
+#endregion

@@ -6,7 +6,7 @@ func main() {
 	}
 }
 */
-
+#region source
 static class main_package
 {
     static void Main() {
@@ -14,3 +14,4 @@ static class main_package
         }
     }
 }
+#endregion

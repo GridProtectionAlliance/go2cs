@@ -1,16 +1,16 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using go;
+using time = go.time_package;
 
 public static partial class main_package
 {
     public partial struct MyError
     {
-        public MyError((DateTime, @string) i) :
+        public MyError((time.Time, @string) i) :
             this(i.Item1, i.Item2) { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public MyError(DateTime When = default, @string What = default) {
+        public MyError(time.Time When = default, @string What = default) {
             this.When = When;
             this.What = What;
         }
@@ -19,7 +19,7 @@ public static partial class main_package
         public override string ToString() => $"{{{When}}} {{{What}}}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator MyError((DateTime, @string) value) => new MyError(value);
+        public static implicit operator MyError((time.Time, @string) value) => new MyError(value);
 
         // Person to nil comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

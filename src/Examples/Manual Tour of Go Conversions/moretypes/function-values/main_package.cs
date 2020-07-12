@@ -20,6 +20,7 @@ func main() {
 	fmt.Println(compute(math.Pow))
 }
 */
+#region source
 using System;
 using fmt = go.fmt_package;
 using math = System.Math;
@@ -41,3 +42,4 @@ static class main_package
 		fmt.Println(compute(math.Pow));
     }
 }
+#endregion

@@ -20,7 +20,7 @@ func main() {
 	do(true)
 }
 */
-
+#region source
 using go;
 using static go.builtin;
 
@@ -51,3 +51,4 @@ static class main_package
         @do(true);
     }
 }
+#endregion

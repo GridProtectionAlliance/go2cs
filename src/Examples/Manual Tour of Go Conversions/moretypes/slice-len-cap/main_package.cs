@@ -24,7 +24,7 @@ func printSlice(s []int) {
 	fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s)
 }
 */
-
+#region source
 using go;
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -52,3 +52,4 @@ static class main_package
         fmt.Printf("len={0} cap={1} {2}\n", len(s), cap(s), s);
 	}
 }
+#endregion

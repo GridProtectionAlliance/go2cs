@@ -18,7 +18,7 @@ func main() {
 	fmt.Println(a, z)
 }
 */
-
+#region source
 using fmt = go.fmt_package;
 using go;
 
@@ -39,3 +39,4 @@ static partial class main_package
 		fmt.Println(a, z);
     }
 }
+#endregion

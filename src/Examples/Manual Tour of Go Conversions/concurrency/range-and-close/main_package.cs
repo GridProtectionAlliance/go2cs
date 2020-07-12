@@ -32,7 +32,7 @@ static class main_package
 	static void fibonacci(int n, channel<int> c) {
 		int x = 0, y = 1;
         for (int i = 0; i < n; i++) {
-			c.Send(x);
+            c.Send(x);
 			var _y1 = x + y;
 			x = y;
             y = _y1;
@@ -41,8 +41,13 @@ static class main_package
     }
 
     static void Main() {
-		var c = make_channel<int>(10);
-		go_(() => fibonacci(cap(c), c));
+		// 'c' escapes stack in goroutine below, so we need a pointer
+		ref var c = ref heap(make_channel<int>(10), out var c__ptr).Value;
+        go_(() =>
+        {
+			ref var c = ref c__ptr.Value;
+            fibonacci(cap(c), c);
+        });
         foreach (int i in c) {
 			fmt.Println(i);
         }

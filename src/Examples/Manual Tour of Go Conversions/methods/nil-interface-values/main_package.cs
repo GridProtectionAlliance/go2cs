@@ -17,9 +17,8 @@ func describe(i I) {
 	fmt.Printf("(%v, %T)\n", i, i)
 }
 */
-
-using go;
-using static go.builtin;
+#region source
+using fmt = go.fmt_package;
 
 partial class main_package
 {
@@ -34,6 +33,7 @@ partial class main_package
     }
 
 	static void describe(I i) {
-		println($"({i:v}, {i:T})");
+		fmt.Println($"({i:v}, {i:T})");
 	}
 }
+#endregion

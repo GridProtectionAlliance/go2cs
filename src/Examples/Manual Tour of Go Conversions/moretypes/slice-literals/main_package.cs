@@ -24,6 +24,7 @@ func main() {
 	fmt.Println(s)
 }
 */
+#region source
 using go;
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -53,3 +54,4 @@ static partial class main_package
         fmt.Println(s);
     }
 }
+#endregion

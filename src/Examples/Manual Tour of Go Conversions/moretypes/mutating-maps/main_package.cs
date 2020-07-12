@@ -19,7 +19,7 @@ func main() {
 	fmt.Println("The value:", v, "Present?", ok)
 }
 */
-
+#region source
 using go;
 using static go.builtin;
 using fmt = go.fmt_package;
@@ -42,3 +42,4 @@ static class main_package
         fmt.Println("The value:", v, "Present?", ok);
     }
 }
+#endregion

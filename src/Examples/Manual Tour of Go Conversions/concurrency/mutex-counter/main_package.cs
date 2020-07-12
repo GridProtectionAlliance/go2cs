@@ -65,7 +65,7 @@ static partial class main_package
 
     // Value returns the current value of the counter for the given key.
 	public static int Value(this ref SafeCounter _this, @string key) => func(ref _this, (ref SafeCounter c, Defer defer, Panic panic, Recover recover) => {
-        // c escapes stack in defer below, so we need a pointer
+        // 'c' escapes stack in defer below, so we need a pointer
 		var c__ptr = ptr(c);
 
 		c.mu.Lock();
@@ -78,7 +78,7 @@ static partial class main_package
 	});
 
 	static void Main() {
-		// c escapes stack in goroutine below, so we need a pointer
+		// 'c' escapes stack in goroutine below, so we need a pointer
 		ref var c = ref heap(new SafeCounter(v: make_map<@string, int>()), out var c__ptr).Value;
 
         for (var i = 0; i < 1000; i++) {

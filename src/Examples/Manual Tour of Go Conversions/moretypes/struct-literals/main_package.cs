@@ -18,6 +18,7 @@ func main() {
 	fmt.Println(v1, p, v2, v3)
 }
 */
+#region source
 using go;
 using static go.builtin;
 using fmt = go.fmt_package;
@@ -30,12 +31,13 @@ static partial class main_package
     }
 
     // As of C# 8.0, implicit typing of member variables is not available
-    static Vertex v1 = new Vertex(1, 2);
-    static Vertex v2 = new Vertex { X = 1 };
-    static Vertex v3 = new Vertex();
-    static ptr<Vertex> p = ptr(new Vertex(1, 2));
+    static Vertex v1 = new Vertex(1, 2);            // has type Vertex
+    static Vertex v2 = new Vertex { X = 1 };        // Y:0 is implicit
+    static Vertex v3 = new Vertex();                // X:0 and Y:0
+    static ptr<Vertex> p = ptr(new Vertex(1, 2));   // has type *Vertex
 
     static void Main() {
         fmt.Println(v1, p, v2, v3);
     }
 }
+#endregion

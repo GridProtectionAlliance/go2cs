@@ -25,10 +25,9 @@ func main() {
 	fmt.Println(v.Abs())
 }
 */
-
+#region source
 using fmt = go.fmt_package;
 using math = System.Math;
-
 using float64 = System.Double;
 
 static partial class main_package
@@ -53,3 +52,4 @@ static partial class main_package
         fmt.Println(v.Abs());
     }
 }
+#endregion

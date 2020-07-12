@@ -40,10 +40,12 @@ func describe(i I) {
 	fmt.Printf("(%v, %T)\n", i, i)
 }
 */
-
-using System;
+#region source
 using go;
+using fmt = go.fmt_package;
+using math = System.Math;
 using static go.builtin;
+
 using F = System.Double;
 
 static partial class main_package
@@ -57,11 +59,11 @@ static partial class main_package
     }
 
 	public static void M(this ref T t) {
-		println(t.S);
+		fmt.Println(t.S);
 	}
 
 	public static void M(this F f) {
-        println(f);
+        fmt.Println(f);
 	}
 
 	static void Main() {
@@ -71,12 +73,13 @@ static partial class main_package
 		describe(i);
 		i.M();
 
-		i = I.As((F)(Math.PI));
+		i = I.As((F)(math.PI));
 		describe(i);
         i.M();
     }
 
 	static void describe(I i) {
-		println($"({i:v}, {i:T})");
+		fmt.Println($"({i:v}, {i:T})");
 	}
 }
+#endregion

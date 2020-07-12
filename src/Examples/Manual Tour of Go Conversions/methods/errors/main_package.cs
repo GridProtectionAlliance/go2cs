@@ -29,16 +29,16 @@ func main() {
 	}
 }
 */
-
-using System;
+#region source
 using go;
 using fmt = go.fmt_package;
+using time = go.time_package;
 using static go.builtin;
 
 static partial class main_package
 {
 	partial struct MyError {
-		public DateTime When;
+		public time.Time When;
 		public @string What;
 	}
 
@@ -49,7 +49,7 @@ static partial class main_package
 
 	static error run() {
 		return error.As(new MyError(
-			DateTime.Now,
+			time.Now(),
 			"it didn't work"));
     }
 
@@ -62,3 +62,4 @@ static partial class main_package
 		}
     }
 }
+#endregion

@@ -42,10 +42,12 @@ func (v *Vertex) Abs() float64 {
 	return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
 */
-
-using System;
-using static go.builtin;
+#region source
+using fmt = go.fmt_package;
+using math = System.Math;
 using float64 = System.Double;
+using static go.builtin;
+
 using MyFloat = System.Double;
 
 static partial class main_package
@@ -56,10 +58,10 @@ static partial class main_package
 
 	static void Main() {
 		Abser a;
-		var f = (MyFloat)(-Math.Sqrt(2));
+		var f = (MyFloat)(-math.Sqrt(2));
 		ref var v = ref heap(new Vertex(3, 4), out var _v_ptr).Value;
 
-		a = Abser.As(f);  // a MyFloat implements Abser
+		a = Abser.As(f);	  // a MyFloat implements Abser
 		a = Abser.As(_v_ptr); // a *Vertex implements Abser
 
 		// In the following line, v is a Vertex (not *Vertex)
@@ -67,7 +69,7 @@ static partial class main_package
 		// C# this would work fine with current implementation
 		//a = v
 
-		println(a.Abs());
+		fmt.Println(a.Abs());
     }
 
 	public static float64 Abs(this MyFloat f) {
@@ -77,13 +79,13 @@ static partial class main_package
 		return (float64)(f);
     }
 
-    public partial struct Vertex
-    {
+    public partial struct Vertex {
         public float64 X;
         public float64 Y;
     }
 
 	public static float64 Abs(this ref Vertex v) {
-		return Math.Sqrt(v.X * v.X + v.Y * v.Y);
+		return math.Sqrt(v.X*v.X + v.Y*v.Y);
 	}
 }
+#endregion

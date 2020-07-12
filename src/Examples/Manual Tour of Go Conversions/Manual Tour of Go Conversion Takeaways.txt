@@ -384,4 +384,3 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
 			var _y1 = x+y;
 			x = y;
                         y = _y1;
-

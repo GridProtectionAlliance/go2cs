@@ -19,7 +19,7 @@ func main() {
 	fmt.Println(f)
 }
 */
-
+#region source
 using fmt = go.fmt_package;
 using float64 = System.Double;
 using static go.builtin;
@@ -44,3 +44,4 @@ static class main_package
         fmt.Println(f, ok);
     }
 }
+#endregion

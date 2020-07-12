@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using go;
+using static go.builtin;
 
 #pragma warning disable CS0660, CS0661
 
@@ -70,17 +71,17 @@ public static partial class main_package
             switch (format)
             {
                 case "T":
-                    {
-                        string typeName = typeof(T).FullName!.Replace("_package+", ".");
-                        return m_target_is_ptr ? $"*{typeName}" : typeName;
-                    }
+                {
+                    string typeName = GetGoTypeName(typeof(T)).Replace("_package+", ".");
+                    return m_target_is_ptr ? $"*{typeName}" : typeName;
+                }
                 case "v":
-                    {
-                        if (m_target_is_ptr)
-                            return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.Value}";
+                {
+                    if (m_target_is_ptr)
+                        return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.Value}";
 
-                        return m_target?.ToString() ?? "<nil>";
-                    }
+                    return m_target?.ToString() ?? "<nil>";
+                }
                 default:
                     return ToString() ?? "<nil>";
             }

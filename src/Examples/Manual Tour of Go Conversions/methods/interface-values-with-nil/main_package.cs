@@ -36,8 +36,9 @@ func describe(i I) {
 	fmt.Printf("(%v, %T)\n", i, i)
 }
 */
-
+#region source
 using go;
+using fmt = go.fmt_package;
 using static go.builtin;
 
 static partial class main_package
@@ -52,10 +53,10 @@ static partial class main_package
 
 	public static void M(this ref T t) {
 		if (t == nil) {
-			println("<nil>");
+			fmt.Println("<nil>");
 			return;
 		}
-        println(t.S);
+        fmt.Println(t.S);
 	}
 
 	static void Main() {
@@ -72,6 +73,7 @@ static partial class main_package
     }
 
 	static void describe(I i) {
-		println($"({i:v}, {i:T})");
+		fmt.Println($"({i:v}, {i:T})");
 	}
 }
+#endregion

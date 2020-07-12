@@ -52,9 +52,13 @@ static class main_package
     }
 
     static void Main() {
-		var c = make_channel<int>();
-		var quit = make_channel<int>();
+        // 'c' and 'quit' escape stack in goroutine below, so we use pointers
+        ref var c = ref heap(make_channel<int>(), out var c__ptr).Value;
+        ref var quit = ref heap(make_channel<int>(), out var quit__ptr).Value;
 		go_(() => {
+            ref var c = ref c__ptr.Value;
+			ref var quit = ref quit__ptr.Value;
+
             for (int i = 0; i < 10; i++) {
                 fmt.Println(c.Receive());
             }
@@ -66,6 +70,10 @@ static class main_package
     }
 }
 #endregion
+// Tehcnically, because of channel's current design, it doesn't actually require
+// heap allocation before leaving the stack - but to be consistent, the procedure
+// is followed.
+
 // Go detects "deadlock" behavior when nothing is ready, currently this
 // code will spin. May need to implement a similar behavior.
 

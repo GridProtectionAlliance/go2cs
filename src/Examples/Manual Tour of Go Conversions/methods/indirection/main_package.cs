@@ -29,7 +29,7 @@ func main() {
 	fmt.Println(v, p)
 }
 */
-
+#region source
 using go;
 using static go.builtin;
 using fmt = go.fmt_package;
@@ -47,18 +47,17 @@ static partial class main
         v.Y = v.Y * f;
     }
 
-    public static void ScaleFunc(ptr<Vertex> v_ptr, float64 f)
-    {
-        ref var v = ref v_ptr.Value;
+    public static void ScaleFunc(ptr<Vertex> v__ptr, float64 f) {
+        ref var v = ref v__ptr.Value;
         v.X = v.X * f;
         v.Y = v.Y * f;
     }
 
     static void Main() {
-        var v_ptr = ptr(new Vertex(3, 4));
-        ref var v = ref v_ptr.Value;
+        // Address of v taken in this function, so we heap allocate and get a pointer
+        ref var v = ref heap(new Vertex(3, 4), out var v__ptr).Value;
         v.Scale(2);
-        ScaleFunc(v_ptr, 10);
+        ScaleFunc(v__ptr, 10);
 
         var p = ptr(new Vertex(4, 3));
         p.Value.Scale(3);
@@ -67,3 +66,4 @@ static partial class main
         fmt.Println(v, p);
     }
 }
+#endregion

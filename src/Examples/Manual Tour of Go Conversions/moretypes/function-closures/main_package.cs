@@ -21,7 +21,7 @@ func main() {
 	}
 }
 */
-
+#region source
 using System;
 using fmt = go.fmt_package;
 
@@ -47,3 +47,4 @@ static class main_package
         }
     }
 }
+#endregion

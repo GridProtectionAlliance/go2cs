@@ -47,6 +47,7 @@ func main() {
 	fmt.Println(v1, m["Bell Labs"])
 }
 */
+#region source
 using go;
 using static go.builtin;
 using fmt = go.fmt_package;
@@ -113,3 +114,4 @@ static partial class main_package
         fmt.Println(v1, m["Bell Labs"]);
     }
 }
+#endregion

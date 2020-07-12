@@ -38,6 +38,7 @@ func main() {
 	fmt.Println(v1, m["Bell Labs"])
 }
 */
+#region source
 using go;
 using static go.builtin;
 using fmt = go.fmt_package;
@@ -87,8 +88,8 @@ static partial class main_package
         fmt.Println(v1, m["Bell Labs"]);
 
         /* Option 1: */ m["Bell Labs"].Value.Lat = 1000;
-        /* Option 2: */ //((Vertex*)m["Bell Labs"])->Lat = 1000;
-        /* Option 3: */ // (~m["Bell Labs"])->Lat = 1000;
+        /* Option 2 - unsafe: */ //((Vertex*)m["Bell Labs"])->Lat = 1000;
+        /* Option 3 - unsafe: */ // (~m["Bell Labs"])->Lat = 1000;
         fmt.Println(v1, m["Bell Labs"]);
 
         // Escape detected here with address of operator for "&v2.Lat"
@@ -96,3 +97,4 @@ static partial class main_package
         fmt.Println(v1, m["Bell Labs"]);
     }
 }
+#endregion

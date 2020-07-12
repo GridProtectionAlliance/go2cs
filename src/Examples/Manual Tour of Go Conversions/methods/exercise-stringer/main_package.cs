@@ -19,7 +19,7 @@ func main() {
 	}
 }
 */
-
+#region source
 using go;
 using fmt = go.fmt_package;
 using IPAddr = go.array<byte>;
@@ -32,8 +32,8 @@ static class main_package
 
     static void Main() {
 		var hosts  = new map<@string, IPAddr> {
-			["loopback"] = new byte[] { 127, 0, 0, 1 },
-			["googleDNS"] = new byte[] { 8, 8, 8, 8}
+			["loopback"] = new[] { (byte)127, (byte)0, (byte)0, (byte)1 },
+			["googleDNS"] = new[] { (byte)8, (byte)8, (byte)8, (byte)8 }
         };
 
         foreach (var (name, ip) in hosts) {
@@ -41,3 +41,4 @@ static class main_package
         }
     }
 }
+#endregion
