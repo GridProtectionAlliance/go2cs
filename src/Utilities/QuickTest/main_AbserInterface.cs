@@ -23,14 +23,20 @@ namespace go
         [GeneratedCode("go2cs", "0.1.1.0")]
         public partial interface Abser : EmptyInterface
         {
+            // Can't implicitly cast to an interface, but C# 8 supports interface methods
+            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+            public static Abser @new<T>(T target) =>
+                target as Abser ?? (Abser<T>)target;
         }
 
         [GeneratedCode("go2cs", "0.1.1.0")]
-        public struct Abser<T> : Abser
+        public class Abser<T> : Abser
         {
             private T m_target;
 
-            public T Target => m_target;
+            private Abser(T target) => m_target = target;
+
+            public ref T Target => ref m_target;
 
             private delegate double AbsByVal(T value);
             private delegate double AbsByRef(ref T value);
@@ -49,20 +55,20 @@ namespace go
 
                 extensionMethod = targetType.GetExtensionMethod("Abs");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod != null)
                 {
                     s_AbsByRef = extensionMethod.CreateStaticDelegate(typeof(AbsByRef)) as AbsByRef;
 
-                    if ((object)s_AbsByRef == null)
+                    if (s_AbsByRef == null)
                         s_AbsByVal = extensionMethod.CreateStaticDelegate(typeof(AbsByVal)) as AbsByVal;
                 }
 
-                if ((object)s_AbsByRef == null && (object)s_AbsByVal == null)
+                if (s_AbsByRef == null && s_AbsByVal == null)
                     throw new NotImplementedException($"{targetType.Name} does not implement Abser.Abs method", new Exception("Abs"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static explicit operator Abser<T>(T target) => new Abser<T> { m_target = target };
+            public static explicit operator Abser<T>(T target) => new Abser<T>(target);
 
             // Enable comparisons between nil and Abser<T> interface instance
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
