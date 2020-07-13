@@ -8,7 +8,10 @@
 
   <ItemGroup>
     <Compile Remove="Properties\AssemblyInfo.cs" />
-    <ProjectReference Include="..\..\goutil\goutil.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\gocore\golib\golib.csproj" />
   </ItemGroup>
 
 </Project>

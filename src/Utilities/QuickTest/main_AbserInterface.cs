@@ -21,7 +21,7 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial interface Abser : EmptyInterface
+        public partial interface Abser
         {
             // Can't implicitly cast to an interface, but C# 8 supports interface methods
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

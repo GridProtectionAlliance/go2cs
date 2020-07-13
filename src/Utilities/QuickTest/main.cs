@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
+using complex128 = System.Numerics.Complex;
 
 namespace go
 {
@@ -12,9 +13,9 @@ namespace go
         {
             @bool b = false;
             @string s = "hello";
-            @int i = 12;
-            EmptyInterface eb = b;
-            EmptyInterface ai = (@int)12;
+            int i = 12;
+            object eb = b;
+            object ai = (int)12;
 
             //@string y1 = 0x266c;
 
@@ -50,7 +51,7 @@ namespace go
         }
 
         // Right operand of shift operators should always be cast it int
-        private static readonly dynamic intSize = 32 << (int)(~(@uint)0 >> 63);
+        private static readonly dynamic intSize = 32 << (int)(~(uint)0 >> 63);
 
         private static readonly dynamic maxUint64 = (1 << 64 - 1);
 
@@ -64,15 +65,15 @@ namespace go
 
         private static ref NumError syntaxError(@string fn, @string str)
         {
-            return ref new Ref<NumError>(new NumError{Func = fn, Num = str, Err = null}).Value;
+            return ref new ptr<NumError>(new NumError{Func = fn, Num = str, Err = null}).Value;
         }
 
         public partial struct ColorList
         {
             public long Total;
             public string Color;
-            public Ptr<ColorList> Next;
-            public Ptr<Ptr<ColorList>> NextNext;
+            public ptr<ColorList> Next;
+            public ptr<ptr<ColorList>> NextNext;
         }
 
         public partial struct MyError
@@ -116,10 +117,10 @@ namespace go
             private static readonly AbsByRef s_AbsByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public double Abs() => s_AbsByRef?.Invoke(ref this) ?? s_AbsByVal?.Invoke(this) ?? Abser?.Abs() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public double Abs() => s_AbsByRef?.Invoke(ref this) ?? s_AbsByVal?.Invoke(this) ?? Abser?.Abs() ?? throw new Exception(); //RuntimeErrorPanic.NilPointerDereference();
 
             // MyError structure promotion
-            private readonly Ref<MyError> m_MyErrorRef;
+            private readonly ptr<MyError> m_MyErrorRef;
 
             private ref MyError MyError_val => ref m_MyErrorRef.Value;
 
@@ -150,14 +151,14 @@ namespace go
             {
                 this.Message = "";
                 this.Abser = null;
-                this.m_MyErrorRef = new Ref<MyError>(new MyError(nil));
+                this.m_MyErrorRef = new ptr<MyError>(new MyError(nil));
             }
 
             public MyCustomError(string Message, Abser Abser, MyError MyError)
             {
                 this.Message = Message;
                 this.Abser = Abser;
-                this.m_MyErrorRef = new Ref<MyError>(MyError);
+                this.m_MyErrorRef = new ptr<MyError>(MyError);
             }
         }
 
@@ -196,12 +197,12 @@ namespace go
         // It prints into a buffer that must be set up separately.
         private struct fmt
         {
-            public Ptr<buffer> buf;
+            public ptr<buffer> buf;
 
             public fmtFlags fmtFlags;
 
-            public @int wid;  // width
-            public @int prec; // precision
+            public int wid;  // width
+            public int prec; // precision
 
             // intbuf is large enough to store %b of an int64 with a sign and
             // avoids padding at the end of the struct on 32 bit architectures.
@@ -219,7 +220,7 @@ namespace go
 
             fmt f = new fmt();
 
-            val(ref f.buf.Deref);
+            val(ref f.buf.Value);
 
             f.clearFlags();
 
@@ -310,13 +311,13 @@ namespace go
 
         private static void printSlice(slice<int> s)
         {
-            Console.WriteLine("len={0} cap={1} {2}", len(ref s), cap(ref s), s);
+            Console.WriteLine("len={0} cap={1} {2}", len(s), cap(s), s);
         }
 
         private static void Main3()
         {
             slice<int> s = new slice<int>();
-            Console.WriteLine("{0} {1} {2}", s, len(ref s), cap(ref s));
+            Console.WriteLine("{0} {1} {2}", s, len(s), cap(s));
 
             if (s == nil)
                 Console.WriteLine("nil!");
@@ -338,7 +339,7 @@ namespace go
             board[1][0] = "O";
             board[0][2] = "X";
 
-            for (var i = 0; i < len(ref board); i++)
+            for (var i = 0; i < len(board); i++)
             {
                 Console.WriteLine("{0}", string.Join(" ", board[i]));
             }
@@ -359,15 +360,15 @@ namespace go
             printSlice(s);
 
             // append works on nil slices.
-            s = append(ref s, 0);
+            s = append(s, 0);
             printSlice(s);
 
             // The slice grows as needed.
-            s = append(ref s, 1);
+            s = append(s, 1);
             printSlice(s);
 
             // We can add more than one element at a time.
-            s = append(ref s, 2, 3, 4);
+            s = append(s, 2, 3, 4);
             printSlice(s);
         }
 
@@ -470,7 +471,7 @@ namespace go
 
         private static ref int Main8()
         {
-            Ref<int> i = new Ref<int>(42), j = new Ref<int>(2701);
+            ptr<int> i = new ptr<int>(42), j = new ptr<int>(2701);
 
             ref int p = ref i.Value;
             Console.WriteLine(p);
@@ -481,7 +482,7 @@ namespace go
             p = p / 37;
             Console.WriteLine(j);
 
-            Ref<Vertex> v = new Ref<Vertex>(new Vertex { X = 1, Y = 2 });
+            ptr<Vertex> v = new ptr<Vertex>(new Vertex { X = 1, Y = 2 });
             ref Vertex pv = ref v.Value;
 
             pv.X = 12;
@@ -493,27 +494,29 @@ namespace go
             return ref i.Value;
         }
 
-        private static Ref<int> Main9()
+        private static ptr<int> Main9()
         {
-            Ref<int> i = new Ref<int>(42), j = new Ref<int>(2701);
+            ptr<int> i = new ptr<int>(42);
 
-            Ptr<int> p = new Ptr<int>(i);
-            Console.WriteLine(p);
-            p.Deref = 21;
-            Console.WriteLine(i);
+            //ptr<int> j = new ptr<int>(2701);
 
-            p.Value = j;
-            p.Deref = p.Deref / 37;
-            Console.WriteLine(j);
+            //ptr<int> p = new ptr<int>(~i);
+            //Console.WriteLine(p);
+            //p.Value = 21;
+            //Console.WriteLine(i);
 
-            Ref<Vertex> v = new Ref<Vertex>(new Vertex { X = 1, Y = 2 });
-            Ptr<Vertex> pv = new Ptr<Vertex>(v);
+            //p.Value = j;
+            //p.Value = p.Value / 37;
+            //Console.WriteLine(j);
 
-            pv.Deref.X = 12;
+            //ptr<Vertex> v = new ptr<Vertex>(new Vertex { X = 1, Y = 2 });
+            //ptr<Vertex> pv = new ptr<Vertex>(~v);
 
-            pv.Deref.X = 99;
+            //pv.Value.X = 12;
 
-            PrintVertex(ref v.Value);
+            //pv.Value.X = 99;
+
+            //PrintVertex(ref v.Value);
 
             return i;
         }
