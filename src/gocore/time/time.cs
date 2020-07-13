@@ -22,8 +22,7 @@
 //******************************************************************************************************
 
 using System;
-using System.Threading;
-using Timer = System.Timers.Timer;
+using System.Threading.Tasks;
 using static go.builtin;
 
 namespace go
@@ -56,22 +55,21 @@ namespace go
         private class ChannelTimer
         {
             private channel<Time> m_notify;
-            private readonly Timer m_timer;
+            private readonly int m_delay;
+            private readonly Action m_pulse;
+            private bool m_started;
 
             public ChannelTimer(long ticks, bool continuous)
             {
                 m_notify = make_channel<Time>();
-                m_timer = new Timer
-                {
-                    Interval = ticks / (double)TimeSpan.TicksPerMillisecond,
-                    AutoReset = false
-                };
-                m_timer.Elapsed += (_, e) =>
+                m_delay = (int)(ticks / TimeSpan.TicksPerMillisecond);
+
+                m_pulse = () =>
                 {
                     m_notify.Send(Now());
 
                     if (continuous)
-                        m_timer.Start();
+                        m_pulse.DelayAndExecute(m_delay);
                 };
             }
 
@@ -79,7 +77,12 @@ namespace go
             {
                 get
                 {
-                    m_timer.Start();
+                    if (!m_started)
+                    {
+                        m_started = true;
+                        m_pulse.DelayAndExecute(m_delay);
+                    }
+
                     return ref m_notify;
                 }
             }
@@ -89,7 +92,7 @@ namespace go
 
         public const long Second = TimeSpan.TicksPerSecond;
 
-        public static void Sleep(long ticks) => Thread.Sleep((int)(ticks / TimeSpan.TicksPerMillisecond));
+        public static void Sleep(long ticks) => Task.Delay((int)(ticks / TimeSpan.TicksPerMillisecond)).Wait();
 
         public static ref channel<Time> Tick(long ticks) => ref new ChannelTimer(ticks, true).Channel;
 
