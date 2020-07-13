@@ -113,7 +113,6 @@ namespace go
             m_isClosed = new ptr<bool>(false);
 
             Capacity = size;
-            IsClosed = false;
         }
 
         /// <summary>
@@ -131,7 +130,13 @@ namespace go
         public int Length
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => m_queue?.Count ?? 0;
+            get
+            {
+                if (m_queue is null)
+                    return 0;
+
+                return m_queue.Count;
+            }
         }
 
         public bool IsUnbuffered
@@ -152,13 +157,25 @@ namespace go
         public bool SendIsReady
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => m_queue?.Count != Capacity;
+            get
+            {
+                if (m_queue is null)
+                    return false;
+
+                return m_queue.Count != Capacity;
+            }
         }
 
         public bool ReceiveIsReady
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => !m_queue?.IsEmpty ?? false;
+            get
+            {
+                if (m_queue is null)
+                    return false;
+
+                return !m_queue.IsEmpty;
+            }
         }
 
         /// <summary>
@@ -252,6 +269,7 @@ namespace go
                 AssertChannelIsOpenForSend();
                 m_canAddEvent.Wait(cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
+                m_canAddEvent.Reset();
             }
 
             AssertChannelIsOpenForSend();
@@ -335,6 +353,7 @@ namespace go
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                m_canTakeEvent.Reset();
 
                 if (m_queue!.TryDequeue(out T value))
                 {
@@ -351,23 +370,29 @@ namespace go
 
         public bool Sent(in T value)
         {
-            if (!SendIsReady)
-                return false;
+            if (SendIsReady)
+            {
+                m_queue.Enqueue(value);
+                m_canTakeEvent.Set();
+                return true;
+            }
 
-            Send(value);
-            return true;
+            return false;
         }
 
         public bool Received(out T value)
         {
-            if (!ReceiveIsReady)
+            if (ReceiveIsReady)
             {
-                value = default!;
-                return false;
+                if (m_queue.TryDequeue(out value))
+                {
+                    m_canAddEvent.Set();
+                    return true;
+                }
             }
 
-            value = Receive();
-            return true;
+            value = default!;
+            return false;
         }
 
         object IChannel.Receive() => Receive()!;
