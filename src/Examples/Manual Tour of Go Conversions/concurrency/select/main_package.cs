@@ -70,7 +70,7 @@ static class main_package
     }
 }
 #endregion
-// Tehcnically, because of channel's current design, it doesn't actually require
+// Technically, because of channel's current design, it doesn't actually require
 // heap allocation before leaving the stack - but to be consistent, the procedure
 // is followed.
 

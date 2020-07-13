@@ -31,8 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\golib\golib.csproj" Condition="'$(Configuration)'=='Debug'" />
-    <PackageReference Include="go.lib" Version="0.1.0" Condition="'$(Configuration)'=='Release'" />
+    <ProjectReference Include="..\golib\golib.csproj" /> <!--Condition="'$(Configuration)'=='Debug'"-->
+    <!--<PackageReference Include="go.lib" Version="0.1.0" Condition="'$(Configuration)'=='Release'" />-->
   </ItemGroup>
 
 </Project>
