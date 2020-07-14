@@ -57,46 +57,27 @@ static class main_package
 {
     static void Main() {
         // Create a tic-tac-toe board.
-		var board = slice(new[]{
-			slice(new @string[]{"_", "_", "_"}),
-			slice(new @string[]{"_", "_", "_"}),
-			slice(new @string[]{"_", "_", "_"}),
+        var board = slice(new[]{
+                slice(new @string[]{"_", "_", "_"}),
+                slice(new @string[]{"_", "_", "_"}),
+                slice(new @string[]{"_", "_", "_"}),
         });
 
-		// The players take turns.
-		board[0][0] = "X";
-		board[2][2] = "O";
-		board[1][2] = "X";
-		board[1][0] = "O";
-		board[0][2] = "X";
+        // The players take turns.
+        board[0][0] = "X";
+        board[2][2] = "O";
+        board[1][2] = "X";
+        board[1][0] = "O";
+        board[0][2] = "X";
 
         for (var i = 0; i < len(board); i++) {
-            fmt.Printf("{0}\n", strings.Join(board[i], " "));
+            fmt.Printf("%s\n", strings.Join(board[i], " "));
         }
     }
 }
 ```
-Example excerpt of converted code from the Go [`errors`](https://github.com/pkg/errors/blob/master/errors.go#L102) package:
-```CSharp
-public static partial class errors_package
-{
-    // New returns an error that formats as the given text.
-    // Each call to New returns a distinct error value even if the text is identical.
-    public static error New(@string text) =>
-        error.As(new errorString(text))!;
 
-    // errorString is a trivial implementation of error.
-    private partial struct errorString {
-        public @string s;
-    }
-
-    private static @string Error(this ref errorString e) {
-        return e.s;
-    }
-}
-```
-
-## Optimizations
+## defer / panic / recover
 
 Code conversions only create a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/GoFunc.cs#L47) for converted Go function that reference `defer`, `panic`, or `recover`.
 
@@ -138,24 +119,19 @@ The Go code gets converted into C# code like the following:
 using fmt = go.fmt_package;
 using static go.builtin;
 
-
 public static partial class main_package
 {
-    private static void Main()
-    {
+    private static void Main() {
         f();
         fmt.Println("Returned normally from f.");
     }
 
-    private static void f() => func((defer, _, recover) =>
-    {
-        defer(() =>
-        {
+    private static void f() => func((defer, _, recover) => {
+        defer(() => {
             {
                 var r = recover();
 
-                if (r != nil)
-                {
+                if (r != nil) {
                     fmt.Println("Recovered in f", r);
                 }
             }
@@ -165,10 +141,8 @@ public static partial class main_package
         fmt.Println("Returned normally from g.");
     });
 
-    private static void g(int i) => func((defer, panic, _) =>
-    {
-        if (i > 3)
-        {
+    private static void g(int i) => func((defer, panic, _) => {
+        if (i > 3) {
             fmt.Println("Panicking!");
             panic(fmt.Sprintf("%v", i));
         }
@@ -182,9 +156,28 @@ public static partial class main_package
 Certainly for functions that call `defer`, `panic` or `recover`, the Go function execution context is required. However, if the function does not _directly_ call the functions, nor _indirectly_ call the functions through a lambda, then you should be able to safely remove the wrapping function execution context. For example, in the converted C# code above the `main` function does not directly nor indirectly call `defer`, `panic` or `recover` so the function is safely simplified as follows:
 
 ```CSharp
-private static void main()
-{
+private static void main() {
     f();
     fmt.Println("Returned normally from f.");
+}
+```
+
+* Example excerpt of converted code from the Go [`errors`](https://github.com/pkg/errors/blob/master/errors.go#L102) package:
+```CSharp
+public static partial class errors_package
+{
+    // New returns an error that formats as the given text.
+    // Each call to New returns a distinct error value even if the text is identical.
+    public static error New(@string text) =>
+        error.As(new errorString(text))!;
+
+    // errorString is a trivial implementation of error.
+    private partial struct errorString {
+        public @string s;
+    }
+
+    private static @string Error(this ref errorString e) {
+        return e.s;
+    }
 }
 ```
