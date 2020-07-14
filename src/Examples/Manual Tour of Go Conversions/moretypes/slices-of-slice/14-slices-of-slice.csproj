@@ -3,8 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>slices_of_slice</RootNamespace>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>slices_of_slice</RootNamespace>    
   </PropertyGroup>
 
   <ItemGroup>
