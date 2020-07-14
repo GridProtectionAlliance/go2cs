@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "go2cs", "go2cs\go2cs.csproj
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{E4417714-A721-45FD-B587-8A8A736AF2FA}"
 	ProjectSection(SolutionItems) = preProject
+		..\Background.md = ..\Background.md
+		..\ConversionStrategies.md = ..\ConversionStrategies.md
 		..\LICENSE = ..\LICENSE
 		..\NOTICE = ..\NOTICE
 		..\README.md = ..\README.md
