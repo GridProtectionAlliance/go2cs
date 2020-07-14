@@ -6,7 +6,7 @@ Converts source code developed using the Go programming language (see [Go Langua
 ## Goals
 
 * Convert Go code into visually similar C# code -- see [conversion strategies](ConversionStrategies.md).
- * Go is a minimalist language, as such it provides high-level functionality provided by the compiler. Converted C# code will have more visible code than Go used to provide equivalent functionality, however most of this code will be behind the scenes in separate files using partial class functionality.
+  * Go is a minimalist language, as such it provides high-level functionality provided by the compiler. Converted C# code will have more visible code than Go used to provide equivalent functionality, however most of this code will be behind the scenes in separate files using partial class functionality.
 * Convert Go units test to C# and verify results are the same (TBD).
 * Conversion always tries to target managed code, this way code is more portable.
   * If there is no possible way for managed code to accomplish a specific task, an option always exists to create a [native interop library](http://www.mono-project.com/docs/advanced/pinvoke/) that works on multiple platforms, i.e., importing code from a `.dll`/`.so`/`.dylib`. Even so, the philosophy is to always attempt to use managed code, i.e., not to lean towards native code libraries, regardless of possible performance implications. Simple first.
