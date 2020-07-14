@@ -1,6 +1,7 @@
 theme: jekyll-theme-cayman
 title: go2cs
 description: Go to C# Converter
+highlighter: rouge
 github:
   repository_name: GridProtectionAlliance/go2cs
   owner_url: https://www.gridprotectionalliance.org
