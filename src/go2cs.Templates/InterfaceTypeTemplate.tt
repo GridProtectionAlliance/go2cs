@@ -30,7 +30,7 @@ using go;
     public static partial class <#=PackageName#>_package
     {
         [<#=GeneratedCodeAttribute#>]
-        <#=Scope#> partial interface <#=InterfaceName#> : EmptyInterface
+        <#=Scope#> partial interface <#=InterfaceName#>
         {
         }
 

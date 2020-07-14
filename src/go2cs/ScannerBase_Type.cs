@@ -93,7 +93,7 @@ namespace go2cs
 
                 count = count - (typeInfo.IsByRefPointer ? 1 : 0);
 
-                string prefix = string.Join("", Enumerable.Range(0, count).Select(i => "Ptr<"));
+                string prefix = string.Join("", Enumerable.Range(0, count).Select(i => "ptr<"));
                 string suffix = new string('>', count);
 
                 typeInfo = ConvertByRefToBasicPointer(typeInfo);

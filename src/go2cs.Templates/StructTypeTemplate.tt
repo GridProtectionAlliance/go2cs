@@ -39,7 +39,7 @@ using go;
             }
         }#>
 
-        <#=Scope#> partial struct <#=StructName#> : EmptyInterface
+        <#=Scope#> partial struct <#=StructName#>
         {<#
             foreach (KeyValuePair<string, List<FunctionSignature>> kvp in PromotedFunctions)
             {
@@ -67,7 +67,7 @@ using go;
             #>
 
             // <#=kvp.Key#> structure promotion - sourced from <#=isPointer ? "pointer" : "value copy"#>
-            private readonly Ref<<#=kvp.Key#>> m_<#=kvp.Key#>Ref;
+            private readonly ptr<<#=kvp.Key#>> m_<#=kvp.Key#>Ref;
 
             private ref <#=kvp.Key#> <#=kvp.Key#>_<#=isPointer ? "ptr" : "val"#> => ref m_<#=kvp.Key#>Ref.Value;
 <#
@@ -117,7 +117,7 @@ using go;
                 {
                     // Promoted struct #>
 
-                this.m_<#=decl.Name#>Ref = new Ref<<#=decl.Type.TypeName#>>(new <#=decl.Type.TypeName#>(nil));<#
+                this.m_<#=decl.Name#>Ref = new ptr<<#=decl.Type.TypeName#>>(new <#=decl.Type.TypeName#>(nil));<#
                 }
                 else
                 {
@@ -141,7 +141,7 @@ using go;
                 {
                     // Promoted struct #>
 
-                this.m_<#=decl.Name#>Ref = new Ref<<#=decl.Type.TypeName#>>(<#=decl.Type.IsPointer ? "ref " : ""#><#=decl.Name#>);<#
+                this.m_<#=decl.Name#>Ref = new ptr<<#=decl.Type.TypeName#>>(<#=decl.Type.IsPointer ? "ref " : ""#><#=decl.Name#>);<#
                 }
                 else
                 {

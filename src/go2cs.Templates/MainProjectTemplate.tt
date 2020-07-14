@@ -12,7 +12,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PublishReadyToRun>true</PublishReadyToRun>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName><#=AssemblyName ?? ""#></AssemblyName>
+    <AssemblyName><#=AssemblyName#></AssemblyName>
     <ApplicationIcon>go2cs.ico</ApplicationIcon>
     <Product>go2cs</Product>
     <Copyright>Copyright © 2020</Copyright>

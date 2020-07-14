@@ -95,9 +95,9 @@ namespace go2cs.Metadata
 
         public static readonly TypeInfo EmptyInterfaceType = new TypeInfo
         {
-            Name = "EmptyInterface",
-            TypeName = "EmptyInterface",
-            FullTypeName = "go.EmptyInterface",
+            Name = "object",
+            TypeName = "object",
+            FullTypeName = "System.Object",
             TypeClass = TypeClass.Simple
         };
     }

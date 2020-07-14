@@ -481,12 +481,12 @@ namespace go2cs
             string[] parts = typeName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length == 2)
-                typeName = $"Ptr<{parts[1]}>";
+                typeName = $"ptr<{parts[1]}>";
 
             parts = fullTypeName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length == 2)
-                fullTypeName = $"Ptr<{parts[1]}>";
+                fullTypeName = $"ptr<{parts[1]}>";
 
             return new TypeInfo
             {

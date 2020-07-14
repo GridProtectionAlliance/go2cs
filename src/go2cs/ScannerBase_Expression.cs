@@ -139,9 +139,9 @@ namespace go2cs
                 }
                 else if (unaryOP.Equals("*", StringComparison.Ordinal))
                 {
-                    // TODO: Handle pointer dereference context - if this is a ref variable, Deref call is unnecessary
+                    // TODO: Handle pointer dereference context - if this is a ref variable, Value call is unnecessary
                     unaryOP = null;
-                    UnaryExpressions[context] = $"{Expressions[context.expression()]}.Deref";
+                    UnaryExpressions[context] = $"{Expressions[context.expression()]}.Value";
                 }
 
                 if ((object)unaryOP != null)
@@ -188,7 +188,7 @@ namespace go2cs
                     else
                     {
                         if (typeInfo.IsPointer)
-                            PrimaryExpressions[context] = $"new Ptr<{typeInfo.TypeName}>({expression})";
+                            PrimaryExpressions[context] = $"new ptr<{typeInfo.TypeName}>({expression})";
                         else if (typeInfo.TypeClass == TypeClass.Struct)
                             PrimaryExpressions[context] = $"{typeInfo.TypeName}_cast({expression})";
                         else if (typeInfo.TypeClass == TypeClass.Simple)
@@ -462,9 +462,9 @@ namespace go2cs
 
             GoParser.ReceiverTypeContext receiverType = context.receiverType();
 
-            // TODO: Handle type name pointer dereference context - if this is a ref variable, Deref call is unnecessary
+            // TODO: Handle type name pointer dereference context - if this is a ref variable, Value call is unnecessary
             if (receiverType?.children.Count == 4)
-                Operands[operandContext] = $"{receiverType.typeName().GetText()}.Deref";
+                Operands[operandContext] = $"{receiverType.typeName().GetText()}.Value";
             else
                 Operands[operandContext] = context.GetText();
         }

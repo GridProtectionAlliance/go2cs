@@ -16,7 +16,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+    #line 1 "C:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class MainProjectTemplate : MainProjectTemplateBase
     {
@@ -27,7 +27,7 @@ namespace go2cs.Templates
         public virtual string TransformText()
         {
             
-            #line 1 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 1 "C:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
  // This template creates a <AssemblyName>.csproj file 
             
             #line default
@@ -37,8 +37,8 @@ namespace go2cs.Templates
                     "ToRun>true</PublishReadyToRun>\r\n    <RootNamespace>go</RootNamespace>\r\n    <Asse" +
                     "mblyName>");
             
-            #line 15 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(AssemblyName ?? ""));
+            #line 15 "C:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(AssemblyName));
             
             #line default
             #line hidden
@@ -61,7 +61,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 30 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+        #line 30 "C:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
 
 // Template Parameters
 public string AssemblyName;  // File name without extension
