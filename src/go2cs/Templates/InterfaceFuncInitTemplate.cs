@@ -1,3 +1,0 @@
-﻿
-
-                extensionMethod = targetType.GetExtensionMethod("

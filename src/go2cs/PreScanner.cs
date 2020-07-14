@@ -74,8 +74,8 @@ namespace go2cs
 
             BinaryFormatter formatter = new BinaryFormatter();
 
-            using (FileStream stream = File.Create(FolderMetadataFileName))
-                formatter.Serialize(stream, folderMetadata);
+            using FileStream stream = File.Create(FolderMetadataFileName);
+            formatter.Serialize(stream, folderMetadata);
         }
 
         protected override void BeforeScan()

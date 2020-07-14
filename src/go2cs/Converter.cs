@@ -23,7 +23,7 @@
 
 using Antlr4.Runtime;
 using go2cs.Metadata;
-using go2cs.Templates;
+//using go2cs.Templates;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -91,8 +91,8 @@ namespace go2cs
             targetFile = targetFile.Replace(UsingsMarker, "");
             targetFile = targetFile.Replace(UnsafeMarker, UsesUnsafePointers ? "unsafe " : "");
 
-            using (StreamWriter writer = File.CreateText(TargetFileName))
-                writer.Write(targetFile);
+            using StreamWriter writer = File.CreateText(TargetFileName);
+            writer.Write(targetFile);
         }
 
         protected override void BeforeScan()
@@ -180,34 +180,34 @@ namespace go2cs
                     if (package.Equals("main"))
                         continue;
 
-                    string sharedProjectItems = Path.Combine(packagePath, $"{package}.projitems");
-                    string sharedProjectFile = Path.Combine(packagePath, $"{package}.shproj");
-                    string uniqueProjectID = GetProjectGuid(sharedProjectItems, "SharedGUID");
+                    //string sharedProjectItems = Path.Combine(packagePath, $"{package}.projitems");
+                    //string sharedProjectFile = Path.Combine(packagePath, $"{package}.shproj");
+                    //string uniqueProjectID = GetProjectGuid(sharedProjectItems, "SharedGUID");
 
-                    string sharedProjectItemsContent = new SharedProjectFileItemsTemplate
-                    {
-                        UniqueProjectID = uniqueProjectID,
-                        RootNamespace = packageNamespace,
-                        FileNames = packageFileNames.Select(Path.GetFileName).ToArray()
-                    }
-                    .TransformText();
+                    //string sharedProjectItemsContent = new SharedProjectFileItemsTemplate
+                    //{
+                    //    UniqueProjectID = uniqueProjectID,
+                    //    RootNamespace = packageNamespace,
+                    //    FileNames = packageFileNames.Select(Path.GetFileName).ToArray()
+                    //}
+                    //.TransformText();
 
-                    string sharedProjectFileContent = new SharedProjectFileTemplate
-                    {
-                        UniqueProjectID = uniqueProjectID,
-                        PackageName = package
-                    }
-                    .TransformText();
+                    //string sharedProjectFileContent = new SharedProjectFileTemplate
+                    //{
+                    //    UniqueProjectID = uniqueProjectID,
+                    //    PackageName = package
+                    //}
+                    //.TransformText();
 
-                    // Build a shared project items file (this is the shared project that normal projects will reference)
-                    if (!File.Exists(sharedProjectItems) || GetMD5HashFromFile(sharedProjectItems) != GetMD5HashFromString(sharedProjectItemsContent))
-                        using (StreamWriter writer = File.CreateText(sharedProjectItems))
-                            writer.Write(sharedProjectItemsContent);
+                    //// Build a shared project items file (this is the shared project that normal projects will reference)
+                    //if (!File.Exists(sharedProjectItems) || GetMD5HashFromFile(sharedProjectItems) != GetMD5HashFromString(sharedProjectItemsContent))
+                    //    using (StreamWriter writer = File.CreateText(sharedProjectItems))
+                    //        writer.Write(sharedProjectItemsContent);
 
-                    // Build a shared project file - this can be added to a solution to easily access reference code 
-                    if (!File.Exists(sharedProjectFile) || GetMD5HashFromFile(sharedProjectFile) != GetMD5HashFromString(sharedProjectFileContent))
-                        using (StreamWriter writer = File.CreateText(sharedProjectFile))
-                            writer.Write(sharedProjectFileContent);
+                    //// Build a shared project file - this can be added to a solution to easily access reference code 
+                    //if (!File.Exists(sharedProjectFile) || GetMD5HashFromFile(sharedProjectFile) != GetMD5HashFromString(sharedProjectFileContent))
+                    //    using (StreamWriter writer = File.CreateText(sharedProjectFile))
+                    //        writer.Write(sharedProjectFileContent);
                 }
             }
 
@@ -256,7 +256,7 @@ namespace go2cs
                 }
 
                 string mainProjectFile = Path.Combine(mainPackagePath, $"{assemblyName}.csproj");
-                string uniqueProjectID = RemoveSurrounding(GetProjectGuid(mainProjectFile, "ProjectGuid"), "{", "}");
+                //string uniqueProjectID = RemoveSurrounding(GetProjectGuid(mainProjectFile, "ProjectGuid"), "{", "}");
                 string mainProjectAssemblyInfoFile;
 
                 if (multipleSinglePathMainTargets)
@@ -275,35 +275,33 @@ namespace go2cs
                     mainProjectAssemblyInfoFile = Path.Combine(mainProjectAssemblyInfoFilePath, "AssemblyInfo.cs");
                 }
 
-                string mainProjectAssemblyInfoFileContent = new MainProjectAssemblyInfoTemplate
-                {
-                    AssemblyName = assemblyName,
-                    UniqueProjectID = uniqueProjectID
-                }
-                .TransformText();
+                //string mainProjectAssemblyInfoFileContent = new MainProjectAssemblyInfoTemplate
+                //{
+                //    AssemblyName = assemblyName,
+                //    UniqueProjectID = uniqueProjectID
+                //}
+                //.TransformText();
 
                 // Build a main project assembly info file (don't overwrite possible user changes)
-                if (!File.Exists(mainProjectAssemblyInfoFile))
-                    using (StreamWriter writer = File.CreateText(mainProjectAssemblyInfoFile))
-                        writer.Write(mainProjectAssemblyInfoFileContent);
+                //if (!File.Exists(mainProjectAssemblyInfoFile))
+                //    using (StreamWriter writer = File.CreateText(mainProjectAssemblyInfoFile))
+                //        writer.Write(mainProjectAssemblyInfoFileContent);
 
                 checkedProjectFiles.Add(mainProjectAssemblyInfoFile);
 
-                // TODO: Add shared project references for tracked imports
-
-                string mainProjectFileContent = new MainProjectTemplate
-                {
-                    AssemblyName = assemblyName,
-                    UniqueProjectID = uniqueProjectID,
-                    ProjectFiles = checkedProjectFiles.Select(fileName => GetRelativePath(fileName, mainPackagePath)).ToArray(),
-                    SharedProjectReferences = new[] { "$(GOPATH)\\src\\go2cs\\goutil\\goutil.projitems" }
-                }
-                .TransformText();
+                //string mainProjectFileContent = new MainProjectTemplate
+                //{
+                //    AssemblyName = assemblyName,
+                //    UniqueProjectID = uniqueProjectID,
+                //    ProjectFiles = checkedProjectFiles.Select(fileName => GetRelativePath(fileName, mainPackagePath)).ToArray(),
+                //    SharedProjectReferences = new[] { "$(GOPATH)\\src\\go2cs\\goutil\\goutil.projitems" }
+                //}
+                //.TransformText();
 
                 // Build a main project file
-                if (!File.Exists(mainProjectFile) || GetMD5HashFromFile(mainProjectFile) != GetMD5HashFromString(mainProjectFileContent))
-                    using (StreamWriter writer = File.CreateText(mainProjectFile))
-                        writer.Write(mainProjectFileContent);
+                //if (!File.Exists(mainProjectFile) || GetMD5HashFromFile(mainProjectFile) != GetMD5HashFromString(mainProjectFileContent))
+                //    using (StreamWriter writer = File.CreateText(mainProjectFile))
+                //        writer.Write(mainProjectFileContent);
             }
         }
 
@@ -319,35 +317,35 @@ namespace go2cs
                 }
             }
 
-            string sharedProjectItems = Path.Combine(options.TargetGoSrcPath, $"{StandardLibrary}.projitems");
-            string sharedProjectFile = Path.Combine(options.TargetGoSrcPath, $"{StandardLibrary}.shproj");
-            string uniqueProjectID = GetProjectGuid(sharedProjectItems, "SharedGUID");
-            int rootIndex = GoPath.Length;
+            //string sharedProjectItems = Path.Combine(options.TargetGoSrcPath, $"{StandardLibrary}.projitems");
+            //string sharedProjectFile = Path.Combine(options.TargetGoSrcPath, $"{StandardLibrary}.shproj");
+            //string uniqueProjectID = GetProjectGuid(sharedProjectItems, "SharedGUID");
+            //int rootIndex = GoPath.Length;
 
-            string sharedProjectItemsContent = new SharedProjectFileItemsTemplate
-            {
-                UniqueProjectID = uniqueProjectID,
-                RootNamespace = RootNamespace,
-                FileNames = packageFileNames.Select(fileName => fileName.Substring(rootIndex)).ToArray()
-            }
-            .TransformText();
+            //string sharedProjectItemsContent = new SharedProjectFileItemsTemplate
+            //{
+            //    UniqueProjectID = uniqueProjectID,
+            //    RootNamespace = RootNamespace,
+            //    FileNames = packageFileNames.Select(fileName => fileName.Substring(rootIndex)).ToArray()
+            //}
+            //.TransformText();
 
-            string sharedProjectFileContent = new SharedProjectFileTemplate
-            {
-                UniqueProjectID = uniqueProjectID,
-                PackageName = StandardLibrary
-            }
-            .TransformText();
+            //string sharedProjectFileContent = new SharedProjectFileTemplate
+            //{
+            //    UniqueProjectID = uniqueProjectID,
+            //    PackageName = StandardLibrary
+            //}
+            //.TransformText();
 
-            // Build a shared project items file (this is the shared project that normal projects will reference)
-            if (!File.Exists(sharedProjectItems) || GetMD5HashFromFile(sharedProjectItems) != GetMD5HashFromString(sharedProjectItemsContent))
-                using (StreamWriter writer = File.CreateText(sharedProjectItems))
-                    writer.Write(sharedProjectItemsContent);
+            //// Build a shared project items file (this is the shared project that normal projects will reference)
+            //if (!File.Exists(sharedProjectItems) || GetMD5HashFromFile(sharedProjectItems) != GetMD5HashFromString(sharedProjectItemsContent))
+            //    using (StreamWriter writer = File.CreateText(sharedProjectItems))
+            //        writer.Write(sharedProjectItemsContent);
 
-            // Build a shared project file - this can be added to a solution to easily access reference code 
-            if (!File.Exists(sharedProjectFile) || GetMD5HashFromFile(sharedProjectFile) != GetMD5HashFromString(sharedProjectFileContent))
-                using (StreamWriter writer = File.CreateText(sharedProjectFile))
-                    writer.Write(sharedProjectFileContent);
+            //// Build a shared project file - this can be added to a solution to easily access reference code 
+            //if (!File.Exists(sharedProjectFile) || GetMD5HashFromFile(sharedProjectFile) != GetMD5HashFromString(sharedProjectFileContent))
+            //    using (StreamWriter writer = File.CreateText(sharedProjectFile))
+            //        writer.Write(sharedProjectFileContent);
         }
 
         private string GetPackageNamespace(string packageImport)

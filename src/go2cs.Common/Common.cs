@@ -45,9 +45,9 @@ namespace go2cs
 
         public static readonly Assembly EntryAssembly;
 
-        public static string GoStandardLibraryProject { get; private set; }
+        //public static string GoStandardLibraryProject { get; private set; }
 
-        public static string GoUtilSharedProject { get; private set; }
+        //public static string GoUtilSharedProject { get; private set; }
 
         private static readonly HashSet<string> s_keywords;
 
@@ -61,7 +61,7 @@ namespace go2cs
 
         static Common()
         {
-            EntryAssembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+            EntryAssembly = Assembly.GetEntryAssembly();
 
             s_keywords = new HashSet<string>(new[]
             {
@@ -82,39 +82,87 @@ namespace go2cs
             s_findOctals = new Regex(@"\\[0-7]{3}", RegexOptions.Compiled);
         }
 
+        //public static void RestoreGoUtilSources(string targetPath)
+        //{
+        //    const string prefix = RootNamespace + ".goutil.";
+
+        //    if (!targetPath.EndsWith("goutil"))
+        //        targetPath = Path.Combine(targetPath, "goutil");
+
+        //    targetPath = AddPathSuffix(targetPath);
+
+        //    foreach (string name in EntryAssembly.GetManifestResourceNames().Where(name => name.StartsWith(prefix)))
+        //    {
+        //        using (Stream resourceStream = EntryAssembly.GetManifestResourceStream(name))
+        //        {
+        //            if (resourceStream != null)
+        //            {
+        //                string targetFileName = Path.Combine(targetPath, name.Substring(prefix.Length));
+        //                bool restoreFile = true;
+
+        //                if (File.Exists(targetFileName))
+        //                {
+        //                    string resourceMD5 = GetMD5HashFromStream(resourceStream);
+        //                    resourceStream.Seek(0, SeekOrigin.Begin);
+        //                    restoreFile = !resourceMD5.Equals(GetMD5HashFromFile(targetFileName));
+        //                }
+
+        //                if (restoreFile)
+        //                {
+        //                    byte[] buffer = new byte[resourceStream.Length];
+        //                    resourceStream.Read(buffer, 0, (int)resourceStream.Length);
+
+        //                    string directory = Path.GetDirectoryName(targetFileName);
+
+        //                    if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        //                        Directory.CreateDirectory(directory);
+
+        //                    using (StreamWriter writer = File.CreateText(targetFileName))
+        //                        writer.Write(Encoding.UTF8.GetString(buffer, 0, buffer.Length));
+        //                }
+
+        //                if (targetFileName.EndsWith(".projitems"))
+        //                    GoUtilSharedProject = targetFileName;
+        //            }
+        //        }
+        //    }
+
+        //    GoStandardLibraryProject = Path.Combine(targetPath, $"{Converter.StandardLibrary}.projitems");
+        //}
+
         // Use this function to preserve existing shared project Guid when overwriting
-        public static string GetProjectGuid(string projectFileName, string tagName)
-        {
-            if (File.Exists(projectFileName))
-            {
-                XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(projectFileName);
+        //public static string GetProjectGuid(string projectFileName, string tagName)
+        //{
+        //    if (File.Exists(projectFileName))
+        //    {
+        //        XmlDocument xmlDoc = new XmlDocument();
+        //        xmlDoc.Load(projectFileName);
 
-                XmlNodeList guidList = xmlDoc.GetElementsByTagName(tagName);
+        //        XmlNodeList guidList = xmlDoc.GetElementsByTagName(tagName);
 
-                if (guidList.Count > 0)
-                    return guidList[0].InnerText;
-            }
+        //        if (guidList.Count > 0)
+        //            return guidList[0].InnerText;
+        //    }
 
-            return Guid.NewGuid().ToString();
-        }
+        //    return Guid.NewGuid().ToString();
+        //}
 
         public static string GetMD5HashFromFile(string fileName)
         {
-            using (FileStream stream = File.OpenRead(fileName))
-                return GetMD5HashFromStream(stream);
+            using FileStream stream = File.OpenRead(fileName);
+            return GetMD5HashFromStream(stream);
         }
 
         public static string GetMD5HashFromString(string source)
         {
-            using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(source)))
-                return GetMD5HashFromStream(stream);
+            using MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(source));
+            return GetMD5HashFromStream(stream);
         }
 
         public static string GetMD5HashFromStream(Stream stream)
         {
-            using (MD5 md5 = MD5.Create())
-                return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty);
+            using MD5 md5 = MD5.Create();
+            return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty);
         }
 
         public static string AddPathSuffix(string filePath)
@@ -161,11 +209,7 @@ namespace go2cs
             // Test for case where valid path does not end in directory separator, Path.GetDirectoryName assumes
             // this is a file name - whether it exists or not
             string directoryName = AddPathSuffix(filePath);
-
-            if (Directory.Exists(directoryName))
-                return directoryName;
-
-            return AddPathSuffix(Path.GetDirectoryName(filePath) ?? filePath);
+            return Directory.Exists(directoryName) ? directoryName : AddPathSuffix(Path.GetDirectoryName(filePath) ?? filePath);
         }
 
         public static string GetLastDirectoryName(string filePath)
@@ -185,25 +229,17 @@ namespace go2cs
             return filePath;
         }
 
-        public static bool PathHasFiles(string filePath, string searchPattern)
-        {
-            return Directory.Exists(filePath) && Directory.EnumerateFiles(filePath, searchPattern, SearchOption.TopDirectoryOnly).Any();
-        }
+        public static bool PathHasFiles(string filePath, string searchPattern) =>
+            Directory.Exists(filePath) && Directory.EnumerateFiles(filePath, searchPattern, SearchOption.TopDirectoryOnly).Any();
 
-        public static string RemoveInvalidCharacters(string fileName)
-        {
-            return fileName.Replace('<', '(').Replace('>', ')');
-        }
+        public static string RemoveInvalidCharacters(string fileName) =>
+            fileName.Replace('<', '(').Replace('>', ')');
 
-        public static string GetRelativePath(string fileName, string targetPath)
-        {
-            return new DirectoryInfo(targetPath).GetRelativePathTo(new FileInfo(fileName));
-        }
+        public static string GetRelativePath(string fileName, string targetPath) =>
+            new DirectoryInfo(targetPath).GetRelativePathTo(new FileInfo(fileName));
 
-        public static string GetRelativePathFrom(this FileSystemInfo to, FileSystemInfo from)
-        {
-            return from.GetRelativePathTo(to);
-        }
+        public static string GetRelativePathFrom(this FileSystemInfo to, FileSystemInfo from) =>
+            from.GetRelativePathTo(to);
 
         public static string GetRelativePathTo(this FileSystemInfo from, FileSystemInfo to)
         {
@@ -232,10 +268,8 @@ namespace go2cs
             return source.Length > left.Length + right.Length ? source.Substring(left.Length, source.Length - (left.Length + right.Length)) : "";
         }
 
-        public static string SanitizedIdentifier(string identifier)
-        {
-            return s_keywords.Contains(identifier) ? $"@{identifier}" : identifier;
-        }
+        public static string SanitizedIdentifier(string identifier) =>
+            s_keywords.Contains(identifier) ? $"@{identifier}" : identifier;
 
         public static string ToStringLiteral(string input)
         {
@@ -250,9 +284,7 @@ namespace go2cs
             return writer.ToString();
         }
 
-        public static string ReplaceOctalBytes(string input)
-        {
-            return s_findOctals.Replace(input, match => new string(new[] { Convert.ToChar(Convert.ToUInt16(match.Value.Substring(1), 8)) }));
-        }
+        public static string ReplaceOctalBytes(string input) =>
+            s_findOctals.Replace(input, match => new string(new[] { Convert.ToChar(Convert.ToUInt16(match.Value.Substring(1), 8)) }));
     }
 }

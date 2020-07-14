@@ -1,11 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>go2cs.Templates</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="MainProjectAssemblyInfoTemplate.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="MainProjectAssemblyInfoTemplate.tt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.CodeDom" Version="4.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\go2cs.Common\go2cs.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -13,17 +26,89 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="CodeTemplate.cs">
+    <Compile Update="InheritedTypeTemplate.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>CodeTemplate.tt</DependentUpon>
+      <DependentUpon>InheritedTypeTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="InterfaceFuncDeclTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InterfaceFuncDeclTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="InterfaceFuncInitTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InterfaceFuncInitTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="InterfaceTypeTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InterfaceTypeTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="MainProjectTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MainProjectTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="StructFuncDeclTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>StructFuncDeclTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="StructFuncInitTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>StructFuncInitTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="StructTypeTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>StructTypeTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="TemplateBase.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TemplateBase.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="CodeTemplate.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>CodeTemplate.cs</LastGenOutput>
+    <None Update="InheritedTypeTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InheritedTypeTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="InterfaceFuncDeclTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceFuncDeclTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="InterfaceFuncInitTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceFuncInitTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="InterfaceTypeTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InterfaceTypeTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="MainProjectTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MainProjectTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="StructFuncDeclTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>StructFuncDeclTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="StructFuncInitTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>StructFuncInitTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="StructTypeTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>StructTypeTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="TemplateBase.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>TemplateBase.cs</LastGenOutput>
     </None>
   </ItemGroup>
 

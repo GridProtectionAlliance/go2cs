@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -15,25 +16,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Metadata\**" />
+    <Compile Remove="Templates\**" />
+    <EmbeddedResource Remove="Metadata\**" />
+    <EmbeddedResource Remove="Templates\**" />
+    <None Remove="Metadata\**" />
+    <None Remove="Templates\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Properties\AssemblyInfo.cs" />
-    <Compile Remove="Templates\InterfaceFuncDeclTemplate.cs" />
-    <Compile Remove="Templates\InterfaceFuncInitTemplate.cs" />
-    <Compile Remove="Templates\InterfaceTypeTemplate.cs" />
-    <Compile Remove="Templates\MainProjectAssemblyInfoTemplate.cs" />
-    <Compile Remove="Templates\MainProjectTemplate.cs" />
-    <Compile Remove="Templates\SharedProjectFileItemsTemplate.cs" />
-    <Compile Remove="Templates\SharedProjectFileTemplate.cs" />
-    <Compile Remove="Templates\StructFuncDeclTemplate.cs" />
-    <Compile Remove="Templates\StructFuncInitTemplate.cs" />
-    <Compile Remove="Templates\StructTypeTemplate.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Templates\*.tt" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Templates\SharedProjectFileItemsTemplate.projitems" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,47 +33,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\goutil\array.cs" Link="goutil\array.cs" />
-    <EmbeddedResource Include="..\goutil\builtin.cs" Link="goutil\builtin.cs" />
-    <EmbeddedResource Include="..\goutil\channel.cs" Link="goutil\channel.cs" />
-    <EmbeddedResource Include="..\goutil\DefinedTypes.cs" Link="goutil\DefinedTypes.cs" />
-    <EmbeddedResource Include="..\goutil\GoFunc.cs" Link="goutil\GoFunc.cs" />
-    <EmbeddedResource Include="..\goutil\NilType.cs" Link="goutil\NilType.cs" />
-    <EmbeddedResource Include="..\goutil\PanicException.cs" Link="goutil\PanicException.cs" />
-    <EmbeddedResource Include="..\goutil\PromotedStructAttribute.cs" Link="goutil\PromotedStructAttribute.cs" />
-    <EmbeddedResource Include="..\goutil\Ptr.cs" Link="goutil\Ptr.cs" />
-    <EmbeddedResource Include="..\goutil\Ref.cs" Link="goutil\Ref.cs" />
-    <EmbeddedResource Include="..\goutil\slice.cs" Link="goutil\slice.cs" />
-    <EmbeddedResource Include="..\goutil\string.cs" Link="goutil\string.cs" />
-    <EmbeddedResource Include="..\goutil\SwitchExpression.cs" Link="goutil\SwitchExpression.cs" />
-    <EmbeddedResource Include="..\goutil\TypeExtensions.cs" Link="goutil\TypeExtensions.cs" />
-    <None Include="Templates\InheritedTypeTemplate.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>InheritedTypeTemplate.cs</LastGenOutput>
-    </None>
-    <None Include="Templates\TemplateBase.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TemplateBase.cs</LastGenOutput>
-    </None>
-    <ProjectReference Include="..\Utilities\Antlr4.Runtime\Antlr4.Runtime.dotnet.csproj" />
+    <ProjectReference Include="..\go2cs.Common\go2cs.Common.csproj" />
+    <ProjectReference Include="..\go2cs.Templates\go2cs.Templates.csproj" />
+    <ProjectReference Include="..\Utilities\Antlr4.Runtime\Antlr4.Runtime.csproj" />
     <ProjectReference Include="..\Utilities\CommandLine\CommandLine.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.CodeDom" Version="4.6.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Templates\InheritedTypeTemplate.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>InheritedTypeTemplate.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Templates\TemplateBase.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>TemplateBase.tt</DependentUpon>
-    </Compile>
   </ItemGroup>
 
 </Project>

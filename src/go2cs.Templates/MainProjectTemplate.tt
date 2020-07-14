@@ -1,0 +1,33 @@
+﻿<# // This template creates a <AssemblyName>.csproj file #>
+<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="$(SolutionDir)go2cs.Common\$(OutDir)go2cs.Common.dll" #>
+<#@ assembly name="netstandard" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="go2cs" #>
+<#@ output extension=".cs" #>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <RootNamespace>go</RootNamespace>
+    <AssemblyName><#=AssemblyName ?? ""#></AssemblyName>
+    <ApplicationIcon>go2cs.ico</ApplicationIcon>
+    <Product>go2cs</Product>
+    <Copyright>Copyright © 2020</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Nullable>enable</Nullable>
+    <NoWarn>660;661;1701;1702;IDE1006</NoWarn>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="go.lib" Version="0.1.0" />
+  </ItemGroup>
+
+</Project>
+<#+
+// Template Parameters
+public string AssemblyName;  // File name without extension
+#>

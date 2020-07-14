@@ -1,7 +1,11 @@
 ﻿<# // This template creates a <PackageName>_<StructName>Struct.cs file #>
 <#@ template language="C#" inherits="TemplateBase" #>
+<#@ assembly name="$(SolutionDir)go2cs.Common\$(OutDir)go2cs.Common.dll" #>
+<#@ assembly name="netstandard" #>
+<#@ assembly name="System.Core" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
+<#@ import namespace="go2cs" #>
 <#@ import namespace="go2cs.Metadata" #>
 <#@ output extension=".cs" #>
 //---------------------------------------------------------

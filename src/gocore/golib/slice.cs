@@ -51,8 +51,6 @@ namespace go
         int Available { get; }
     }
 
-    // Span<T> considered for slices: https://github.com/dotnet/corefxlab/blob/master/docs/specs/span.md#relationship-to-array-slicing
-
     [Serializable]
     public readonly struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEnumerable<(long, T)>, IEquatable<slice<T>>, IEquatable<ISlice>
     {

@@ -1,0 +1,20 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="$(SolutionDir)go2cs.Common\$(OutDir)go2cs.Common.dll" #>
+<#@ assembly name="netstandard" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#+
+/*
+  It's important to note that these templates are designed for use at runtime, as a result
+  the project file should be set to use the file preprocessor for each T4 template, e.g.:
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+*/
+public string Version => Common.EntryAssembly.GetName().Version.ToString();
+
+public string GeneratedCodeAttribute => $"GeneratedCode(\"go2cs\", \"{Version}\")";
+
+public string GeneratedTime => $"{DateTime.UtcNow:yyyy MMMM dd HH:mm:ss} UTC";
+#>

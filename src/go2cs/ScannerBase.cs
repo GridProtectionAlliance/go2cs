@@ -402,8 +402,8 @@ namespace go2cs
 
             try
             {
-                using (FileStream stream = File.OpenRead(folderMetadataFileName))
-                    folderMetadata = formatter.Deserialize(stream) as FolderMetadata;
+                using FileStream stream = File.OpenRead(folderMetadataFileName);
+                folderMetadata = formatter.Deserialize(stream) as FolderMetadata;
             }
             catch (Exception ex)
             {
