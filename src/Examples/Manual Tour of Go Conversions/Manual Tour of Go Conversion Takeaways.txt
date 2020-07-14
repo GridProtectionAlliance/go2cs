@@ -171,7 +171,7 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
     you    don't seem to have any awareness (er, need of awareness) of all the memory
     management operations that are happening behind the scenes on your behalf.
 
-    Note 1: Go deferenced pointer operations should always be wrapped in C# for
+    Note 1: Go dereferenced pointer operations should always be wrapped in C# for
     proper compilation, for example:
         Go *val++ => C# (*val)++;
 
@@ -190,9 +190,9 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
 
         /* Original: */ m["Bell Labs"].Lat = 1000
 
-        /* Option 1: */ m["Bell Labs"].Value.Lat = 1000;        // ref T Value
-        /* Option 2: */ ((Vertex*)m["Bell Labs"])->Lat = 1000;    // implicit conversion to T*
-        /* Option 3: */ (~m["Bell Labs"])->Lat = 1000;            // bitwise complement operator to T*
+        /* Option 1: */ m["Bell Labs"].Value.Lat = 1000;          // ref T Value
+        /* Option 2: */ ((Vertex*)m["Bell Labs"])->Lat = 1000;    // implicit conversion to T* (unsafe only)
+        /* Option 3: */ (~m["Bell Labs"])->Lat = 1000;            // bitwise complement operator to T* (unsafe only)
 
         The nice thing about option 1 is (a) looks closer to Go code, (b) code
         does not require unsafe markers, and (c) it may be slightly faster to
@@ -383,4 +383,4 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
 
             var _y1 = x+y;
             x = y;
-                        y = _y1;
+            y = _y1;

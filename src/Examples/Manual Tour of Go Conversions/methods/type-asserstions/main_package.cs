@@ -45,3 +45,4 @@ static class main_package
     }
 }
 #endregion
+// Yes. I used an underscore as a function name.
