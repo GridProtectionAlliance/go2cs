@@ -5,15 +5,6 @@ VisualStudioVersion = 16.0.29424.173
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "go2cs", "go2cs\go2cs.csproj", "{DCB4FA2F-9CA3-4535-B9AE-082D076DFB97}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{E4417714-A721-45FD-B587-8A8A736AF2FA}"
-	ProjectSection(SolutionItems) = preProject
-		..\Background.md = ..\Background.md
-		..\ConversionStrategies.md = ..\ConversionStrategies.md
-		..\LICENSE = ..\LICENSE
-		..\NOTICE = ..\NOTICE
-		..\README.md = ..\README.md
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utilities", "utilities", "{BC53B46E-B2FA-4174-A0A2-326DD554B237}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "go2cs", "go2cs", "{78E6A8DC-83D6-4536-BE17-211B1B1D0D97}"
@@ -51,6 +42,13 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sync", "gocore\sync\sync.csproj", "{2E3B5E98-225B-4DDE-AB89-D0A9AE827657}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "time", "gocore\time\time.csproj", "{E7DFFC46-ABE6-4C35-A9C3-7530AFF7CDB5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{8862BC7D-C577-4972-8995-B217B51EC948}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\Background.md = ..\docs\Background.md
+		..\docs\ConversionStrategies.md = ..\docs\ConversionStrategies.md
+		..\docs\README.md = ..\docs\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

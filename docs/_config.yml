@@ -1,1 +1,9 @@
 theme: jekyll-theme-cayman
+title: go2cs
+description: Go to C# Converter
+github:
+  repository_name: GridProtectionAlliance/go2cs
+  owner_url: https://www.gridprotectionalliance.org
+  owner_name: Grid Protection Alliance
+plugins:
+  - jemoji

@@ -20,7 +20,7 @@ Picking up this project again now that .NET 5.0 is forthcoming and some of the n
 Converted code now targets .NET Core only, specifically version 3.1 and C# 8.0 with goal to support .NET 5.0 and C# 9.0 when it comes out.
 
 As a new strategy, sets of common Go examples have been manually converted to C# using the current [C# Go Library](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/). All relevant code samples from the "[Tour of Go](https://tour.golang.org/welcome/1)" have been converted to C#, [see converted code](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/). Ultimately would like to see this in head-to-head mode using [Try .NET](https://github.com/dotnet/try), for example:
-![go2cs](../src/Examples/Manual%20Tour%20of%20Go%20Conversions/HeadToHead-Small.png)
+![go2cs](images/HeadToHead-Small.png)
 However, current Blazor C# 8.0 code targets do not run with published Try .NET -- will be watching for an update.
 
 As releases are made for  updated `go2cs` executables, this will also include updates to pre-converted [Go Standard Library libraries for reference from NuGet](https://www.nuget.org/packages?q=%22package+in+.NET+for+use+with+go2cs%22).
@@ -76,4 +76,4 @@ If you were looking to "go" in the other direction, a full _code based_ conversi
 
 ## Background
 
-See [here](Background.md).
+For more background information, see [here](Background.md).
