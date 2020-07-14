@@ -4,7 +4,7 @@ package main
 import "fmt"
 
 type Vertex struct {
-	Lat, Long float64
+    Lat, Long float64
 }
 
 var m map[string]*Vertex
@@ -14,28 +14,28 @@ func update(val *float64) {
 }
 
 func main() {
-	m = make(map[string]*Vertex)
-	
-	v1 := Vertex{
-		40.68433, -74.39967,
-	}
-	
-	m["Bell Labs"] = &v1
-	fmt.Println(v1, m["Bell Labs"])
+    m = make(map[string]*Vertex)
+    
+    v1 := Vertex{
+        40.68433, -74.39967,
+    }
+    
+    m["Bell Labs"] = &v1
+    fmt.Println(v1, m["Bell Labs"])
 
     var v = m["Bell Labs"]
-	v.Lat = 99	
-	fmt.Println(v1, m["Bell Labs"])
-	
-	v2 := m["Bell Labs"]
-	v2.Lat = 999	
-	fmt.Println(v1, m["Bell Labs"])
-	
-	m["Bell Labs"].Lat = 1000
-	fmt.Println(v1, m["Bell Labs"])
-	
-	update(&v2.Lat);
-	fmt.Println(v1, m["Bell Labs"])
+    v.Lat = 99    
+    fmt.Println(v1, m["Bell Labs"])
+    
+    v2 := m["Bell Labs"]
+    v2.Lat = 999    
+    fmt.Println(v1, m["Bell Labs"])
+    
+    m["Bell Labs"].Lat = 1000
+    fmt.Println(v1, m["Bell Labs"])
+    
+    update(&v2.Lat);
+    fmt.Println(v1, m["Bell Labs"])
 }
 */
 #region source

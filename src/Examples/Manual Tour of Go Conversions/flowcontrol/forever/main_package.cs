@@ -2,8 +2,8 @@
 package main
 
 func main() {
-	for {
-	}
+    for {
+    }
 }
 */
 #region source

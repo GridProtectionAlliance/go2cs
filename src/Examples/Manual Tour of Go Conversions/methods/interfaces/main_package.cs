@@ -2,44 +2,44 @@
 package main
 
 import (
-	"fmt"
-	"math"
+    "fmt"
+    "math"
 )
 
 type Abser interface {
-	Abs() float64
+    Abs() float64
 }
 
 func main() {
-	var a Abser
-	f := MyFloat(-math.Sqrt2)
-	v := Vertex{3, 4}
+    var a Abser
+    f := MyFloat(-math.Sqrt2)
+    v := Vertex{3, 4}
 
-	a = f  // a MyFloat implements Abser
-	a = &v // a *Vertex implements Abser
+    a = f  // a MyFloat implements Abser
+    a = &v // a *Vertex implements Abser
 
-	// In the following line, v is a Vertex (not *Vertex)
-	// and does NOT implement Abser.
-	//a = v
+    // In the following line, v is a Vertex (not *Vertex)
+    // and does NOT implement Abser.
+    //a = v
 
-	fmt.Println(a.Abs())
+    fmt.Println(a.Abs())
 }
 
 type MyFloat float64
 
 func (f MyFloat) Abs() float64 {
-	if f < 0 {
-		return float64(-f)
-	}
-	return float64(f)
+    if f < 0 {
+        return float64(-f)
+    }
+    return float64(f)
 }
 
 type Vertex struct {
-	X, Y float64
+    X, Y float64
 }
 
 func (v *Vertex) Abs() float64 {
-	return math.Sqrt(v.X*v.X + v.Y*v.Y)
+    return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
 */
 #region source
@@ -53,30 +53,30 @@ using MyFloat = System.Double;
 static partial class main_package
 {
     partial interface Abser {
-		float64 Abs();
+        float64 Abs();
     }
 
-	static void Main() {
-		Abser a;
-		var f = (MyFloat)(-math.Sqrt(2));
-		ref var v = ref heap(new Vertex(3, 4), out var _v_ptr).Value;
+    static void Main() {
+        Abser a;
+        var f = (MyFloat)(-math.Sqrt(2));
+        ref var v = ref heap(new Vertex(3, 4), out var _v_ptr).Value;
 
-		a = Abser.As(f);	  // a MyFloat implements Abser
-		a = Abser.As(_v_ptr); // a *Vertex implements Abser
+        a = Abser.As(f);      // a MyFloat implements Abser
+        a = Abser.As(_v_ptr); // a *Vertex implements Abser
 
-		// In the following line, v is a Vertex (not *Vertex)
-		// and does NOT implement Abser -- in Go anyway, here in
-		// C# this would work fine with current implementation
-		//a = v
+        // In the following line, v is a Vertex (not *Vertex)
+        // and does NOT implement Abser -- in Go anyway, here in
+        // C# this would work fine with current implementation
+        //a = v
 
-		fmt.Println(a.Abs());
+        fmt.Println(a.Abs());
     }
 
-	public static float64 Abs(this MyFloat f) {
+    public static float64 Abs(this MyFloat f) {
         if (f < 0) {
-			return (float64)(-f);
+            return (float64)(-f);
         }
-		return (float64)(f);
+        return (float64)(f);
     }
 
     public partial struct Vertex {
@@ -84,8 +84,8 @@ static partial class main_package
         public float64 Y;
     }
 
-	public static float64 Abs(this ref Vertex v) {
-		return math.Sqrt(v.X*v.X + v.Y*v.Y);
-	}
+    public static float64 Abs(this ref Vertex v) {
+        return math.Sqrt(v.X*v.X + v.Y*v.Y);
+    }
 }
 #endregion

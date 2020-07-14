@@ -2,21 +2,21 @@
 package main
 
 import (
-	"fmt"
-	"math"
+    "fmt"
+    "math"
 )
 
 type Vertex struct {
-	X, Y float64
+    X, Y float64
 }
 
 func (v Vertex) Abs() float64 {
-	return math.Sqrt(v.X*v.X + v.Y*v.Y)
+    return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
 
 func main() {
-	v := Vertex{3, 4}
-	fmt.Println(v.Abs())
+    v := Vertex{3, 4}
+    fmt.Println(v.Abs())
 }
 */
 #region source
@@ -32,7 +32,7 @@ static partial class main_package
     }
 
     public static float64 Abs(this ref Vertex v) {
-	    return math.Sqrt(v.X*v.X + v.Y*v.Y);
+        return math.Sqrt(v.X*v.X + v.Y*v.Y);
     }
 
     static void Main() {

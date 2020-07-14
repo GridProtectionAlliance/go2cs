@@ -2,22 +2,22 @@
 package main
 
 import (
-	"fmt"
-	"math"
+    "fmt"
+    "math"
 )
 
 type MyFloat float64
 
 func (f MyFloat) Abs() float64 {
-	if f < 0 {
-		return float64(-f)
-	}
-	return float64(f)
+    if f < 0 {
+        return float64(-f)
+    }
+    return float64(f)
 }
 
 func main() {
-	f := MyFloat(-math.Sqrt2)
-	fmt.Println(f.Abs())
+    f := MyFloat(-math.Sqrt2)
+    fmt.Println(f.Abs())
 }
 */
 // The following type based using statements create a true alias,
@@ -32,16 +32,16 @@ using MyFloat = System.Double;
 
 static class main_package
 {
-	static float64 Abs(this MyFloat f) {
-		if (f < 0) {
-			return (float64)(-f);
-		}
-		return (float64)(f);
-	}
+    static float64 Abs(this MyFloat f) {
+        if (f < 0) {
+            return (float64)(-f);
+        }
+        return (float64)(f);
+    }
 
-	static void Main() {
-		var f = (float64)(-math.Sqrt(2));
-		fmt.Println(f.Abs());
+    static void Main() {
+        var f = (float64)(-math.Sqrt(2));
+        fmt.Println(f.Abs());
     }
 }
 #endregion

@@ -65,7 +65,7 @@ Specific grammar and embedded code changes:
     /// </returns>
     private bool noTerminatorBetween(int tokenOffset)
     {
-        BufferedTokenStream stream = TokenStream as BufferedTokenStream;		
+        BufferedTokenStream stream = TokenStream as BufferedTokenStream;        
         IList<IToken> tokens = stream.GetHiddenTokensToLeft(stream.LT(tokenOffset).TokenIndex);
 
         if (tokens == null)
@@ -153,7 +153,7 @@ eos
 
 COMMENT
     :   [ \t]* '/*' .*? '*/' [\r\n]* -> channel(HIDDEN)
-	;
+    ;
 
 LINE_COMMENT
     :   [ \t]* '//' ~[\r\n]* [\r\n]+ -> channel(HIDDEN)

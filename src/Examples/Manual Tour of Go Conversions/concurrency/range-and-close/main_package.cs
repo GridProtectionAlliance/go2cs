@@ -2,24 +2,24 @@
 package main
 
 import (
-	"fmt"
+    "fmt"
 )
 
 func fibonacci(n int, c chan int) {
-	x, y := 0, 1
-	for i := 0; i < n; i++ {
-		c <- x
-		x, y = y, x+y
-	}
-	close(c)
+    x, y := 0, 1
+    for i := 0; i < n; i++ {
+        c <- x
+        x, y = y, x+y
+    }
+    close(c)
 }
 
 func main() {
-	c := make(chan int, 10)
-	go fibonacci(cap(c), c)
-	for i := range c {
-		fmt.Println(i)
-	}
+    c := make(chan int, 10)
+    go fibonacci(cap(c), c)
+    for i := range c {
+        fmt.Println(i)
+    }
 }
 */
 #region source
@@ -29,27 +29,27 @@ using static go.builtin;
 
 static class main_package
 {
-	static void fibonacci(int n, channel<int> c) {
-		int x = 0, y = 1;
+    static void fibonacci(int n, channel<int> c) {
+        int x = 0, y = 1;
         for (int i = 0; i < n; i++) {
             c.Send(x);
-			var _y1 = x + y;
-			x = y;
+            var _y1 = x + y;
+            x = y;
             y = _y1;
         }
-		close(c);
+        close(c);
     }
 
     static void Main() {
-		// 'c' escapes stack in goroutine below, so we need a pointer
-		ref var c = ref heap(make_channel<int>(10), out var c__ptr).Value;
+        // 'c' escapes stack in goroutine below, so we need a pointer
+        ref var c = ref heap(make_channel<int>(10), out var c__ptr).Value;
         go_(() =>
         {
-			ref var c = ref c__ptr.Value;
+            ref var c = ref c__ptr.Value;
             fibonacci(cap(c), c);
         });
         foreach (int i in c) {
-			fmt.Println(i);
+            fmt.Println(i);
         }
     }
 }

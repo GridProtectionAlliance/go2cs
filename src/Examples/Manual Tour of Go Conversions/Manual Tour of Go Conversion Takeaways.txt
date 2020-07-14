@@ -4,180 +4,180 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
 
 07-named-results
 
-	Named tuple variables are available as locals to function and once
-	assigned allow a naked return.
+    Named tuple variables are available as locals to function and once
+    assigned allow a naked return.
 
 08-variables
 
-	Locals in Go do not require initialization - during conversion variables
-	will need to be initialized like "int i = default;".
+    Locals in Go do not require initialization - during conversion variables
+    will need to be initialized like "int i = default;".
 
 11-basic-types
 
-	Literals are arbitrary-precision numbers until assigned to a variable.
+    Literals are arbitrary-precision numbers until assigned to a variable.
 
 13-type-conversions
 
-	Since Go requires a cast even for simple numeric types, applying equivalent
-	cast in C# is simple even if redundant in some cases.
+    Since Go requires a cast even for simple numeric types, applying equivalent
+    cast in C# is simple even if redundant in some cases.
 
 14-type-inference
 
-	Will need to be careful that type checks work as expected. Need to make sure
-	equivalent Go types return the same names as Go via "fmt". General type
-	inference in C# works using the "var" declarator. Go is more flexible about
-	location of var types though, e.g., use outside function. In these cases the
-	conversion process will need to infer proper type. Literals will be fairy
-	simple, but some type of expression evaluation will be required.
+    Will need to be careful that type checks work as expected. Need to make sure
+    equivalent Go types return the same names as Go via "fmt". General type
+    inference in C# works using the "var" declarator. Go is more flexible about
+    location of var types though, e.g., use outside function. In these cases the
+    conversion process will need to infer proper type. Literals will be fairy
+    simple, but some type of expression evaluation will be required.
 
 15-constants
 
-	First: Go allows inferred type constants. C# does not support "var" outside
-	local functions - the right solution seems to be infer desired type during
-	conversion process through expression evaluation - could get a little tricky.
-	One cheaper	solution might be to compile Go code and attempt to infer
-	constant value that	way, adding console output for answer for example. If
-	conversion state is good enough this won't be necessary.
+    First: Go allows inferred type constants. C# does not support "var" outside
+    local functions - the right solution seems to be infer desired type during
+    conversion process through expression evaluation - could get a little tricky.
+    One cheaper    solution might be to compile Go code and attempt to infer
+    constant value that    way, adding console output for answer for example. If
+    conversion state is good enough this won't be necessary.
 
-	Second: Console apps wanting to display Unicode foreign language symbols need
-	to (a) use a font that supports the language, and (b) use UTF8 encoding. This
-	could become important for running Go unit tests and comparing console outputs
-	from converted code.
+    Second: Console apps wanting to display Unicode foreign language symbols need
+    to (a) use a font that supports the language, and (b) use UTF8 encoding. This
+    could become important for running Go unit tests and comparing console outputs
+    from converted code.
 
 16-numeric-constants
 
-	Go constants can hold arbitrary-precision literals with expression support,
-	applying value to variables in Go happens at compile time, so C# conversion
-	will need to support this operation. Ideally every numeric constant that can
-	hold the value with overflowing should to be defined. An additional run-time
-	lazy initialized BigInteger can be provided for simpler library usage but
-	use of constants should be encouraged for better performance.
+    Go constants can hold arbitrary-precision literals with expression support,
+    applying value to variables in Go happens at compile time, so C# conversion
+    will need to support this operation. Ideally every numeric constant that can
+    hold the value with overflowing should to be defined. An additional run-time
+    lazy initialized BigInteger can be provided for simpler library usage but
+    use of constants should be encouraged for better performance.
 
 >> flowcontrol
 
 09-switch
 
-	Go switch statements to not automatically fall-through - so a "break"
-	statement is not required.
+    Go switch statements to not automatically fall-through - so a "break"
+    statement is not required.
 
 10-switch-evaluation-order
 
-	First: Each switch case is a full expression evaluation, not a constant.
-	Since this deviates so far from C# switch handling, it could be better to
-	use	a custom "switch class" to use during the conversion or just convert
-	to if/else if expressions. A custom class would better mirror original
-	code construction.
+    First: Each switch case is a full expression evaluation, not a constant.
+    Since this deviates so far from C# switch handling, it could be better to
+    use    a custom "switch class" to use during the conversion or just convert
+    to if/else if expressions. A custom class would better mirror original
+    code construction.
 
-	Second: enumeration of values in Go seem to be treated as integers without
-	casting like is required by C#. Conversion code will need to evaluate each
-	enumeration usage to see if a cast is required.
+    Second: enumeration of values in Go seem to be treated as integers without
+    casting like is required by C#. Conversion code will need to evaluate each
+    enumeration usage to see if a cast is required.
 
 13-defer-multi
 
-	First: the defer command creates a stack of functions to be executed before
-	function exits. A function-wrapped architecture could help here.
+    First: the defer command creates a stack of functions to be executed before
+    function exits. A function-wrapped architecture could help here.
 
-	Second: evaluation of lambda captures appears to happen before pushing
-	lambda to the defer stack - will need to think on how to best handle this.
+    Second: evaluation of lambda captures appears to happen before pushing
+    lambda to the defer stack - will need to think on how to best handle this.
 
 >> moretypes
 
 01-pointers
 
-	For pointer operations constrained to local stack used with fully blittable
-	structures, code conversion is simple - just an "unsafe" marker and normal
-	C# pointer operations. However, if a pointer ever leaves the local stack
-	then its target will need heap allocation. If it's easy to detect when a
-	variable leaves the stack during code conversion, then both options can
-	be implemented, that is, both simple local stack pointer operations and
-	operations that require heap allocation. If pointer escape analysis ends
-	up being difficult, initial code conversions can always use heap-based
-	pointers implementations any time a variable address is taken.
+    For pointer operations constrained to local stack used with fully blittable
+    structures, code conversion is simple - just an "unsafe" marker and normal
+    C# pointer operations. However, if a pointer ever leaves the local stack
+    then its target will need heap allocation. If it's easy to detect when a
+    variable leaves the stack during code conversion, then both options can
+    be implemented, that is, both simple local stack pointer operations and
+    operations that require heap allocation. If pointer escape analysis ends
+    up being difficult, initial code conversions can always use heap-based
+    pointers implementations any time a variable address is taken.
 
 05-struct-literals
 
-	Pointers to member level variables are going to be problematic from a C#
-	perspective	as these would need to be a stack allocated	pinned pointer to
-	the shared member variable. For Go every thing is a simple struct until it
-	needs heap allocation outside of the local stack, even passing a parameter
-	to a function by reference happens using pointers in Go. It seems like Go
-	pointers are more like C# class references.	A simple heap allocation class
-	wrapper like "ptr<T>" should suffice for Go pointer functionality.
+    Pointers to member level variables are going to be problematic from a C#
+    perspective    as these would need to be a stack allocated    pinned pointer to
+    the shared member variable. For Go every thing is a simple struct until it
+    needs heap allocation outside of the local stack, even passing a parameter
+    to a function by reference happens using pointers in Go. It seems like Go
+    pointers are more like C# class references.    A simple heap allocation class
+    wrapper like "ptr<T>" should suffice for Go pointer functionality.
 
-	Member variables in C# cannot be declared with var for implicit typing, so
-	conversion tool will need to type expressions on the fly. A simple utility
-	written in Go that would parse and evaluate the member types might be handy
-	for this operation, otherwise, a Roslyn based expression parser would work
-	post conversion of expression to C#.
+    Member variables in C# cannot be declared with var for implicit typing, so
+    conversion tool will need to type expressions on the fly. A simple utility
+    written in Go that would parse and evaluate the member types might be handy
+    for this operation, otherwise, a Roslyn based expression parser would work
+    post conversion of expression to C#.
 
 08-slice-pointers
 
-	Arrays and slices in Go act differently than in C#, so this functionality
-	will need to be replicated with custom array / slice classes.
+    Arrays and slices in Go act differently than in C#, so this functionality
+    will need to be replicated with custom array / slice classes.
 
-	Go array lengths are validated at compile-time - I do not currently see a 
-	need for this same validation in C#, especially if a prerequisite for
-	converting code is that it already compiles in Go.
+    Go array lengths are validated at compile-time - I do not currently see a 
+    need for this same validation in C#, especially if a prerequisite for
+    converting code is that it already compiles in Go.
 
 09-slice-literals
 
-	In Go a struct can be declared inline, C# does not support this so these
-	dynamic structure elements will need to be named and declared external to
-	the function. Suggest at least internal if private cannot be accommodated.
-	Example shows how clean primary code can remain with some back-side
-	helper functions.
+    In Go a struct can be declared inline, C# does not support this so these
+    dynamic structure elements will need to be named and declared external to
+    the function. Suggest at least internal if private cannot be accommodated.
+    Example shows how clean primary code can remain with some back-side
+    helper functions.
 
-	If multiple identical dynamic structures are defined for a static class
-	conversion will need to map to the same	structure in order to use the
-	tuple-based construction helper functions. This means a per-class local
-	dictionary of defined types. Need to see if these dynamic structure types
-	can also support local extension functions.
+    If multiple identical dynamic structures are defined for a static class
+    conversion will need to map to the same    structure in order to use the
+    tuple-based construction helper functions. This means a per-class local
+    dictionary of defined types. Need to see if these dynamic structure types
+    can also support local extension functions.
 
-	Testing will need to be done with scoped variables with the same name, each
-	C# per static class local structure will need an index for uniqueness.
+    Testing will need to be done with scoped variables with the same name, each
+    C# per static class local structure will need an index for uniqueness.
 
-	Additionally, C# does not allow a bool as blittable value. In Go the bool
-	is the same size as a byte, so the golib defines a @bool type structure that
-	is implicitly castable to C# bool that can be used in structures or type
-	definitions. Blittable types are required or GCHandle allocations and
-	pointer operations.
+    Additionally, C# does not allow a bool as blittable value. In Go the bool
+    is the same size as a byte, so the golib defines a @bool type structure that
+    is implicitly castable to C# bool that can be used in structures or type
+    definitions. Blittable types are required or GCHandle allocations and
+    pointer operations.
 
-	For tuple based inputs with @bool, boolean source fields will need to be
-	declared as standard C# bool for proper literal parsing.
+    For tuple based inputs with @bool, boolean source fields will need to be
+    declared as standard C# bool for proper literal parsing.
 
 17-range-continued
 
-	The shift value in bit-shift operators will need to be cast to (int) as this
-	is what C# expects - even operator overload requires it.
+    The shift value in bit-shift operators will need to be cast to (int) as this
+    is what C# expects - even operator overload requires it.
 
 19-maps-pointerstyle(1 & 2)
 
-	This is not part of the official tour, but curiosity got the best of me
-	wondering about pointers - so after emerging from the rabbit hole (having
-	went deeper than I meant to go) I learned two things (1) Go pointers have
-	more unconstrained usage than in C#, (2) pointers in Go often match "ref"
-	operations in C# for structs, as such, this should be the preferred method
-	of handling pointers during conversions. However, "ref" only works for stack
-	allocated structures, so a class based reference wrapper will be required
-	anytime a structure needs to "leave the stack". Since the very moment a
-	structure "leaves the stack" a copy of the structure will be made, careful
-	handling will be required for interactions happening with local structs, i.e.,
-	pointers to local structs that leave the scope of the local functions will
-	need to be wrapped - careful, there be dragons that live here...
+    This is not part of the official tour, but curiosity got the best of me
+    wondering about pointers - so after emerging from the rabbit hole (having
+    went deeper than I meant to go) I learned two things (1) Go pointers have
+    more unconstrained usage than in C#, (2) pointers in Go often match "ref"
+    operations in C# for structs, as such, this should be the preferred method
+    of handling pointers during conversions. However, "ref" only works for stack
+    allocated structures, so a class based reference wrapper will be required
+    anytime a structure needs to "leave the stack". Since the very moment a
+    structure "leaves the stack" a copy of the structure will be made, careful
+    handling will be required for interactions happening with local structs, i.e.,
+    pointers to local structs that leave the scope of the local functions will
+    need to be wrapped - careful, there be dragons that live here...
 
-	From a high level, Go seems to use pointers like C# uses reference classes,
-	but in Go there is no clear delineation of class vs a struct like there is
-	in C#. In Go every struct looks and acts like a C# struct and, as a Go coder,
-	you	don't seem to have any awareness (er, need of awareness) of all the memory
-	management operations that are happening behind the scenes on your behalf.
+    From a high level, Go seems to use pointers like C# uses reference classes,
+    but in Go there is no clear delineation of class vs a struct like there is
+    in C#. In Go every struct looks and acts like a C# struct and, as a Go coder,
+    you    don't seem to have any awareness (er, need of awareness) of all the memory
+    management operations that are happening behind the scenes on your behalf.
 
-	Note 1: Go deferenced pointer operations should always be wrapped in C# for
-	proper compilation, for example:
-		Go *val++ => C# (*val)++;
+    Note 1: Go deferenced pointer operations should always be wrapped in C# for
+    proper compilation, for example:
+        Go *val++ => C# (*val)++;
 
-	Note 2: Any time a local variable has an address-of operator applied to it
-	in a Go function, C# conversion should create a heap-based wrapper for the
-	type and dereference variable local to function using C# "ref", e.g.:
+    Note 2: Any time a local variable has an address-of operator applied to it
+    in a Go function, C# conversion should create a heap-based wrapper for the
+    type and dereference variable local to function using C# "ref", e.g.:
 
         var p__v1 = ptr(new Vertex(
             40.68433, -74.39967
@@ -185,202 +185,202 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
 
         ref var v1 = ref p__v1.Value;
 
-	Note 3: Stylistically there a few ways to support dereferenced pointer
-	variables in converted code, for example:
+    Note 3: Stylistically there a few ways to support dereferenced pointer
+    variables in converted code, for example:
 
-		/* Original: */ m["Bell Labs"].Lat = 1000
+        /* Original: */ m["Bell Labs"].Lat = 1000
 
-	    /* Option 1: */ m["Bell Labs"].Value.Lat = 1000;		// ref T Value
-        /* Option 2: */ ((Vertex*)m["Bell Labs"])->Lat = 1000;	// implicit conversion to T*
-        /* Option 3: */ (~m["Bell Labs"])->Lat = 1000;			// bitwise complement operator to T*
+        /* Option 1: */ m["Bell Labs"].Value.Lat = 1000;        // ref T Value
+        /* Option 2: */ ((Vertex*)m["Bell Labs"])->Lat = 1000;    // implicit conversion to T*
+        /* Option 3: */ (~m["Bell Labs"])->Lat = 1000;            // bitwise complement operator to T*
 
-		The nice thing about option 1 is (a) looks closer to Go code, (b) code
-		does not require unsafe markers, and (c) it may be slightly faster to
-		access property vs an operator function.
+        The nice thing about option 1 is (a) looks closer to Go code, (b) code
+        does not require unsafe markers, and (c) it may be slightly faster to
+        access property vs an operator function.
 
 22-mutating-maps
 
-	To handle the optional return tuple pattern, a constant like "WithOK" set to false
-	can produce an indexer overload to handle the use case:
+    To handle the optional return tuple pattern, a constant like "WithOK" set to false
+    can produce an indexer overload to handle the use case:
 
-		// Source with tuple return pattern
-		public (TValue, bool) this[TKey key, bool _] => ...
+        // Source with tuple return pattern
+        public (TValue, bool) this[TKey key, bool _] => ...
 
-		// Example usage
-		var (v, ok) = m["Answer", WithOK];
+        // Example usage
+        var (v, ok) = m["Answer", WithOK];
 
 >> methods
 
 03-methods-continued
 
-	The C# using alias is ideal for simple Go type extensions, especially since
-	C# does not support type inheritance. That said, this now creates a need for
-	a reference	log to know every time the new type is used. Each time aliased
-	type is referenced in a source code file it will need to be added to the
-	using section at the top of the source code file:
+    The C# using alias is ideal for simple Go type extensions, especially since
+    C# does not support type inheritance. That said, this now creates a need for
+    a reference    log to know every time the new type is used. Each time aliased
+    type is referenced in a source code file it will need to be added to the
+    using section at the top of the source code file:
 
-		using MyFloat = System.Double;
+        using MyFloat = System.Double;
 
-	Speaking of which, this may be an excellent way to handle direct native Go
-	equivalents instead of a wrapped implicitly cast structure type:
+    Speaking of which, this may be an excellent way to handle direct native Go
+    equivalents instead of a wrapped implicitly cast structure type:
 
-		using int32 = System.Int32;
-		using int64 = System.Int64;
+        using int32 = System.Int32;
+        using int64 = System.Int64;
 
-	Should we bother with support for 32-bits?
+    Should we bother with support for 32-bits?
 
-	#if Target32Bit
-		using @int = System.Int32;
-		using @uint = System.UInt32;
-	#else
-		using @int = System.Int64;
-		using @uint = System.UInt64;
-	#endif
+    #if Target32Bit
+        using @int = System.Int32;
+        using @uint = System.UInt32;
+    #else
+        using @int = System.Int64;
+        using @uint = System.UInt64;
+    #endif
 
-	Could just opt for 64-bit only and use C# long/ulong for every Go int/uint
+    Could just opt for 64-bit only and use C# long/ulong for every Go int/uint
 
 
 06-indirection
 
-	One thing to note when creating a direct pointer variable in a local function,
-	e.g., from Go "p := &Vertex{4, 3}" to C# "var p = ptr(new Vertex(4, 3));", is
-	that any time the variable is used with the function the "Value" of the pointer
-	needs to be assumed to be the target of "p" unless the destination is a ptr<T>.
+    One thing to note when creating a direct pointer variable in a local function,
+    e.g., from Go "p := &Vertex{4, 3}" to C# "var p = ptr(new Vertex(4, 3));", is
+    that any time the variable is used with the function the "Value" of the pointer
+    needs to be assumed to be the target of "p" unless the destination is a ptr<T>.
 
-	This gets explained in methods tour step 7. Given pointer "p", the method call
-	to "p.Abs()" is interpreted as "(*p).Abs()".
+    This gets explained in methods tour step 7. Given pointer "p", the method call
+    to "p.Abs()" is interpreted as "(*p).Abs()".
 
 09-interfaces
 
-	Implementing interfaces in C# the Go way, that is, based on duck-typing via
-	extension methods, is hard, but not impossible.
-	
-	One could imagine some kind of preprocessing during the conversion process where
-	all extension methods encountered could be actually implemented as part of the
-	target type. This would certainly work for many types and in many cases, but in
-	Go the duck typed implementation can happen at any time - this works much more
-	like a .NET extension function such that the type can be extended by other
-	libraries later and the source type not need to be compiled with all known types.
-	
-	Also, based on prior C# aliasing technique, an extension method would still work
-	but a native type cannot be extended to implement an interface without creating
-	a new derived type. As such extension methods seems to be the best fit. Using
-	conventional methods this will depend on reflecting types at runtime, but the
-	results can be statically cached so that the performance hit will only happen
-	once during initialization, i.e., first time when casting a type to an interface.
+    Implementing interfaces in C# the Go way, that is, based on duck-typing via
+    extension methods, is hard, but not impossible.
+    
+    One could imagine some kind of preprocessing during the conversion process where
+    all extension methods encountered could be actually implemented as part of the
+    target type. This would certainly work for many types and in many cases, but in
+    Go the duck typed implementation can happen at any time - this works much more
+    like a .NET extension function such that the type can be extended by other
+    libraries later and the source type not need to be compiled with all known types.
+    
+    Also, based on prior C# aliasing technique, an extension method would still work
+    but a native type cannot be extended to implement an interface without creating
+    a new derived type. As such extension methods seems to be the best fit. Using
+    conventional methods this will depend on reflecting types at runtime, but the
+    results can be statically cached so that the performance hit will only happen
+    once during initialization, i.e., first time when casting a type to an interface.
 
-	This can all happen with a behind the scenes with a class wrapper that will take
-	either the type (T) or a pointer to the type, i.e., ptr<T>, for the interface.
-	Unfortunately C# does not allow implicit type conversions with interfaces as
-	parameters (guess this makes sense as type already implements interface), so
-	we will need a static cast function whenever a type is converted to the
-	interface class wrapper which will lookup needed interface methods for given
-	type during static type initialization - like an "As<T>" function, e.g.:
+    This can all happen with a behind the scenes with a class wrapper that will take
+    either the type (T) or a pointer to the type, i.e., ptr<T>, for the interface.
+    Unfortunately C# does not allow implicit type conversions with interfaces as
+    parameters (guess this makes sense as type already implements interface), so
+    we will need a static cast function whenever a type is converted to the
+    interface class wrapper which will lookup needed interface methods for given
+    type during static type initialization - like an "As<T>" function, e.g.:
 
-	>> Go code:
+    >> Go code:
 
-		var a Abser
-		f := MyFloat(-math.Sqrt2)
-		v := Vertex{3, 4}
+        var a Abser
+        f := MyFloat(-math.Sqrt2)
+        v := Vertex{3, 4}
 
-		a = f  // a MyFloat implements Abser
-		a = &v // a *Vertex implements Abser
+        a = f  // a MyFloat implements Abser
+        a = &v // a *Vertex implements Abser
 
-	>> C# equivalent:
+    >> C# equivalent:
 
-		Abser a;
-		var f = (MyFloat)(-math.Sqrt2);
+        Abser a;
+        var f = (MyFloat)(-math.Sqrt2);
         var _v_ptr = ptr(new Vertex(3, 4));  // Have to heap allocate v, it's pointer address is used later
-		ref var v = ref _v_ptr.Value;
+        ref var v = ref _v_ptr.Value;
 
-		a = Abser.As(f);      // a MyFloat implements Abser
-		a = Abser.As(_v_ptr); // a *Vertex implements Abser
+        a = Abser.As(f);      // a MyFloat implements Abser
+        a = Abser.As(_v_ptr); // a *Vertex implements Abser
 
 14-empty-interface
 
-	The empty interface in Go acts like the object class in .NET. For all intents and
-	purposes, every Go "interface{}" should be easily replaced with .NET "object". The
-	other option is creating a full set of Go types that all inherit something like
-	an "IEmptyInterface". Creating a full set of types for all Go native types might
-	work for most cases, but the compiled code would lose native value optimizations
-	that come at an IL level since all interactions with Go equivalent .NET native
-	types would need to be cast to and from C# native types via operator functions.
-	Going to try just using .NET "object" class for encountered "interface {}" types.
+    The empty interface in Go acts like the object class in .NET. For all intents and
+    purposes, every Go "interface{}" should be easily replaced with .NET "object". The
+    other option is creating a full set of Go types that all inherit something like
+    an "IEmptyInterface". Creating a full set of types for all Go native types might
+    work for most cases, but the compiled code would lose native value optimizations
+    that come at an IL level since all interactions with Go equivalent .NET native
+    types would need to be cast to and from C# native types via operator functions.
+    Going to try just using .NET "object" class for encountered "interface {}" types.
 
 15-type-assertions
 
-	Hoping that this functionality will be easy to map since .NET already has strong
-	type handling. One interesting thing is that functions used to handle Go-like type
-	assertions can actually just be an underscore with a generic type, as a single
-	underscore is a valid function name. I think a function name like this would
-	generally be discouraged, but in this case it produces C# code that is very
-	visually similar to original Go code, for example:
+    Hoping that this functionality will be easy to map since .NET already has strong
+    type handling. One interesting thing is that functions used to handle Go-like type
+    assertions can actually just be an underscore with a generic type, as a single
+    underscore is a valid function name. I think a function name like this would
+    generally be discouraged, but in this case it produces C# code that is very
+    visually similar to original Go code, for example:
 
-	>> Go code:
+    >> Go code:
 
-		package main
+        package main
 
-		import "fmt"
+        import "fmt"
 
-		func main() {
-			var i interface{} = "hello"
+        func main() {
+            var i interface{} = "hello"
 
-			s := i.(string)
-			fmt.Println(s)
+            s := i.(string)
+            fmt.Println(s)
 
-			s, ok := i.(string)
-			fmt.Println(s, ok)
+            s, ok := i.(string)
+            fmt.Println(s, ok)
 
-			f, ok := i.(float64)
-			fmt.Println(f, ok)
+            f, ok := i.(float64)
+            fmt.Println(f, ok)
 
-			f = i.(float64) // panic
-			fmt.Println(f)
+            f = i.(float64) // panic
+            fmt.Println(f)
         }
 
-	>> C# equivalent:
+    >> C# equivalent:
 
-		using fmt = go.fmt_package;
-		using static go.builtin;
-		using float64 = System.Double;
+        using fmt = go.fmt_package;
+        using static go.builtin;
+        using float64 = System.Double;
 
-		class main_package
-		{
-			static void Main() {
-				object i = "hello";
+        class main_package
+        {
+            static void Main() {
+                object i = "hello";
 
-				string s = i._<string>();
-				fmt.Println(s);
+                string s = i._<string>();
+                fmt.Println(s);
 
-				bool ok;
-				(s, ok) = i._<string>(WithOK);
-				fmt.Println(s, ok);
+                bool ok;
+                (s, ok) = i._<string>(WithOK);
+                fmt.Println(s, ok);
 
-				float64 f;
-				(f, ok) = i._<float64>(WithOK);
-				fmt.Println(f, ok);
+                float64 f;
+                (f, ok) = i._<float64>(WithOK);
+                fmt.Println(f, ok);
 
-				f = i._<float64>(); // panic
-				fmt.Println(f, ok);
-			}
-		}
+                f = i._<float64>(); // panic
+                fmt.Println(f, ok);
+            }
+        }
 
 21-reader
 
-	When determining function accessibility of a Go type extension, if the target
-	of the extension is private, then the function should be private.
+    When determining function accessibility of a Go type extension, if the target
+    of the extension is private, then the function should be private.
 
 >> concurrency
 
 04-range-and-close
 
-	Right hand operands are fully evaluated before assignment to left hand
-	operands. Consider the following in Go:
+    Right hand operands are fully evaluated before assignment to left hand
+    operands. Consider the following in Go:
 
-			x, y = y, x+y
+            x, y = y, x+y
 
-	The equivalent in C# is as follows
+    The equivalent in C# is as follows
 
-			var _y1 = x+y;
-			x = y;
+            var _y1 = x+y;
+            x = y;
                         y = _y1;

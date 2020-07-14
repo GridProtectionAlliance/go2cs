@@ -1,42 +1,42 @@
 ﻿// https://go101.org/article/details.html#default-branch-position
 /*
-	switch n := rand.Intn(3); n {
-	case 0: fmt.Println("n == 0")
-	case 1: fmt.Println("n == 1")
-	default: fmt.Println("n == 2")
-	}
+    switch n := rand.Intn(3); n {
+    case 0: fmt.Println("n == 0")
+    case 1: fmt.Println("n == 1")
+    default: fmt.Println("n == 2")
+    }
 
-	switch n := rand.Intn(3); n {
-	default: fmt.Println("n == 2")
-	case 0: fmt.Println("n == 0")
-	case 1: fmt.Println("n == 1")
-	}
+    switch n := rand.Intn(3); n {
+    default: fmt.Println("n == 2")
+    case 0: fmt.Println("n == 0")
+    case 1: fmt.Println("n == 1")
+    }
 
-	switch n := rand.Intn(3); n {
-	case 0: fmt.Println("n == 0")
-	default: fmt.Println("n == 2")
-	case 1: fmt.Println("n == 1")
-	}
+    switch n := rand.Intn(3); n {
+    case 0: fmt.Println("n == 0")
+    default: fmt.Println("n == 2")
+    case 1: fmt.Println("n == 1")
+    }
 
-	var x, y chan int
+    var x, y chan int
 
-	select {
-	case <-x:
-	case y <- 1:
-	default:
-	}
+    select {
+    case <-x:
+    case y <- 1:
+    default:
+    }
 
-	select {
-	case <-x:
-	default:
-	case y <- 1:
-	}
+    select {
+    case <-x:
+    default:
+    case y <- 1:
+    }
 
-	select {
-	default:
-	case <-x:
-	case y <- 1:
-	}
+    select {
+    default:
+    case <-x:
+    case y <- 1:
+    }
 */
 #region source
 using go;
@@ -47,11 +47,11 @@ static class main_package
 {
     static void Main() {
         {
-			int n = rand.Intn(3);
+            int n = rand.Intn(3);
             switch (n) {
-				case 0: fmt.Println("n == 0"); break;
-				case 1: fmt.Println("n == 1"); break;
-				default: fmt.Println("n == 2"); break;
+                case 0: fmt.Println("n == 0"); break;
+                case 1: fmt.Println("n == 1"); break;
+                default: fmt.Println("n == 2"); break;
             }
         }
 
@@ -66,7 +66,7 @@ static class main_package
         }
         
         {
-			int n = rand.Intn(3);
+            int n = rand.Intn(3);
             switch (n)
             {
                 case 0: fmt.Println("n == 0"); break;
@@ -75,13 +75,13 @@ static class main_package
             }
         }
 
-		channel<int> x = default, y = default;
+        channel<int> x = default, y = default;
 
-		switch (true)
+        switch (true)
         {
-			case true when x.Received(out _): break;
+            case true when x.Received(out _): break;
             case true when y.Sent(1): break;
-			default: break;
+            default: break;
         }
 
         switch (true)
@@ -97,7 +97,7 @@ static class main_package
             case true when x.Received(out _): break;
             case true when y.Sent(1): break;
         }
-	}
+    }
 }
 #endregion
 namespace go.math

@@ -7,7 +7,7 @@ import "io"
 import inout "io"
 
 func main() {
-	fmt.Println(&inout.EOF == &io.EOF) // true
+    fmt.Println(&inout.EOF == &io.EOF) // true
 }
 */
 #region source

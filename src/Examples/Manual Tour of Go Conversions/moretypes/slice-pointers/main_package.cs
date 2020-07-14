@@ -4,21 +4,21 @@ package main
 import "fmt"
 
 func main() {
-	names := [4]string{
-		"John",
-		"Paul",
-		"George",
-		"Ringo",
-	}
-	fmt.Println(names)
+    names := [4]string{
+        "John",
+        "Paul",
+        "George",
+        "Ringo",
+    }
+    fmt.Println(names)
 
-	a := names[0:2]
-	b := names[1:3]
-	fmt.Println(a, b)
+    a := names[0:2]
+    b := names[1:3]
+    fmt.Println(a, b)
 
-	b[0] = "XXX"
-	fmt.Println(a, b)
-	fmt.Println(names)
+    b[0] = "XXX"
+    fmt.Println(a, b)
+    fmt.Println(names)
 }
 */
 #region source
@@ -43,16 +43,16 @@ static class main_package
 
         b[0] = "XXX";
         fmt.Println(a, b);
-		fmt.Println(names);
+        fmt.Println(names);
     }
 }
 #endregion
 // Note that native comparable C# code fails to operate in same way as Go
 //var names = new[]{
-//	"John",
-//	"Paul",
-//	"George",
-//	"Ringo"
+//    "John",
+//    "Paul",
+//    "George",
+//    "Ringo"
 //};
 //fmt.Println($"[{string.Join(" ", names)}]");
 

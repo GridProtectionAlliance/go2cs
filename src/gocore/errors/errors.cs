@@ -34,7 +34,7 @@ namespace go
     // The Unwrap, Is and As functions work on errors that may wrap other errors.
     // An error wraps another error if its type has the method
     //
-    //	Unwrap() error
+    //    Unwrap() error
     //
     // If e.Unwrap() returns a non-nil error w, then we say that e wraps w.
     //
@@ -44,7 +44,7 @@ namespace go
     // A simple way to create wrapped errors is to call fmt.Errorf and apply the %w verb
     // to the error argument:
     //
-    //	errors.Unwrap(fmt.Errorf("... %w ...", ..., err, ...))
+    //    errors.Unwrap(fmt.Errorf("... %w ...", ..., err, ...))
     //
     // returns err.
     //
@@ -52,11 +52,11 @@ namespace go
     // second. It reports whether it finds a match. It should be used in preference to
     // simple equality checks:
     //
-    //	if errors.Is(err, os.ErrExist)
+    //    if errors.Is(err, os.ErrExist)
     //
     // is preferable to
     //
-    //	if err == os.ErrExist
+    //    if err == os.ErrExist
     //
     // because the former will succeed if err wraps os.ErrExist.
     //
@@ -64,16 +64,16 @@ namespace go
     // assigned to its second argument, which must be a pointer. If it succeeds, it
     // performs the assignment and returns true. Otherwise, it returns false. The form
     //
-    //	var perr *os.PathError
-    //	if errors.As(err, &perr) {
-    //		fmt.Println(perr.Path)
-    //	}
+    //    var perr *os.PathError
+    //    if errors.As(err, &perr) {
+    //        fmt.Println(perr.Path)
+    //    }
     //
     // is preferable to
     //
-    //	if perr, ok := err.(*os.PathError); ok {
-    //		fmt.Println(perr.Path)
-    //	}
+    //    if perr, ok := err.(*os.PathError); ok {
+    //        fmt.Println(perr.Path)
+    //    }
     //
     // because the former will succeed if err wraps an *os.PathError.
     public static partial class errors_package

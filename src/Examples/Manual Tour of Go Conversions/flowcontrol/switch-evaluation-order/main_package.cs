@@ -2,23 +2,23 @@
 package main
 
 import (
-	"fmt"
-	"time"
+    "fmt"
+    "time"
 )
 
 func main() {
-	fmt.Println("When's Saturday?")
-	today := time.Now().Weekday()
-	switch time.Saturday {
-	case today + 0:
-		fmt.Println("Today.")
-	case today + 1:
-		fmt.Println("Tomorrow.")
-	case today + 2:
-		fmt.Println("In two days.")
-	default:
-		fmt.Println("Too far away.")
-	}
+    fmt.Println("When's Saturday?")
+    today := time.Now().Weekday()
+    switch time.Saturday {
+    case today + 0:
+        fmt.Println("Today.")
+    case today + 1:
+        fmt.Println("Tomorrow.")
+    case today + 2:
+        fmt.Println("In two days.")
+    default:
+        fmt.Println("Too far away.")
+    }
 }
 */
 #region source
@@ -29,8 +29,8 @@ using time = go.time_package;
 static class main_package
 {
     static void Main() {
-		fmt.Println("When's Saturday?");
-		var today = time.Now().Weekday();
+        fmt.Println("When's Saturday?");
+        var today = time.Now().Weekday();
 
         if (time.Saturday == today + 0) {
             fmt.Println("Today.");
@@ -49,9 +49,9 @@ static class main_package
 #endregion
 // Another possibility. however, this would not be able to handle fallthrough
 //switch (true) {
-//	  case true when time.Saturday == today + 0:
-//		  fmt.Println("Today.");
-//		  break;
+//      case true when time.Saturday == today + 0:
+//          fmt.Println("Today.");
+//          break;
 //    case true when time.Saturday == today + 1:
 //        fmt.Println("Tomorrow.");
 //        break;
@@ -59,8 +59,8 @@ static class main_package
 //        fmt.Println("In two days.");
 //        break;
 //    default:
-//		  fmt.Println("Too far away.");
-//		  break;
+//          fmt.Println("Too far away.");
+//          break;
 //}
 
 
@@ -70,5 +70,5 @@ static class main_package
 //    == today + 0 => fmt.Println("Today.");
 //    == today + 1 => fmt.Println("Tomorrow.");
 //    == today + 2 => fmt.Println("In two days.");
-//	  _ => fmt.Println("Too far away.");
+//      _ => fmt.Println("Too far away.");
 //};
