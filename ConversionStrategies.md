@@ -6,7 +6,7 @@
 
 * So that Go packages are more readily usable in C# applications, all converted code is in a root `go` namespace. Package paths are also converted to namespaces, so a Go import like `import "unicode/utf8"` becomes a C# using like `using utf8 = go.unicode.utf8_package;`.
 
-* Go projects that contain a `main` function are converted into a standard C# project. The conversion process will automatically reference the needed shared projects, per defined encountered `import` statements, recursively. In this manner a single executable with no external dependencies, besides .NET runtime, is created - just like its original Go counterpart.
+* Go projects that contain a `main` function are converted into a standard C# project. The conversion process will automatically reference the needed shared projects, per defined encountered `import` statements, recursively. In this manner an executablewith packages compiled as referenced assemblies can be created. To create a single executable, like the original Go counterpart, a [self-contained executable](https://docs.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained) will be created (when the .NET feature is available.
 
 * Go types are converted to C# `struct` types and used on the stack to optimize memory use and reduce the need for garbage collection. The `struct` types can be wrapped by C# `class` types that reference the type so that heap-allocated instances of the type can exist as needed.
 
