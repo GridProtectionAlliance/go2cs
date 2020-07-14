@@ -5,6 +5,8 @@ Converts source code developed using the Go programming language (see [Go Langua
 
 ## Goals
 
+* Convert Go code into C# so that Go code can be directly used within .NET eco-system.
+  * This is the primary goal of `go2cs`.
 * Convert Go code into visually similar C# code -- see [conversion strategies](ConversionStrategies.md).
   * Go is a minimalist language, as such it provides high-level functionality provided by the compiler. Converted C# code will have more visible code than Go used to provide equivalent functionality, however most of this code will be behind the scenes in separate files using partial class functionality.
 * Convert Go units test to C# and verify results are the same (TBD).
