@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //******************************************************************************************************
+// ReSharper disable InconsistentNaming
 // ReSharper disable UnusedParameter.Local
 
 using System.Runtime.CompilerServices;
@@ -32,6 +33,12 @@ namespace go
     /// </summary>
     /// <typeparam name="T">Reference type for heap based reference.</typeparam>
     /// <remarks>
+    /// <para>
+    /// A .NET class is always allocated on the heap and registered for garbage collection.
+    /// The <see cref="ptr{T}"/> class is used to create a reference to a heap allocated instance
+    /// of type <typeparamref name="T"/> so that the type can (1) have scope beyond the current
+    /// stack, and (2) have the ability to create a safe pointer to the type, i.e., a reference.
+    /// </para>
     /// <para>
     /// If <typeparamref name="T"/> is a <see cref="System.ValueType"/>, e.g., a struct, note that
     /// value will be "boxed" for heap allocation. Since boxed value will be a new copy of original
