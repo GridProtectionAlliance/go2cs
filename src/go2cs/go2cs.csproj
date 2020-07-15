@@ -4,33 +4,8 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PublishReadyToRun>true</PublishReadyToRun>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>TRACE;DOTNETCORE;NET35PLUS;NET40PLUS;NET45PLUS</DefineConstants>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>TRACE;DOTNETCORE;NET35PLUS;NET40PLUS;NET45PLUS</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Metadata\**" />
-    <Compile Remove="Templates\**" />
-    <EmbeddedResource Remove="Metadata\**" />
-    <EmbeddedResource Remove="Templates\**" />
-    <None Remove="Metadata\**" />
-    <None Remove="Templates\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\go2cs.Common\go2cs.Common.csproj" />
