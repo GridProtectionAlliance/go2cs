@@ -34,37 +34,38 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
 
     First: Go allows inferred type constants. C# does not support "var" outside
     local functions - the right solution seems to be infer desired type during
-    conversion process through expression evaluation - could get a little tricky.
-    One cheaper    solution might be to compile Go code and attempt to infer
-    constant value that    way, adding console output for answer for example. If
+    conversion process through expression evaluation, could get a little tricky.
+    One cheaper solution might be to compile Go code and attempt to infer
+    constant value that way, adding console output for answer for example. If
     conversion state is good enough this won't be necessary.
 
-    Second: Console apps wanting to display Unicode foreign language symbols need
-    to (a) use a font that supports the language, and (b) use UTF8 encoding. This
-    could become important for running Go unit tests and comparing console outputs
-    from converted code.
+    Second: Console apps wanting to display Unicode foreign language symbols
+    need to (a) use a font that supports the language, and (b) use UTF8
+    encoding. This could become important for running Go unit tests and
+    comparing console outputs from converted code.
 
 16-numeric-constants
 
     Go constants can hold arbitrary-precision literals with expression support,
     applying value to variables in Go happens at compile time, so C# conversion
     will need to support this operation. Ideally every numeric constant that can
-    hold the value with overflowing should to be defined. An additional run-time
-    lazy initialized BigInteger can be provided for simpler library usage but
-    use of constants should be encouraged for better performance.
+    hold the value without overflowing should to be defined. An additional
+    run-time lazy initialized BigInteger can be provided for simpler library
+    usage but use of constants should be encouraged for better performance.
 
 >> flowcontrol
 
 09-switch
 
-    Go switch statements to not automatically fall-through - so a "break"
-    statement is not required.
+    Go switch statements do not automatically fall-through - so a "break"
+    statement is not required in Go. When the `fallthrough` keyword is used
+    in Go, it evaluates the next case. A simple `if/then/else`
 
 10-switch-evaluation-order
 
     First: Each switch case is a full expression evaluation, not a constant.
     Since this deviates so far from C# switch handling, it could be better to
-    use    a custom "switch class" to use during the conversion or just convert
+    use a custom "switch class" to use during the conversion or just convert
     to if/else if expressions. A custom class would better mirror original
     code construction.
 
@@ -97,11 +98,11 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
 05-struct-literals
 
     Pointers to member level variables are going to be problematic from a C#
-    perspective    as these would need to be a stack allocated    pinned pointer to
+    perspective as these would need to be a stack allocated pinned pointer to
     the shared member variable. For Go every thing is a simple struct until it
     needs heap allocation outside of the local stack, even passing a parameter
     to a function by reference happens using pointers in Go. It seems like Go
-    pointers are more like C# class references.    A simple heap allocation class
+    pointers are more like C# class references. A simple heap allocation class
     wrapper like "ptr<T>" should suffice for Go pointer functionality.
 
     Member variables in C# cannot be declared with var for implicit typing, so
@@ -115,7 +116,7 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
     Arrays and slices in Go act differently than in C#, so this functionality
     will need to be replicated with custom array / slice classes.
 
-    Go array lengths are validated at compile-time - I do not currently see a 
+    Go array lengths are validated at compile-time - I do not currently see a
     need for this same validation in C#, especially if a prerequisite for
     converting code is that it already compiles in Go.
 
@@ -128,7 +129,7 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
     helper functions.
 
     If multiple identical dynamic structures are defined for a static class
-    conversion will need to map to the same    structure in order to use the
+    conversion will need to map to the same structure in order to use the
     tuple-based construction helper functions. This means a per-class local
     dictionary of defined types. Need to see if these dynamic structure types
     can also support local extension functions.
@@ -139,11 +140,9 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
     Additionally, C# does not allow a bool as blittable value. In Go the bool
     is the same size as a byte, so the golib defines a @bool type structure that
     is implicitly castable to C# bool that can be used in structures or type
-    definitions. Blittable types are required or GCHandle allocations and
-    pointer operations.
-
-    For tuple based inputs with @bool, boolean source fields will need to be
-    declared as standard C# bool for proper literal parsing.
+    definitions. Not sure if this is necessary... If @bool is used for tuple
+    based inputs with @bool, boolean source fields will need to be declared as
+    standard C# bool for proper literal parsing.
 
 17-range-continued
 
@@ -215,7 +214,7 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
 
     The C# using alias is ideal for simple Go type extensions, especially since
     C# does not support type inheritance. That said, this now creates a need for
-    a reference    log to know every time the new type is used. Each time aliased
+    a reference log to know every time the new type is used. Each time aliased
     type is referenced in a source code file it will need to be added to the
     using section at the top of the source code file:
 
@@ -242,26 +241,27 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
 
 06-indirection
 
-    One thing to note when creating a direct pointer variable in a local function,
-    e.g., from Go "p := &Vertex{4, 3}" to C# "var p = ptr(new Vertex(4, 3));", is
-    that any time the variable is used with the function the "Value" of the pointer
-    needs to be assumed to be the target of "p" unless the destination is a ptr<T>.
+    One thing to note when creating a direct pointer variable in a local
+    function, e.g., from Go "p := &Vertex{4, 3}" to C#
+    "var p = ptr(new Vertex(4, 3));", is that any time the variable is used with
+    the function the "Value" of the pointer needs to be assumed to be the target
+    of "p" unless the destination is a ptr<T>.
 
-    This gets explained in methods tour step 7. Given pointer "p", the method call
-    to "p.Abs()" is interpreted as "(*p).Abs()".
+    This gets explained in methods tour step 7. Given pointer "p", the method
+    call to "p.Abs()" is interpreted as "(*p).Abs()".
 
 09-interfaces
 
     Implementing interfaces in C# the Go way, that is, based on duck-typing via
     extension methods, is hard, but not impossible.
-    
+
     One could imagine some kind of preprocessing during the conversion process where
     all extension methods encountered could be actually implemented as part of the
     target type. This would certainly work for many types and in many cases, but in
     Go the duck typed implementation can happen at any time - this works much more
     like a .NET extension function such that the type can be extended by other
     libraries later and the source type not need to be compiled with all known types.
-    
+
     Also, based on prior C# aliasing technique, an extension method would still work
     but a native type cannot be extended to implement an interface without creating
     a new derived type. As such extension methods seems to be the best fit. Using
