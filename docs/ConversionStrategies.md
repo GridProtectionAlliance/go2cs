@@ -17,29 +17,29 @@
   In Go a struct can be declared inline, C# does not support this so these dynamic structure elements are named and declared external to the function using per-class local dictionary of defined types. Each inline C# per static class local structure will need an index for uniqueness.
 
 * Many go functions return a tuple of "value and success" or just a "value" where only the declared return type determines which overload to use. To accommodate similar functionality in C#, an overload is defined that takes a bool that returns the tuple style return using a constant like `WithOK`, e.g.:
-```CSharp
-var (v, ok) = m["Answer", WithOK];
-```
+  ```CSharp
+  var (v, ok) = m["Answer", WithOK];
+  ```
 
 * Go interfaces are not explicitly implemented. Instead if extension-style functions exist that satisfy all defined interface methods, the class is said to implicitly implement the interface. To accommodate these duck-implemented interfaces, a generic class is created for each interface so that for a given type, interface extension methods can be looked up using reflection. To speed up this operation, as assemblies are loaded, extension methods are cached in a dictionary for quick lookup and any lookup operations are only done once statically during type initialization. To make use of typed generic class any assignments to interface variables will be cast to generic type, e.g., see equivalent C# code for handling Go duck-implemented interfaces:
-```CSharp
-Abser a;
-var f = (MyFloat)(-math.Sqrt(2));
-a = Abser.As(f); // Succeeds if MyFloat type implements Abser interface
-```
+  ```CSharp
+  Abser a;
+  var f = (MyFloat)(-math.Sqrt(2));
+  a = Abser.As(f); // Succeeds if MyFloat type implements Abser interface
+  ```
 
-* In Go all objects are said to implement an interface with no methods, this is called the `EmptyInterface`. This operates fundamentally like .NET's `System.Object` class, consequently any time the `EmptyInterface` is encountered during conversion, it is simply replace
+* In Go all objects are said to implement an interface with no methods, this is called the `EmptyInterface`. This operates fundamentally like .NET's `System.Object` class, consequently any time the `EmptyInterface` is encountered during conversion, it is simply replaced with `object`.
 
 * All right-hand operands in assignment expressions in Go are evaluated before assignment to left-hand operands. This is tricky, for example, consider the following Go code:
-```Go
-x, y = y, x+y
-```
-The equivalent in C# is as follows
-```CSharp
-var _y1 = x+y;
-x = y;
-y = _y1;
-```
+  ```Go
+  x, y = y, x+y
+  ```
+  The equivalent in C# is as follows
+  ```CSharp
+  var _y1 = x+y;
+  x = y;
+  y = _y1;
+  ```
 
 * Conversion of pointer types will use the C# `ref` keyword where possible. When this strategy does not work, a heap allocated instance of the base type will be created (see [`ptr<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/ptr.cs)).
 
@@ -193,21 +193,21 @@ y = _y1;
   ```
 
 * Example excerpt of converted code from the Go [`errors`](https://github.com/pkg/errors/blob/master/errors.go#L102) package:
-```CSharp
-public static partial class errors_package
-{
-    // New returns an error that formats as the given text.
-    // Each call to New returns a distinct error value even if the text is identical.
-    public static error New(@string text) =>
-        error.As(new errorString(text))!;
+  ```CSharp
+  public static partial class errors_package
+  {
+      // New returns an error that formats as the given text.
+      // Each call to New returns a distinct error value even if the text is identical.
+      public static error New(@string text) =>
+          error.As(new errorString(text))!;
 
-    // errorString is a trivial implementation of error.
-    private partial struct errorString {
-        public @string s;
-    }
+      // errorString is a trivial implementation of error.
+      private partial struct errorString {
+          public @string s;
+      }
 
-    private static @string Error(this ref errorString e) {
-        return e.s;
-    }
-}
-```
+      private static @string Error(this ref errorString e) {
+          return e.s;
+      }
+  }
+  ```
