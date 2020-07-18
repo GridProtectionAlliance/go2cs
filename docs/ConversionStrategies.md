@@ -19,11 +19,14 @@
   > Note: In Go, a struct can be declared inline. C# does not support inline or intra-function `struct` definitions, so these dynamic structure elements will be named and declared external to the function. A per-parent static class local dictionary of defined types will need to be used during conversion to track this. Each inline C# per static class local structure will need an index for uniqueness. See [example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/moretypes/slice-literals) with inline `struct`.
 
 * Many go functions return a tuple of "value and success" or just a "value" where only the declared return type determines which overload to use. To accommodate similar functionality in C#, an overload is defined that takes a bool that returns the tuple style return using a constant like `WithOK`, e.g.:
-```CSharp
-var v1 = m["Answer"];
-var (v2, ok) = m["Answer", WithOK];
-```
+
+  ```CSharp
+  var v1 = m["Answer"];
+  var (v2, ok) = m["Answer", WithOK];
+  ```
+  
   Similarly functions returning an "value and error" tuple can operate in the same way:
+  
   ```CSharp
   var n1 = r.Read(b);
   var (n2, err) = r.Read(b, WithErr);
