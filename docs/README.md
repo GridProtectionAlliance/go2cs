@@ -30,7 +30,7 @@ As releases are made for  updated `go2cs` executables, this will also include up
 
 > There's no official release yet, but you can compile the code to produce a `go2cs` executable.
 
-1. Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. The only dependency is .NET (see [prerequisites](#prerequisites) below).
+1. Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. This should compile as a standalone executable for your target platform with no external dependencies.
 
 2. Optionally extract the pre-converted C# Go Standard Library source code into the desired target path, by default `%GOPATH\src\go2cs\`
 
@@ -63,9 +63,9 @@ As releases are made for  updated `go2cs` executables, this will also include up
 
 ### Future Options
 
-A new command line option to prefer `var` over explicit types would be handy, e.g., specifying `-x` would request explicit type definitions otherwise defaulting to use `var` where possible.
+A new command line option to prefer explicit types over `var` would be handy, e.g., specifying `-x` would request explicit type definitions; otherwise, without applying setting, conversion would default to using `var` where possible.
 
-If converted code ever gets updated where a new `import` is added, a command line option that would "rescan" the imports in a project and augment the project file to make sure all the needed imports are referenced would be ideal.
+If converted code ever gets manually updated, e.g., where a new `import` is added, a command line option that would "rescan" the imports in a project and augment the project file to make sure all the needed imports are referenced could be handy.
 
 ## C# to Go?
 
