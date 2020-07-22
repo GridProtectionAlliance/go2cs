@@ -18,6 +18,10 @@
 
   > Note: In Go, a struct can be declared inline. C# does not support inline or intra-function `struct` definitions, so these dynamic structure elements will be named and declared external to the function. A per-parent static class local dictionary of defined types will need to be used during conversion to track this. Each inline C# per static class local structure will need an index for uniqueness. See [example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/moretypes/slice-literals) with inline `struct`.
 
+* Go structs use "[type embedding](https://go101.org/article/type-embedding.html)" for extending type functionality instead of inheritance. Since converted Go structs use C# `struct` types and structures in C# do not support inheritance, the code conversion process has to manage equivalent field type embedding. This process adds fields of embedded types with the same name as the type. In Go, embedded type fields are flattened into a single set (selection shorthand), including nested types - so this too has to be managed by the conversion tool.
+
+  Also, when a type is embedded in another type, the derived type supports the extension methods of the embedded types. This is more tricky in C# since interfaces are duck-implemented (see interface strategies below) and the type implemented for the extension method will have no "direct" relation to the derived types save it simply exists as a field in another type. The Go compiler seems to create proxy extension functions for the derived type's embedded type methods, as such this is how the conversion tool will accommodate this functionality.
+
 * Many go functions return a tuple of "value and success" or just a "value" where only the declared return type determines which overload to use. To accommodate similar functionality in C#, an overload is defined that takes a bool that returns the tuple style return using a constant like `WithOK`, e.g.:
 
   ```CSharp
@@ -54,6 +58,8 @@
   This automatic dereferencing also applies to extension methods, in other words, an extension-style method for a non-pointer type will work for the type as well as a pointer to the type.
 
 * In Go all objects are said to implement an interface with no methods, this is called the `EmptyInterface`. This operates fundamentally like .NET's `System.Object` class, consequently any time the `EmptyInterface` is encountered during conversion, it is simply replaced with `object`. If there are type specific semantic use cases where this does not work, this strategy may need to be reevaluated.
+
+* In Go `nil` is the equivalent of C# `null`. Where possible converted code will use the [`NilType`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/NilType.cs#L33) with a default instance that equals `null` defined in [`go.builtin`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/builtin.cs#L75). Generally the `NilType` will work properly for compares, but cannot be used during assignments (no overloads or operators exist for this operation) - so assignments to heap based elements, like an interface, will convert to `null`.
 
 * All right-hand operands in assignment expressions in Go are evaluated before assignment to left-hand operands. This is tricky, for example, consider the following Go code:
 

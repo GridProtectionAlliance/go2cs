@@ -10,8 +10,9 @@ Converts source code developed using the Go programming language (see [Go Langua
 * Convert Go code into visually similar C# code -- see [conversion strategies](ConversionStrategies.md).
   * Go is a minimalist language, as such it provides high-level functionality provided by the compiler. Converted C# code will have more visible code than Go used to provide equivalent functionality, however most of this code will be behind the scenes in separate files using partial class functionality.
 * Convert Go units test to C# and verify results are the same (TBD).
-* Conversion always tries to target managed code, this way code is more portable.
-  * If there is no possible way for managed code to accomplish a specific task, an option always exists to create a [native interop library](http://www.mono-project.com/docs/advanced/pinvoke/) that works on multiple platforms, i.e., importing code from a `.dll`/`.so`/`.dylib`. Even so, the philosophy is to always attempt to use managed code, i.e., not to lean towards native code libraries, regardless of possible performance implications. Simple first.
+  * For most unit tests defined in Go, it should be possible to create an equivalent converted C# unit test. In many cases it may also be possible to successfully compare "outputs" of both unit tests as an additional validation test.
+* Convert Go code into managed C# code.
+  * Conversion always tries to target managed code, this way code is more portable. If there is no possible way for managed code to accomplish a specific task, an option always exists to create a [native interop library](https://docs.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke) that works on multiple platforms, i.e., importing code from a `.dll`/`.so`/`.dylib`. Even so, the philosophy is to always attempt to use managed code, i.e., not to lean towards native code libraries, regardless of possible performance implications. Simple first.
 
 ## Project Status
 
@@ -19,9 +20,9 @@ Picking up this project again now that .NET 5.0 is forthcoming and some of the n
 
 Converted code now targets .NET Core only, specifically version 3.1 and C# 8.0 with goal to support .NET 5.0 and C# 9.0 when it comes out.
 
-As a new strategy, sets of common Go examples have been manually converted to C# using the current [C# Go Library](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/). All relevant code samples from the "[Tour of Go](https://tour.golang.org/welcome/1)" have been converted to C#, [see converted code](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/). Ultimately would like to see this in head-to-head mode using [Try .NET](https://github.com/dotnet/try), for example:
+As a new conversion strategy to cover various code use cases, sets of common Go sample code have been manually converted to C# using the current [C# Go Library](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/). As an example, all relevant code samples from the "[Tour of Go](https://tour.golang.org/welcome/1)" have been converted to C#, [see converted code](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/). Ultimately would like to see this in head-to-head mode using [Try .NET](https://github.com/dotnet/try), for example:
 ![go2cs](images/HeadToHead-Small.png)
-However, current Blazor C# 8.0 code targets do not run with published Try .NET -- will be watching for an update.
+Currently converted code will not execute with latest release of Try .NET (see [posted issue](https://github.com/dotnet/try/issues/859)). Will be watching for an update.
 
 As releases are made for  updated `go2cs` executables, this will also include updates to pre-converted [Go Standard Library libraries for reference from NuGet](https://www.nuget.org/packages?q=%22package+in+.NET+for+use+with+go2cs%22).
 
