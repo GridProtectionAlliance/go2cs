@@ -199,6 +199,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "import-package-multiple-tim
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "default-branch-position", "Examples\Manual go101 Conversions\default-branch-position\default-branch-position.csproj", "{3568123D-071D-44EF-879D-C3B71132BFEB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "type-embedding", "Examples\Manual go101 Conversions\type-embedding\type-embedding.csproj", "{EDCAE47B-E6BF-4BB3-AA08-2E3FD767FD25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -541,6 +543,10 @@ Global
 		{3568123D-071D-44EF-879D-C3B71132BFEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3568123D-071D-44EF-879D-C3B71132BFEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3568123D-071D-44EF-879D-C3B71132BFEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDCAE47B-E6BF-4BB3-AA08-2E3FD767FD25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDCAE47B-E6BF-4BB3-AA08-2E3FD767FD25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDCAE47B-E6BF-4BB3-AA08-2E3FD767FD25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDCAE47B-E6BF-4BB3-AA08-2E3FD767FD25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -637,6 +643,7 @@ Global
 		{36B35CD0-C2DB-4F82-9199-6ACE99BA421F} = {04259A76-0770-4D31-A89B-99CD43A1E6D3}
 		{7CB52CDD-98A0-4A91-B715-33672CF05215} = {04259A76-0770-4D31-A89B-99CD43A1E6D3}
 		{3568123D-071D-44EF-879D-C3B71132BFEB} = {04259A76-0770-4D31-A89B-99CD43A1E6D3}
+		{EDCAE47B-E6BF-4BB3-AA08-2E3FD767FD25} = {04259A76-0770-4D31-A89B-99CD43A1E6D3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EF0C750B-E868-445C-AEB3-2E863A655290}
