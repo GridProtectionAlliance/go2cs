@@ -319,6 +319,30 @@ namespace go
         public static channel<T> make_channel<T>(int size = 1) => new channel<T>(size);
 
         /// <summary>
+        /// Allocates and initializes a new object.
+        /// </summary>
+        /// <param name="p1">Size parameter.</param>
+        /// <param name="p2">Capacity parameter,</param>
+        /// <typeparam name="T">Type of object.</typeparam>
+        /// <returns>New object.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static T make<T>(int p1 = 0, int p2 = -1) where T : new()
+        {
+            if (p1 == 0 && p2 == 0)
+                return new T();
+
+            Type type = typeof(T);
+
+            if (type == typeof(slice<>))
+                return (T)Activator.CreateInstance(type, p1, p2, 0);
+
+            if (type == typeof(channel<>) && p1 == 0)
+                p1 = 1;
+
+            return (T)Activator.CreateInstance(type, p1);
+        }
+
+        /// <summary>
         /// Creates a new heap allocated copy of existing <paramref name="target"/> value.
         /// </summary>
         /// <typeparam name="T">Target type of reference.</typeparam>
