@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 // ReSharper disable InconsistentNaming
+// ReSharper disable BuiltInTypeReferenceStyle
 
 using System;
 using System.Collections.Generic;
@@ -57,15 +58,18 @@ namespace go
         public const int iota = 0;
 
         /// <summary>
-        /// Defines a constant to return a tuple that includes success.
+        /// Defines a constant to return a tuple that includes a boolean success indicator.
         /// </summary>
-        // TODO: Treat this like a reserved C# keyword during conversion in case Go code happens to use this constant
         public const bool WithOK = false;
 
         /// <summary>
-        /// Defines a constant to return a tuple that includes value.
+        /// Defines a constant to return a tuple that includes an error indicator.
         /// </summary>
-        // TODO: Treat this like a reserved C# keyword during conversion in case Go code happens to use this constant
+        public const bool WithErr = false;
+
+        /// <summary>
+        /// Defines a constant to return a tuple that includes a value.
+        /// </summary>
         public const bool WithVal = false;
 
         /// <summary>
@@ -131,9 +135,10 @@ namespace go
         /// Closes the channel.
         /// </summary>
         /// <param name="channel">Target channel pointer.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
         // An "in" parameter works here because the close method operates on channel structure's
         // private class-based member references, not on value types
-        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
         public static void close<T>(in channel<T> channel) => channel.Close();
 
         /// <summary>
@@ -203,10 +208,10 @@ namespace go
         /// As a special case, it also will copy bytes from a string to a slice of bytes.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int copy(ref slice<byte> dst, in @string src)
+        public static int copy(in slice<byte> dst, in @string src)
         {
             slice<byte> bytes = src;
-            return copy(ref dst, bytes);
+            return copy(in dst, bytes);
         }
 
         /// <summary>

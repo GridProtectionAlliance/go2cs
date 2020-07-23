@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 // ReSharper disable UnusedMember.Global
+// ReSharper disable InconsistentNaming
 
 using System;
 using System.CodeDom;
@@ -32,7 +33,6 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml;
 
 #pragma warning disable SCS0006 // Weak hash
 #pragma warning disable SCS0018 // Path traversal
@@ -65,6 +65,7 @@ namespace go2cs
 
             s_keywords = new HashSet<string>(new[]
             {
+                // The following are all valid C# keywords, if encountered in Go code they should be escaped
                 "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const",
                 "continue", "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern",
                 "false", "finally", "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in", "int", "interface",
@@ -72,7 +73,9 @@ namespace go2cs
                 "params", "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short",
                 "sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true", "try", "typeof",
                 "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while",
-                "__argslist", "__makeref", "__reftype", "__refvalue"
+                "__argslist", "__makeref", "__reftype", "__refvalue",
+                // The following keywords are reserved by go2cs, if they are encountered in Go code they should be escaped
+                "WithOK", "WithErr", "WithVal"
             },
             StringComparer.Ordinal);
 
@@ -173,7 +176,7 @@ namespace go2cs
             }
             else
             {
-                char suffixChar = filePath[filePath.Length - 1];
+                char suffixChar = filePath[^1];
 
                 if (suffixChar != Path.DirectorySeparatorChar && suffixChar != Path.AltDirectorySeparatorChar)
                     filePath += Path.DirectorySeparatorChar;
@@ -190,14 +193,14 @@ namespace go2cs
             }
             else
             {
-                char suffixChar = filePath[filePath.Length - 1];
+                char suffixChar = filePath[^1];
 
                 while ((suffixChar == Path.DirectorySeparatorChar || suffixChar == Path.AltDirectorySeparatorChar) && filePath.Length > 0)
                 {
                     filePath = filePath.Substring(0, filePath.Length - 1);
 
                     if (filePath.Length > 0)
-                        suffixChar = filePath[filePath.Length - 1];
+                        suffixChar = filePath[^1];
                 }
             }
 
