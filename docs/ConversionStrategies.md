@@ -14,10 +14,78 @@ Long term plan is to provide ability to use reference packages that have already
 ## Literal Values
 Go constants hold arbitrary-precision literals with expression support. Applying value to variables in Go happens at compile time, so C# conversion will need to support this operation. Ideally every numeric constant that can hold the value without overflowing should to be defined, see [example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/basics/numeric-constants). An additional run-time lazy initialized BigInteger can be provided for simpler library usage but use of constants should be encouraged for best performance.
 
+## Handling "int" and "uint" Types
+
+In Go the `int` and `uint` types are sized according the platform build target, i.e., 32-bit or 64-bit. In C# an `int` and `uint` is always 32-bits and a `long` and `ulong` is always 64-bits. Although an option exists to create custom `@int` and `@uint` structures that are compiled to 32-bit or 64-bit lengths based on a selected target build platform, e.g., using a `#ifdef TARGET32BIT` directive, and be implicitly castable to C# integer types, the current thinking is to only target 64-bit platforms for conversion. It seems that 64-bit deployments are likely the most common use case and this helps keeps things simple for now. This means any encountered Go `int` or `uint` will simply be converted to a C# `long` or `ulong`.
+
+Later, an option could be added to the conversion tool that would allow for 32-bit build targets where any encountered Go `int` or `uint` would be converted to a C# `int` or `uint`. This option would mean pre-compiled library packages would need to include a 32-bit build as well, so there will be cascading consequences to consider.
+
+Note that one sticking point with this strategy is that not all C# indexing constructs currently accept a `long`, so in some places a down-cast from `long` to `int` will be required. For example, although explicit indexers in C# support a `long`, [implicit index support](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support) currently only works with an `int`, this means range operation indices will need to be cast to `int`. FYI, [issue is being discussed](https://github.com/dotnet/runtime/issues/28070) for future C# runtime updates.
+
 ## Switch Statements
 Go `switch` statements are very flexible, case statements do not automatically fall-through - so a `break` statement is not required. When the Go `fallthrough` keyword is used, the next case expression is evaluated. Based on work done with the [Manual Tour of Go Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions), converting to simple `if / else if` statements seems like the logical best choice.
 
 If the original Go `case` statements all use constants and no `fallthough` keyword is being used, a traditional C# `switch` should work OK. Because this creates additional conversion complexity for detection of the proper use case, all for the sake of simply using a switch statement, this will likely be deferred to later. However, as one of the primary `go2cs` goals is to produce visually similar code where possible, the task should not be abandoned.
+
+> FYI, toyed around with an experimental [`SwitchExpression<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/experimental/SwitchExpression.cs) class that used chained expressions and evaluated case statements as lambdas. This generally works like original Go `switch` even with `fallthrough` statements, but resultant code was much more noisy and certainly no cleaner than `if / else if` expansions. It also began to create burdening edge cases with lambda case expressions and captured variables.
+
+## Type Switch Statements
+In the case of Go type-based switch statements, the C# type-based pattern matching works well - even as a `switch` statement. For example, the following Go code using type-switch:
+
+```Go
+package main
+
+import "fmt"
+
+func do(i interface{}) {
+    switch v := i.(type) {
+    case int:
+        fmt.Printf("Twice %v is %v\n", v, v*2)
+    case string:
+        fmt.Printf("%q is %v bytes long\n", v, len(v))
+    default:
+        fmt.Printf("I don't know about type %T!\n", v)
+    }
+}
+
+func main() {
+    do(21)
+    do("hello")
+    do(true)
+}
+```
+
+would be converted to C# as:
+
+```CSharp
+using go;
+using static go.builtin;
+
+static class main_package
+{
+    static void @do(object i) {
+        switch (i.type()) {
+            case int v:
+                println($"Twice {v} is {v * 2}");
+                break;
+            case @string v:
+                println($"\"{v}\" is {len(v)} bytes long");
+                break;
+            default: {
+                var v = i.type();
+                println($"I don't know about type {GetGoTypeName(v)}!");
+                break;
+            }
+        }
+    }
+
+    static void Main() {
+        @do(21);
+        @do("hello");
+        @do(true);
+    }
+}
+```
 
 ## Struct Types
 Go types are converted to C# `struct` types and used on the stack to optimize memory use and reduce the need for garbage collection. By using a `struct` instead of a `class`, converted C# code should better match original Go operation both from a memory and performance perspective. The `struct` types will be wrapped by a C# `class` that references the type value so that heap-allocated instances of the type can exist as needed, see [`ptr<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/ptr.cs), such as, when the type needs to leave the local stack.
@@ -61,13 +129,13 @@ Go structs use "[type embedding](https://go101.org/article/type-embedding.html)"
 
 Also, when a type is embedded in another type, the derived type supports the extension methods of the embedded types. This is more tricky in C# since interfaces are duck-implemented (see [interface strategies](#interfaces)) and the type implemented for the extension method will have no "direct" relation to the derived types save it simply exists as a field in another type. The Go compiler seems to create proxy extension functions for the derived type's embedded type methods, as such this is how the conversion tool will accommodate this functionality.
 
-This basically means that the proxied extension functions created for derived embedded type values will only be for those found during the conversion process, i.e., from a maintainability perspective these features end at conversion. If a new extension function is added in the C# code, the derived class will not automatically see it. Users will need to do one of the following: (1) maintain code in Go and reconvert, (2) manually add missing proxy extensions, or (3) move on without this Go coding construct in converted C# code, e.g., switching to explicitly implemented interfaces.
+This basically means that the proxied extension functions created for derived embedded type values will only be for those found during the conversion process, i.e., from a maintainability perspective these features end at conversion. If a new extension function is added in the C# code, the derived class will not automatically see it. Users will need to do one of the following: (1) maintain code in Go and reconvert, (2) manually add missing proxy extensions, or (3) move on without this Go coding construct in converted C# code, e.g., switching to explicitly implemented interfaces. That said, if things start converting very well in the future, one option could always be to continue direct coding in Go and use a [transpilation](https://en.wikipedia.org/wiki/Source-to-source_compiler) step to automatically convert the code to C# as a pre-build step.
 
 ## Return Tuples
-Many go functions return a tuple of "value and success" or just a "value" where only the declared return type determines which overload to use. To accommodate similar functionality in C#, an overload is defined that takes a bool that returns the tuple style return using a constant like `WithOK`, e.g.:
+Many Go functions for built-in types return a tuple of "value and success" or just a "value" where only the declared return type determines which overload to use. To accommodate similar functionality in C#, an overload is defined that takes a bool that returns the tuple style return using a constant like `WithOK`, e.g.:
 
 ```CSharp
-var v1 = m["Answer"];
+var v1 = m["Answer"]; // Does not fail if value doesn't exist, just returns default value
 var (v2, ok) = m["Answer", WithOK];
 ```
 
@@ -78,6 +146,8 @@ var (n2, err) = r.Read(b, WithErr);
 ```
 
 See [success tuple return example](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/moretypes/mutating-maps/main_package.cs).
+
+Currently these optional tuple returns are not allowed in user code, so normal tuple handling for converted user code should be fine.
 
 ## Interfaces
 Go interfaces are not explicitly implemented. Instead, if extension-style functions exist that satisfy all defined interface methods, the class is said to implicitly implement the interface. To accommodate these duck-implemented interfaces, a generic class is created for each interface so that for a given type, interface extension methods can be looked up using reflection. To speed up this operation, as assemblies are loaded, extension methods are [cached in a dictionary](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/TypeExtensions.cs#L121) for quick lookup and any type-specific lookup operations are only done once statically during [type initialization](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/error.cs#L127). To make use of typed generic class any assignments to interface variables will be cast to generic type, for example, see equivalent C# code with [`As`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/error.cs#L50) function for handling Go duck-implemented interfaces:
@@ -96,7 +166,7 @@ In Go all objects are said to implement an interface with no methods, this is ca
 ## Type Aliasing
 Go supports two kinds of [type aliasing](https://go101.org/article/type-system-overview.html#type-definition), these are a "type definition" and a "type alias declaration".
 
-For Go "type alias declarations" generally<sup>[[1](#user-content-ref1)]</sup> matches aliasing in C# implemented with the `using` keyword, for example, the following Go and C# code are equivalent:
+For Go "type alias declarations" generally <sup>[[1](#ref1)]</sup> matches aliasing in C# implemented with the `using` keyword, for example, the following Go and C# code are equivalent:
 
 Go type alias declaration:
 ```Go
@@ -108,7 +178,7 @@ Equivalent C# alias with `using`:
 using table = go.map<@string, int>;
 ````
 
-   > <a name="ref1"></a>[1] <small>When using a type alias as an embedded type, Go is picky about structure matching. Weirdly, structures definitions are only considered a match when the embedded types both use the type alias, using the base type fails, see [example](https://play.golang.org/p/97lMNpTtPAy). However, this should not be a case the converter should have to consider because this is build error in Go.</small>
+   > <small><a name="ref1"></a>[1] When using a type alias as an embedded type, Go is picky about structure matching. Weirdly, structures definitions are only considered a match when the embedded types both use the type alias, using the base type fails, see [example](https://play.golang.org/p/97lMNpTtPAy). However, this should not be a case the converter should have to consider because this is build error in Go.</small>
 
 One difference for this type of aliasing is that in C# `using` aliases are always local to a file. In Go, type alias declarations can be exported. To accommodate this type of exportable aliasing, the conversion tool will need to add the exported using statements to all files needing the alias. It should be easy enough to simply ensure aliases are declared any time type is imported, however, this creates an interesting situation for imported packages. If conversion tool is setup to use a package, e.g., from NuGet, instead of converting local code, there will need to be an embedded resource dictionary in the package assembly that will report all exported aliases so the conversion tool can add these to code headers when package is encountered per Go `import`.
 
