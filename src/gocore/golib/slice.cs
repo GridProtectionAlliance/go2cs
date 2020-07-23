@@ -436,7 +436,7 @@ namespace go
             baseTypeArray = new T[array.Length];
 
             for (int i = 0; i < array.Length; i++)
-                baseTypeArray[i] = (T)ConvertToType(array[i] as IConvertible);
+                baseTypeArray[i] = (T)ConvertToType((IConvertible)array[i]!);
 
             return baseTypeArray;
         }

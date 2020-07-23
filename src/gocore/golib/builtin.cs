@@ -183,7 +183,7 @@ namespace go
                 else
                 {
                     for (int i = 0; i < min; i++)
-                        dst[dst.Low + i] = (T1)ConvertToType(src[src.Low + i] as IConvertible);
+                        dst[dst.Low + i] = (T1)ConvertToType((IConvertible)src[src.Low + i]!);
                 }
             }
 

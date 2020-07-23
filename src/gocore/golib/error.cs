@@ -29,7 +29,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 
-#pragma warning disable IDE0044
+#pragma warning disable IDE0044, CS8618
 
 // TODO: Keep error implementation updated to match best interface template pattern
 
@@ -47,7 +47,7 @@ namespace go
         @string Error();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static error As<T>(in T target) => (error<T>)target;
+        public static error As<T>(in T target) => (error<T>)target!;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static error As<T>(ptr<T> target_ptr) => (error<T>)target_ptr;
