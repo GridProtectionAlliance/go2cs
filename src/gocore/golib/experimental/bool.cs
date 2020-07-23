@@ -24,7 +24,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace go
+namespace go.experimental
 {
     /// <summary>
     /// Represents a boolean type for the set of binary truth values denoted by the predeclared constants <c>true</c> and <c>false</c>. 
