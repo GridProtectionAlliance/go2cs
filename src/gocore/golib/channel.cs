@@ -24,6 +24,7 @@
 //******************************************************************************************************
 // ReSharper disable UnusedMemberInSuper.Global
 // ReSharper disable UnusedMember.Global
+// ReSharper disable InconsistentNaming
 
 using System;
 using System.Collections;
@@ -91,6 +92,9 @@ namespace go
         private readonly ManualResetEventSlim m_canTakeEvent;
         private readonly ConcurrentQueue<T> m_queue;
         private readonly CancellationTokenSource m_enumeratorTokenSource;
+
+        // Following value type is heap allocated so read-only or struct copy calls can still update
+        // original value, e.g., allowing "builtin.close" method without requiring a "ref" parameter.
         private readonly ptr<bool> m_isClosed;
 
         /// <summary>

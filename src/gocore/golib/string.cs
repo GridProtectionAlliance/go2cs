@@ -25,6 +25,7 @@
 // ReSharper disable InconsistentNaming
 // ReSharper disable LoopCanBeConvertedToQuery
 // ReSharper disable ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
+// ReSharper disable BuiltInTypeReferenceStyle
 
 using System;
 using System.Collections;

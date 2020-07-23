@@ -110,9 +110,7 @@ namespace go
             if (deferredAction is null)
                 return;
 
-            if (Defers is null)
-                Defers = new Stack<Action>();
-
+            Defers ??= new Stack<Action>();
             Defers.Push(deferredAction);
         }
 
@@ -131,8 +129,10 @@ namespace go
         protected void HandleFinally()
         {
             if (!(Defers is null))
+            {
                 while (Defers.Count > 0)
                     Defers.Pop()();
+            }
 
             if (!(CapturedPanic.Value is null))
                 throw CapturedPanic.Value;

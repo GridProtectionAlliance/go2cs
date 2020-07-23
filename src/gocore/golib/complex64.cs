@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //******************************************************************************************************
+// ReSharper disable InconsistentNaming
 
 using System;
 using System.Globalization;

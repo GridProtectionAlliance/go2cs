@@ -211,7 +211,7 @@ namespace go
         public static int copy(in slice<byte> dst, in @string src)
         {
             slice<byte> bytes = src;
-            return copy(in dst, bytes);
+            return copy(dst, bytes);
         }
 
         /// <summary>
@@ -632,22 +632,6 @@ namespace go
         /// <param name="source">C# <see cref="string"/> array</param>
         /// <returns>Go <see cref="go.@string"/> array from C# <see cref="string"/> array <paramref name="source"/>.</returns>
         public static @string[] @string(IReadOnlyCollection<string> source) => source.Select(value => new @string(value)).ToArray();
-
-        /// <summary>
-        /// Converts <paramref name="value"/> to a <see cref="bool"/>.
-        /// </summary>
-        /// <param name="value">Value to convert.</param>
-        /// <returns><paramref name="value"/> converted to a <see cref="bool"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static @bool @bool(bool value) => value;
-
-        /// <summary>
-        /// Converts <paramref name="value"/> to a <see cref="bool"/>.
-        /// </summary>
-        /// <param name="value">Value to convert.</param>
-        /// <returns><paramref name="value"/> converted to a <see cref="bool"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static @bool @bool(object value) => (bool)Convert.ChangeType(value, TypeCode.Boolean);
 
         /// <summary>
         /// Converts <paramref name="value"/> to a <see cref="byte"/>.
