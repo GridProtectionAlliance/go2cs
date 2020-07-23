@@ -4,7 +4,7 @@ using go;
 
 using float64 = System.Double;
 
-#pragma warning disable CS0660, CS0661
+#pragma warning disable 8618, CS0660, CS0661
 
 public static partial class main_package
 {

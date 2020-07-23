@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>    
     <nullable>enable</nullable>
-    <NoWarn>660;661;1701;1702</NoWarn>
+    <NoWarn>660;661;1701;1702;CS8604</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

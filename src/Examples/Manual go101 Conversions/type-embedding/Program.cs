@@ -32,7 +32,7 @@ using static go.builtin;
 
 struct x__main {
     public @string @string;
-    public error error;
+    public error? error;
     public ptr<int> @int;
     public P__main P;
     public M__main M;

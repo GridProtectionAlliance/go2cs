@@ -35,7 +35,7 @@ static partial class main_package
         var q = slice(new[]{2, 3, 5, 7, 11, 13});
         fmt.Println(q);
 
-        var r = slice(new @bool[]{true, false, true, true, false, true});
+        var r = slice(new []{true, false, true, true, false, true});
         fmt.Println(r);
 
         var s = slice(@struct(
