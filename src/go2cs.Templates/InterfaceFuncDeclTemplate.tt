@@ -2,14 +2,25 @@
 <#@ template language="C#" #>
 
 
-            private delegate <#=ResultType#> <#=FunctionName#>ByVal(T value<#=PrefixedParameterSignature#>);
             private delegate <#=ResultType#> <#=FunctionName#>ByRef(ref T value<#=PrefixedParameterSignature#>);
+            private delegate <#=ResultType#> <#=FunctionName#>ByVal(T value<#=PrefixedParameterSignature#>);
 
-            private static readonly <#=FunctionName#>ByVal s_<#=FunctionName#>ByVal;
             private static readonly <#=FunctionName#>ByRef s_<#=FunctionName#>ByRef;
+            private static readonly <#=FunctionName#>ByVal s_<#=FunctionName#>ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            <#=Scope#> <#=ResultType#> <#=FunctionName#>(<#=ParameterSignature#>) => s_<#=FunctionName#>ByRef?.Invoke(ref m_target<#=ParameterNames#>) ?? s_<#=FunctionName#>ByVal(m_target<#=ParameterNames#>);<#+
+            <#=Scope#> <#=ResultType#> <#=FunctionName#>(<#=ParameterSignature#>)
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.Value;
+
+                if (s_<#=FunctionName#>ByRef is null)
+                    return s_<#=FunctionName#>ByVal!(target<#=ParameterNames#>);
+
+                return s_<#=FunctionName#>ByRef(ref target<#=ParameterNames#>);
+            }<#+
 // Template Parameters
 public string FunctionName;
 public string Scope;

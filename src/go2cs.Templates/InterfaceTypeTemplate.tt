@@ -32,14 +32,42 @@ using go;
         [<#=GeneratedCodeAttribute#>]
         <#=Scope#> partial interface <#=InterfaceName#>
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+            public static <#=InterfaceName#> As<T>(in T target) => (<#=InterfaceName#><T>)target!;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+            public static <#=InterfaceName#> As<T>(ptr<T> target_ptr) => (<#=InterfaceName#><T>)target_ptr;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+            public static <#=InterfaceName#>? As(object target) =>
+                typeof(<#=InterfaceName#><>).CreateInterfaceHandler<<#=InterfaceName#>>(target);
         }
 
         [<#=GeneratedCodeAttribute#>]
         <#=Scope#> struct <#=InterfaceName#><T> : <#=InterfaceName#>
         {
             private T m_target;
+            private readonly ptr<T>? m_target_ptr;
+            private readonly bool m_target_is_ptr;
 
-            public T Target => m_target;<#
+            public ref T Target
+            {
+                get
+                {
+                    if (m_target_is_ptr && !(m_target_ptr is null))
+                        return ref m_target_ptr.Value;
+
+                    return ref m_target;
+                }
+            }
+
+            public <#=InterfaceName#>(in T target) => m_target = target;
+
+            public <#=InterfaceName#>(ptr<T> target_ptr)
+            {
+                m_target_ptr = target_ptr;
+                m_target_is_ptr = true;
+            }<#
         
             foreach (var decl in Functions)
             {
@@ -60,6 +88,7 @@ using go;
             static <#=InterfaceName#>()
             {
                 Type targetType = typeof(T);
+                Type targetTypeByRef = targetType.MakeByRefType();
                 MethodInfo extensionMethod;<#
                 
                 foreach (var decl in Functions)
@@ -75,7 +104,10 @@ using go;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static explicit operator <#=InterfaceName#><T>(T target) => new <#=InterfaceName#><T> { m_target = target };
+            public static explicit operator <#=InterfaceName#><T>(in ptr<T> target_ptr) => new <#=InterfaceName#><T>(target_ptr);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+            public static explicit operator <#=InterfaceName#><T>(in T target) => new <#=InterfaceName#><T>(target);
 
             // Enable comparisons between nil and <#=InterfaceName#><T> interface instance
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -90,42 +122,17 @@ using go;
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, <#=InterfaceName#><T> value) => value != nil;
         }
-
-        [<#=GeneratedCodeAttribute#>, MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        <#=Scope#> static <#=InterfaceName#> <#=InterfaceName#>_cast<T>(T target)
-        {
-            if (typeof(<#=InterfaceName#>).IsAssignableFrom(typeof(T)))
-                return target as <#=InterfaceName#>;
-
-            return (<#=InterfaceName#><T>)target;
-        }
     }
 <#=NamespaceFooter#>
 
 namespace go
 {
-    public partial class NilType
-    {
-        // Enable comparisons between nil and <#=InterfaceName#> interface
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(<#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(<#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> value, NilType nil) => !(value == nil);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(NilType nil, <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> value) => value == nil;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(NilType nil, <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> value) => value != nil;
-    }
-
     public static class <#=PackageName#>_<#=InterfaceName#>Extensions
     {
         private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new ConcurrentDictionary<Type, MethodInfo>();
 
         [<#=GeneratedCodeAttribute#>, MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static T TypeAssert<T>(this <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> target)
+        public static T _<T>(this <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> target)
         {
             try
             {
@@ -133,50 +140,50 @@ namespace go
             }
             catch (NotImplementedException ex)
             {
-                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}: missing method {ex.InnerException?.Message}");
+                throw new PanicException($"interface conversion: {GetGoTypeName(target.GetType())} is not {GetGoTypeName(typeof(T))}: missing method {ex.InnerException?.Message}");
             }
         }
 
         [<#=GeneratedCodeAttribute#>, MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static bool TryTypeAssert<T>(this <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> target, out T result)
+        public static bool _<T>(this <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> target, out T result)
         {
             try
             {
-                result = target.TypeAssert<T>();
+                result = target._<T>();
                 return true;
             }
             catch (PanicException)
             {
-                result = default(T);
+                result = default!;
                 return false;
             }
         }
 
         [<#=GeneratedCodeAttribute#>, MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static object TypeAssert(this <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> target, Type type)
+        public static object? _(this <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> target, Type type)
         {
             try
             {
-                MethodInfo conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(<#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#><>).GetExplicitGenericConversionOperator(type));
+                MethodInfo? conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(<#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#><>).GetExplicitGenericConversionOperator(type));
 
-                if ((object)conversionOperator == null)
-                    throw new PanicException($"panic: interface conversion: failed to create converter for {target.GetType().FullName} to {type.FullName}");
+                if (conversionOperator is null)
+                    throw new PanicException($"interface conversion: failed to create converter for {GetGoTypeName(target.GetType())} to {GetGoTypeName(type)}");
 
-                dynamic result = conversionOperator.Invoke(null, new object[] { target });
-                return result.Target;
+                dynamic? result = conversionOperator.Invoke(null, new object[] { target });
+                return result?.Target;
             }
             catch (NotImplementedException ex)
             {
-                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {type.FullName}: missing method {ex.InnerException?.Message}");
+                throw new PanicException($"interface conversion: {GetGoTypeName(target.GetType())} is not {GetGoTypeName(type)}: missing method {ex.InnerException?.Message}");
             }
         }
 
         [<#=GeneratedCodeAttribute#>, MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static bool TryTypeAssert(this <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> target, Type type, out object result)
+        public static bool _(this <#=NamespacePrefix#>.<#=PackageName#>_package.<#=InterfaceName#> target, Type type, out object? result)
         {
             try
             {
-                result = target.TypeAssert(type);
+                result = target._(type);
                 return true;
             }
             catch (PanicException)
