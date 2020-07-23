@@ -1,4 +1,20 @@
-﻿using System;
+﻿// This is just testing code for quick validations and experiments...
+
+// ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable ShiftExpressionRightOperandNotEqualRealCount
+// ReSharper disable UnusedVariable
+// ReSharper disable UnusedParameter.Local
+// ReSharper disable ArrangeThisQualifier
+// ReSharper disable NotAccessedField.Local
+// ReSharper disable RedundantAssignment
+// ReSharper disable StructCanBeMadeReadOnly
+// ReSharper disable PossibleNullReferenceException
+#pragma warning disable 414
+#pragma warning disable 219
+
+using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -11,9 +27,9 @@ namespace go
     {
         private static void Main()
         {
-            @bool b = false;
+            bool b = false;
             @string s = "hello";
-            int i = 12;
+            //int i = 12;
             object eb = b;
             object ai = (int)12;
 
@@ -56,7 +72,7 @@ namespace go
         private static readonly dynamic maxUint64 = (1 << 64 - 1);
 
         // A NumError records a failed conversion.
-        public partial struct NumError
+        public struct NumError
         {
             public @string Func; // the failing function (ParseBool, ParseInt, ParseUint, ParseFloat)
             public @string Num;  // the input
@@ -68,7 +84,7 @@ namespace go
             return ref new ptr<NumError>(new NumError{Func = fn, Num = str, Err = null}).Value;
         }
 
-        public partial struct ColorList
+        public struct ColorList
         {
             public long Total;
             public string Color;
@@ -97,6 +113,7 @@ namespace go
             }
         }
 
+        #pragma warning disable CS0282
         public partial struct MyCustomError : Abser
         {
             public string Message;
@@ -105,8 +122,8 @@ namespace go
 
             public ref MyError MyError => ref MyError_val;
         }
+        #pragma warning restore CS0282
 
-        [PromotedStruct(typeof(MyError))]
         public partial struct MyCustomError
         {
             // Abser.Abs function promotion
@@ -135,7 +152,7 @@ namespace go
                 MethodInfo method;
 
                 // Any existing defined extensions will override interface reference calls
-                method = targetType.GetExtensionMethodSearchingPromotions("Abs");
+                method = targetType.GetExtensionMethod("Abs");
 
                 if (method != null)
                 {
@@ -167,8 +184,9 @@ namespace go
 
         }
 
+        #pragma warning disable CS0649
         // flags placed in a separate struct for easy clearing.
-        private partial struct fmtFlags
+        private struct fmtFlags
         {
             public bool widPresent;
             public bool precPresent;
@@ -185,13 +203,13 @@ namespace go
             public bool sharpV;
         }
 
-        private partial struct fmtFlags
-        {
-            public static bool operator ==(fmtFlags value, NilType nil) => value.Equals(default(fmtFlags));
-            public static bool operator !=(fmtFlags value, NilType nil) => !(value == nil);
-            public static bool operator ==(NilType nil, fmtFlags value) => value == nil;
-            public static bool operator !=(NilType nil, fmtFlags value) => value != nil;
-        }
+        //private partial struct fmtFlags
+        //{
+        //    public static bool operator ==(fmtFlags value, NilType nil) => value.Equals(default(fmtFlags));
+        //    public static bool operator !=(fmtFlags value, NilType nil) => !(value == nil);
+        //    public static bool operator ==(NilType nil, fmtFlags value) => value == nil;
+        //    public static bool operator !=(NilType nil, fmtFlags value) => value != nil;
+        //}
 
         // A fmt is the raw formatter used by Printf etc.
         // It prints into a buffer that must be set up separately.
@@ -208,6 +226,7 @@ namespace go
             // avoids padding at the end of the struct on 32 bit architectures.
             public fixed byte intbuf[68];
         }
+        #pragma warning restore CS0649
 
         private static void clearFlags(ref this fmt _this) => func(ref _this, (ref fmt f, Defer defer, Panic panic, Recover recover) =>
         {
@@ -232,7 +251,7 @@ namespace go
 
         }
 
-        public partial struct MyFloat
+        public struct MyFloat
         {
             private readonly double m_value;
 
