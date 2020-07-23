@@ -520,10 +520,17 @@ namespace go
         }
 
         /// <summary>
-        /// Gets the common Go type name for the specified type <paramref name="type"/>.
+        /// Gets the common Go type name for the specified <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value">Value to evaluate.</param>
+        /// <returns>Common Go type name for the specified <paramref name="value"/>.</returns>
+        public static string GetGoTypeName(object value) => GetGoTypeName(value.GetType());
+
+        /// <summary>
+        /// Gets the common Go type name for the specified <paramref name="type"/>.
         /// </summary>
         /// <param name="type">Target type</param>
-        /// <returns>Common Go type name for the specified type <paramref name="type"/>.</returns>
+        /// <returns>Common Go type name for the specified <paramref name="type"/>.</returns>
         public static string GetGoTypeName(Type type)
         {
             switch (Type.GetTypeCode(type))
@@ -1114,29 +1121,6 @@ namespace go
         /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
         public static complex128 i(double imaginary) => new complex128(0.0D, imaginary);
-
-        /// <summary>
-        /// Creates a new switch expression that behaves like a Go switch statement.
-        /// </summary>
-        /// <returns>New switch object that behaves like a Go switch statement.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SwitchExpression<object> @switch() => new SwitchExpression<object>(null!);
-
-        /// <summary>
-        /// Creates a new select expression that behaves like a Go select statement.
-        /// </summary>
-        /// <returns>New switch object that behaves like a Go switch statement.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SwitchExpression<object> select() => new SwitchExpression<object>(null!);
-
-        /// <summary>
-        /// Creates a new switch expression that behaves like a Go switch statement.
-        /// </summary>
-        /// <param name="value">Switch target value.</param>
-        /// <returns>New switch object that behaves like a Go switch statement.</returns>
-        /// <typeparam name="T">Target type of the switch statement.</typeparam>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SwitchExpression<T> @switch<T>(in T value) => new SwitchExpression<T>(value);
 
         /// <summary>
         /// Returns a Go type equivalent to the specified value.

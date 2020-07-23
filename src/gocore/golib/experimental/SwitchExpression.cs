@@ -29,7 +29,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 
-namespace go
+namespace go.experimental
 {
     public delegate SwitchExpression<T> SwitchCaseExpression<T>(Action action, bool fallThrough = false);
 
