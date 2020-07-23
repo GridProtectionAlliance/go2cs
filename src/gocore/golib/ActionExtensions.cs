@@ -45,7 +45,7 @@ namespace go
         /// End users should attach to the <see cref="TaskScheduler.UnobservedTaskException"/> event to log exceptions if the
         /// <paramref name="exceptionAction"/> is not defined.
         /// </remarks>
-        public static void DelayAndExecute(this Action action, int delay, CancellationToken cancellationToken, Action<Exception> exceptionAction = default!) =>
+        public static void DelayAndExecute(this Action action, int delay, CancellationToken cancellationToken, Action<Exception>? exceptionAction = null) =>
             new Action<CancellationToken>(_ => action()).DelayAndExecute(delay, cancellationToken, exceptionAction);
 
         /// <summary>
@@ -59,13 +59,13 @@ namespace go
         /// End users should attach to the <see cref="TaskScheduler.UnobservedTaskException"/> event to log exceptions if the
         /// <paramref name="exceptionAction"/> is not defined.
         /// </remarks>
-        public static void DelayAndExecute(this Action<CancellationToken> action, int delay, CancellationToken cancellationToken, Action<Exception> exceptionAction = default!) =>
+        public static void DelayAndExecute(this Action<CancellationToken> action, int delay, CancellationToken cancellationToken, Action<Exception>? exceptionAction = null) =>
             Task.Delay(delay, cancellationToken)
                 .ContinueWith(task => action(cancellationToken), cancellationToken)
                 .ContinueWith(task =>
                 {
                     // ReSharper disable once PossibleNullReferenceException
-                    if (exceptionAction == null)
+                    if (exceptionAction is null)
                         throw task.Exception;
 
                     exceptionAction(task.Exception);
@@ -88,7 +88,7 @@ namespace go
         /// End users should attach to the <see cref="TaskScheduler.UnobservedTaskException"/> event to log exceptions if the
         /// <paramref name="exceptionAction"/> is not defined.
         /// </remarks>
-        public static Func<bool> DelayAndExecute(this Action action, int delay, Action<Exception> exceptionAction = default!) =>
+        public static Func<bool> DelayAndExecute(this Action action, int delay, Action<Exception>? exceptionAction = null) =>
             new Action<CancellationToken>(_ => action()).DelayAndExecute(delay, exceptionAction);
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace go
         /// End users should attach to the <see cref="TaskScheduler.UnobservedTaskException"/> event to log exceptions if the
         /// <paramref name="exceptionAction"/> is not defined.
         /// </remarks>
-        public static Func<bool> DelayAndExecute(this Action<CancellationToken> action, int delay, Action<Exception> exceptionAction = default!)
+        public static Func<bool> DelayAndExecute(this Action<CancellationToken> action, int delay, Action<Exception>? exceptionAction = null)
         {
             // All this state complexity ensures that the token source
             // is not disposed until after the action finishes executing;

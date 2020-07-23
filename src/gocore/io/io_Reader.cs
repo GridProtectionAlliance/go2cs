@@ -30,7 +30,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using static go.io_package;
 
-#pragma warning disable IDE0044
+#pragma warning disable IDE0044, CS8618
 
 namespace go
 {
@@ -43,7 +43,7 @@ namespace go
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
             public static Reader As<T>(ref T target) =>
-                (Reader<T>)target;
+                (Reader<T>)target!;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
             public static Reader As<T>(ptr<T> target_ptr) =>
@@ -113,7 +113,7 @@ namespace go
                             if (m_target_is_ptr)
                                 return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.Value}";
 
-                            return m_target.ToString() ?? "<nil>";
+                            return m_target?.ToString() ?? "<nil>";
                         }
                     default:
                         return ToString() ?? "<nil>";
