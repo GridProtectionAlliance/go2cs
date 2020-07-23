@@ -14,12 +14,28 @@
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
+                    target = m_target_ptr.Value;<#
+                
+            if (ResultType == "void"){#>
+
+                if (s_<#=FunctionName#>ByRef is null)
+                {
+                    s_<#=FunctionName#>ByVal!(target<#=ParameterNames#>);
+                    return;
+                }
+
+                s_<#=FunctionName#>ByRef(ref target<#=ParameterNames#>);
+                return;
+                <#
+            }
+            else {#>
 
                 if (s_<#=FunctionName#>ByRef is null)
                     return s_<#=FunctionName#>ByVal!(target<#=ParameterNames#>);
 
-                return s_<#=FunctionName#>ByRef(ref target<#=ParameterNames#>);
+                return s_<#=FunctionName#>ByRef(ref target<#=ParameterNames#>);<#
+            }#>
+
             }<#+
 // Template Parameters
 public string FunctionName;

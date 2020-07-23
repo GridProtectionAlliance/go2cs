@@ -132,46 +132,107 @@ namespace go2cs.Templates
             #line hidden
             this.Write(")\r\n            {\r\n                T target = m_target;\r\n\r\n                if (m_t" +
                     "arget_is_ptr && !(m_target_ptr is null))\r\n                    target = m_target_" +
-                    "ptr.Value;\r\n\r\n                if (s_");
+                    "ptr.Value;");
             
-            #line 19 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+            #line 17 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+
+                
+            if (ResultType == "void"){
+            
+            #line default
+            #line hidden
+            this.Write("\r\n                if (s_");
+            
+            #line 21 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
-            this.Write("ByRef is null)\r\n                    return s_");
+            this.Write("ByRef is null)\r\n                {\r\n                    s_");
             
-            #line 20 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+            #line 23 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByVal!(target");
             
-            #line 20 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+            #line 23 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ParameterNames));
             
             #line default
             #line hidden
-            this.Write(");\r\n\r\n                return s_");
+            this.Write(");\r\n                    return;\r\n                }\r\n\r\n                s_");
             
-            #line 22 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+            #line 27 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef(ref target");
             
-            #line 22 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+            #line 27 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ParameterNames));
             
             #line default
             #line hidden
-            this.Write(");\r\n            }");
+            this.Write(");\r\n                return;\r\n                ");
+            
+            #line 29 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+
+            }
+            else {
+            
+            #line default
+            #line hidden
+            this.Write("\r\n                if (s_");
+            
+            #line 33 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
+            
+            #line default
+            #line hidden
+            this.Write("ByRef is null)\r\n                    return s_");
+            
+            #line 34 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
+            
+            #line default
+            #line hidden
+            this.Write("ByVal!(target");
+            
+            #line 34 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ParameterNames));
+            
+            #line default
+            #line hidden
+            this.Write(");\r\n\r\n                return s_");
+            
+            #line 36 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
+            
+            #line default
+            #line hidden
+            this.Write("ByRef(ref target");
+            
+            #line 36 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ParameterNames));
+            
+            #line default
+            #line hidden
+            this.Write(");");
+            
+            #line 36 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+
+            }
+            
+            #line default
+            #line hidden
+            this.Write("\r\n            }");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 23 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
+        #line 39 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceFuncDeclTemplate.tt"
 
 // Template Parameters
 public string FunctionName;
