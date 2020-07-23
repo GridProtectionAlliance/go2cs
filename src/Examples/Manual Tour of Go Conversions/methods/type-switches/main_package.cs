@@ -22,6 +22,7 @@ func main() {
 */
 #region source
 using go;
+using fmt = go.fmt_package;
 using static go.builtin;
 
 static class main_package
@@ -29,14 +30,14 @@ static class main_package
     static void @do(object i) {
         switch (i.type()) {
             case int v:
-                println($"Twice {v} is {v * 2}");
+                fmt.Printf("Twice {0} is {1}\n", v, v*2);
                 break;
             case @string v:
-                println($"\"{v}\" is {len(v)} bytes long");
+                fmt.Printf("{0} is {1} bytes long\n", v, len(v));
                 break;
             default: {
                 var v = i.type();
-                println($"I don't know about type {GetGoTypeName(v)}!");
+                fmt.Printf("I don't know about type {0}!\n", GetGoTypeName(v));
                 break;
             }
         }
