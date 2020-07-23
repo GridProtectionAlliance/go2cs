@@ -27,20 +27,17 @@ using static go.builtin;
 static class main_package
 {
     static void @do(object i) {
-        {
-            object v = i.type(); // "v" is scoped to switch
-
-            switch (v)
-            {
-                case int v_i:
-                    println($"Twice {v_i} is {v_i * 2}");
-                    break;
-                case @string v_s:
-                    println($"\"{v_s}\" is {len(v_s)} bytes long");
-                    break;
-                default:
-                    println($"I don't know about type {GetGoTypeName(v.GetType())}!");
-                    break;
+        switch (i.type()) {
+            case int v:
+                println($"Twice {v} is {v * 2}");
+                break;
+            case @string v:
+                println($"\"{v}\" is {len(v)} bytes long");
+                break;
+            default: {
+                var v = i.type();
+                println($"I don't know about type {GetGoTypeName(v)}!");
+                break;
             }
         }
     }
