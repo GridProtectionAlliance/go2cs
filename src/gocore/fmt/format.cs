@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.Collections;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -49,6 +50,9 @@ namespace go
             if (arg is bool)
                 return arg.ToString().ToLowerInvariant();
 
+            if (arg is bool)
+                return arg.ToString().ToLowerInvariant();
+
             return arg?.ToString() ?? "<nil>";
         }
 
@@ -61,8 +65,16 @@ namespace go
         /// </summary>
         /// <param name="args">Arguments to display.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Println(params object[] args) =>
+        public static void Println(params object[] args)
+        {
+            if (args.Length == 1 && args[0] is IEnumerable array)
+            {
+                Console.WriteLine($"[{string.Join(" ", array.Cast<object>().Select(ToString))}]");
+                return;
+            }
+
             Console.WriteLine(string.Join(" ", args.Select(ToString)));
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Printf(@string format, params object[] args) =>
