@@ -62,7 +62,7 @@ namespace go2cs
             if (!Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
                 typeInfo = TypeInfo.ObjectType;
 
-            if (identifiers != null)
+            if (!(identifiers is null))
             {
                 for (int i = 0; i < identifiers.Length; i++)
                 {

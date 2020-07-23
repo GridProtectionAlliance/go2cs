@@ -380,7 +380,7 @@ namespace go2cs
                 }
             }
 
-            return interfaceFileMetadata != null;
+            return !(interfaceFileMetadata is null);
         }
 
         private void SearchPromotedStructFields(GoParser.TypeSpecContext context, string identifier, StructInfo structInfo, HashSet<string> inheritedTypeNames, Dictionary<string, List<FieldInfo>> promotedFields, HashSet<string> promotedStructTypeNames = null, bool useFullTypeName = false)
@@ -464,12 +464,12 @@ namespace go2cs
                 }
             }
 
-            return structFileMetadata != null;
+            return !(structFileMetadata is null);
         }
 
         private string GetInheritedTypeList(HashSet<string> inheritedTypeNames)
         {
-            if (inheritedTypeNames == null || inheritedTypeNames.Count == 0)
+            if (inheritedTypeNames is null || inheritedTypeNames.Count == 0)
                 return "";
 
             return $" : {string.Join(", ", inheritedTypeNames)}";

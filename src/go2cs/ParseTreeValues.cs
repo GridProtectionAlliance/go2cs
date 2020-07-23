@@ -40,7 +40,7 @@ namespace go2cs
         /// </returns>
         public new bool TryGetValue(IParseTree key, out T value)
         {
-            if (key == null)
+            if (key is null)
             {
                 value = default;
                 return false;

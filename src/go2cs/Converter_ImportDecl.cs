@@ -88,7 +88,7 @@ namespace go2cs
 
                 FolderMetadata metadata = LoadImportMetadata(Options, targetImport, out string warning);
 
-                if (metadata == null)
+                if (metadata is null)
                     AddWarning(context, warning);
                 else
                     ImportMetadata[targetImport] = metadata;

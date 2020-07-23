@@ -142,6 +142,6 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, in ptr<T> value) => value != nil;
 
-        private static readonly bool IsReferenceType = default(T) == null;
+        private static readonly bool IsReferenceType = default(T) is null;
     }
 }

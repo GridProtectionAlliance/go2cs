@@ -86,14 +86,14 @@ namespace go2cs
             }
             else
             {
-                if (context.primaryExpr() != null)
+                if (!(context.primaryExpr() is null))
                 {
                     if (PrimaryExpressions.TryGetValue(context.primaryExpr(), out string primaryExpression))
                         Expressions[context] = primaryExpression;
                     else
                         AddWarning(context, $"Failed to find primary expression \"{context.unaryExpr().GetText()}\" in the expression \"{context.GetText()}\"");
                 }
-                else if (context.unaryExpr() != null)
+                else if (!(context.unaryExpr() is null))
                 {
                     if (UnaryExpressions.TryGetValue(context.unaryExpr(), out string unaryExpression))
                         Expressions[context] = unaryExpression;
@@ -117,7 +117,7 @@ namespace go2cs
             {
                 UnaryExpressions[context] = primaryExpression;
             }
-            else if (context.expression() != null)
+            else if (!(context.expression() is null))
             {
                 string unaryOP = context.children[0].GetText();
 
@@ -144,7 +144,7 @@ namespace go2cs
                     UnaryExpressions[context] = $"{Expressions[context.expression()]}.Value";
                 }
 
-                if ((object)unaryOP != null)
+                if (unaryOP is object)
                     UnaryExpressions[context] = $"{unaryOP}{Expressions[context.expression()]}";
             }
             else if (!UnaryExpressions.ContainsKey(context))
@@ -173,7 +173,7 @@ namespace go2cs
             {
                 PrimaryExpressions[context] = SanitizedIdentifier(operand);
             }
-            else if (context.conversion() != null)
+            else if (!(context.conversion() is null))
             {
                 // conversion
                 //     : type '(' expression ',' ? ')'
@@ -202,14 +202,14 @@ namespace go2cs
                     AddWarning(context, $"Failed to find type or sub-expression for the conversion expression in \"{context.GetText()}\"");
                 }
             }
-            else if (context.DOT() != null)
+            else if (!(context.DOT() is null))
             {
                 // selector
                 //     : '.' IDENTIFIER
 
                 PrimaryExpressions[context] = $"{primaryExpression}.{SanitizedIdentifier(context.IDENTIFIER().GetText())}";
             }
-            else if (context.index() != null)
+            else if (!(context.index() is null))
             {
                 // index
                 //     : '[' expression ']'
@@ -219,7 +219,7 @@ namespace go2cs
                 else
                     AddWarning(context, $"Failed to find index expression for \"{context.GetText()}\"");
             }
-            else if (context.slice() != null)
+            else if (!(context.slice() is null))
             {
                 // slice
                 //     : '['((expression ? ':' expression ? ) | (expression ? ':' expression ':' expression)) ']'
@@ -273,7 +273,7 @@ namespace go2cs
                         AddWarning(context, $"Failed to find one of the slice expressions for \"{context.GetText()}\"");
                 }
             }
-            else if (context.typeAssertion() != null)
+            else if (!(context.typeAssertion() is null))
             {
                 // typeAssertion
                 //     : '.' '(' type ')'
@@ -283,7 +283,7 @@ namespace go2cs
                 else
                     AddWarning(context, $"Failed to find type for the type assertion expression in \"{context.GetText()}\"");
             }
-            else if (context.arguments() != null)
+            else if (!(context.arguments() is null))
             {
                 // arguments
                 //     : '('((expressionList | type(',' expressionList) ? ) '...' ? ',' ? ) ? ')'
@@ -347,16 +347,16 @@ namespace go2cs
             //     | RUNE_LIT
             //     | STRING_LIT
 
-            if (context.IMAGINARY_LIT() != null)
+            if (!(context.IMAGINARY_LIT() is null))
             {
                 string value = context.IMAGINARY_LIT().GetText();
                 basicLiteral = value.EndsWith("i") ? $"i({value.Substring(0, value.Length - 1)})" : value;
             }
-            else if (context.RUNE_LIT() != null)
+            else if (!(context.RUNE_LIT() is null))
             {
                 basicLiteral = ReplaceOctalBytes(context.RUNE_LIT().GetText());
             }
-            else if (context.string_() != null)
+            else if (!(context.string_() is null))
             {
                 basicLiteral = ToStringLiteral(ReplaceOctalBytes(context.string_().GetText()));
             }

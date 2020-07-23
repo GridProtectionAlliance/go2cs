@@ -96,7 +96,7 @@ namespace go2cs
         {
             Options = options;
 
-            if ((object)fileName == null)
+            if (fileName is null)
                 throw new ArgumentNullException(nameof(fileName));
 
             if (!File.Exists(fileName))
@@ -208,7 +208,7 @@ namespace go2cs
 
         protected static void Scan(Options options, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null, SkippedFileScanFunction handleSkippedScan = null)
         {
-            if ((object)fileNeedsScan == null)
+            if (fileNeedsScan is null)
                 fileNeedsScan = DefaultFileNeedsScan;
 
             string sourcePath = GetAbsolutePath(options.SourcePath);
@@ -254,7 +254,7 @@ namespace go2cs
 
         protected static void ScanFile(Options options, string fileName, bool showParseTree, CreateNewScannerFunction createNewScanner, FileNeedsScanFunction fileNeedsScan = null, SkippedFileScanFunction handleSkippedScan = null)
         {
-            if ((object)fileNeedsScan == null)
+            if (fileNeedsScan is null)
                 fileNeedsScan = DefaultFileNeedsScan;
 
             if (s_processedFiles.Contains(fileName))
@@ -394,7 +394,7 @@ namespace go2cs
             if (!File.Exists(folderMetadataFileName))
                 return null;
 
-            if (folderMetadataFileName.Equals(s_currentFolderMetadataFileName, StringComparison.OrdinalIgnoreCase) && s_currentFolderMetadata != null)
+            if (folderMetadataFileName.Equals(s_currentFolderMetadataFileName, StringComparison.OrdinalIgnoreCase) && !(s_currentFolderMetadata is null))
                 return s_currentFolderMetadata;
 
             FolderMetadata folderMetadata;
@@ -431,12 +431,12 @@ namespace go2cs
 
             metadata = GetFolderMetadata(options, goRootImport);
 
-            if (metadata != null)
+            if (!(metadata is null))
                 return metadata;
 
             metadata = GetFolderMetadata(options, goPathImport);
 
-            if (metadata != null)
+            if (!(metadata is null))
                 return metadata;
 
             StringBuilder loadWarning = new StringBuilder();

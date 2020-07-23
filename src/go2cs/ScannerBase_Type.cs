@@ -47,7 +47,7 @@ namespace go2cs
 
         public override void ExitType_(GoParser.Type_Context context)
         {
-            if (context.type_() != null)
+            if (!(context.type_() is null))
             {
                 if (Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
                     Types[context] = typeInfo;
@@ -196,12 +196,12 @@ namespace go2cs
 
             Types.TryGetValue(context.type_(), out TypeInfo keyTypeInfo);
 
-            if (keyTypeInfo == null)
+            if (keyTypeInfo is null)
                 return; // throw new InvalidOperationException("Map key type undefined.");
 
             Types.TryGetValue(context.elementType().type_(), out TypeInfo elementTypeInfo);
 
-            if (elementTypeInfo == null)
+            if (elementTypeInfo is null)
                 return; // throw new InvalidOperationException("Map element type undefined.");
 
             RequiredUsings.Add("System.Collections.Generic");
@@ -221,7 +221,7 @@ namespace go2cs
         {
             Types.TryGetValue(context.elementType().type_(), out TypeInfo typeInfo);
 
-            if (typeInfo == null)
+            if (typeInfo is null)
                 typeInfo = TypeInfo.ObjectType;
 
             Types[context.Parent.Parent] = new TypeInfo
@@ -238,7 +238,7 @@ namespace go2cs
             // TODO: Update to reference proper channel type name when added
             Types.TryGetValue(context.elementType().type_(), out TypeInfo typeInfo);
 
-            if (typeInfo == null)
+            if (typeInfo is null)
                 typeInfo = TypeInfo.ObjectType;
 
             Types[context.Parent.Parent] = new TypeInfo

@@ -269,7 +269,7 @@ namespace go2cs
         private bool CommentOnNewLine(IList<IToken> hiddenChannel, IToken testToken)
         {
             IToken priorToken = hiddenChannel?.FirstOrDefault(token => token.StopIndex == testToken.StartIndex - 1);
-            return priorToken != null && EndsWithLineFeed(priorToken.Text);
+            return !(priorToken is null) && EndsWithLineFeed(priorToken.Text);
         }
 
         //protected bool IsEndOfLineCommentLeft(ParserRuleContext context)

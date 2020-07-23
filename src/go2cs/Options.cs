@@ -142,8 +142,8 @@ namespace go2cs
             ForceMetadataUpdate = forceMetadataUpdate;
             OnlyUpdateMetadata = onlyUpdateMetadata;
             TargetGoSrcPath = AddPathSuffix(Path.GetFullPath(Environment.ExpandEnvironmentVariables(targetGoSrcPath)));
-            SourcePath = sourcePath == null ? null : Environment.ExpandEnvironmentVariables(sourcePath);
-            TargetPath = targetPath == null ? null : Environment.ExpandEnvironmentVariables(targetPath);
+            SourcePath = sourcePath is null ? null : Environment.ExpandEnvironmentVariables(sourcePath);
+            TargetPath = targetPath is null ? null : Environment.ExpandEnvironmentVariables(targetPath);
 
             m_excludeExpression = new Regex(ExcludeFiles, RegexOptions.Compiled | RegexOptions.Singleline);
         }

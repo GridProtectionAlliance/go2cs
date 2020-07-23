@@ -34,7 +34,7 @@ namespace go2cs
             base.EnterImportSpec(context);
 
             string alternateName = SanitizedIdentifier(context.IDENTIFIER()?.GetText());
-            bool useStatic = (object)alternateName == null && context.ChildCount > 1 && context.GetChild(0).GetText().Equals(".");
+            bool useStatic = alternateName is null && context.ChildCount > 1 && context.GetChild(0).GetText().Equals(".");
 
             int lastSlash = CurrentImportPath.LastIndexOf('/');
             string packageName = SanitizedIdentifier(lastSlash > -1 ? CurrentImportPath.Substring(lastSlash + 1) : CurrentImportPath);

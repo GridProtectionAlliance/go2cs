@@ -62,7 +62,7 @@ namespace go2cs
 
         public override void ExitStatement(GoParser.StatementContext context)
         {
-            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
+            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
             {
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
                     m_targetFile.Append($"{statement}{(LineTerminatorAhead(context.simpleStmt()) ? "" : Environment.NewLine)}");
@@ -344,7 +344,7 @@ namespace go2cs
 
             bool breakHandled = false;
 
-            if (context.IDENTIFIER() != null)
+            if (!(context.IDENTIFIER() is null))
             {
                 string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
 
@@ -380,7 +380,7 @@ namespace go2cs
 
             bool continueHandled = false;
 
-            if (context.IDENTIFIER() != null)
+            if (!(context.IDENTIFIER() is null))
             {
                 string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
 
@@ -435,10 +435,10 @@ namespace go2cs
 
             m_ifExpressionLevel++;
 
-            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
+            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
             {
                 // Any declared variable will be scoped to if statement, so create a sub-block for it
-                if (context.simpleStmt().shortVarDecl() != null)
+                if (!(context.simpleStmt().shortVarDecl() is null))
                 {
                     m_targetFile.AppendLine($"{Spacing()}{{");
                     IndentLevel++;
@@ -479,7 +479,7 @@ namespace go2cs
                 AddWarning(context, $"Failed to find expression for if statement: {context.GetText()}");
             }
 
-            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
+            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
             {
                 // TODO: Handle case where short val declaration re-declares a variable already defined in current scope - C# does not allow this. One option: cache current variable value and restore below
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
@@ -488,7 +488,7 @@ namespace go2cs
                     AddWarning(context, $"Failed to find simple statement for if statement: {context.simpleStmt().GetText()}");
                 
                 // Close any locally scoped declared variable sub-block
-                if (context.simpleStmt().shortVarDecl() != null)
+                if (!(context.simpleStmt().shortVarDecl() is null))
                 {
                     IndentLevel--;
                     m_targetFile.AppendLine();
@@ -509,9 +509,9 @@ namespace go2cs
 
             m_exprSwitchExpressionLevel++;
 
-            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
+            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
             {
-                if (context.simpleStmt().shortVarDecl() != null)
+                if (!(context.simpleStmt().shortVarDecl() is null))
                 {
                     // Any declared variable will be scoped to switch statement, so create a sub-block for it
                     m_targetFile.AppendLine($"{Spacing()}{{");
@@ -521,10 +521,10 @@ namespace go2cs
                 m_targetFile.Append(string.Format(ExprSwitchStatementMarker, m_exprSwitchExpressionLevel));
             }
 
-            if (context.expression() != null)
-                m_targetFile.Append($"{Spacing()}Switch({string.Format(ExprSwitchExpressionMarker, m_exprSwitchExpressionLevel)})");
-            else
+            if (context.expression() is null)
                 m_targetFile.Append($"{Spacing()}Switch()");
+            else
+                m_targetFile.Append($"{Spacing()}Switch({string.Format(ExprSwitchExpressionMarker, m_exprSwitchExpressionLevel)})");
 
             m_exprSwitchDefaultCase.Push(new StringBuilder());
         }
@@ -540,7 +540,7 @@ namespace go2cs
             // exprSwitchCase
             //     : 'case' expressionList | 'default'
 
-            if (context.exprSwitchCase().expressionList() == null)
+            if (context.exprSwitchCase().expressionList() is null)
                 m_exprSwitchDefaultCase.Peek().Append($"{Environment.NewLine}{Spacing()}.Default(() =>{Environment.NewLine}{Spacing()}{{{CheckForCommentsLeft(context.statementList(), 1)}");
             else
                 m_targetFile.Append($"{Environment.NewLine}{Spacing()}.Case({string.Format(ExprSwitchCaseTypeMarker, m_exprSwitchExpressionLevel)})(() =>{Environment.NewLine}{Spacing()}{{{CheckForCommentsLeft(context.statementList(), 1)}");
@@ -565,7 +565,7 @@ namespace go2cs
 
             GoParser.ExpressionListContext expressionList = context.exprSwitchCase().expressionList();
 
-            if (expressionList == null)
+            if (expressionList is null)
             {
                 m_exprSwitchDefaultCase.Peek().Append($"{PopBlock(false)}{Spacing()}}})");
             }
@@ -593,7 +593,7 @@ namespace go2cs
             // Default case always needs to be last case clause in SwitchExpression - Go allows its declaration anywhere
             m_targetFile.Append($"{m_exprSwitchDefaultCase.Pop()};{CheckForCommentsRight(context)}");
 
-            if (context.expression() != null)
+            if (!(context.expression() is null))
             {
                 if (Expressions.TryGetValue(context.expression(), out string expression))
                 {
@@ -606,7 +606,7 @@ namespace go2cs
                 }
             }
 
-            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
+            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
             {
                 // TODO: Handle case where short val declaration re-declares a variable already defined in current scope - C# does not allow this. One option: cache current variable value and restore below
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
@@ -615,7 +615,7 @@ namespace go2cs
                     AddWarning(context, $"Failed to find simple statement for expression based switch statement: {context.simpleStmt().GetText()}");
 
                 // Close any locally scoped declared variable sub-block
-                if (context.simpleStmt().shortVarDecl() != null)
+                if (!(context.simpleStmt().shortVarDecl() is null))
                 {
                     IndentLevel--;
                     m_targetFile.AppendLine();
@@ -636,9 +636,9 @@ namespace go2cs
 
             m_typeSwitchExpressionLevel++;
 
-            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
+            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
             {
-                if (context.simpleStmt().shortVarDecl() != null)
+                if (!(context.simpleStmt().shortVarDecl() is null))
                 {
                     // Any declared variable will be scoped to switch statement, so create a sub-block for it
                     m_targetFile.AppendLine($"{Spacing()}{{");
@@ -648,7 +648,7 @@ namespace go2cs
                 m_targetFile.Append(string.Format(TypeSwitchStatementMarker, m_typeSwitchExpressionLevel));
             }
 
-            if (context.typeSwitchGuard().IDENTIFIER() != null)
+            if (!(context.typeSwitchGuard().IDENTIFIER() is null))
             {
                 string identifier = SanitizedIdentifier(context.typeSwitchGuard().IDENTIFIER().GetText());
 
@@ -675,7 +675,7 @@ namespace go2cs
             // typeList
             //     : type ( ',' type )*
 
-            if (context.typeSwitchCase().typeList() == null)
+            if (context.typeSwitchCase().typeList() is null)
                 m_typeSwitchDefaultCase.Peek().Append($"{Environment.NewLine}{Spacing()}.Default(() =>{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
             else
                 m_targetFile.Append($"{Environment.NewLine}{Spacing()}.Case({string.Format(TypeSwitchCaseTypeMarker, m_typeSwitchExpressionLevel)})(() =>{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
@@ -698,7 +698,7 @@ namespace go2cs
 
             IndentLevel--;
 
-            if (context.typeSwitchCase().typeList() == null)
+            if (context.typeSwitchCase().typeList() is null)
             {
                 m_typeSwitchDefaultCase.Peek().Append($"{PopBlock(false)}{Spacing()}}})");
             }
@@ -756,7 +756,7 @@ namespace go2cs
                 AddWarning(context, $"Failed to find primary expression for type switch statement: {context.typeSwitchGuard().GetText()}");
             }
 
-            if (context.simpleStmt() != null && context.simpleStmt().emptyStmt() == null)
+            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
             {
                 // TODO: Handle case where short val declaration re-declares a variable already defined in current scope - C# does not allow this. One option: cache current variable value and restore below
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
@@ -765,7 +765,7 @@ namespace go2cs
                     AddWarning(context, $"Failed to find simple statement for type switch statement: {context.simpleStmt().GetText()}");
 
                 // Close any locally scoped declared variable sub-block
-                if (context.simpleStmt().shortVarDecl() != null)
+                if (!(context.simpleStmt().shortVarDecl() is null))
                 {
                     IndentLevel--;
                     m_targetFile.AppendLine();
@@ -791,12 +791,12 @@ namespace go2cs
 
             GoParser.ForClauseContext forClause = context.forClause();
 
-            if (context.expression() != null || forClause != null && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
+            if (!(context.expression() is null) || !(forClause is null) && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
             {
                 // Handle while-style statement
                 m_targetFile.AppendLine($"{Spacing()}while ({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
             }
-            else if (forClause != null)
+            else if (!(forClause is null))
             {
                 // forClause
                 //     : simpleStmt? ';' expression? ';' simpleStmt?
@@ -804,21 +804,21 @@ namespace go2cs
                 bool hasInitStatement = ForHasInitStatement(forClause, out GoParser.SimpleStmtContext simpleInitStatement);
                 bool hasPostStatement = ForHasPostStatement(forClause, out GoParser.SimpleStmtContext simplePostStatement);
                 bool useForStyleStatement =
-                    hasInitStatement && (simpleInitStatement.shortVarDecl() != null || simpleInitStatement.assignment() != null) &&
-                    hasPostStatement && (simplePostStatement.incDecStmt() != null || simplePostStatement.expressionStmt() != null);
+                    hasInitStatement && (!(simpleInitStatement.shortVarDecl() is null) || !(simpleInitStatement.assignment() is null)) &&
+                    hasPostStatement && (!(simplePostStatement.incDecStmt() is null) || !(simplePostStatement.expressionStmt() is null));
 
                 if (hasInitStatement)
                 {
                     // Any declared variable will be scoped to for statement, so create a sub-block for it
-                    if (!useForStyleStatement && simpleInitStatement.shortVarDecl() != null)
+                    if (!useForStyleStatement && !(simpleInitStatement.shortVarDecl() is null))
                     {
                         m_targetFile.AppendLine($"{Spacing()}{{");
                         IndentLevel++;
                     }
                 }
 
-                if (hasInitStatement && (simpleInitStatement.shortVarDecl() != null || simpleInitStatement.assignment() != null) &&
-                    hasPostStatement && (simplePostStatement.incDecStmt() != null || simplePostStatement.expressionStmt() != null))
+                if (hasInitStatement && (!(simpleInitStatement.shortVarDecl() is null) || !(simpleInitStatement.assignment() is null)) &&
+                    hasPostStatement && (!(simplePostStatement.incDecStmt() is null) || !(simplePostStatement.expressionStmt() is null)))
                 {
                     // Use standard for-style statement for simple constructs
                     m_targetFile.AppendLine($"{Spacing()}for ({string.Format(ForInitStatementMarker, m_forExpressionLevel)}; {string.Format(ForExpressionMarker, m_forExpressionLevel)}; {string.Format(ForPostStatementMarker, m_forExpressionLevel)})");
@@ -843,7 +843,7 @@ namespace go2cs
                 // rangeClause
                 //     : ( expressionList '=' | identifierList ':=' )? 'range' expression
 
-                if (context.rangeClause().identifierList() != null)
+                if (!(context.rangeClause().identifierList() is null))
                 {
                     // Any declared variable will be scoped to for statement, so create a sub-block for it
                     m_targetFile.AppendLine($"{Spacing()}{{");
@@ -864,12 +864,12 @@ namespace go2cs
 
             GoParser.ForClauseContext forClause = context.forClause();
 
-            if (context.expression() != null || forClause != null && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
+            if (!(context.expression() is null) || !(forClause is null) && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
             {
                 Expressions.TryGetValue(context.expression() ?? forClause?.expression(), out string expression);
                 m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression ?? "true");
             }
-            else if (forClause != null)
+            else if (!(forClause is null))
             {
                 // forClause
                 //     : simpleStmt? ';' expression? ';' simpleStmt?
@@ -882,8 +882,8 @@ namespace go2cs
                 bool hasInitStatement = ForHasInitStatement(forClause, out GoParser.SimpleStmtContext simpleInitStatement);
                 bool hasPostStatement = ForHasPostStatement(forClause, out GoParser.SimpleStmtContext simplePostStatement);
                 bool useForStyleStatement =
-                    hasInitStatement && (simpleInitStatement.shortVarDecl() != null || simpleInitStatement.assignment() != null) &&
-                    hasPostStatement && (simplePostStatement.incDecStmt() != null || simplePostStatement.expressionStmt() != null);
+                    hasInitStatement && (!(simpleInitStatement.shortVarDecl() is null) || !(simpleInitStatement.assignment() is null)) &&
+                    hasPostStatement && (!(simplePostStatement.incDecStmt() is null) || !(simplePostStatement.expressionStmt() is null));
 
                 if (hasInitStatement)
                 {
@@ -910,7 +910,7 @@ namespace go2cs
                     }
 
                     // Close any locally scoped declared variable sub-block
-                    if (!useForStyleStatement && simpleInitStatement.shortVarDecl() != null)
+                    if (!useForStyleStatement && !(simpleInitStatement.shortVarDecl() is null))
                     {
                         IndentLevel--;
                         m_targetFile.AppendLine();
@@ -947,7 +947,7 @@ namespace go2cs
                 // rangeClause
                 //     : (expressionList '=' | identifierList ':=' )? 'range' expression
 
-                if (context.rangeClause().identifierList() != null)
+                if (!(context.rangeClause().identifierList() is null))
                 {
                     // Close any locally scoped declared variable sub-block
                     IndentLevel--;
@@ -971,9 +971,9 @@ namespace go2cs
             simpleStatement = forClause.simpleStmt(0);
 
             return
-                simpleStatement != null &&
-                simpleStatement.emptyStmt() == null &&
-                forClause.children[forClause.children.Count - 1] != simpleStatement;
+                !(simpleStatement is null) &&
+                simpleStatement.emptyStmt() is null &&
+                forClause.children[^1] != simpleStatement;
         }
 
         private bool ForHasPostStatement(GoParser.ForClauseContext forClause, out GoParser.SimpleStmtContext simpleStatement)
@@ -987,16 +987,16 @@ namespace go2cs
 
             if (forClause.simpleStmt().Length == 1)
                 return
-                    simpleStatement != null &&
-                    simpleStatement.emptyStmt() == null &&
-                    forClause.children[forClause.children.Count - 1] == simpleStatement;
+                    !(simpleStatement is null) &&
+                    simpleStatement.emptyStmt() is null &&
+                    forClause.children[^1] == simpleStatement;
 
             simpleStatement = forClause.simpleStmt(1);
 
             return
-                simpleStatement != null &&
-                simpleStatement.emptyStmt() == null &&
-                forClause.children[forClause.children.Count - 1] == simpleStatement;
+                !(simpleStatement is null) &&
+                simpleStatement.emptyStmt() is null &&
+                forClause.children[^1] == simpleStatement;
         }
 
         public override void ExitDeferStmt(GoParser.DeferStmtContext context)

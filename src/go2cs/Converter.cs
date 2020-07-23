@@ -56,7 +56,7 @@ namespace go2cs
         {
             FolderMetadata folderMetadata = GetFolderMetadata(Options, SourceFileName);
 
-            if (folderMetadata == null || !folderMetadata.Files.TryGetValue(fileName, out FileMetadata metadata))
+            if (folderMetadata is null || !folderMetadata.Files.TryGetValue(fileName, out FileMetadata metadata))
                 throw new InvalidOperationException($"Failed to load metadata for \"{fileName}\" - file conversion canceled.");
 
             Metadata = metadata;
@@ -234,7 +234,7 @@ namespace go2cs
                     }
                 }
 
-                if (projectFiles == null)
+                if (projectFiles is null)
                     throw new InvalidOperationException($"Failed to find project files for main package file: {mainPackageFile}");
 
                 // When multiple Go source files from the same folder contain a main method,

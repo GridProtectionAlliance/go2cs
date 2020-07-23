@@ -72,7 +72,7 @@ namespace go2cs
 
             ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions);
 
-            if (expressions != null && identifiers.Length != expressions.Length)
+            if (!(expressions is null) && identifiers.Length != expressions.Length)
             {
                 AddWarning(context, $"Encountered count mismatch for identifiers and expressions in var specification expression: {context.GetText()}");
                 return;
@@ -101,7 +101,7 @@ namespace go2cs
 
                 m_targetFile.Append($"{type} {identifier}");
 
-                if ((object)expression != null)
+                if (expression is object)
                     m_targetFile.Append($" = {expression}");
                 else if (typeInfo?.TypeClass == TypeClass.Array && typeInfo is ArrayTypeInfo arrayTypeInfo)
                     m_targetFile.Append($" = new {type}({arrayTypeInfo.Length.Text})");

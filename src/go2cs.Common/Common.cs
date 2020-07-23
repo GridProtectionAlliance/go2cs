@@ -95,7 +95,7 @@ namespace go2cs
         //    {
         //        using (Stream resourceStream = EntryAssembly.GetManifestResourceStream(name))
         //        {
-        //            if (resourceStream != null)
+        //            if (!(resourceStream is null))
         //            {
         //                string targetFileName = Path.Combine(targetPath, name.Substring(prefix.Length));
         //                bool restoreFile = true;
@@ -214,7 +214,7 @@ namespace go2cs
 
         public static string GetLastDirectoryName(string filePath)
         {
-            if (filePath == null)
+            if (filePath is null)
                 throw new ArgumentNullException(nameof(filePath));
 
             int index;

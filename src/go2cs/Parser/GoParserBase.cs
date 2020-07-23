@@ -81,7 +81,7 @@ public abstract class GoParserBase : Parser
         BufferedTokenStream stream = (BufferedTokenStream)tokenStream;
         IList<IToken> tokens = stream.GetHiddenTokensToLeft(LT(stream, tokenOffset).TokenIndex);
 
-        if (tokens == null)
+        if (tokens is null)
         {
             return true;
         }
