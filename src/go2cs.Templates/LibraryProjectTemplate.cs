@@ -44,7 +44,7 @@ namespace go2cs.Templates
             this.Write("</AssemblyName>\r\n    <Product>go2cs</Product>\r\n    <Copyright>Copyright © ");
             
             #line 16 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(DateTime.UtcNow.ToString("yyyy")));
+            this.Write(this.ToStringHelper.ToStringWithCulture(DateTime.Now.ToString("yyyy")));
             
             #line default
             #line hidden
@@ -58,8 +58,7 @@ namespace go2cs.Templates
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include=""..\golib\golib.csproj"" /><!--Condition=""'$(Configuration)'=='Debug'""-->
-    <!--<PackageReference Include=""go.lib"" Version=""0.1.0"" Condition=""'$(Configuration)'=='Release'"" />-->
+    <ProjectReference Include=""$(GOPATH)\go2cs\golib\golib.csproj"" />
   </ItemGroup>
 
 </Project>
@@ -67,7 +66,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 31 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
+        #line 30 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
 
 // Template Parameters
 public string AssemblyName;  // File name without extension

@@ -18,7 +18,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Projects\go2cs\src\go2cs.Templates\TemplateBase.tt"
+    #line 1 "D:\Projects\go2cs\src\go2cs.Templates\TemplateBase.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class TemplateBase : TemplateBaseBase
     {
@@ -31,7 +31,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 9 "C:\Projects\go2cs\src\go2cs.Templates\TemplateBase.tt"
+        #line 9 "D:\Projects\go2cs\src\go2cs.Templates\TemplateBase.tt"
 
 /*
   It's important to note that these templates are designed for use at runtime, as a result
