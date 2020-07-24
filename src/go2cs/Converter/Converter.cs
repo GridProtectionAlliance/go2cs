@@ -152,10 +152,10 @@ namespace go2cs
             groupedPackageData = CreateGroupedPackageData();
 
             // Process packages with "main" functions - these become standard projects
-            ProcessMainProjectPackages();
+            ProcessMainProjectPackages(options);
 
             if (options.ConvertStandardLibrary && options.RecurseSubdirectories && AddPathSuffix(options.SourcePath).Equals(GoPath))
-                ProcessStandardLibraryPackages(groupedPackageData);
+                ProcessStandardLibraryPackages(options, groupedPackageData);
         }
 
         private static Dictionary<string, List<(string, string[])>> CreateGroupedPackageData()
@@ -180,7 +180,7 @@ namespace go2cs
             return groupedPackageData;
         }
 
-        private static void ProcessMainProjectPackages()
+        private static void ProcessMainProjectPackages(Options options)
         {
             foreach (string mainPackageFile in s_mainPackageFiles)
             {
@@ -188,8 +188,18 @@ namespace go2cs
                 string mainPackagePath = Path.GetDirectoryName(mainPackageFile) ?? "";
                 string assemblyName = Path.GetFileNameWithoutExtension(mainPackageFileName);
 
+                FolderMetadata folderMetadata = GetFolderMetadata(options, mainPackageFile);
+                string sourceFileName = Path.Combine(Path.GetDirectoryName(mainPackageFile) ?? "", $"{Path.GetFileNameWithoutExtension(mainPackageFile)}.go");
+
+                if (folderMetadata is null || !folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata metadata))
+                    throw new InvalidOperationException($"Failed to load metadata for \"{sourceFileName}\" - file conversion canceled.");
+
                 string mainProjectFile = Path.Combine(mainPackagePath, $"{assemblyName}.csproj");
-                string mainProjectFileContent = new MainProjectTemplate { AssemblyName = assemblyName }.TransformText();
+                string mainProjectFileContent = new MainProjectTemplate
+                {
+                    AssemblyName = assemblyName,
+                    Imports = metadata.ImportAliases.Select(kvp => kvp.Value.targetImport)
+                }.TransformText();
 
                 // Build main project file
                 if (File.Exists(mainProjectFile) && GetMD5HashFromFile(mainProjectFile) == GetMD5HashFromString(mainProjectFileContent))
@@ -200,7 +210,7 @@ namespace go2cs
             }
         }
 
-        private static void ProcessStandardLibraryPackages(Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData)
+        private static void ProcessStandardLibraryPackages(Options options, Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData)
         {
             foreach (KeyValuePair<string, List<(string path, string[] fileNames)>> packageData in groupedPackageData)
             {
@@ -213,7 +223,18 @@ namespace go2cs
 
                         string assemblyName = packageData.Key;
                         string libraryProjectFile = Path.Combine(rootPackage.path, $"{assemblyName}.csproj");
-                        string libraryProjectFileContent = new LibraryProjectTemplate { AssemblyName = assemblyName }.TransformText();
+
+                        FolderMetadata folderMetadata = GetFolderMetadata(options, fileName);
+                        string sourceFileName = Path.Combine(Path.GetDirectoryName(fileName) ?? "", $"{Path.GetFileNameWithoutExtension(fileName)}.go");
+
+                        if (folderMetadata is null || !folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata metadata))
+                            throw new InvalidOperationException($"Failed to load metadata for \"{sourceFileName}\" - file conversion canceled.");
+
+                        string libraryProjectFileContent = new LibraryProjectTemplate
+                        {
+                            AssemblyName = assemblyName,
+                            Imports = metadata.ImportAliases.Select(kvp => kvp.Value.targetImport)
+                        }.TransformText();
 
                         // Build library project file
                         if (File.Exists(libraryProjectFile) && GetMD5HashFromFile(libraryProjectFile) == GetMD5HashFromString(libraryProjectFileContent))

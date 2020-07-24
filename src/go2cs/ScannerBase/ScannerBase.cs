@@ -373,8 +373,8 @@ namespace go2cs
             targetFileName = $"{Path.GetFileNameWithoutExtension(sourceFileName)}.cs";
             targetFilePath = string.IsNullOrWhiteSpace(options.TargetPath) || sourceFilePath.StartsWith(options.TargetGoSrcPath) ? sourceFilePath : Path.GetFullPath(options.TargetPath);
 
-            if (!Directory.Exists(targetFilePath))
-                Directory.CreateDirectory(targetFilePath);
+            //if (!Directory.Exists(targetFilePath))
+            //    Directory.CreateDirectory(targetFilePath);
 
             targetFileName = Path.Combine(targetFilePath, targetFileName);
         }
@@ -425,7 +425,7 @@ namespace go2cs
             string packageName = lastSlash > -1 ? targetImport.Substring(lastSlash + 1) : targetImport;
             string importPath = $"{AddPathSuffix(targetImport.Replace("/", "\\"))}{packageName}.go";
             string goRootImport = Path.Combine(options.TargetGoSrcPath, importPath);
-            string goPathImport = Path.Combine(GoPath, importPath);
+            string goPathImport = Path.Combine(GoPath, "go2cs", importPath);
             FolderMetadata metadata;
             warning = default;
 

@@ -140,11 +140,6 @@ namespace go2cs
             }
         }
 
-        public override void ExitArrayLength([NotNull] GoParser.ArrayLengthContext context)
-        {
-            ExitArrayType(context.Parent as GoParser.ArrayTypeContext);
-        }
-
         public override void ExitArrayType(GoParser.ArrayTypeContext context)
         {
             string name = context.GetText();
