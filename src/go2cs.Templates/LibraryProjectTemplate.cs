@@ -9,6 +9,7 @@
 // ------------------------------------------------------------------------------
 namespace go2cs.Templates
 {
+    using System.Collections.Generic;
     using go2cs;
     using System;
     
@@ -36,14 +37,14 @@ namespace go2cs.Templates
                     "OutputType>\r\n    <TargetFramework>netcoreapp3.1</TargetFramework>\r\n    <RootName" +
                     "space>go</RootNamespace>\r\n    <AssemblyName>");
             
-            #line 14 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
+            #line 15 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(AssemblyName));
             
             #line default
             #line hidden
             this.Write("</AssemblyName>\r\n    <Product>go2cs</Product>\r\n    <Copyright>Copyright © ");
             
-            #line 16 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
+            #line 17 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(DateTime.Now.ToString("yyyy")));
             
             #line default
@@ -58,18 +59,76 @@ namespace go2cs.Templates
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include=""$(GOPATH)\go2cs\golib\golib.csproj"" />
-  </ItemGroup>
+    <Reference Include=""golib"">
+      <HintPath>$(GOPATH)\src\go2cs\golib\$(OutDir)golib.dll</HintPath>
+    </Reference>");
+            
+            #line 29 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
 
-</Project>
-");
+
+    if (!(Imports is null))
+    {
+        foreach (string value in Imports)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                continue;
+
+            importPath = value;
+            string package;
+
+            if (importPath.Contains('/'))
+            {
+                string[] parts = importPath.Split('/');
+                package = parts[^1];
+                parts[0] = $"go2cs.{parts[0]}";
+                importPath = string.Join('/', parts);
+            }
+            else
+            {
+                package = importPath;
+                importPath = $"go2cs/{importPath}";
+            }
+
+            importPath = $"$(GOPATH)\\src\\{importPath.Replace('/', '\\')}\\$(OutDir){package}_package.dll";
+            
+            #line default
+            #line hidden
+            this.Write("\r\n    <Reference Include=\"");
+            
+            #line 56 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(package));
+            
+            #line default
+            #line hidden
+            this.Write("\">\r\n      <HintPath>");
+            
+            #line 57 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(importPath));
+            
+            #line default
+            #line hidden
+            this.Write("</HintPath>\r\n    </Reference>");
+            
+            #line 58 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
+
+        }
+    }
+
+    
+            
+            #line default
+            #line hidden
+            this.Write("\r\n  </ItemGroup>\r\n\r\n</Project>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 30 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
+        #line 67 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
 
 // Template Parameters
 public string AssemblyName;  // File name without extension
+public IEnumerable<string> Imports;
+
+private string importPath;
 
         
         #line default

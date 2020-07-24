@@ -9,6 +9,7 @@
 // ------------------------------------------------------------------------------
 namespace go2cs.Templates
 {
+    using System.Collections.Generic;
     using go2cs;
     using System;
     
@@ -37,14 +38,14 @@ namespace go2cs.Templates
                     "ToRun>true</PublishReadyToRun>\r\n    <RootNamespace>go</RootNamespace>\r\n    <Asse" +
                     "mblyName>");
             
-            #line 15 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 16 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(AssemblyName));
             
             #line default
             #line hidden
             this.Write("</AssemblyName>\r\n    <Product>go2cs</Product>\r\n    <Copyright>Copyright © ");
             
-            #line 17 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 18 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(DateTime.Now.ToString("yyyy")));
             
             #line default
@@ -53,25 +54,83 @@ namespace go2cs.Templates
     <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <ApplicationIcon>$(GOPATH)\go2cs\go2cs.ico</ApplicationIcon>
+    <ApplicationIcon>$(GOPATH)\src\go2cs\go2cs.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <NoWarn>660;661;IDE1006</NoWarn>
     <Version>0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include=""$(GOPATH)\go2cs\golib\golib.csproj"" />
-  </ItemGroup>
+    <Reference Include=""golib"">
+      <HintPath>$(GOPATH)\src\go2cs\golib\$(OutDir)golib.dll</HintPath>
+    </Reference>");
+            
+            #line 31 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
 
-</Project>
-");
+
+    if (!(Imports is null))
+    {
+        foreach (string value in Imports)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                continue;
+
+            importPath = value;
+            string package;
+
+            if (importPath.Contains('/'))
+            {
+                string[] parts = importPath.Split('/');
+                package = parts[^1];
+                parts[0] = $"go2cs.{parts[0]}";
+                importPath = string.Join('/', parts);
+            }
+            else
+            {
+                package = importPath;
+                importPath = $"go2cs/{importPath}";
+            }
+
+            importPath = $"$(GOPATH)\\src\\{importPath.Replace('/', '\\')}\\$(OutDir){package}_package.dll";
+            
+            #line default
+            #line hidden
+            this.Write("\r\n    <Reference Include=\"");
+            
+            #line 58 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(package));
+            
+            #line default
+            #line hidden
+            this.Write("\">\r\n      <HintPath>");
+            
+            #line 59 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(importPath));
+            
+            #line default
+            #line hidden
+            this.Write("</HintPath>\r\n    </Reference>");
+            
+            #line 60 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+
+        }
+    }
+
+    
+            
+            #line default
+            #line hidden
+            this.Write("\r\n  </ItemGroup>\r\n\r\n</Project>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 32 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+        #line 69 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
 
 // Template Parameters
 public string AssemblyName;  // File name without extension
+public IEnumerable<string> Imports;
+
+private string importPath;
 
         
         #line default

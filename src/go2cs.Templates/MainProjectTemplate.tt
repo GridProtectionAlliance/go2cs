@@ -3,6 +3,7 @@
 <#@ assembly name="$(SolutionDir)go2cs.Common\$(OutDir)go2cs.Common.dll" #>
 <#@ assembly name="netstandard" #>
 <#@ assembly name="System.Core" #>
+<#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="go2cs" #>
 <#@ output extension=".cs" #>
 <Project Sdk="Microsoft.NET.Sdk">
@@ -18,18 +19,57 @@
     <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <ApplicationIcon>$(GOPATH)\go2cs\go2cs.ico</ApplicationIcon>
+    <ApplicationIcon>$(GOPATH)\src\go2cs\go2cs.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <NoWarn>660;661;IDE1006</NoWarn>
     <Version>0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(GOPATH)\go2cs\golib\golib.csproj" />
+    <Reference Include="golib">
+      <HintPath>$(GOPATH)\src\go2cs\golib\$(OutDir)golib.dll</HintPath>
+    </Reference><#
+
+    if (!(Imports is null))
+    {
+        foreach (string value in Imports)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                continue;
+
+            importPath = value;
+            string package;
+
+            if (importPath.Contains('/'))
+            {
+                string[] parts = importPath.Split('/');
+                package = parts[^1];
+                parts[0] = $"go2cs.{parts[0]}";
+                importPath = string.Join('/', parts);
+            }
+            else
+            {
+                package = importPath;
+                importPath = $"go2cs/{importPath}";
+            }
+
+            importPath = $"$(GOPATH)\\src\\{importPath.Replace('/', '\\')}\\$(OutDir){package}_package.dll";#>
+
+    <Reference Include="<#=package#>">
+      <HintPath><#=importPath#></HintPath>
+    </Reference><#
+        }
+    }
+
+    #>
+
   </ItemGroup>
 
 </Project>
 <#+
 // Template Parameters
 public string AssemblyName;  // File name without extension
+public IEnumerable<string> Imports;
+
+private string importPath;
 #>
