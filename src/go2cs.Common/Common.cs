@@ -44,19 +44,10 @@ namespace go2cs
         public const string RootNamespace = "go2cs";
 
         public static readonly Assembly EntryAssembly;
-
-        //public static string GoStandardLibraryProject { get; private set; }
-
-        //public static string GoUtilSharedProject { get; private set; }
-
         private static readonly HashSet<string> s_keywords;
-
         private static readonly CodeDomProvider s_provider;
-
         private static readonly CodeGeneratorOptions s_generatorOptions;
-
         private static readonly char[] s_dirVolChars;
-
         private static readonly Regex s_findOctals;
 
         static Common()
@@ -85,70 +76,44 @@ namespace go2cs
             s_findOctals = new Regex(@"\\[0-7]{3}", RegexOptions.Compiled);
         }
 
-        //public static void RestoreGoUtilSources(string targetPath)
-        //{
-        //    const string prefix = RootNamespace + ".goutil.";
+        public static void RestoreResources(string targetPath)
+        {
+            string prefix = $"{RootNamespace}.";
 
-        //    if (!targetPath.EndsWith("goutil"))
-        //        targetPath = Path.Combine(targetPath, "goutil");
+            targetPath = AddPathSuffix(targetPath);
 
-        //    targetPath = AddPathSuffix(targetPath);
+            foreach (string name in EntryAssembly.GetManifestResourceNames().Where(name => name.StartsWith(prefix)))
+            {
+                using Stream resourceStream = EntryAssembly.GetManifestResourceStream(name);
 
-        //    foreach (string name in EntryAssembly.GetManifestResourceNames().Where(name => name.StartsWith(prefix)))
-        //    {
-        //        using (Stream resourceStream = EntryAssembly.GetManifestResourceStream(name))
-        //        {
-        //            if (!(resourceStream is null))
-        //            {
-        //                string targetFileName = Path.Combine(targetPath, name.Substring(prefix.Length));
-        //                bool restoreFile = true;
+                if (resourceStream is null)
+                    continue;
+                
+                string targetFileName = Path.Combine(targetPath, name.Substring(prefix.Length));
+                bool restoreFile = true;
 
-        //                if (File.Exists(targetFileName))
-        //                {
-        //                    string resourceMD5 = GetMD5HashFromStream(resourceStream);
-        //                    resourceStream.Seek(0, SeekOrigin.Begin);
-        //                    restoreFile = !resourceMD5.Equals(GetMD5HashFromFile(targetFileName));
-        //                }
+                if (File.Exists(targetFileName))
+                {
+                    string resourceMD5 = GetMD5HashFromStream(resourceStream);
+                    resourceStream.Seek(0, SeekOrigin.Begin);
+                    restoreFile = !resourceMD5.Equals(GetMD5HashFromFile(targetFileName));
+                }
 
-        //                if (restoreFile)
-        //                {
-        //                    byte[] buffer = new byte[resourceStream.Length];
-        //                    resourceStream.Read(buffer, 0, (int)resourceStream.Length);
+                if (!restoreFile)
+                    continue;
+                
+                byte[] buffer = new byte[resourceStream.Length];
+                resourceStream.Read(buffer, 0, (int)resourceStream.Length);
 
-        //                    string directory = Path.GetDirectoryName(targetFileName);
+                string directory = Path.GetDirectoryName(targetFileName);
 
-        //                    if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-        //                        Directory.CreateDirectory(directory);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                    Directory.CreateDirectory(directory);
 
-        //                    using (StreamWriter writer = File.CreateText(targetFileName))
-        //                        writer.Write(Encoding.UTF8.GetString(buffer, 0, buffer.Length));
-        //                }
-
-        //                if (targetFileName.EndsWith(".projitems"))
-        //                    GoUtilSharedProject = targetFileName;
-        //            }
-        //        }
-        //    }
-
-        //    GoStandardLibraryProject = Path.Combine(targetPath, $"{Converter.StandardLibrary}.projitems");
-        //}
-
-        // Use this function to preserve existing shared project Guid when overwriting
-        //public static string GetProjectGuid(string projectFileName, string tagName)
-        //{
-        //    if (File.Exists(projectFileName))
-        //    {
-        //        XmlDocument xmlDoc = new XmlDocument();
-        //        xmlDoc.Load(projectFileName);
-
-        //        XmlNodeList guidList = xmlDoc.GetElementsByTagName(tagName);
-
-        //        if (guidList.Count > 0)
-        //            return guidList[0].InnerText;
-        //    }
-
-        //    return Guid.NewGuid().ToString();
-        //}
+                using FileStream writer = File.Create(targetFileName);
+                writer.Write(buffer, 0, buffer.Length);
+            }
+        }
 
         public static string GetMD5HashFromFile(string fileName)
         {

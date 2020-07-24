@@ -239,7 +239,7 @@ namespace go2cs
 
         public override void ExitArrayType(GoParser.ArrayTypeContext context)
         {
-            //base.ExitArrayType(context);
+            base.ExitArrayType(context);
         }
 
         public override void ExitLiteralType(GoParser.LiteralTypeContext context)

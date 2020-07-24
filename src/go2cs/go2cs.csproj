@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="go2cs.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="go2cs.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\go2cs.Common\go2cs.Common.csproj" />
     <ProjectReference Include="..\go2cs.Templates\go2cs.Templates.csproj" />
     <ProjectReference Include="..\Utilities\Antlr4.Runtime\Antlr4.Runtime.csproj" />

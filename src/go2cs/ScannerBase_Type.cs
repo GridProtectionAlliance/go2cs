@@ -21,7 +21,9 @@
 //
 //******************************************************************************************************
 
+using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
+using System;
 using System.Linq;
 
 namespace go2cs
@@ -56,10 +58,10 @@ namespace go2cs
             }
         }
 
-        //public override void ExitElementType(GoParser.ElementTypeContext context)
-        //{
-        //    ExitType_(context.type_());
-        //}
+        public override void ExitElementType(GoParser.ElementTypeContext context)
+        {
+            ExitType_(context.type_());
+        }
 
         public override void EnterTypeName(GoParser.TypeNameContext context)
         {
@@ -138,6 +140,11 @@ namespace go2cs
             }
         }
 
+        public override void ExitArrayLength([NotNull] GoParser.ArrayLengthContext context)
+        {
+            ExitArrayType(context.Parent as GoParser.ArrayTypeContext);
+        }
+
         public override void ExitArrayType(GoParser.ArrayTypeContext context)
         {
             string name = context.GetText();
@@ -204,13 +211,11 @@ namespace go2cs
             if (elementTypeInfo is null)
                 return; // throw new InvalidOperationException("Map element type undefined.");
 
-            RequiredUsings.Add("System.Collections.Generic");
-
             Types[context.Parent.Parent] = new MapTypeInfo
             {
                 Name = type,
-                TypeName = $"Dictionary<{keyTypeInfo.TypeName}, {elementTypeInfo.TypeName}>",
-                FullTypeName = $"System.Collections.Generic.Dictionary<{keyTypeInfo.FullTypeName}, {elementTypeInfo.FullTypeName}>",
+                TypeName = $"map<{keyTypeInfo.TypeName}, {elementTypeInfo.TypeName}>",
+                FullTypeName = $"go.map<{keyTypeInfo.FullTypeName}, {elementTypeInfo.FullTypeName}>",
                 ElementTypeInfo = elementTypeInfo,
                 KeyTypeInfo = keyTypeInfo,
                 TypeClass = TypeClass.Map
@@ -320,21 +325,13 @@ namespace go2cs
 
         protected string ConvertToPrimitiveType(string type)
         {
-            switch (type)
+            return type switch
             {
-                case "bool":
-                    return "@bool";
-                case "byte":
-                    return "@byte";
-                case "int":
-                    return "@int";
-                case "uint":
-                    return "@uint";
-                case "string":
-                    return "@string";
-                default:
-                    return $"{type}";
-            }
+                "int" => "long",
+                "uint" => "ulong",
+                "string" => "@string",
+                _ => $"{type}"
+            };
         }
 
         protected string ConvertToFrameworkType(string type)
@@ -342,41 +339,37 @@ namespace go2cs
             switch (type)
             {
                 case "bool":
-                    return "go.@bool";
+                    return "bool";
                 case "int8":
-                    return "go.int8";
+                    return "sbyte";
                 case "uint8":
-                    return "go.uint8";
                 case "byte":
-                    return "go.@byte";
+                    return "byte";
                 case "int16":
-                    return "go.int16";
+                    return "short";
                 case "uint16":
-                    return "go.uint16";
+                    return "ushort";
                 case "int32":
-                    return "go.int32";
-                case "uint32":
-                    return "go.uint32";
-                case "int64":
-                    return "go.int64";
-                case "int":
-                    return "go.@int";
-                case "uint64":
-                    return "go.uint64";
-                case "uint":
-                    return "go.@uint";
-                case "float32":
-                    return "go.float32";
-                case "float64":
-                    return "go.float64";
                 case "rune":
-                    return "go.rune";
+                    return "int";
+                case "uint32":
+                    return "uint";
+                case "int64":
+                case "int":
+                    return "long";
+                case "uint64":
+                case "uint":
+                    return "ulong";
+                case "float32":
+                    return "float";
+                case "float64":
+                    return "double";
                 case "uintptr":
-                    return "go.uintptr";
+                    return "System.UIntPtr";
                 case "complex64":
                     return "go.complex64";
                 case "complex128":
-                    return "go.complex128";
+                    return "System.Numerics.Complex128";
                 case "string":
                     return "go.@string";
                 default:

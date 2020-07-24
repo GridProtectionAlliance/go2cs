@@ -103,51 +103,51 @@ namespace go2cs
 
         public override void ExitVarSpec(GoParser.VarSpecContext context)
         {
-            if (Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
+            if (!Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
+                return;
+
+            if (!Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
+                typeInfo = TypeInfo.VarType;
+
+            if (!ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
+                return;
+
+            for (int i = 0; i < identifiers.Length; i++)
             {
-                if (!Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
-                    typeInfo = TypeInfo.VarType;
+                string identifier = identifiers[i];
 
-                if (ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
+                if (expressions.Length > i)
                 {
-                    for (int i = 0; i < identifiers.Length; i++)
+                    m_variables.Add(GetUniqueIdentifier(m_variables, identifiers[i]), new VariableInfo
                     {
-                        string identifier = identifiers[i];
-
-                        if (expressions.Length > i)
-                        {
-                            m_variables.Add(GetUniqueIdentifier(m_variables, identifiers[i]), new VariableInfo
-                            {
-                                Name = identifier,
-                                Type = typeInfo,
-                                HeapAllocated = expressions[i]?.StartsWith("&") ?? false
-                            });
-                        }
-                    }
+                        Name = identifier,
+                        Type = typeInfo,
+                        HeapAllocated = expressions[i]?.StartsWith("&") ?? false
+                    });
                 }
             }
         }
 
         public override void ExitShortVarDecl(GoParser.ShortVarDeclContext context)
         {
-            if (Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
-            {
-                if (ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
-                {
-                    for (int i = 0; i < identifiers.Length; i++)
-                    {
-                        string identifier = identifiers[i];
+            if (!Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
+                return;
+            
+            if (!ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
+                return;
 
-                        if (expressions.Length > i)
-                        {
-                            m_variables.Add(GetUniqueIdentifier(m_variables, identifiers[i]), new VariableInfo
-                            {
-                                Name = identifier,
-                                Type = TypeInfo.VarType,
-                                HeapAllocated = expressions[i]?.StartsWith("&") ?? false
-                            });
-                        }
-                    }
+            for (int i = 0; i < identifiers.Length; i++)
+            {
+                string identifier = identifiers[i];
+
+                if (expressions.Length > i)
+                {
+                    m_variables.Add(GetUniqueIdentifier(m_variables, identifiers[i]), new VariableInfo
+                    {
+                        Name = identifier,
+                        Type = TypeInfo.VarType,
+                        HeapAllocated = expressions[i]?.StartsWith("&") ?? false
+                    });
                 }
             }
         }

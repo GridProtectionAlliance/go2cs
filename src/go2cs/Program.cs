@@ -70,7 +70,7 @@ namespace go2cs
             try
             {
         #endif
-                //Common.RestoreGoUtilSources(options.TargetGoSrcPath);
+                Common.RestoreResources(options.TargetGoSrcPath);
                 PreScanner.Scan(options);
                 Converter.Convert(options);
         #if !DEBUG
