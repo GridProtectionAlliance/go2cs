@@ -15,7 +15,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
+    #line 1 "D:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class StructFuncInitTemplate : StructFuncInitTemplateBase
     {
@@ -26,7 +26,7 @@ namespace go2cs.Templates
         public virtual string TransformText()
         {
             
-            #line 1 "C:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
+            #line 1 "D:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
  // This template creates the function initializations in a <PackageName>_<StructName>Struct.cs file 
             
             #line default
@@ -34,7 +34,7 @@ namespace go2cs.Templates
             this.Write("\r\n                \r\n                extensionMethod = targetType.GetExtensionMeth" +
                     "odSearchingPromotions(\"");
             
-            #line 5 "C:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
+            #line 5 "D:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
@@ -42,49 +42,49 @@ namespace go2cs.Templates
             this.Write("\");\r\n\r\n                if ((object)extensionMethod != null)\r\n                {\r\n " +
                     "                   s_");
             
-            #line 9 "C:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
+            #line 9 "D:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef = extensionMethod.CreateStaticDelegate(typeof(");
             
-            #line 9 "C:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
+            #line 9 "D:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef)) as ");
             
-            #line 9 "C:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
+            #line 9 "D:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef;\r\n\r\n                    if ((object)s_");
             
-            #line 11 "C:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
+            #line 11 "D:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByRef == null)\r\n                        s_");
             
-            #line 12 "C:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByVal = extensionMethod.CreateStaticDelegate(typeof(");
             
-            #line 12 "C:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
             #line hidden
             this.Write("ByVal)) as ");
             
-            #line 12 "C:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
+            #line 12 "D:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(FunctionName));
             
             #line default
@@ -93,7 +93,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 13 "C:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
+        #line 13 "D:\Projects\go2cs\src\go2cs.Templates\StructFuncInitTemplate.tt"
 
 // Template Parameters
 public string FunctionName;

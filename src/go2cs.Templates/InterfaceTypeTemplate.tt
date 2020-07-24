@@ -1,5 +1,5 @@
 ﻿<# // This template creates a <PackageName>_<InterfaceName>Interface.cs file #>
-<#@ template language="C#" inherits="TemplateBase" #>
+<#@ template debug="false" hostspecific="false" language="C#" inherits="TemplateBase" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="go2cs.Metadata" #>

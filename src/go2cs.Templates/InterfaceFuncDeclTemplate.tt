@@ -1,5 +1,5 @@
 ﻿<# // This template creates the function declarations in a <PackageName>_<InterfaceName>Interface.cs file #>
-<#@ template language="C#" #>
+<#@ template debug="false" hostspecific="false" language="C#" #>
 
 
             private delegate <#=ResultType#> <#=FunctionName#>ByRef(ref T value<#=PrefixedParameterSignature#>);

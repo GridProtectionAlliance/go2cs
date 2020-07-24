@@ -1,5 +1,5 @@
 ﻿<# // This template creates a <PackageName>_<StructName>Struct.cs file #>
-<#@ template language="C#" inherits="TemplateBase" #>
+<#@ template debug="false" hostspecific="false" language="C#" inherits="TemplateBase" #>
 <#@ assembly name="$(SolutionDir)go2cs.Common\$(OutDir)go2cs.Common.dll" #>
 <#@ assembly name="netstandard" #>
 <#@ assembly name="System.Core" #>
