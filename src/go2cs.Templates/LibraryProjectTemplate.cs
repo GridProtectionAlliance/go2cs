@@ -16,9 +16,9 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+    #line 1 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
-    public partial class MainProjectTemplate : MainProjectTemplateBase
+    public partial class LibraryProjectTemplate : LibraryProjectTemplateBase
     {
 #line hidden
         /// <summary>
@@ -27,24 +27,23 @@ namespace go2cs.Templates
         public virtual string TransformText()
         {
             
-            #line 1 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 1 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
  // This template creates a <AssemblyName>.csproj file 
             
             #line default
             #line hidden
-            this.Write("<Project Sdk=\"Microsoft.NET.Sdk\">\r\n\r\n  <PropertyGroup>\r\n    <OutputType>Exe</Outp" +
-                    "utType>\r\n    <TargetFramework>netcoreapp3.1</TargetFramework>\r\n    <PublishReady" +
-                    "ToRun>true</PublishReadyToRun>\r\n    <RootNamespace>go</RootNamespace>\r\n    <Asse" +
-                    "mblyName>");
+            this.Write("<Project Sdk=\"Microsoft.NET.Sdk\">\r\n\r\n  <PropertyGroup>\r\n    <OutputType>Library</" +
+                    "OutputType>\r\n    <TargetFramework>netcoreapp3.1</TargetFramework>\r\n    <RootName" +
+                    "space>go</RootNamespace>\r\n    <AssemblyName>");
             
-            #line 15 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 14 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(AssemblyName));
             
             #line default
             #line hidden
             this.Write("</AssemblyName>\r\n    <Product>go2cs</Product>\r\n    <Copyright>Copyright © ");
             
-            #line 17 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 16 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(DateTime.UtcNow.ToString("yyyy")));
             
             #line default
@@ -53,15 +52,10 @@ namespace go2cs.Templates
     <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <ApplicationIcon>go2cs.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <NoWarn>660;661;IDE1006</NoWarn>
     <Version>0.1.0</Version>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove=""go2cs.ico"" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include=""..\golib\golib.csproj"" /><!--Condition=""'$(Configuration)'=='Debug'""-->
@@ -73,7 +67,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 37 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+        #line 31 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
 
 // Template Parameters
 public string AssemblyName;  // File name without extension
@@ -90,7 +84,7 @@ public string AssemblyName;  // File name without extension
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
-    public class MainProjectTemplateBase
+    public class LibraryProjectTemplateBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

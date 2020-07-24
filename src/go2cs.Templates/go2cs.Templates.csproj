@@ -43,6 +43,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>MainProjectTemplate.tt</DependentUpon>
     </Compile>
+    <Compile Update="LibraryProjectTemplate.cs">
+      <DependentUpon>LibraryProjectTemplate.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="StructFuncDeclTemplate.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -85,6 +90,10 @@
     <None Update="MainProjectTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>MainProjectTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="LibraryProjectTemplate.tt">
+      <LastGenOutput>LibraryProjectTemplate.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
     <None Update="StructFuncDeclTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
