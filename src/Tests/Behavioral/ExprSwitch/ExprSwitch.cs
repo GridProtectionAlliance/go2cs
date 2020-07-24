@@ -1,8 +1,8 @@
  // _Switch statements_ express conditionals across many
 // branches.
 
-// package main -- go2cs converted at 2018 August 14 00:22:19 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\ExprSwitch.go
+// package main -- go2cs converted at 2020 July 24 04:55:07 UTC
+// Original source: D:\Projects\go2cs\src\Tests\Behavioral\ExprSwitch\ExprSwitch.go
 using fmt = go.fmt_package;
 using time = go.time_package;
 using static go.builtin;
@@ -28,7 +28,7 @@ namespace go
             .Case(3)(() =>
             {
                 fmt.Println("three");
-            });
+            }); 
 
             // You can use commas to separate multiple expressions
             // in the same `case` statement. We use the optional
@@ -41,7 +41,7 @@ namespace go
             .Default(() =>
             {
                 fmt.Println("It's a weekday");
-            });
+            }); 
 
             // `switch` without an expression is an alternate way
             // to express if/else logic. Here we also show how the
@@ -55,7 +55,7 @@ namespace go
             .Default(() =>
             {
                 fmt.Println("It's after noon");
-            });
+            }); 
 
             // A type `switch` compares types instead of values.  You
             // can use this to discover the type of an interface
@@ -66,11 +66,11 @@ namespace go
                 var t = i;
 
                 Switch(t)
-                .Case(typeof(@bool))(() =>
+                .Case(typeof(bool))(() =>
                 {
                     fmt.Println("I'm a bool");
                 })
-                .Case(typeof(@int))(() =>
+                .Case(typeof(long))(() =>
                 {
                     fmt.Println("I'm an int");
                 })
@@ -82,6 +82,6 @@ namespace go
             whatAmI(@true);
             whatAmI(1);
             whatAmI("hey");
-        }
+        };
     }
 }

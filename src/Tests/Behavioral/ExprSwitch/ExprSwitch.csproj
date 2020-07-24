@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <RootNamespace>go</RootNamespace>
+    <AssemblyName>ExprSwitch</AssemblyName>
+    <Product>go2cs</Product>
+    <Copyright>Copyright © 2020</Copyright>
+    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <ApplicationIcon>go2cs.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
+    <NoWarn>660;661;IDE1006</NoWarn>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="go2cs.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\golib\golib.csproj" /><!--Condition="'$(Configuration)'=='Debug'"-->
+    <!--<PackageReference Include="go.lib" Version="0.1.0" Condition="'$(Configuration)'=='Release'" />-->
+  </ItemGroup>
+
+</Project>
