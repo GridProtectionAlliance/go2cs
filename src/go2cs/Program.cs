@@ -56,9 +56,7 @@ namespace go2cs
 
                 Console.WriteLine($"Processing time: {DateTime.UtcNow - startTime}");
             }
-        #if DEBUG
-            Console.ReadKey();
-        #endif
+
             return exitCode;
         }
 
