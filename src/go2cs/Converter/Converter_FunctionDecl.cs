@@ -75,11 +75,9 @@ namespace go2cs
 
         public override void ExitFunctionDecl(GoParser.FunctionDeclContext context)
         {
-            bool signatureOnly = false;
+            bool signatureOnly = context.block() is null;
 
-            if (Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) && !(parameters is null))
-                signatureOnly = true;
-            else if (!Parameters.TryGetValue(context.signature()?.parameters(), out parameters) || parameters is null)
+            if (!Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) || parameters is null)
                 parameters = new List<ParameterInfo>();
 
             string functionSignature = FunctionSignature.Generate(m_originalFunctionName, parameters);
