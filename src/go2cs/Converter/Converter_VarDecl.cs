@@ -101,14 +101,14 @@ namespace go2cs
 
                 m_targetFile.Append($"{type} {identifier}");
 
-                if (expression is object)
+                if (!(expression is null))
                     m_targetFile.Append($" = {expression}");
                 else if (typeInfo?.TypeClass == TypeClass.Array && typeInfo is ArrayTypeInfo arrayTypeInfo)
                     m_targetFile.Append($" = new {type}({arrayTypeInfo.Length.Text})");
 
                 // Since multiple specifications can be on one line, only check for comments after last specification
-                if (i < length - 1)
-                    m_targetFile.AppendLine(";");
+                if (i < length - 1 || length == 1)
+                    m_targetFile.Append(";");
                 else
                     m_targetFile.Append($";{CheckForCommentsRight(context)}");
             }
