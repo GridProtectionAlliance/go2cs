@@ -137,12 +137,12 @@ namespace go2cs
             int index = line.IndexOf("\r\n", StringComparison.Ordinal);
 
             if (index == 0)
-                return line.Substring(index + 2);
+                return line.Substring(2);
 
             index = line.IndexOf('\n');
 
             if (index == 0)
-                line = line.Substring(index + 1);
+                line = line.Substring(1);
 
             return line;
         }

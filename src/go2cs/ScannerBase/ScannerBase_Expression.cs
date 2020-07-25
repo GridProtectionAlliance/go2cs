@@ -144,7 +144,7 @@ namespace go2cs
                     UnaryExpressions[context] = $"{Expressions[context.expression()]}.Value";
                 }
 
-                if (unaryOP is object)
+                if (!(unaryOP is null))
                     UnaryExpressions[context] = $"{unaryOP}{Expressions[context.expression()]}";
             }
             else if (!UnaryExpressions.ContainsKey(context))
@@ -279,7 +279,7 @@ namespace go2cs
                 //     : '.' '(' type ')'
 
                 if (Types.TryGetValue(context.typeAssertion().type_(), out TypeInfo typeInfo))
-                    PrimaryExpressions[context] = $"{primaryExpression}.TypeAssert<{typeInfo.TypeName}>()";
+                    PrimaryExpressions[context] = $"{primaryExpression}._<{typeInfo.TypeName}>()";
                 else
                     AddWarning(context, $"Failed to find type for the type assertion expression in \"{context.GetText()}\"");
             }

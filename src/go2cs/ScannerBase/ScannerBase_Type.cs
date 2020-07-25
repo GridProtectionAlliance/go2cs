@@ -161,8 +161,8 @@ namespace go2cs
                     Type = new TypeInfo
                     {
                         TypeClass = TypeClass.Simple,
-                        TypeName = "@int",
-                        FullTypeName = "go.@int"
+                        TypeName = "long",
+                        FullTypeName = "System.Int64"
                     }
                 };
             }
@@ -174,8 +174,8 @@ namespace go2cs
                     Type = new TypeInfo
                     {
                         TypeClass = TypeClass.Simple,
-                        TypeName = "@int",
-                        FullTypeName = "go.@int"
+                        TypeName = "long",
+                        FullTypeName = "System.Int64"
                     }
                 };
 
