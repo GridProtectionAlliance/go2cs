@@ -48,6 +48,10 @@ namespace go2cs.Metadata
         public bool IsPointer;
         public bool IsByRefPointer;
 
+        // TODO: Cross reference heap allocated variable, for
+        // variables that leave the stack by "&" address,
+        // "defer" or "go"
+
         public virtual TypeInfo Clone()
         {
             return new TypeInfo

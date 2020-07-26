@@ -110,7 +110,17 @@ namespace go2cs
             }
                 
             // Update expression operand (managed in ScannerBase_Expression.cs)
-            Operands[operandContext] = lambdaExpression;
+            Operands[operandContext] = new ExpressionInfo
+            {
+                Text = lambdaExpression,
+                Type = new TypeInfo
+                {
+                    Name = parametersSignature,
+                    TypeName = parametersSignature,
+                    FullTypeName = parametersSignature,
+                    TypeClass = TypeClass.Function
+                }
+            };
         }
     }
 }

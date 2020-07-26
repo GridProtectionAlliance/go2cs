@@ -25,6 +25,7 @@ using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using static go2cs.Common;
 
@@ -104,7 +105,7 @@ namespace go2cs
             // sendStmt
             //     : expression '<-' expression
 
-            if (Expressions.TryGetValue(context.expression(0), out string channel) && Expressions.TryGetValue(context.expression(1), out string value))
+            if (Expressions.TryGetValue(context.expression(0), out ExpressionInfo channel) && Expressions.TryGetValue(context.expression(1), out ExpressionInfo value))
             {
                 StringBuilder statement = new StringBuilder();
 
@@ -126,7 +127,7 @@ namespace go2cs
             // expressionStmt
             //     : expression
 
-            if (Expressions.TryGetValue(context.expression(), out string expression))
+            if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
             {
                 StringBuilder statement = new StringBuilder();
 
@@ -148,7 +149,7 @@ namespace go2cs
             // incDecStmt
             //     : expression('++' | '--')
 
-            if (Expressions.TryGetValue(context.expression(), out string expression))
+            if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
             {
                 StringBuilder statement = new StringBuilder();
 
@@ -170,16 +171,28 @@ namespace go2cs
             // assignment
             //     : expressionList assign_op expressionList
 
-            if (ExpressionLists.TryGetValue(context.expressionList(0), out string[] leftOperands) && ExpressionLists.TryGetValue(context.expressionList(1), out string[] rightOperands))
+            // TODO: Properly handle assignment order of operations, see https://gridprotectionalliance.github.io/go2cs/ConversionStrategies.html#inline-assignment-order-of-operations
+            if (ExpressionLists.TryGetValue(context.expressionList(0), out ExpressionInfo[] leftOperands) && ExpressionLists.TryGetValue(context.expressionList(1), out ExpressionInfo[] rightOperands))
             {
                 StringBuilder statement = new StringBuilder();
 
                 if (leftOperands.Length != rightOperands.Length)
                 {
                     if (leftOperands.Length > rightOperands.Length && rightOperands.Length == 1)
-                        leftOperands = new[] { $"({string.Join(", ", leftOperands)})" };
+                    {
+                        leftOperands = new[]
+                        {
+                            new ExpressionInfo 
+                            { 
+                                Text = string.Join(", ", leftOperands.Select(expr => expr.Text)),
+                                Type = leftOperands[0].Type
+                            }
+                        };
+                    }
                     else
+                    {
                         AddWarning(context, $"Encountered count mismatch for left and right operand expressions in assignment statement: {context.GetText()}");
+                    }
                 }
 
                 int length = Math.Min(leftOperands.Length, rightOperands.Length);
@@ -191,14 +204,14 @@ namespace go2cs
                     if (assignOP.Equals("<<=") || assignOP.Equals(">>="))
                     {
                         // TODO: Need expression evaluation - cast not needed for int expressions
-                        if (!int.TryParse(rightOperands[i], out int _))
-                            rightOperands[i] = $"(int)({rightOperands[i]})";
+                        if (!int.TryParse(rightOperands[i].Text, out int _))
+                            rightOperands[i].Text = $"(int)({rightOperands[i]})";
                     }
 
                     if (assignOP.Equals("&^="))
                     {
                         assignOP = " &= ";
-                        rightOperands[i] = $"~({rightOperands[i]})";
+                        rightOperands[i].Text = $"~({rightOperands[i].Text})";
                     }
                     else
                     {
@@ -257,7 +270,7 @@ namespace go2cs
             // shortVarDecl
             //     : identifierList ':=' expressionList
 
-            if (Identifiers.TryGetValue(context.identifierList(), out string[] identifiers) && ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
+            if (Identifiers.TryGetValue(context.identifierList(), out string[] identifiers) && ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions))
             {
                 StringBuilder statement = new StringBuilder();
 
@@ -302,10 +315,10 @@ namespace go2cs
             // goStmt
             //     : 'go' expression
 
-            if (Expressions.TryGetValue(context.expression(), out string expression))
+            if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
             {
                 RequiredUsings.Add("System.Threading");
-                m_targetFile.Append($"{Spacing()}ThreadPool.QueueUserWorkItem(state => {expression});{CheckForCommentsRight(context)}");
+                m_targetFile.Append($"{Spacing()}go_(() => {expression});{CheckForCommentsRight(context)}");
 
                 if (!WroteLineFeed)
                     m_targetFile.AppendLine();
@@ -323,10 +336,10 @@ namespace go2cs
 
             m_targetFile.Append($"{Spacing()}return");
 
-            if (ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
+            if (ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions))
             {
                 if (expressions.Length > 1)
-                    m_targetFile.Append($" ({string.Join(", ", expressions)})");
+                    m_targetFile.Append($" ({string.Join(", ", expressions.Select(expr => expr.Text))})");
                 else if (expressions.Length > 0)
                     m_targetFile.Append($" {expressions[0]}");
             }
@@ -465,12 +478,12 @@ namespace go2cs
             // ifStmt
             //     : 'if '(simpleStmt ';') ? expression block ( 'else' ( ifStmt | block ) ) ?
 
-            if (Expressions.TryGetValue(context.expression(), out string expression))
+            if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
             {
                 bool isElseIf = context.Parent is GoParser.IfStmtContext;
 
                 // Replace if markers
-                m_targetFile.Replace(string.Format(IfExpressionMarker, m_ifExpressionLevel), expression);
+                m_targetFile.Replace(string.Format(IfExpressionMarker, m_ifExpressionLevel), expression.Text);
                 m_targetFile.Replace(string.Format(IfElseBreakMarker, m_ifExpressionLevel), isElseIf ? Environment.NewLine : "");
                 m_targetFile.Replace(string.Format(IfElseMarker, m_ifExpressionLevel), isElseIf ? "else " : "");
             }
@@ -574,11 +587,11 @@ namespace go2cs
                 PopBlock();
                 m_targetFile.Append($"{Spacing()}}}{(m_fallThrough ? ", fallthrough" : "")})");
 
-                if (!ExpressionLists.TryGetValue(expressionList, out string[] expressions))
+                if (!ExpressionLists.TryGetValue(expressionList, out ExpressionInfo[] expressions))
                     AddWarning(expressionList, $"Failed to find expression list for switch case statement: {context.exprSwitchCase().GetText()}");
 
                 // Replace switch expression case type marker
-                m_targetFile.Replace(string.Format(ExprSwitchCaseTypeMarker, m_exprSwitchExpressionLevel), string.Join(", ", expressions ?? new string[0]));
+                m_targetFile.Replace(string.Format(ExprSwitchCaseTypeMarker, m_exprSwitchExpressionLevel), string.Join(", ", expressions.Select(expr => expr.Text)));
             }
 
             // Reset fallthrough flag at the end of each case clause
@@ -595,10 +608,10 @@ namespace go2cs
 
             if (!(context.expression() is null))
             {
-                if (Expressions.TryGetValue(context.expression(), out string expression))
+                if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
                 {
                     // Replace switch expression marker
-                    m_targetFile.Replace(string.Format(ExprSwitchExpressionMarker, m_exprSwitchExpressionLevel), expression);
+                    m_targetFile.Replace(string.Format(ExprSwitchExpressionMarker, m_exprSwitchExpressionLevel), expression.Text);
                 }
                 else
                 {
@@ -746,10 +759,10 @@ namespace go2cs
             // Default case always needs to be last case clause in SwitchExpression - Go allows its declaration anywhere
             m_targetFile.Append($"{m_typeSwitchDefaultCase.Pop()};{CheckForCommentsRight(context)}");
 
-            if (PrimaryExpressions.TryGetValue(context.typeSwitchGuard().primaryExpr(), out string expression))
+            if (PrimaryExpressions.TryGetValue(context.typeSwitchGuard().primaryExpr(), out ExpressionInfo expression))
             {
                 // Replace type switch expression marker
-                m_targetFile.Replace(string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel), expression);
+                m_targetFile.Replace(string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel), expression.Text);
             }
             else
             {
@@ -866,16 +879,16 @@ namespace go2cs
 
             if (!(context.expression() is null) || !(forClause is null) && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
             {
-                Expressions.TryGetValue(context.expression() ?? forClause?.expression(), out string expression);
-                m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression ?? "true");
+                Expressions.TryGetValue(context.expression() ?? forClause?.expression(), out ExpressionInfo expression);
+                m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression?.Text ?? "true");
             }
             else if (!(forClause is null))
             {
                 // forClause
                 //     : simpleStmt? ';' expression? ';' simpleStmt?
 
-                if (Expressions.TryGetValue(forClause.expression(), out string expression))
-                    m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression);
+                if (Expressions.TryGetValue(forClause.expression(), out ExpressionInfo expression))
+                    m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression.Text);
                 else
                     AddWarning(context, $"Failed to find expression in for statement: {context.GetText()}");
 
@@ -1004,7 +1017,7 @@ namespace go2cs
             // deferStmt
             //     : 'defer' expression
 
-            if (Expressions.TryGetValue(context.expression(), out string expression))
+            if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
             {
                 m_targetFile.Append($"{Spacing()}defer({expression});{CheckForCommentsRight(context)}");
 

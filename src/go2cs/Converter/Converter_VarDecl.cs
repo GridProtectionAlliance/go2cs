@@ -70,7 +70,7 @@ namespace go2cs
                 return;
             }
 
-            ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions);
+            ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions);
 
             if (!(expressions is null) && identifiers.Length != expressions.Length)
             {
@@ -80,31 +80,26 @@ namespace go2cs
 
             Types.TryGetValue(context.type_(), out TypeInfo typeInfo);
 
-            string type = typeInfo?.TypeName ?? "var";
+            string type = typeInfo?.TypeName;
             int length = Math.Min(identifiers.Length, expressions?.Length ?? int.MaxValue);
 
             for (int i = 0; i < length; i++)
             {
                 string identifier = SanitizedIdentifier(identifiers[i]);
-                string expression = expressions?[i];
+                string expression = expressions?[i].Text;
+                string typeName = type ?? expressions?[i].Type.TypeName ?? "var";
 
                 m_targetFile.Append($"{Spacing()}");
 
                 if (!m_inFunction)
-                {
                     m_targetFile.Append(char.IsUpper(identifier[0]) ? "public " : "private ");
 
-                    // TODO: Using dynamic type here is not ideal - need to use an expression type evaluator
-                    if (type.Equals("var", StringComparison.Ordinal))
-                        type = "dynamic";
-                }
-
-                m_targetFile.Append($"{type} {identifier}");
+                m_targetFile.Append($"{typeName} {identifier}");
 
                 if (!(expression is null))
                     m_targetFile.Append($" = {expression}");
                 else if (typeInfo?.TypeClass == TypeClass.Array && typeInfo is ArrayTypeInfo arrayTypeInfo)
-                    m_targetFile.Append($" = new {type}({arrayTypeInfo.Length.Text})");
+                    m_targetFile.Append($" = new {typeName}({arrayTypeInfo.Length.Text})");
 
                 // Since multiple specifications can be on one line, only check for comments after last specification
                 if (i < length - 1 || length == 1)

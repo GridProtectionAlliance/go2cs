@@ -25,10 +25,43 @@ using System;
 
 namespace go2cs.Metadata
 {
+    // expression is fundamentally one of:
+    //     unaryExpr
+    //     expression operator expression
+    //     primaryExpr
+
+    // For unaryExpr, result type matches sub-expression
+
+    // For expression operator expression
+    //     if operator is comparison, result type is boolean
+    //     otherwise, result type matches sub-expression
+
+    // primaryExpr is more complex, it breaks down to one of:
+    //     operand
+    //     conversion
+    //     primaryExpr operation
+
+    // When primaryExpr is operand, result types are as follows:
+    //     literal, result is literal type
+    //     operandName, result is operand type
+    //     methodExpr, result is a method expression
+    //     (expression), result type matched sub-expression
+
+    // When primaryExpr is conversion,
+    //     result type is specified target type
+
+    // When primary is expression has an operation, options are:
+    //     DOT IDENIFIER, result type matches identifier
+    //     index, result type matches sub-primaryExpr
+    //     slice, result type matches sub-primaryExpr
+    //     typeAssersion, result type matches specified target type
+    //     arguments, result type matches sub-primaryExpr
+
     [Serializable]
     public class ExpressionInfo
     {
         public string Text;
         public TypeInfo Type;
+        public override string ToString() => Text;
     }
 }

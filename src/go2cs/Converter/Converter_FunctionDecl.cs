@@ -126,6 +126,7 @@ namespace go2cs
 
             if (!signatureOnly)
             {
+                // TODO: Double check if any other types need clone-type copy operations
                 // For any array parameters, Go copies the array by value
                 StringBuilder arrayClones = new StringBuilder();
 

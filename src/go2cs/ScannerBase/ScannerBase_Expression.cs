@@ -25,6 +25,7 @@ using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static go2cs.Common;
 
 namespace go2cs
@@ -51,10 +52,15 @@ namespace go2cs
         //  slice (optional)
         //  expression (optional)
         //  conversion (required)
-        protected readonly ParseTreeValues<string> Expressions = new ParseTreeValues<string>();
-        protected readonly ParseTreeValues<string> UnaryExpressions = new ParseTreeValues<string>();
-        protected readonly ParseTreeValues<string> PrimaryExpressions = new ParseTreeValues<string>();
-        protected readonly ParseTreeValues<string> Operands = new ParseTreeValues<string>();
+        protected readonly ParseTreeValues<ExpressionInfo> Expressions = new ParseTreeValues<ExpressionInfo>();
+        protected readonly ParseTreeValues<ExpressionInfo> UnaryExpressions = new ParseTreeValues<ExpressionInfo>();
+        protected readonly ParseTreeValues<ExpressionInfo> PrimaryExpressions = new ParseTreeValues<ExpressionInfo>();
+        protected readonly ParseTreeValues<ExpressionInfo> Operands = new ParseTreeValues<ExpressionInfo>();
+
+        private static readonly HashSet<string> s_comparisionOperands = new HashSet<string>
+        {
+            "==", "!=", "<", "<=", ">=", "&&", "||"
+        };
 
         public override void ExitExpression(GoParser.ExpressionContext context)
         {
@@ -69,33 +75,56 @@ namespace go2cs
 
             if (context.expression()?.Length == 2)
             {
-                string leftOperand = Expressions[context.expression(0)];
-                string rightOperand = Expressions[context.expression(1)];
+                ExpressionInfo leftOperand = Expressions[context.expression(0)];
+                ExpressionInfo rightOperand = Expressions[context.expression(1)];
                 string binaryOP = context.children[1].GetText();
 
                 if (binaryOP.Equals("<<") || binaryOP.Equals(">>"))
                 {
-                    // TODO: Need expression evaluations - no cast needed if expressions is int type
-                    if (!int.TryParse(rightOperand, out int _))
-                        rightOperand = $"(int)({rightOperand})";
+                    if (!int.TryParse(rightOperand.Text, out int _))
+                        rightOperand.Text = $"(int)({rightOperand.Text})";
                 }
 
                 binaryOP = binaryOP.Equals("&^") ? " & ~" : $" {binaryOP} ";
 
-                Expressions[context] = $"{leftOperand}{binaryOP}{rightOperand}";
+                string expression = $"{leftOperand}{binaryOP}{rightOperand}";
+
+                if (s_comparisionOperands.Contains(binaryOP))
+                {
+                    Expressions[context] = new ExpressionInfo
+                    {
+                        Text = expression,
+                        Type = new TypeInfo
+                        {
+                            Name = "bool",
+                            TypeName = "bool",
+                            FullTypeName = "System.Boolean",
+                            TypeClass = TypeClass.Simple
+                        }
+                    };
+                }
+                else
+                {
+                    // TODO: If both operands are integer, expression should be treated as arbitrary-precision numbers until assigned to a variable
+                    Expressions[context] = new ExpressionInfo
+                    {
+                        Text = expression,
+                        Type = leftOperand.Type
+                    };
+                }
             }
             else
             {
                 if (!(context.primaryExpr() is null))
                 {
-                    if (PrimaryExpressions.TryGetValue(context.primaryExpr(), out string primaryExpression))
+                    if (PrimaryExpressions.TryGetValue(context.primaryExpr(), out ExpressionInfo primaryExpression))
                         Expressions[context] = primaryExpression;
                     else
-                        AddWarning(context, $"Failed to find primary expression \"{context.unaryExpr().GetText()}\" in the expression \"{context.GetText()}\"");
+                        AddWarning(context, $"Failed to find primary expression \"{context.primaryExpr().GetText()}\" in the expression \"{context.GetText()}\"");
                 }
                 else if (!(context.unaryExpr() is null))
                 {
-                    if (UnaryExpressions.TryGetValue(context.unaryExpr(), out string unaryExpression))
+                    if (UnaryExpressions.TryGetValue(context.unaryExpr(), out ExpressionInfo unaryExpression))
                         Expressions[context] = unaryExpression;
                     else
                         AddWarning(context, $"Failed to find unary expression \"{context.unaryExpr().GetText()}\" in the expression \"{context.GetText()}\"");
@@ -113,39 +142,53 @@ namespace go2cs
             //     : primaryExpr
             //     | ('+' | '-' | '!' | '^' | '*' | '&' | '<-') expression
 
-            if (PrimaryExpressions.TryGetValue(context.primaryExpr(), out string primaryExpression))
+            if (PrimaryExpressions.TryGetValue(context.primaryExpr(), out ExpressionInfo primaryExpression))
             {
                 UnaryExpressions[context] = primaryExpression;
             }
             else if (!(context.expression() is null))
             {
-                string unaryOP = context.children[0].GetText();
+                if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
+                {
+                    string unaryOP = context.children[0].GetText();
+                    string unaryExpression = "";
 
-                if (unaryOP.Equals("^", StringComparison.Ordinal))
-                {
-                    unaryOP = "~";
-                }
-                else if (unaryOP.Equals("<-", StringComparison.Ordinal))
-                {
-                    // TODO: Handle channel value access (update when channel class is created):
-                    unaryOP = null;
-                    UnaryExpressions[context] = $"{Expressions[context.expression()]}.Receive()";
-                }
-                else if (unaryOP.Equals("&", StringComparison.Ordinal))
-                {
-                    // TODO: Handle pointer acquisition context - may need to augment pre-scan metadata for heap allocation notation
-                    unaryOP = null;
-                    UnaryExpressions[context] = $"ref {Expressions[context.expression()]}";
-                }
-                else if (unaryOP.Equals("*", StringComparison.Ordinal))
-                {
-                    // TODO: Handle pointer dereference context - if this is a ref variable, Value call is unnecessary
-                    unaryOP = null;
-                    UnaryExpressions[context] = $"{Expressions[context.expression()]}.Value";
-                }
+                    if (unaryOP.Equals("^", StringComparison.Ordinal))
+                    {
+                        unaryOP = "~";
+                    }
+                    else if (unaryOP.Equals("<-", StringComparison.Ordinal))
+                    {
+                        // TODO: Handle channel value access (update when channel class is created):
+                        unaryOP = null;
+                        unaryExpression = $"{expression}.Receive()";
+                    }
+                    else if (unaryOP.Equals("&", StringComparison.Ordinal))
+                    {
+                        // TODO: Handle pointer acquisition context - may need to augment pre-scan metadata for heap allocation notation
+                        unaryOP = null;
+                        unaryExpression = $"ref {expression}";
+                    }
+                    else if (unaryOP.Equals("*", StringComparison.Ordinal))
+                    {
+                        // TODO: Handle pointer dereference context - if this is a ref variable, Value call is unnecessary
+                        unaryOP = null;
+                        unaryExpression = $"{expression}.Value";
+                    }
 
-                if (!(unaryOP is null))
-                    UnaryExpressions[context] = $"{unaryOP}{Expressions[context.expression()]}";
+                    if (!(unaryOP is null))
+                        unaryExpression = $"{unaryOP}{expression}";
+
+                    UnaryExpressions[context] = new ExpressionInfo
+                    {
+                        Text = unaryExpression,
+                        Type = expression.Type
+                    };
+                }
+                else
+                {
+                    AddWarning(context, $"Unexpected unary expression \"{context.expression().GetText()}\"");
+                }
             }
             else if (!UnaryExpressions.ContainsKey(context))
             {
@@ -164,37 +207,61 @@ namespace go2cs
             //     | primaryExpr typeAssertion
             //     | primaryExpr arguments
 
-            PrimaryExpressions.TryGetValue(context.primaryExpr(), out string primaryExpression);
+            PrimaryExpressions.TryGetValue(context.primaryExpr(), out ExpressionInfo primaryExpression);
 
-            if (!string.IsNullOrEmpty(primaryExpression))
-                primaryExpression = SanitizedIdentifier(primaryExpression);
+            if (!(primaryExpression is null) && !string.IsNullOrEmpty(primaryExpression.Text))
+                primaryExpression.Text = SanitizedIdentifier(primaryExpression.Text);
 
-            if (Operands.TryGetValue(context.operand(), out string operand))
+            if (Operands.TryGetValue(context.operand(), out ExpressionInfo operand))
             {
-                PrimaryExpressions[context] = SanitizedIdentifier(operand);
+                PrimaryExpressions[context] = new ExpressionInfo
+                {
+                    Text = SanitizedIdentifier(operand.Text),
+                    Type = operand.Type
+                };
             }
             else if (!(context.conversion() is null))
             {
                 // conversion
                 //     : type '(' expression ',' ? ')'
 
-                if (Types.TryGetValue(context.conversion().type_(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.conversion().expression(), out string expression))
+                if (Types.TryGetValue(context.conversion().type_(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.conversion().expression(), out ExpressionInfo expression))
                 {
                     if (typeInfo.TypeName.StartsWith("*(*"))
                     {
                         // TODO: Complex pointer expression needs special handling consideration - could opt for unsafe implementation
-                        PrimaryExpressions[context] = $"{typeInfo.TypeName}{expression}";
+                        PrimaryExpressions[context] = new ExpressionInfo
+                        {
+                            Text = $"{expression}.Value",
+                            Type = typeInfo
+                        };
                     }
                     else
                     {
                         if (typeInfo.IsPointer)
-                            PrimaryExpressions[context] = $"new ptr<{typeInfo.TypeName}>({expression})";
+                        {
+                            PrimaryExpressions[context] = new ExpressionInfo
+                            {
+                                Text = $"new ptr<{typeInfo.TypeName}>({expression})",
+                                Type = typeInfo
+                            };
+                        }
                         else if (typeInfo.TypeClass == TypeClass.Struct)
-                            PrimaryExpressions[context] = $"{typeInfo.TypeName}_cast({expression})";
-                        else if (typeInfo.TypeClass == TypeClass.Simple)
-                            PrimaryExpressions[context] = $"{typeInfo.TypeName}({expression})";
+                        {
+                            PrimaryExpressions[context] = new ExpressionInfo
+                            {
+                                Text = $"{typeInfo.TypeName}_cast({expression})",
+                                Type = typeInfo
+                            };
+                        }
                         else
-                            PrimaryExpressions[context] = $"({typeInfo.TypeName}){expression}";
+                        {
+                            PrimaryExpressions[context] = new ExpressionInfo
+                            {
+                                Text = $"({typeInfo.TypeName}){expression}",
+                                Type = typeInfo
+                            };
+                        }
                     }
                 }
                 else
@@ -206,18 +273,30 @@ namespace go2cs
             {
                 // selector
                 //     : '.' IDENTIFIER
-
-                PrimaryExpressions[context] = $"{primaryExpression}.{SanitizedIdentifier(context.IDENTIFIER().GetText())}";
+                // TODO: Will need to lookup IDENTIFIER type in metadata to determine type
+                PrimaryExpressions[context] = new ExpressionInfo
+                {
+                    Text = $"{primaryExpression.Text}.{SanitizedIdentifier(context.IDENTIFIER().GetText())}",
+                    Type = primaryExpression.Type
+                };
             }
             else if (!(context.index() is null))
             {
                 // index
                 //     : '[' expression ']'
-
-                if (Expressions.TryGetValue(context.index().expression(), out string expression))
-                    PrimaryExpressions[context] = $"{primaryExpression}[{expression}]";
+                // TODO: Will need to lookup IDENTIFIER type in metadata to determine type
+                if (Expressions.TryGetValue(context.index().expression(), out ExpressionInfo expression))
+                {
+                    PrimaryExpressions[context] = new ExpressionInfo
+                    {
+                        Text = $"{primaryExpression}[{expression}]",
+                        Type = primaryExpression.Type
+                    };
+                }
                 else
+                {
                     AddWarning(context, $"Failed to find index expression for \"{context.GetText()}\"");
+                }
             }
             else if (!(context.slice() is null))
             {
@@ -229,27 +308,47 @@ namespace go2cs
                 if (sliceContext.children.Count == 3)
                 {
                     // primaryExpr[:]
-                    PrimaryExpressions[context] = $"{primaryExpression}.slice()";
+                    PrimaryExpressions[context] = new ExpressionInfo
+                    {
+                        Text = $"{primaryExpression}[..]",
+                        Type = primaryExpression.Type
+                    };
                 }
                 else if (sliceContext.children.Count == 4)
                 {
                     bool expressionIsLeft = sliceContext.children[1] is GoParser.ExpressionContext;
 
                     // primaryExpr[low:] or primaryExpr[:high]
-                    if (Expressions.TryGetValue(sliceContext.expression(0), out string expression))
-                        PrimaryExpressions[context] = $"{primaryExpression}.slice({(expressionIsLeft ? expression : $"high:{expression}")})";
+                    if (Expressions.TryGetValue(sliceContext.expression(0), out ExpressionInfo expression))
+                    {
+                        PrimaryExpressions[context] = new ExpressionInfo
+                        {
+                            Text = $"{primaryExpression}[{(expressionIsLeft ? $"{expression}..": $"..{expression}")}]",
+                            Type = primaryExpression.Type
+                        };
+                    }
                     else
+                    {
                         AddWarning(context, $"Failed to find slice expression for \"{context.GetText()}\"");
+                    }
                 }
                 else if (sliceContext.children.Count == 5)
                 {
                     if (sliceContext.children[1] is GoParser.ExpressionContext && sliceContext.children[3] is GoParser.ExpressionContext)
                     {
                         // primaryExpr[low:high]
-                        if (Expressions.TryGetValue(sliceContext.expression(0), out string lowExpression) && Expressions.TryGetValue(sliceContext.expression(1), out string highExpression))
-                            PrimaryExpressions[context] = $"{primaryExpression}.slice({lowExpression}, {highExpression})";
+                        if (Expressions.TryGetValue(sliceContext.expression(0), out ExpressionInfo lowExpression) && Expressions.TryGetValue(sliceContext.expression(1), out ExpressionInfo highExpression))
+                        {
+                            PrimaryExpressions[context] = new ExpressionInfo
+                            {
+                                Text = $"{primaryExpression}[{lowExpression}..{highExpression}]",
+                                Type = primaryExpression.Type
+                            };
+                        }
                         else
+                        {
                             AddWarning(context, $"Failed to find one of the slice expressions for \"{context.GetText()}\"");
+                        }
                     }
                     else
                     {
@@ -259,18 +358,34 @@ namespace go2cs
                 else if (sliceContext.children.Count == 6)
                 {
                     // primaryExpr[:high:max]
-                    if (Expressions.TryGetValue(sliceContext.expression(0), out string highExpression) && Expressions.TryGetValue(sliceContext.expression(1), out string maxExpression))
-                        PrimaryExpressions[context] = $"{primaryExpression}.slice(-1, {highExpression}, {maxExpression})";
+                    if (Expressions.TryGetValue(sliceContext.expression(0), out ExpressionInfo highExpression) && Expressions.TryGetValue(sliceContext.expression(1), out ExpressionInfo maxExpression))
+                    {
+                        PrimaryExpressions[context] = new ExpressionInfo
+                        {
+                            Text = $"{primaryExpression}.slice(-1, {highExpression}, {maxExpression})",
+                            Type = primaryExpression.Type
+                        };
+                    }
                     else
+                    {
                         AddWarning(context, $"Failed to find one of the slice expressions for \"{context.GetText()}\"");
+                    }
                 }
                 else if (sliceContext.children.Count == 7)
                 {
                     // primaryExpr[low:high:max]
-                    if (Expressions.TryGetValue(sliceContext.expression(0), out string lowExpression) && Expressions.TryGetValue(sliceContext.expression(1), out string highExpression) && Expressions.TryGetValue(sliceContext.expression(2), out string maxExpression))
-                        PrimaryExpressions[context] = $"{primaryExpression}.slice({lowExpression}, {highExpression}, {maxExpression})";
+                    if (Expressions.TryGetValue(sliceContext.expression(0), out ExpressionInfo lowExpression) && Expressions.TryGetValue(sliceContext.expression(1), out ExpressionInfo highExpression) && Expressions.TryGetValue(sliceContext.expression(2), out ExpressionInfo maxExpression))
+                    {
+                        PrimaryExpressions[context] = new ExpressionInfo
+                        {
+                            Text = $"{primaryExpression}.slice({lowExpression}, {highExpression}, {maxExpression})",
+                            Type = primaryExpression.Type
+                        };
+                    }
                     else
+                    {
                         AddWarning(context, $"Failed to find one of the slice expressions for \"{context.GetText()}\"");
+                    }
                 }
             }
             else if (!(context.typeAssertion() is null))
@@ -279,9 +394,17 @@ namespace go2cs
                 //     : '.' '(' type ')'
 
                 if (Types.TryGetValue(context.typeAssertion().type_(), out TypeInfo typeInfo))
-                    PrimaryExpressions[context] = $"{primaryExpression}._<{typeInfo.TypeName}>()";
+                {
+                    PrimaryExpressions[context] = new ExpressionInfo
+                    {
+                        Text = $"{primaryExpression}._<{typeInfo.TypeName}>()",
+                        Type = typeInfo
+                    };
+                }
                 else
+                {
                     AddWarning(context, $"Failed to find type for the type assertion expression in \"{context.GetText()}\"");
+                }
             }
             else if (!(context.arguments() is null))
             {
@@ -294,10 +417,14 @@ namespace go2cs
                 if (Types.TryGetValue(argumentsContext.type_(), out TypeInfo typeInfo))
                     arguments.Add($"typeof({typeInfo.TypeName})");
 
-                if (ExpressionLists.TryGetValue(argumentsContext.expressionList(), out string[] expressions))
-                    arguments.AddRange(expressions);
+                if (ExpressionLists.TryGetValue(argumentsContext.expressionList(), out ExpressionInfo[] expressions))
+                    arguments.AddRange(expressions.Select(expr => expr.Text));
 
-                PrimaryExpressions[context] = $"{primaryExpression}({string.Join(", ", arguments)})";
+                PrimaryExpressions[context] = new ExpressionInfo
+                {
+                    Text = $"{primaryExpression}({string.Join(", ", arguments)})",
+                    Type = primaryExpression.Type
+                };
             }
             else
             {
@@ -313,8 +440,14 @@ namespace go2cs
             //     | methodExpr
             //     | '(' expression ')'
 
-            if (Expressions.TryGetValue(context.expression(), out string expression))
-                Operands[context] = $"({expression})";
+            if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
+            {
+                Operands[context] = new ExpressionInfo
+                {
+                    Text = $"({expression})",
+                    Type = expression.Type
+                };
+            }
 
             // Remaining operands contexts handled below...
         }
@@ -339,6 +472,7 @@ namespace go2cs
             }
 
             string basicLiteral;
+            TypeInfo typeInfo;
 
             // basicLit
             //     : INT_LIT
@@ -350,36 +484,132 @@ namespace go2cs
             if (!(context.IMAGINARY_LIT() is null))
             {
                 string value = context.IMAGINARY_LIT().GetText();
-                basicLiteral = value.EndsWith("i") ? $"i({value.Substring(0, value.Length - 1)})" : value;
+                bool endsWith_i = value.EndsWith("i");
+                value = endsWith_i ? value.Substring(0, value.Length - 1) : value;
+                basicLiteral = endsWith_i ? $"i({value})" : value;
+
+                if (float.TryParse(value, out _))
+                {
+                    typeInfo = new TypeInfo
+                    {
+                        Name = "complex64",
+                        TypeName = "complex64",
+                        FullTypeName = "go.complex64",
+                        TypeClass = TypeClass.Simple
+                    };
+                }
+                else
+                {
+                    typeInfo = new TypeInfo
+                    {
+                        Name = "Complex",
+                        TypeName = "Complex",
+                        FullTypeName = "System.Numerics.Complex",
+                        TypeClass = TypeClass.Simple
+                    };
+                }
+            }
+            else if (!(context.FLOAT_LIT() is null))
+            {
+                basicLiteral = context.GetText();
+
+                if (float.TryParse(basicLiteral, out _))
+                {
+                    typeInfo = new TypeInfo
+                    {
+                        Name = "float",
+                        TypeName = "float",
+                        FullTypeName = "System.Single",
+                        TypeClass = TypeClass.Simple
+                    };
+                }
+                else
+                {
+                    typeInfo = new TypeInfo
+                    {
+                        Name = "double",
+                        TypeName = "double",
+                        FullTypeName = "System.Double",
+                        TypeClass = TypeClass.Simple
+                    };
+                }
+            }
+            else if (!(context.integer() is null))
+            {
+                basicLiteral = ReplaceOctalBytes(context.integer().GetText());
+
+                if (long.TryParse(basicLiteral, out _))
+                {
+                    typeInfo = new TypeInfo
+                    {
+                        Name = "long",
+                        TypeName = "long",
+                        FullTypeName = "System.Int64",
+                        TypeClass = TypeClass.Simple
+                    };
+                }
+                else
+                {
+                    typeInfo = new TypeInfo
+                    {
+                        Name = "ulong",
+                        TypeName = "ulong",
+                        FullTypeName = "System.UInt64",
+                        TypeClass = TypeClass.Simple
+                    };
+                }
             }
             else if (!(context.RUNE_LIT() is null))
             {
                 basicLiteral = ReplaceOctalBytes(context.RUNE_LIT().GetText());
+
+                typeInfo = new TypeInfo
+                {
+                    Name = "char",
+                    TypeName = "char",
+                    FullTypeName = "System.Char",
+                    TypeClass = TypeClass.Simple
+                };
             }
             else if (!(context.string_() is null))
             {
                 basicLiteral = ToStringLiteral(ReplaceOctalBytes(context.string_().GetText()));
+
+                typeInfo = new TypeInfo
+                {
+                    Name = "@string",
+                    TypeName = "@string",
+                    FullTypeName = "go.@string",
+                    TypeClass = TypeClass.Simple
+                };
+            }
+            else if (!(context.NIL_LIT() is null))
+            {
+                basicLiteral = "null";
+                typeInfo = TypeInfo.ObjectType;
             }
             else
             {
-                basicLiteral = context.GetText();
+                AddWarning(context, $"Unexpected basic literal: \"{context.GetText()}\"");
+                return;
             }
 
-            Operands[operandContext] = basicLiteral;
+            Operands[operandContext] = new ExpressionInfo
+            {
+                Text = basicLiteral,
+                Type = typeInfo
+            };
         }
 
         public override void ExitCompositeLit(GoParser.CompositeLitContext context)
         {
-            // operand
-            //     : literal
-            //     | operandName
-            //     | methodExpr
-            //     | '(' expression ')'
-
             // literal
             //     : basicLit
             //     | compositeLit
             //     | functionLit
+
+            // compositeLit
+            //    : literalType literalValue
 
             if (!(context.Parent.Parent is GoParser.OperandContext operandContext))
             {
@@ -387,8 +617,134 @@ namespace go2cs
                 return;
             }
 
-            // TODO: Update to handle in-line type constructions
-            Operands[operandContext] = SanitizedIdentifier(context.GetText());
+            GoParser.LiteralTypeContext literalType = context.literalType();
+            GoParser.LiteralValueContext literalValue = context.literalValue();
+
+            string expressionText;
+            TypeInfo typeInfo;
+
+            if (!(literalType.structType() is null))
+            {
+                // TODO: Need to properly handle in-line struct, see "src\Examples\Manual Tour of Go Conversions\moretypes\slice-literals"
+                expressionText = $"/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ {context.GetText()}";
+                typeInfo = new TypeInfo
+                {
+                    Name = literalType.GetText(),
+                    TypeName = literalType.GetText(),
+                    FullTypeName = literalType.GetText(),
+                    TypeClass = TypeClass.Struct
+                };
+            }
+            else if (!(literalType.arrayType() is null))
+            {
+                if (Types.TryGetValue(literalType.arrayType().elementType(), out typeInfo))
+                {
+                    string typeName = typeInfo.TypeName;
+                    expressionText = $"new {typeName}[]{literalValue.GetText()}";
+                    typeInfo = new ArrayTypeInfo
+                    {
+                        Name = typeName,
+                        TypeName = typeName,
+                        FullTypeName = typeInfo.FullTypeName,
+                        Length = new ExpressionInfo
+                        {
+                            Text = literalType.arrayType().arrayLength().GetText(),
+                            Type = new TypeInfo
+                            {
+                                Name = "long",
+                                TypeName = "long",
+                                FullTypeName = "System.Int64",
+                                TypeClass = TypeClass.Simple
+                            }
+                        },
+                        TypeClass = TypeClass.Array
+                    };
+                }
+                else
+                {
+                    AddWarning(context, $"Failed to find element type for the array type expression in \"{context.GetText()}\"");
+                    return;
+                }
+            }
+            else if(!(literalType.elementType() is null))
+            {
+                if (Types.TryGetValue(literalType.elementType(), out typeInfo))
+                {
+                    string typeName = typeInfo.TypeName;
+                    expressionText = $"new {typeName}[]{literalValue.GetText()}";
+                    typeInfo = new TypeInfo
+                    {
+                        Name = typeName,
+                        TypeName = typeName,
+                        FullTypeName = typeInfo.FullTypeName,
+                        TypeClass = TypeClass.Array
+                    };
+                }
+                else
+                {
+                    AddWarning(context, $"Failed to find element type for the array type expression in \"{context.GetText()}\"");
+                    return;
+                }
+            }
+            else if (!(literalType.sliceType() is null))
+            {
+                if (Types.TryGetValue(literalType.sliceType().elementType(), out typeInfo))
+                {
+                    string typeName = typeInfo.TypeName;
+                    expressionText = $"slice(new {typeName}[]{literalValue.GetText()})";
+                    typeInfo = new TypeInfo
+                    {
+                        Name = typeName,
+                        TypeName = typeName,
+                        FullTypeName = typeInfo.FullTypeName,
+                        TypeClass = TypeClass.Slice
+                    };
+                }
+                else
+                {
+                    AddWarning(context, $"Failed to find element type for the slice type expression in \"{context.GetText()}\"");
+                    return;
+                }
+            }
+            else if (!(literalType.mapType() is null))
+            {
+                // TODO: Need to properly handle map literals, see "src\Examples\Manual Tour of Go Conversions\moretypes\map-literals-continued"
+                if (Types.TryGetValue(literalType.mapType().type_(), out typeInfo) && Types.TryGetValue(literalType.mapType().elementType(), out TypeInfo elementTypeInfo))
+                {
+                    expressionText = $"/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<{typeInfo.TypeName}, {elementTypeInfo.TypeName}>{literalValue.GetText()}";
+                    typeInfo = new MapTypeInfo
+                    {
+                        Name = "map",
+                        TypeName = "map",
+                        FullTypeName = "go.map",
+                        KeyTypeInfo = typeInfo,
+                        ElementTypeInfo = elementTypeInfo,
+                        TypeClass = TypeClass.Map
+                    };
+                }
+                else
+                {
+                    AddWarning(context, $"Failed to find key and/or value type for the map type expression in \"{context.GetText()}\"");
+                    return;
+                }
+            }
+            else if (!(literalType.typeName() is null))
+            {
+                // TODO: Converter will need to override and look at identifier metadata to specify proper expression type
+                expressionText = context.GetText();
+                typeInfo = TypeInfo.ObjectType;
+            }
+            else
+            {
+                AddWarning(context, $"Unexpected literal type \"{context.GetText()}\"");
+                return;
+            }
+
+            Operands[operandContext] = new ExpressionInfo
+            {
+                Text = expressionText,
+                Type = typeInfo
+            };
         }
 
         public override void ExitFunctionLit(GoParser.FunctionLitContext context)
@@ -414,7 +770,17 @@ namespace go2cs
             //     : 'func' function
 
             // This is a place-holder for base class - derived classes, e.g., Converter, have to properly handle function content
-            Operands[operandContext] = SanitizedIdentifier(context.GetText());
+            Operands[operandContext] = new ExpressionInfo
+            {
+                Text = SanitizedIdentifier(context.GetText()),
+                Type = new TypeInfo
+                {
+                    Name = "Action",
+                    TypeName = "Action",
+                    FullTypeName = "System.Action",
+                    TypeClass = TypeClass.Function
+                }
+            };
         }
 
         public override void ExitOperandName(GoParser.OperandNameContext context)
@@ -435,7 +801,12 @@ namespace go2cs
             //     : IDENTIFIER
             //     | qualifiedIdent
 
-            Operands[operandContext] = context.GetText();
+            // TODO: Converter will need to override and look at identifier metadata to specify proper expression type
+            Operands[operandContext] = new ExpressionInfo
+            {
+                Text = context.GetText(),
+                Type = TypeInfo.ObjectType
+            };
         }
 
         public override void ExitMethodExpr([NotNull] GoParser.MethodExprContext context)
@@ -462,11 +833,19 @@ namespace go2cs
 
             GoParser.ReceiverTypeContext receiverType = context.receiverType();
 
-            // TODO: Handle type name pointer dereference context - if this is a ref variable, Value call is unnecessary
+            // TODO: should this be a delegate to an extension function? Need a use case...
+            string receiver;
+
             if (receiverType?.children.Count == 4)
-                Operands[operandContext] = $"{receiverType.typeName().GetText()}.Value";
+                receiver = $"ref {receiverType.typeName().GetText()}";
             else
-                Operands[operandContext] = context.GetText();
+                receiver = context.GetText();
+
+            Operands[operandContext] = new ExpressionInfo
+            {
+                Text = receiver,
+                Type = TypeInfo.ObjectType
+            };
         }
     }
 }

@@ -24,6 +24,7 @@
 using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace go2cs
@@ -47,20 +48,25 @@ namespace go2cs
         //  conversion (required)
         protected readonly ParseTreeValues<TypeInfo> Types = new ParseTreeValues<TypeInfo>();
 
+        public override void EnterType_(GoParser.Type_Context context)
+        {
+            Debug.WriteLine($"Enter type: {context.GetText()} -- {context}");
+        }
+
         public override void ExitType_(GoParser.Type_Context context)
         {
+            TypeInfo typeInfo;
+
             if (!(context.type_() is null))
             {
-                if (Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
+                if (Types.TryGetValue(context.type_(), out typeInfo))
                     Types[context] = typeInfo;
                 else
                     AddWarning(context, $"Failed to find sub-type in type expression \"{context.GetText()}\"");
             }
-        }
 
-        public override void ExitElementType(GoParser.ElementTypeContext context)
-        {
-            ExitType_(context.type_());
+            if (context.Parent is GoParser.ElementTypeContext elementType && Types.TryGetValue(context, out typeInfo))
+                Types[elementType] = typeInfo;
         }
 
         public override void EnterTypeName(GoParser.TypeNameContext context)
@@ -70,8 +76,8 @@ namespace go2cs
             Types[context.Parent] = new TypeInfo
             {
                 Name = type,
-                TypeName = ConvertToPrimitiveType(type),
-                FullTypeName = ConvertToFrameworkType(type),
+                TypeName = ConvertToCSTypeName(type),
+                FullTypeName = ConvertToFullCSTypeName(type),
                 TypeClass = TypeClass.Simple
             };
         }
@@ -152,12 +158,11 @@ namespace go2cs
 
             ExpressionInfo length;
 
-            if (Expressions.TryGetValue(context.arrayLength().expression(), out string expression))
+            if (Expressions.TryGetValue(context.arrayLength().expression(), out ExpressionInfo expression))
             {
-                // TODO: Remove once expressions dictionary holds expression info
                 length = new ExpressionInfo
                 {
-                    Text = expression,
+                    Text = expression.Text,
                     Type = new TypeInfo
                     {
                         TypeClass = TypeClass.Simple,
@@ -318,18 +323,17 @@ namespace go2cs
             };
         }
 
-        protected string ConvertToPrimitiveType(string type)
+        protected string ConvertToCSTypeName(string type)
         {
-            return type switch
-            {
-                "int" => "long",
-                "uint" => "ulong",
-                "string" => "@string",
-                _ => $"{type}"
-            };
+            string primitiveType = ConvertToFullCSTypeName(type);
+
+            if (primitiveType.StartsWith("go."))
+                return primitiveType.Substring(3);
+
+            return primitiveType;
         }
 
-        protected string ConvertToFrameworkType(string type)
+        protected string ConvertToFullCSTypeName(string type)
         {
             switch (type)
             {

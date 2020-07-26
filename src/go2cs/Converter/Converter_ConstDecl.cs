@@ -71,7 +71,7 @@ namespace go2cs
                 return;
             }
 
-            ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions);
+            ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions);
 
             if (!(expressions is null) && identifiers.Length != expressions.Length)
             {
@@ -81,19 +81,19 @@ namespace go2cs
 
             Types.TryGetValue(context.type_(), out TypeInfo typeInfo);
 
-            // TODO: Using dynamic type here is not ideal - need to use an expression type evaluator
-            string type = typeInfo?.TypeName ?? "dynamic";
+            string type = typeInfo?.TypeName;
             int length = Math.Min(identifiers.Length, expressions?.Length ?? int.MaxValue);
 
             for (int i = 0; i < identifiers.Length; i++)
             {
                 string identifier = identifiers[i];
-                string expression = expressions?[i] ?? $"{m_iota++}";
+                string expression = expressions?[i].Text ?? $"{m_iota++}";
+                string typeName = type ?? expressions?[i].Type.TypeName ?? "var";
 
                 if (m_inFunction)
-                    m_targetFile.Append($"{Spacing()}const {type} {identifier} = {expression};");
+                    m_targetFile.Append($"{Spacing()}const {typeName} {identifier} = {expression};");
                 else
-                    m_targetFile.Append($"{Spacing()}{(char.IsUpper(identifier[0]) ? "public" : "private")} static readonly {type} {identifier} = {expression};");
+                    m_targetFile.Append($"{Spacing()}{(char.IsUpper(identifier[0]) ? "public" : "private")} static readonly {typeName} {identifier} = {expression};");
 
                 // Since multiple specifications can be on one line, only check for comments after last specification
                 if (i < length - 1)
@@ -104,96 +104,5 @@ namespace go2cs
 
             m_constIdentifierCount++;
         }
-
-        //lastType = type;
-
-        //if (m_inFunction)
-        //{
-        //    //if (type == "Complex")
-        //    //    m_targetFile.Append($"{Spacing()}Complex {identifier} = new Complex;");
-        //    //else
-        //    //    m_targetFile.Append($"{Spacing()}const {type} {identifier} = {ApplyIota(type, expression)};");
-        //}
-        //else
-        //{
-        //    string scope = char.IsUpper(identifier[0]) ? "public" : "private";
-
-        //    identifier = SanitizedIdentifier(identifier);
-
-        //    //if (type == "Complex")
-        //    //    m_targetFile.Append($"{Spacing()}{scope} readonly Complex {identifier} = new {ApplyIota("Complex", type)};");
-        //    //else
-        //    //    m_targetFile.Append($"{Spacing()}{scope} const {type} {identifier} = {ApplyIota(type, expression)};");
-        //}
-
-        //private string DerviveType(string expression, string lastType)
-        //{
-        //    if (expression == "iota")
-        //        return lastType ?? "int";
-
-        //    // TODO: replace all of the following code with an expression parser for better constant type evaluation
-
-        //    if (expression.StartsWith("\"") || expression.StartsWith("`"))
-        //        return "string";
-
-        //    if (expression.StartsWith("'"))
-        //        return "char";
-
-        //    if (expression == "true" || expression == "false")
-        //        return "bool";
-
-        //    if (expression.StartsWith("0x"))
-        //    {
-        //        expression = expression.Substring(2);
-
-        //        if (byte.TryParse(expression, NumberStyles.HexNumber, null, out byte _))
-        //            return "byte";
-
-        //        if (ushort.TryParse(expression, NumberStyles.HexNumber, null, out ushort _))
-        //            return "ushort";
-
-        //        if (uint.TryParse(expression, NumberStyles.HexNumber, null, out uint _))
-        //            return "uint";
-
-        //        return "ulong";
-        //    }
-
-        //    if (expression.Contains("i(") || expression.Contains("complex("))
-        //    {
-        //        RequiredUsings.Add("System.Numerics");
-        //        return "Complex";
-        //    }
-
-        //    if (expression.Contains("."))
-        //    {
-        //        if (float.TryParse(expression, out float _))
-        //            return "float";
-
-        //        if (double.TryParse(expression, out double _))
-        //            return "double";
-                
-        //        return "double";
-        //    }
-
-        //    if (byte.TryParse(expression, out byte _))
-        //        return "byte";
-
-        //    if (short.TryParse(expression, out short _))
-        //        return "short";
-
-        //    if (ushort.TryParse(expression, out ushort _))
-        //        return "ushort";
-
-        //    if (int.TryParse(expression, out int _))
-        //        return "int";
-
-        //    if (uint.TryParse(expression, out uint _))
-        //        return "uint";
-
-        //    if (long.TryParse(expression, out long _))
-        //        return "long";
-
-        //    return "ulong";
-        //}
     }
 }

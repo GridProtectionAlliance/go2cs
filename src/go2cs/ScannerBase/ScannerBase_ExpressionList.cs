@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System.Collections.Generic;
+using go2cs.Metadata;
 
 namespace go2cs
 {
@@ -37,15 +38,15 @@ namespace go2cs
         //  recvStmt (optional)
         //  rangeClause (optional)
         //  arguments (optional)
-        protected readonly ParseTreeValues<string[]> ExpressionLists = new ParseTreeValues<string[]>();
+        protected readonly ParseTreeValues<ExpressionInfo[]> ExpressionLists = new ParseTreeValues<ExpressionInfo[]>();
 
         public override void ExitExpressionList(GoParser.ExpressionListContext context)
         {
-            List<string> expressions = new List<string>();
+            List<ExpressionInfo> expressions = new List<ExpressionInfo>();
 
             for (int i = 0; i < context.expression().Length; i++)
             {
-                if (Expressions.TryGetValue(context.expression(i), out string expression))
+                if (Expressions.TryGetValue(context.expression(i), out ExpressionInfo expression))
                     expressions.Add(expression);
             }
 

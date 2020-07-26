@@ -109,7 +109,7 @@ namespace go2cs
             if (!Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
                 typeInfo = TypeInfo.VarType;
 
-            if (!ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
+            if (!ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions))
                 return;
 
             for (int i = 0; i < identifiers.Length; i++)
@@ -122,7 +122,7 @@ namespace go2cs
                     {
                         Name = identifier,
                         Type = typeInfo,
-                        HeapAllocated = expressions[i]?.StartsWith("&") ?? false
+                        HeapAllocated = expressions[i]?.Text.StartsWith("&") ?? false
                     });
                 }
             }
@@ -133,7 +133,7 @@ namespace go2cs
             if (!Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
                 return;
             
-            if (!ExpressionLists.TryGetValue(context.expressionList(), out string[] expressions))
+            if (!ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions))
                 return;
 
             for (int i = 0; i < identifiers.Length; i++)
@@ -146,7 +146,7 @@ namespace go2cs
                     {
                         Name = identifier,
                         Type = TypeInfo.VarType,
-                        HeapAllocated = expressions[i]?.StartsWith("&") ?? false
+                        HeapAllocated = expressions[i]?.Text.StartsWith("&") ?? false
                     });
                 }
             }
