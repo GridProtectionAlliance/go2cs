@@ -44,12 +44,6 @@ namespace go
             if (!(err is null))
                 return err.Error();
 
-            if (arg is @string)
-                return $"\"{arg}\"";
-
-            if (arg is bool)
-                return arg.ToString().ToLowerInvariant();
-
             if (arg is bool)
                 return arg.ToString().ToLowerInvariant();
 
@@ -67,7 +61,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Println(params object[] args)
         {
-            if (args.Length == 1 && args[0] is IEnumerable array)
+            if (args.Length == 1 && !(args[0] is @string) && !(args[0] is string) && args[0] is IEnumerable array)
             {
                 Console.WriteLine($"[{string.Join(" ", array.Cast<object>().Select(ToString))}]");
                 return;
