@@ -32,6 +32,6 @@ static class main_package
     }
 }
 #endregion
-// Note that getting Japanese characters on console output requires a font capable
+// Note that getting Chinese characters on console output requires a font capable
 // of displaying Unicode characters, e.g., MS Gothic, plus UTF8 encoding:
 //System.Console.OutputEncoding = Encoding.UTF8;
