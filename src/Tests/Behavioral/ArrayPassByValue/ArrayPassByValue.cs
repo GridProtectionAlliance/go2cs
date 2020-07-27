@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2020 July 26 19:21:28 UTC
+// package main -- go2cs converted at 2020 July 27 02:02:22 UTC
 // Original source: D:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue\ArrayPassByValue.go
 using fmt = go.fmt_package;
 using static go.builtin;

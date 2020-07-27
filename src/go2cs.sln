@@ -22,6 +22,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLine", "Utilities\CommandLine\CommandLine.csproj", "{23EED589-896E-4288-A241-4588EF7490B3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gocore", "gocore", "{D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}"
+	ProjectSection(SolutionItems) = preProject
+		deploy-gocore.bat = deploy-gocore.bat
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChannelTests", "Tests\ChannelTests\ChannelTests.csproj", "{8F4CDC83-470F-4550-8BD9-47BC24BFA58A}"
 EndProject
