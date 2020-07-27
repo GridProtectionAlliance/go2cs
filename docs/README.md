@@ -28,7 +28,9 @@ As releases are made for  updated `go2cs` executables, this will also include up
 
 ## Testing
 
-Current conversions reference compiled assemblies of the go2cs core library code in the current `GOPATH`, specifically `%GOPATH%\src\go2cs\`. Run the `deploy-gocore.bat` script located in the `go2cs\src` folder to handle copying source then building needed debug and release assemblies.
+Before attempting conversions it is important that Go coding environment is already properly setup, especially `GOPATH` environmental variable. See [Getting Started](https://golang.org/doc/install) with Go.
+
+Current Go to C# code conversions reference compiled assemblies of the go2cs core library code from the configured `GOPATH`, specifically `%GOPATH%\src\go2cs\`. Run the `deploy-gocore.bat` script located in the `go2cs\src` folder to handle copying source to target path and then building needed debug and release assemblies.
 
 Once a compiled version of the current go2cs core library has been deployed, you can test conversions. For example:
 
@@ -37,6 +39,8 @@ go2cs -o -i D:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue
 ```
 
 This will convert Go code to C#. You can then build and run both the Go and C# versions and compare results.
+
+> **Debugging with Visual Studio:** After running the `deploy-gocore.bat` script you can run conversion code from within Visual Studio by right-clicking on the go2cs project, selecting "Properties" then clicking on the "Debug" tab. In the "Application arguments:" text box you can enter the command line test parameters, e.g., `-o -i D:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue`. When the active solution configuration targets "Debug" you can run go2cs project to convert Go code, then run converted code.
 
 ## Installation
 
