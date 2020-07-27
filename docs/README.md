@@ -66,8 +66,8 @@ Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. This should comp
 | -r | (Default: false) Set to recursively convert source files in subdirectories when a Go source path is specified. |
 | -m | (Default: false) Set to force update of pre-scan metadata. |
 | -g | (Default: %GOPATH%\\src\\go2cs) Target path for converted Go standard library source files. |
-| --help | Display this help screen. |
-| --version | Display version information. |   
+| &#8209;&#8209;help | Display this help screen. |
+| &#8209;&#8209;version | Display version information. |   
 | value 0 | Required. Go source path or file name to convert. |
 | value 1 | Target path for converted files. If not specified, all files (except for Go standard library files) will be converted to source path. |
 
