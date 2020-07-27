@@ -18,7 +18,7 @@ Converts source code developed using the Go programming language (see [Go Langua
 
 Picking up this project again now that .NET 5.0 is forthcoming and some of the new changes are conducive to this project's original goals, such as [publishing as a self-contained executable](https://docs.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained).
 
-Converted code now targets .NET Core only, specifically version 3.1 and C# 8.0 with goal to support .NET 5.0 and C# 9.0 when it comes out.
+Converted code now targets .NET Core only, specifically version 3.1 and C# 8.0 with goal to support .NET 5.0 and C# 9.0 when it comes out. Many basic conversion now work. Currently, work to improve code conversions is progressing by walking through each of the [behavioral testing](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral) projects.
 
 As a new conversion strategy to cover various code use cases, sets of common Go sample code have been manually converted to C# using the current [C# Go Library](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/). As an example, all relevant code samples from the "[Tour of Go](https://tour.golang.org/welcome/1)" have been converted to C#, [see converted code](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/). Ultimately would like to see this in head-to-head mode using [Try .NET](https://github.com/dotnet/try), for example:
 ![go2cs](images/HeadToHead-Small.png)
@@ -26,13 +26,23 @@ Currently converted code will not execute with latest release of Try .NET (see [
 
 As releases are made for  updated `go2cs` executables, this will also include updates to pre-converted [Go Standard Library libraries for reference from NuGet](https://www.nuget.org/packages?q=%22package+in+.NET+for+use+with+go2cs%22).
 
+## Testing
+
+Current conversions reference compiled assemblies of the go2cs core library code in the current `GOPATH`, specifically `%GOPATH%\src\go2cs\`. Run the `deploy-gocore.bat` script located in the `go2cs\src` folder to handle copying source then building needed debug and release assemblies.
+
+Once a compiled version of the current go2cs core library has been deployed, you can test conversions. For example:
+
+```Shell
+go2cs -o -i D:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue
+```
+
+This will convert Go code to C#. You can then build and run both the Go and C# versions and compare results.
+
 ## Installation
 
 > There's no official release yet, but you can compile the code to produce a `go2cs` executable.
 
-1. Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. This should compile as a standalone executable for your target platform with no external dependencies.
-
-2. Optionally extract the pre-converted C# Go Standard Library source code into the desired target path, by default `%GOPATH\src\go2cs\`
+Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. This should compile as a standalone executable for your target platform with no external dependencies, see [publish profiles](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go2cs/Properties/PublishProfiles).
 
 ## Usage
 
