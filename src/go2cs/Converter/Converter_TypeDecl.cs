@@ -232,7 +232,7 @@ namespace go2cs
 
                         if (parts.Length > 0)
                         {
-                            string result = parts[parts.Length - 1];
+                            string result = parts[^1];
                             signature = string.Join(", ", parts.Take(parts.Length - 1));
 
                             m_targetFile.Append($"{Spacing()}public delegate {result} {identifier}({signature});");

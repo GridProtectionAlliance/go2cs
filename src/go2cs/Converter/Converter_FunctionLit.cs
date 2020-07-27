@@ -108,7 +108,34 @@ namespace go2cs
                     }
                 }
             }
-                
+            RequiredUsings.Add("System");
+
+            string typeList = signature.GenerateParameterTypeList();
+            string resultSignature = signature.GenerateResultSignature();
+            string typeName, fullTypeName;
+
+            if (resultSignature == "void")
+            {
+                if (string.IsNullOrEmpty(typeList))
+                {
+                    typeName = "Action";
+                    fullTypeName = "System.Action";
+                }
+                else
+                {
+                    typeName = $"Action<{typeList}>";
+                    fullTypeName = $"System.Action<{typeList}>";
+                }
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(typeList))
+                    typeList = $"{typeList}, ";
+
+                typeName = $"Func<{typeList}{resultSignature}>";
+                fullTypeName = $"System.Func<{typeList}{resultSignature}>";
+            }
+
             // Update expression operand (managed in ScannerBase_Expression.cs)
             Operands[operandContext] = new ExpressionInfo
             {
@@ -116,8 +143,8 @@ namespace go2cs
                 Type = new TypeInfo
                 {
                     Name = parametersSignature,
-                    TypeName = parametersSignature,
-                    FullTypeName = parametersSignature,
+                    TypeName = typeName,
+                    FullTypeName = fullTypeName,
                     TypeClass = TypeClass.Function
                 }
             };

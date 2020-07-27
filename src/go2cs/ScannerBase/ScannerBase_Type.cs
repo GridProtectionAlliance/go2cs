@@ -21,9 +21,7 @@
 //
 //******************************************************************************************************
 
-using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
-using System;
 using System.Diagnostics;
 using System.Linq;
 

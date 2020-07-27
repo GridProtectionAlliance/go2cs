@@ -39,12 +39,15 @@ namespace go2cs
 
         public override void EnterSignature(GoParser.SignatureContext context)
         {
-            Result = new List<ParameterInfo>(new[] { new ParameterInfo
+            Result = new List<ParameterInfo>(new[]
             {
-                Name = "",
-                Type = TypeInfo.VoidType,
-                IsVariadic = false
-            }});
+                new ParameterInfo
+                {
+                    Name = "",
+                    Type = TypeInfo.VoidType,
+                    IsVariadic = false
+                }
+            });
         }
 
         public override void ExitSignature(GoParser.SignatureContext context)

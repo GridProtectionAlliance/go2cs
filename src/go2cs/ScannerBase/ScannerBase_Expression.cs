@@ -209,14 +209,14 @@ namespace go2cs
 
             PrimaryExpressions.TryGetValue(context.primaryExpr(), out ExpressionInfo primaryExpression);
 
-            if (!(primaryExpression is null) && !string.IsNullOrEmpty(primaryExpression.Text))
-                primaryExpression.Text = SanitizedIdentifier(primaryExpression.Text);
+            //if (!(primaryExpression is null) && !string.IsNullOrEmpty(primaryExpression.Text))
+            //    primaryExpression.Text = SanitizedIdentifier(primaryExpression.Text);
 
             if (Operands.TryGetValue(context.operand(), out ExpressionInfo operand))
             {
                 PrimaryExpressions[context] = new ExpressionInfo
                 {
-                    Text = SanitizedIdentifier(operand.Text),
+                    Text = operand.Text,
                     Type = operand.Type
                 };
             }
@@ -486,10 +486,11 @@ namespace go2cs
                 string value = context.IMAGINARY_LIT().GetText();
                 bool endsWith_i = value.EndsWith("i");
                 value = endsWith_i ? value.Substring(0, value.Length - 1) : value;
-                basicLiteral = endsWith_i ? $"i({value})" : value;
 
                 if (float.TryParse(value, out _))
                 {
+                    basicLiteral = endsWith_i ? $"i({value}F)" : $"{value}F";
+
                     typeInfo = new TypeInfo
                     {
                         Name = "complex64",
@@ -500,6 +501,8 @@ namespace go2cs
                 }
                 else
                 {
+                    basicLiteral = endsWith_i ? $"i({value}D)" : $"{value}D";
+
                     typeInfo = new TypeInfo
                     {
                         Name = "Complex",
@@ -515,6 +518,8 @@ namespace go2cs
 
                 if (float.TryParse(basicLiteral, out _))
                 {
+                    basicLiteral += "F";
+
                     typeInfo = new TypeInfo
                     {
                         Name = "float",
@@ -525,6 +530,8 @@ namespace go2cs
                 }
                 else
                 {
+                    basicLiteral += "D";
+
                     typeInfo = new TypeInfo
                     {
                         Name = "double",
@@ -540,6 +547,8 @@ namespace go2cs
 
                 if (long.TryParse(basicLiteral, out _))
                 {
+                    basicLiteral += "L";
+
                     typeInfo = new TypeInfo
                     {
                         Name = "long",
@@ -550,6 +559,8 @@ namespace go2cs
                 }
                 else
                 {
+                    basicLiteral += "UL";
+
                     typeInfo = new TypeInfo
                     {
                         Name = "ulong",

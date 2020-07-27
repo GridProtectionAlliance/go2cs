@@ -30,10 +30,10 @@ namespace go2cs
     public partial class Converter
     {
         private readonly Stack<StringBuilder> m_blocks = new Stack<StringBuilder>();
-        private readonly Stack<String> m_blockInnerPrefixInjection = new Stack<string>();
-        private readonly Stack<String> m_blockInnerSuffixInjection = new Stack<string>();
-        private readonly Stack<String> m_blockOuterPrefixInjection = new Stack<string>();
-        private readonly Stack<String> m_blockOuterSuffixInjection = new Stack<string>();
+        private readonly Stack<string> m_blockInnerPrefixInjection = new Stack<string>();
+        private readonly Stack<string> m_blockInnerSuffixInjection = new Stack<string>();
+        private readonly Stack<string> m_blockOuterPrefixInjection = new Stack<string>();
+        private readonly Stack<string> m_blockOuterSuffixInjection = new Stack<string>();
         private bool m_firstStatementIsReturn;
 
         private void PushBlock()

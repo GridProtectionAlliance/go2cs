@@ -286,7 +286,7 @@ namespace go2cs
 
                 for (int i = 0; i < length; i++)
                 {
-                    statement.Append($"{Spacing()}var {identifiers[i]} = {expressions[i]};");
+                    statement.Append($"{Spacing()}{expressions[i].Type?.TypeName ?? "var"} {identifiers[i]} = {expressions[i]};");
 
                     // Since multiple declarations can be on one line, only check for comments after last declaration
                     if (i < length - 1)
