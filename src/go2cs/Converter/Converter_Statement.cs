@@ -21,7 +21,6 @@
 //
 //******************************************************************************************************
 
-using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
@@ -37,9 +36,6 @@ namespace go2cs
         public const string IfElseBreakMarker = ">>MARKER:IFELSEBREAK_LEVEL_{0}<<";
         public const string IfExpressionMarker = ">>MARKER:IFEXPR_LEVEL_{0}<<";
         public const string IfStatementMarker = ">>MARKER:IFSTATEMENT_LEVEL_{0}<<";
-        public const string ExprSwitchExpressionMarker = ">>MARKER:EXPRSWITCH_LEVEL_{0}<<";
-        public const string ExprSwitchCaseTypeMarker = ">>MARKER:EXPRSWITCHCASE_LEVEL_{0}<<";
-        public const string ExprSwitchStatementMarker = ">>MARKER:EXPRSWITCHSTATEMENT_LEVEL_{0}<<";
         public const string TypeSwitchExpressionMarker = ">>MARKER:TYPESWITCH_LEVEL_{0}<<";
         public const string TypeSwitchCaseTypeMarker = ">>MARKER:TYPESWITCHCASE_LEVEL_{0}<<";
         public const string TypeSwitchStatementMarker = ">>MARKER:TYPESWITCHSTATEMENT_LEVEL_{0}<<";
@@ -53,10 +49,8 @@ namespace go2cs
         private readonly Dictionary<string, bool> m_labels = new Dictionary<string, bool>(StringComparer.Ordinal);
         private readonly Stack<HashSet<string>> m_blockLabeledContinues = new Stack<HashSet<string>>();
         private readonly Stack<HashSet<string>> m_blockLabeledBreaks = new Stack<HashSet<string>>();
-        private readonly Stack<StringBuilder> m_exprSwitchDefaultCase = new Stack<StringBuilder>();
         private readonly Stack<StringBuilder> m_typeSwitchDefaultCase = new Stack<StringBuilder>();
         private int m_ifExpressionLevel;
-        private int m_exprSwitchExpressionLevel;
         private int m_typeSwitchExpressionLevel;
         private int m_forExpressionLevel;
         private bool m_fallThrough;
@@ -513,130 +507,6 @@ namespace go2cs
                 m_targetFile.AppendLine();
 
             m_ifExpressionLevel--;
-        }
-
-        public override void EnterExprSwitchStmt(GoParser.ExprSwitchStmtContext context)
-        {
-            // exprSwitchStmt
-            //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
-
-            m_exprSwitchExpressionLevel++;
-
-            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
-            {
-                if (!(context.simpleStmt().shortVarDecl() is null))
-                {
-                    // Any declared variable will be scoped to switch statement, so create a sub-block for it
-                    m_targetFile.AppendLine($"{Spacing()}{{");
-                    IndentLevel++;
-                }
-
-                m_targetFile.Append(string.Format(ExprSwitchStatementMarker, m_exprSwitchExpressionLevel));
-            }
-
-            if (context.expression() is null)
-                m_targetFile.Append($"{Spacing()}Switch()");
-            else
-                m_targetFile.Append($"{Spacing()}Switch({string.Format(ExprSwitchExpressionMarker, m_exprSwitchExpressionLevel)})");
-
-            m_exprSwitchDefaultCase.Push(new StringBuilder());
-        }
-
-        public override void EnterExprCaseClause(GoParser.ExprCaseClauseContext context)
-        {
-            // exprSwitchStmt
-            //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
-
-            // exprCaseClause
-            //     : exprSwitchCase ':' statementList
-
-            // exprSwitchCase
-            //     : 'case' expressionList | 'default'
-
-            if (context.exprSwitchCase().expressionList() is null)
-                m_exprSwitchDefaultCase.Peek().Append($"{Environment.NewLine}{Spacing()}.Default(() =>{Environment.NewLine}{Spacing()}{{{CheckForCommentsLeft(context.statementList(), 1)}");
-            else
-                m_targetFile.Append($"{Environment.NewLine}{Spacing()}.Case({string.Format(ExprSwitchCaseTypeMarker, m_exprSwitchExpressionLevel)})(() =>{Environment.NewLine}{Spacing()}{{{CheckForCommentsLeft(context.statementList(), 1)}");
-
-            IndentLevel++;
-
-            PushBlock();
-        }
-
-        public override void ExitExprCaseClause(GoParser.ExprCaseClauseContext context)
-        {
-            // exprSwitchStmt
-            //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
-
-            // exprCaseClause
-            //     : exprSwitchCase ':' statementList
-
-            // exprSwitchCase
-            //     : 'case' expressionList | 'default'
-
-            IndentLevel--;
-
-            GoParser.ExpressionListContext expressionList = context.exprSwitchCase().expressionList();
-
-            if (expressionList is null)
-            {
-                m_exprSwitchDefaultCase.Peek().Append($"{PopBlock(false)}{Spacing()}}})");
-            }
-            else
-            {
-                PopBlock();
-                m_targetFile.Append($"{Spacing()}}}{(m_fallThrough ? ", fallthrough" : "")})");
-
-                if (!ExpressionLists.TryGetValue(expressionList, out ExpressionInfo[] expressions))
-                    AddWarning(expressionList, $"Failed to find expression list for switch case statement: {context.exprSwitchCase().GetText()}");
-
-                // Replace switch expression case type marker
-                m_targetFile.Replace(string.Format(ExprSwitchCaseTypeMarker, m_exprSwitchExpressionLevel), string.Join(", ", expressions.Select(expr => expr.Text)));
-            }
-
-            // Reset fallthrough flag at the end of each case clause
-            m_fallThrough = false;
-        }
-
-        public override void ExitExprSwitchStmt(GoParser.ExprSwitchStmtContext context)
-        {
-            // exprSwitchStmt
-            //     : 'switch'(simpleStmt ';') ? expression ? '{' exprCaseClause * '}'
-
-            // Default case always needs to be last case clause in SwitchExpression - Go allows its declaration anywhere
-            m_targetFile.Append($"{m_exprSwitchDefaultCase.Pop()};{CheckForCommentsRight(context)}");
-
-            if (!(context.expression() is null))
-            {
-                if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
-                {
-                    // Replace switch expression marker
-                    m_targetFile.Replace(string.Format(ExprSwitchExpressionMarker, m_exprSwitchExpressionLevel), expression.Text);
-                }
-                else
-                {
-                    AddWarning(context, $"Failed to find expression for switch statement: {context.expression().GetText()}");
-                }
-            }
-
-            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
-            {
-                // TODO: Handle case where short val declaration re-declares a variable already defined in current scope - C# does not allow this. One option: cache current variable value and restore below
-                if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
-                    m_targetFile.Replace(string.Format(ExprSwitchStatementMarker, m_exprSwitchExpressionLevel), statement + Environment.NewLine);
-                else
-                    AddWarning(context, $"Failed to find simple statement for expression based switch statement: {context.simpleStmt().GetText()}");
-
-                // Close any locally scoped declared variable sub-block
-                if (!(context.simpleStmt().shortVarDecl() is null))
-                {
-                    IndentLevel--;
-                    m_targetFile.AppendLine();
-                    m_targetFile.Append($"{Spacing()}}}");
-                }
-            }
-
-            m_exprSwitchExpressionLevel--;
         }
 
         public override void EnterTypeSwitchStmt(GoParser.TypeSwitchStmtContext context)
