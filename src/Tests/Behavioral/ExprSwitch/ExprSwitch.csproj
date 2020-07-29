@@ -21,6 +21,12 @@
     <Reference Include="golib">
       <HintPath>$(GOPATH)\src\go2cs\golib\$(OutDir)golib.dll</HintPath>
     </Reference>
+    <Reference Include="fmt">
+      <HintPath>$(GOPATH)\src\go2cs\fmt\$(OutDir)fmt_package.dll</HintPath>
+    </Reference>
+    <Reference Include="time">
+      <HintPath>$(GOPATH)\src\go2cs\time\$(OutDir)time_package.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

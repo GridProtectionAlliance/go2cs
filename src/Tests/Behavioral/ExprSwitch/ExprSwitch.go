@@ -6,6 +6,13 @@ package main
 import "fmt"
 import "time"
 
+var x = 1
+
+func getNext() int {
+    x++
+    return x
+}
+
 func main() {
 
     // Here's a basic `switch`.
@@ -16,8 +23,11 @@ func main() {
         fmt.Println("one")
     case 2:
         fmt.Println("two")
-    case 3:
+    case 3: {
         fmt.Println("three")
+	}
+    default:
+        fmt.Println("unknown")
     }
 
     // You can use commas to separate multiple expressions
@@ -26,6 +36,8 @@ func main() {
     switch time.Now().Weekday() {
     case time.Saturday, time.Sunday:
         fmt.Println("It's the weekend")
+    case time.Monday:
+        fmt.Println("Ugh, it's Monday")
     default:
         fmt.Println("It's a weekday")
     }
@@ -45,6 +57,7 @@ func main() {
     // can use this to discover the type of an interface
     // value.  In this example, the variable `t` will have the
     // type corresponding to its clause.
+/*
     whatAmI := func(i interface{}) {
         switch t := i.(type) {
         case bool:
@@ -58,4 +71,18 @@ func main() {
     whatAmI(true)
     whatAmI(1)
     whatAmI("hey")
-}
+*/
+    // Here is a switch with simple statement and a fallthrough
+    switch j:=1; getNext() {
+    case 0:
+        fmt.Println("zero")
+    case 1, 2:
+        fmt.Println("one or two")
+        fallthrough
+    case 3:
+        fmt.Printf("three, but x=%d and local i = %d\n", x, j)
+        fallthrough
+    default:
+        fmt.Println("plus, always a default here because of fallthrough")
+    }
+ }

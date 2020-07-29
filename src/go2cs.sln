@@ -59,6 +59,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "behavioral", "behavioral", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArrayPassByValue", "Tests\Behavioral\ArrayPassByValue\ArrayPassByValue.csproj", "{3C8F82FF-CDD1-465E-8A51-2B15847BC8F5}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExprSwitch", "Tests\Behavioral\ExprSwitch\ExprSwitch.csproj", "{B71E95D6-505E-49B7-93F1-BEE6733B966D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -133,6 +135,10 @@ Global
 		{3C8F82FF-CDD1-465E-8A51-2B15847BC8F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C8F82FF-CDD1-465E-8A51-2B15847BC8F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C8F82FF-CDD1-465E-8A51-2B15847BC8F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B71E95D6-505E-49B7-93F1-BEE6733B966D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B71E95D6-505E-49B7-93F1-BEE6733B966D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B71E95D6-505E-49B7-93F1-BEE6733B966D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B71E95D6-505E-49B7-93F1-BEE6733B966D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -157,6 +163,7 @@ Global
 		{6F09E8D8-D54E-46B1-875C-987A40094FF5} = {6BC3FFAC-C517-49AC-85AB-87CD14858148}
 		{65A671E4-4025-48B4-8FD0-9C57FECA553A} = {6BC3FFAC-C517-49AC-85AB-87CD14858148}
 		{3C8F82FF-CDD1-465E-8A51-2B15847BC8F5} = {65A671E4-4025-48B4-8FD0-9C57FECA553A}
+		{B71E95D6-505E-49B7-93F1-BEE6733B966D} = {65A671E4-4025-48B4-8FD0-9C57FECA553A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}
