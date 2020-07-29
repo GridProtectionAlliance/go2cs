@@ -165,7 +165,8 @@ namespace go2cs
                     {
                         TypeClass = TypeClass.Simple,
                         TypeName = "long",
-                        FullTypeName = "System.Int64"
+                        FullTypeName = "System.Int64",
+                        IsConst = true
                     }
                 };
             }
@@ -178,7 +179,8 @@ namespace go2cs
                     {
                         TypeClass = TypeClass.Simple,
                         TypeName = "long",
-                        FullTypeName = "System.Int64"
+                        FullTypeName = "System.Int64",
+                        IsConst = true
                     }
                 };
 

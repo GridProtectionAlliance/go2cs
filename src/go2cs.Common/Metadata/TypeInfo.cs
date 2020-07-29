@@ -47,6 +47,7 @@ namespace go2cs.Metadata
         public TypeClass TypeClass;
         public bool IsPointer;
         public bool IsByRefPointer;
+        public bool IsConst;
 
         // TODO: Cross reference heap allocated variable, for
         // variables that leave the stack by "&" address,
@@ -61,7 +62,8 @@ namespace go2cs.Metadata
                 FullTypeName = FullTypeName,
                 TypeClass = TypeClass,
                 IsPointer = IsPointer,
-                IsByRefPointer = IsByRefPointer
+                IsByRefPointer = IsByRefPointer,
+                IsConst = IsConst
             };
         }
 
@@ -121,6 +123,7 @@ namespace go2cs.Metadata
                 TypeClass = TypeClass,
                 IsPointer = IsPointer,
                 IsByRefPointer = IsByRefPointer,
+                IsConst = IsConst,
                 Length = Length
             };
         }
@@ -142,6 +145,7 @@ namespace go2cs.Metadata
                 TypeClass = TypeClass,
                 IsPointer = IsPointer,
                 IsByRefPointer = IsByRefPointer,
+                IsConst = IsConst,
                 KeyTypeInfo = KeyTypeInfo,
                 ElementTypeInfo = ElementTypeInfo
             };

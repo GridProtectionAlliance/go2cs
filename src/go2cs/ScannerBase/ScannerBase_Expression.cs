@@ -99,7 +99,8 @@ namespace go2cs
                             Name = "bool",
                             TypeName = "bool",
                             FullTypeName = "System.Boolean",
-                            TypeClass = TypeClass.Simple
+                            TypeClass = TypeClass.Simple,
+                            IsConst = true
                         }
                     };
                 }
@@ -273,11 +274,18 @@ namespace go2cs
             {
                 // selector
                 //     : '.' IDENTIFIER
+
+                string selectionExpression = $"{primaryExpression.Text}.{SanitizedIdentifier(context.IDENTIFIER().GetText())}";
+                TypeInfo typeInfo = null;
+
                 // TODO: Will need to lookup IDENTIFIER type in metadata to determine type
+                if (primaryExpression.Type.FullTypeName == "System.Object")
+                    typeInfo = TypeInfo.VarType;
+
                 PrimaryExpressions[context] = new ExpressionInfo
                 {
-                    Text = $"{primaryExpression.Text}.{SanitizedIdentifier(context.IDENTIFIER().GetText())}",
-                    Type = primaryExpression.Type
+                    Text = selectionExpression,
+                    Type = typeInfo ?? primaryExpression.Type
                 };
             }
             else if (!(context.index() is null))
@@ -525,7 +533,8 @@ namespace go2cs
                         Name = "float",
                         TypeName = "float",
                         FullTypeName = "System.Single",
-                        TypeClass = TypeClass.Simple
+                        TypeClass = TypeClass.Simple,
+                        IsConst = true
                     };
                 }
                 else
@@ -537,7 +546,8 @@ namespace go2cs
                         Name = "double",
                         TypeName = "double",
                         FullTypeName = "System.Double",
-                        TypeClass = TypeClass.Simple
+                        TypeClass = TypeClass.Simple,
+                        IsConst = true
                     };
                 }
             }
@@ -554,7 +564,8 @@ namespace go2cs
                         Name = "long",
                         TypeName = "long",
                         FullTypeName = "System.Int64",
-                        TypeClass = TypeClass.Simple
+                        TypeClass = TypeClass.Simple,
+                        IsConst = true
                     };
                 }
                 else
@@ -566,7 +577,8 @@ namespace go2cs
                         Name = "ulong",
                         TypeName = "ulong",
                         FullTypeName = "System.UInt64",
-                        TypeClass = TypeClass.Simple
+                        TypeClass = TypeClass.Simple,
+                        IsConst = true
                     };
                 }
             }
@@ -579,7 +591,8 @@ namespace go2cs
                     Name = "char",
                     TypeName = "char",
                     FullTypeName = "System.Char",
-                    TypeClass = TypeClass.Simple
+                    TypeClass = TypeClass.Simple,
+                    IsConst = true
                 };
             }
             else if (!(context.string_() is null))
@@ -591,7 +604,8 @@ namespace go2cs
                     Name = "@string",
                     TypeName = "@string",
                     FullTypeName = "go.@string",
-                    TypeClass = TypeClass.Simple
+                    TypeClass = TypeClass.Simple,
+                    IsConst = true
                 };
             }
             else if (!(context.NIL_LIT() is null))
@@ -665,7 +679,8 @@ namespace go2cs
                                 Name = "long",
                                 TypeName = "long",
                                 FullTypeName = "System.Int64",
-                                TypeClass = TypeClass.Simple
+                                TypeClass = TypeClass.Simple,
+                                IsConst = true
                             }
                         },
                         TypeClass = TypeClass.Array
