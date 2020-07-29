@@ -198,7 +198,7 @@ namespace go2cs
             return hiddenText;
         }
 
-        private string FixForwardSpacing(string source, int offsetLevel = 0, int indentLevel = -1, bool firstIsEOLComment = false)
+        protected string FixForwardSpacing(string source, int offsetLevel = 0, int indentLevel = -1, bool firstIsEOLComment = false)
         {
             string forwardSpacing = Spacing(offsetLevel, indentLevel);
             string[] lines = source.Split(NewLineDelimeters, StringSplitOptions.None);
