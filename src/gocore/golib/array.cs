@@ -123,7 +123,7 @@ namespace go
         public override int GetHashCode() => m_array.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj) => Equals(obj as IArray);
+        public override bool Equals(object? obj) => Equals(obj as IArray);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(IArray? other) => m_array.Equals(other as T[]);

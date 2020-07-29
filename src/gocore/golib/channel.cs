@@ -322,7 +322,7 @@ namespace go
                 return false;
             }
 
-            if (!m_queue.TryDequeue(out value))
+            if (!m_queue.TryDequeue(out value!))
                 return false;
 
             m_canAddEvent.Set();
@@ -388,7 +388,7 @@ namespace go
         {
             if (ReceiveIsReady)
             {
-                if (m_queue.TryDequeue(out value))
+                if (m_queue.TryDequeue(out value!))
                 {
                     m_canAddEvent.Set();
                     return true;

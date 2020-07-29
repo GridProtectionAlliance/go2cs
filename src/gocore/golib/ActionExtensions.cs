@@ -64,7 +64,9 @@ namespace go
                 .ContinueWith(task => action(cancellationToken), cancellationToken)
                 .ContinueWith(task =>
                 {
-                    // ReSharper disable once PossibleNullReferenceException
+                    if (task.Exception is null)
+                        return;
+
                     if (exceptionAction is null)
                         throw task.Exception;
 

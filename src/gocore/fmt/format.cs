@@ -45,7 +45,7 @@ namespace go
                 return err.Error();
 
             if (arg is bool)
-                return arg.ToString().ToLowerInvariant();
+                return arg.ToString()!.ToLowerInvariant();
 
             return arg?.ToString() ?? "<nil>";
         }

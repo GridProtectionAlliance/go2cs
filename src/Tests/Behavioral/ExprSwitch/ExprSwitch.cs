@@ -96,7 +96,7 @@ namespace go
                 }
                 if (fallthrough || getNext() == 3L)
                 {
-                    fmt.Printf("three, but x=%d and local i = %d\n", x, j);
+                    fmt.Printf("three, but x=%d and j = %d\n", x, j);
                 }
                 // default:
                 fmt.Println("plus, always a default here because of fallthrough");

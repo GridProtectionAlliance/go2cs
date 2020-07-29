@@ -257,7 +257,7 @@ namespace go
         public override int GetHashCode() => m_array is null ? 0 : m_array.GetHashCode() ^ m_low ^ m_length;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj) => Equals(obj as ISlice);
+        public override bool Equals(object? obj) => Equals(obj as ISlice);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(ISlice? other) => other?.Array == m_array && other?.Low == m_low && other.Length == m_length;

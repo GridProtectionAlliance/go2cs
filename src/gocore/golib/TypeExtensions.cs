@@ -49,7 +49,7 @@ namespace go
             public TypePrecedenceComparer(Type targetType) => m_targetType = targetType;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override int Compare(Type x, Type y) => 
+            public override int Compare(Type? x, Type? y) => 
                 Comparer<int>.Default.Compare(RelationDistance(x), RelationDistance(y));
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -128,7 +128,10 @@ namespace go
                     .Where(methodInfo => methodInfo.IsDefined(typeof(ExtensionAttribute), false));
             }
 
-            string name = assembly.FullName;
+            string? name = assembly.FullName;
+
+            if (string.IsNullOrEmpty(name))
+                return;
 
             // Ignore extensions methods from the .NET framework
             if (name.StartsWith("System.") || name.StartsWith("netstandard"))

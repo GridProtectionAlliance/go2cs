@@ -153,7 +153,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode() => ToString().GetHashCode();
 
-        public string ToString(IFormatProvider provider) => ToString().ToString(provider);
+        public string ToString(IFormatProvider? provider) => ToString().ToString(provider);
 
         public TypeCode GetTypeCode() => TypeCode.String;
 
@@ -273,35 +273,35 @@ namespace go
 
         int IReadOnlyCollection<byte>.Count => Length;
 
-        bool IConvertible.ToBoolean(IFormatProvider provider) => ((IConvertible)ToString()).ToBoolean(provider);
+        bool IConvertible.ToBoolean(IFormatProvider? provider) => ((IConvertible)ToString()).ToBoolean(provider);
 
-        char IConvertible.ToChar(IFormatProvider provider) => ((IConvertible)ToString()).ToChar(provider);
+        char IConvertible.ToChar(IFormatProvider? provider) => ((IConvertible)ToString()).ToChar(provider);
 
-        sbyte IConvertible.ToSByte(IFormatProvider provider) => ((IConvertible)ToString()).ToSByte(provider);
+        sbyte IConvertible.ToSByte(IFormatProvider? provider) => ((IConvertible)ToString()).ToSByte(provider);
 
-        byte IConvertible.ToByte(IFormatProvider provider) => ((IConvertible)ToString()).ToByte(provider);
+        byte IConvertible.ToByte(IFormatProvider? provider) => ((IConvertible)ToString()).ToByte(provider);
 
-        short IConvertible.ToInt16(IFormatProvider provider) => ((IConvertible)ToString()).ToInt16(provider);
+        short IConvertible.ToInt16(IFormatProvider? provider) => ((IConvertible)ToString()).ToInt16(provider);
 
-        ushort IConvertible.ToUInt16(IFormatProvider provider) => ((IConvertible)ToString()).ToUInt16(provider);
+        ushort IConvertible.ToUInt16(IFormatProvider? provider) => ((IConvertible)ToString()).ToUInt16(provider);
 
-        int IConvertible.ToInt32(IFormatProvider provider) => ((IConvertible)ToString()).ToInt32(provider);
+        int IConvertible.ToInt32(IFormatProvider? provider) => ((IConvertible)ToString()).ToInt32(provider);
 
-        uint IConvertible.ToUInt32(IFormatProvider provider) => ((IConvertible)ToString()).ToUInt32(provider);
+        uint IConvertible.ToUInt32(IFormatProvider? provider) => ((IConvertible)ToString()).ToUInt32(provider);
 
-        long IConvertible.ToInt64(IFormatProvider provider) => ((IConvertible)ToString()).ToInt64(provider);
+        long IConvertible.ToInt64(IFormatProvider? provider) => ((IConvertible)ToString()).ToInt64(provider);
 
-        ulong IConvertible.ToUInt64(IFormatProvider provider) => ((IConvertible)ToString()).ToUInt64(provider);
+        ulong IConvertible.ToUInt64(IFormatProvider? provider) => ((IConvertible)ToString()).ToUInt64(provider);
 
-        float IConvertible.ToSingle(IFormatProvider provider) => ((IConvertible)ToString()).ToSingle(provider);
+        float IConvertible.ToSingle(IFormatProvider? provider) => ((IConvertible)ToString()).ToSingle(provider);
 
-        double IConvertible.ToDouble(IFormatProvider provider) => ((IConvertible)ToString()).ToDouble(provider);
+        double IConvertible.ToDouble(IFormatProvider? provider) => ((IConvertible)ToString()).ToDouble(provider);
 
-        decimal IConvertible.ToDecimal(IFormatProvider provider) => ((IConvertible)ToString()).ToDecimal(provider);
+        decimal IConvertible.ToDecimal(IFormatProvider? provider) => ((IConvertible)ToString()).ToDecimal(provider);
 
-        DateTime IConvertible.ToDateTime(IFormatProvider provider) => ((IConvertible)ToString()).ToDateTime(provider);
+        DateTime IConvertible.ToDateTime(IFormatProvider? provider) => ((IConvertible)ToString()).ToDateTime(provider);
 
-        object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)ToString()).ToType(conversionType, provider);
+        object IConvertible.ToType(Type conversionType, IFormatProvider? provider) => ((IConvertible)ToString()).ToType(conversionType, provider);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         IEnumerator IEnumerable.GetEnumerator() => Value.GetEnumerator();

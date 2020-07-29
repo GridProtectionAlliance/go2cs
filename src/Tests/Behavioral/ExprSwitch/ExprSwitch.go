@@ -80,7 +80,7 @@ func main() {
         fmt.Println("one or two")
         fallthrough
     case 3:
-        fmt.Printf("three, but x=%d and local i = %d\n", x, j)
+        fmt.Printf("three, but x=%d and j = %d\n", x, j)
         fallthrough
     default:
         fmt.Println("plus, always a default here because of fallthrough")

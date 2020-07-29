@@ -88,7 +88,7 @@ namespace go
         public bool TryGetValue(TKey key, out TValue value)
         {
             if (!(m_map is null))
-                return m_map.TryGetValue(key, out value);
+                return m_map.TryGetValue(key, out value!);
 
             value = default!;
             return false;
