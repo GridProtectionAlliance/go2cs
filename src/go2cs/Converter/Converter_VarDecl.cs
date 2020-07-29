@@ -92,7 +92,7 @@ namespace go2cs
                 m_targetFile.Append($"{Spacing()}");
 
                 if (!m_inFunction)
-                    m_targetFile.Append(char.IsUpper(identifier[0]) ? "public " : "private ");
+                    m_targetFile.Append($"{(char.IsUpper(identifier[0]) ? "public" : "private")} static ");
 
                 m_targetFile.Append($"{typeName} {identifier}");
 
