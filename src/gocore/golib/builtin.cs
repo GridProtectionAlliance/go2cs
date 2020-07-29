@@ -50,6 +50,8 @@ namespace go
 {
     public static class builtin
     {
+        private static readonly ThreadLocal<bool> s_fallthrough = new ThreadLocal<bool>();
+
         /// <summary>
         /// Predeclared identifier representing the untyped integer ordinal number of the current
         /// const specification in a (usually parenthesized) const declaration.
@@ -86,7 +88,21 @@ namespace go
         /// Note that <c>fallthrough</c> is a reserved Go keyword, so it will not be
         /// used as a variable name.
         /// </remarks>
-        public const bool fallthrough = true;
+        public static bool fallthrough
+        {
+            get
+            {
+                if (!s_fallthrough.Value)
+                    return false;
+                
+                s_fallthrough.Value = false;
+                return true;
+            }
+            set
+            {
+                s_fallthrough.Value = value;
+            }
+        }
 
         /// <summary>
         /// Appends elements to the end of a slice. If it has sufficient capacity, the destination is
@@ -339,12 +355,12 @@ namespace go
             Type type = typeof(T);
 
             if (type == typeof(slice<>))
-                return (T)Activator.CreateInstance(type, p1, p2, 0);
+                return (T)Activator.CreateInstance(type, p1, p2, 0)!;
 
             if (type == typeof(channel<>) && p1 == 0)
                 p1 = 1;
 
-            return (T)Activator.CreateInstance(type, p1);
+            return (T)Activator.CreateInstance(type, p1)!;
         }
 
         /// <summary>
@@ -538,6 +554,9 @@ namespace go
         /// <returns>Common Go type name for the specified <paramref name="type"/>.</returns>
         public static string GetGoTypeName(Type type)
         {
+            if (type is null)
+                return "nil";
+
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.String:
@@ -568,7 +587,7 @@ namespace go
                     return "float64";
                 default:
                 {
-                    string typeName = type.FullName;
+                    string typeName = type.FullName?? type.Name;
 
                     switch (typeName)
                     {
