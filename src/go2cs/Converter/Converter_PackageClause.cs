@@ -72,6 +72,9 @@ namespace go2cs
 
             if (!string.IsNullOrWhiteSpace(headerLevelComments))
             {
+                if (m_targetFile.Length == 0)
+                    headerLevelComments = headerLevelComments.TrimStart();
+
                 m_targetFile.Append(headerLevelComments);
 
                 if (!EndsWithLineFeed(headerLevelComments))
