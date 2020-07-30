@@ -63,7 +63,8 @@ Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. This should comp
 |:------:|:------------|
 | -l | (Default: false) Set to only convert local files in source path. Default is to recursively convert all encountered "import" packages. |
 | -o | (Default: false) Set to overwrite, i.e., reconvert, any existing local converted files. |
-| -i | (Default: false) Set to overwrite, i.e., reconvert, any existing files from imported packages. |     
+| -i | (Default: false) Set to overwrite, i.e., reconvert, any existing files from imported packages. |
+| -h | (Default: false) Set to exclude header conversion comments which including original source file path and conversion time. |
 | -t | (Default: false) Set to show syntax tree of parsed source file. |
 | -e | (Default: $.^) Regular expression to exclude certain files from conversion, e.g., "^.+\_test\\.go$". Defaults to exclude none. |
 | -s | (Default: false) Set to convert needed packages from Go standard library files found in "%GOROOT%\\src". |
