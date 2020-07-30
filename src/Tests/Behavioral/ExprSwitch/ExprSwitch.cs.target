@@ -59,35 +59,15 @@ namespace go
             else
                 fmt.Println("It's after noon"); 
 
-            // A type `switch` compares types instead of values.  You
-            // can use this to discover the type of an interface
-            // value.  In this example, the variable `t` will have the
-            // type corresponding to its clause.
-            Action<object> whatAmI = i =>
-            {
-                switch (i.type())
-                {
-                    case bool t:
-                        fmt.Println("I'm a bool");
-                        break;
-                    case long t:
-                        fmt.Println($"I'm an int");
-                        break;
-                    default: {
-                        var t = i;
-                        fmt.Printf("Don't know type {0}\n", GetGoTypeName(t.GetType()));
-                        break;
-                    }
-                }
-            }
-
-            whatAmI(true);
-            whatAmI(1L);
-            whatAmI("hey");
             // Here is a switch with simple statement and a fallthrough
             {
                 long j = 1L;
 
+                if (getNext() == -1L)
+                {
+                    fmt.Println("negative");
+                    goto __switch_break0;
+                }
                 if (getNext() == 0L)
                 {
                     fmt.Println("zero");
@@ -100,7 +80,7 @@ namespace go
                 }
                 if (fallthrough || getNext() == 3L)
                 {
-                    fmt.Printf("three, but x=%d and local i = %d\n", x, j);
+                    fmt.Printf("three, but x=%d and j = %d\n", x, j);
                 }
                 // default:
                 fmt.Println("plus, always a default here because of fallthrough");

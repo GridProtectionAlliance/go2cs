@@ -1,8 +1,6 @@
 // _Switch statements_ express conditionals across many
 // branches.
 
-// package main -- go2cs converted at 2020 July 29 04:18:06 UTC
-// Original source: D:\Projects\go2cs\src\Tests\Behavioral\ExprSwitch\ExprSwitch.go
 using fmt = go.fmt_package;
 using time = go.time_package;
 using static go.builtin;
@@ -61,29 +59,15 @@ namespace go
             else
                 fmt.Println("It's after noon"); 
 
-            // A type `switch` compares types instead of values.  You
-            // can use this to discover the type of an interface
-            // value.  In this example, the variable `t` will have the
-            // type corresponding to its clause.
-            /*
-                whatAmI := func(i interface{}) {
-                    switch t := i.(type) {
-                    case bool:
-                        fmt.Println("I'm a bool")
-                    case int:
-                        fmt.Println("I'm an int")
-                    default:
-                        fmt.Printf("Don't know type %T\n", t)
-                    }
-                }
-                whatAmI(true)
-                whatAmI(1)
-                whatAmI("hey")
-            */
             // Here is a switch with simple statement and a fallthrough
             {
                 long j = 1L;
 
+                if (getNext() == -1L)
+                {
+                    fmt.Println("negative");
+                    goto __switch_break0;
+                }
                 if (getNext() == 0L)
                 {
                     fmt.Println("zero");
