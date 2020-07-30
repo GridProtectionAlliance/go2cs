@@ -83,16 +83,27 @@ namespace BehavioralTests
                 RedirectStandardError = true
             };
 
-            Process process = new Process
+            using Process process = new Process
             {
-                StartInfo = startInfo, 
+                StartInfo = startInfo,
                 EnableRaisingEvents = true
             };
-            
-            process.OutputDataReceived += (_, e) => TestContext.WriteLine(e.Data);
-            process.ErrorDataReceived += (_, e) => TestContext.WriteLine($"[ErrOut]: {e.Data}");
-            
+
+            process.OutputDataReceived += (_, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                    TestContext?.WriteLine(e.Data);
+            };
+
+            process.ErrorDataReceived += (_, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                    TestContext?.WriteLine($"[ErrOut]: {e.Data}");
+            };
+
             process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
             process.WaitForExit();
 
             return process.ExitCode;
