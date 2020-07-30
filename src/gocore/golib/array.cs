@@ -70,7 +70,19 @@ namespace go
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => ref m_array[index];
         }
-        
+
+        public ref T this[long index]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref m_array[index];
+        }
+
+        public ref T this[ulong index]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref this[(long)index];
+        }
+
         // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public slice<T> Slice(int start, int length) =>
