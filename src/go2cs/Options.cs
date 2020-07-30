@@ -40,82 +40,50 @@ namespace go2cs
         private readonly Regex m_excludeExpression;
 
         [Option('l', Required = false, Default = false, HelpText = "Set to only convert local files in source path. Default is to recursively convert all encountered \"import\" packages.")]
-        public bool LocalConvertOnly
-        {
-            get;
-        }
+        public bool LocalConvertOnly { get; }
 
         [Option('o', Required = false, Default = false, HelpText = "Set to overwrite, i.e., reconvert, any existing local converted files.")]
-        public bool OverwriteExistingFiles
-        {
-            get;
-        }
+        public bool OverwriteExistingFiles { get; }
 
         [Option('i', Required = false, Default = false, HelpText = "Set to overwrite, i.e., reconvert, any existing files from imported packages.")]
-        public bool OverwriteExistingPackages
-        {
-            get;
-        }
+        public bool OverwriteExistingPackages { get; }
+
+        [Option('h', Required = false, Default = false, HelpText = "Set to exclude header conversion comments which include original source file path and conversion time.")]
+        public bool ExcludeHeaderComments { get; }
 
         [Option('t', Required = false, Default = false, HelpText = "Set to show syntax tree of parsed source file.")]
-        public bool ShowParseTree
-        {
-            get;
-        }
+        public bool ShowParseTree { get; }
 
         [Option('e', Required = false, Default = DefaultExcludeFiles, HelpText = "Regular expression to exclude certain files from conversion, e.g., \"^.+_test\\.go$\". Defaults to exclude none.")]
-        public string ExcludeFiles
-        {
-            get;
-        }
+        public string ExcludeFiles { get; }
 
         // Default is false since it is desirable to be able to download a pre-converted set of standard library files
         [Option('s', Required = false, Default = false, HelpText = "Set to convert needed packages from Go standard library files found in \"%GOROOT%\\src\".")]
-        public bool ConvertStandardLibrary
-        {
-            get;
-        }
+        public bool ConvertStandardLibrary { get; }
 
         [Option('r', Required = false, Default = false, HelpText = "Set to recursively convert source files in subdirectories when a Go source path is specified.")]
-        public bool RecurseSubdirectories
-        {
-            get;
-        }
+        public bool RecurseSubdirectories { get; }
 
         [Option('m', Required = false, Default = false, HelpText = "Set to force update of pre-scan metadata.")]
-        public bool ForceMetadataUpdate
-        {
-            get;
-        }
+        public bool ForceMetadataUpdate { get; }
 
         [Option('u', Required = false, Default = false, HelpText = "Set to only update pre-scan metadata and skip conversion operations.")]
-        public bool OnlyUpdateMetadata
-        {
-            get;
-        }
+        public bool OnlyUpdateMetadata { get; }
 
         [Option('g', Required = false, Default = DefaultTargetGoSrcPath, HelpText = "Target path for converted Go standard library source files.")]
-        public string TargetGoSrcPath
-        {
-            get;
-        }
+        public string TargetGoSrcPath { get; }
 
         [Value(0, Required = true, HelpText = "Go source path or file name to convert.")]
-        public string SourcePath
-        {
-            get;
-        }
+        public string SourcePath { get; }
 
         [Value(1, Required = false, HelpText = "Target path for converted files. If not specified, all files (except for Go standard library files) will be converted to source path.")]
-        public string TargetPath
-        {
-            get;
-        }
+        public string TargetPath { get; }
 
         public Options(
             bool localConvertOnly,
             bool overwriteExistingFiles,
             bool overwriteExistingPackages,
+            bool excludeHeaderComments,
             bool showParseTree,
             string excludeFiles,
             bool convertStandardLibrary,
@@ -135,6 +103,7 @@ namespace go2cs
             LocalConvertOnly = localConvertOnly;
             OverwriteExistingFiles = overwriteExistingFiles;
             OverwriteExistingPackages = overwriteExistingPackages;
+            ExcludeHeaderComments = excludeHeaderComments;
             ShowParseTree = showParseTree;
             ExcludeFiles = excludeFiles;
             ConvertStandardLibrary = convertStandardLibrary;
@@ -147,6 +116,24 @@ namespace go2cs
 
             m_excludeExpression = new Regex(ExcludeFiles, RegexOptions.Compiled | RegexOptions.Singleline);
         }
+
+        public Regex GetExcludeExpression() => m_excludeExpression;
+
+        public static Options Clone(Options options, bool overwriteExistingFiles, string sourcePath, string targetPath) => 
+            new Options(
+                options.LocalConvertOnly,
+                overwriteExistingFiles,
+                options.OverwriteExistingPackages,
+                options.ExcludeHeaderComments,
+                options.ShowParseTree, 
+                options.ExcludeFiles,
+                options.ConvertStandardLibrary,
+                options.RecurseSubdirectories,
+                options.ForceMetadataUpdate,
+                options.OnlyUpdateMetadata,
+                options.TargetGoSrcPath, 
+                sourcePath, 
+                targetPath);
 
         // Private constructor only used by examples
         private Options(bool localConvertOnly, string sourcePath, bool convertStandardLibrary = false, bool recurseSubdirectories = false)
@@ -163,24 +150,7 @@ namespace go2cs
             TargetGoSrcPath = null;
             SourcePath = sourcePath;
             TargetPath = null;
-       }
-
-        public Regex GetExcludeExpression() => m_excludeExpression;
-
-        public static Options Clone(Options options, bool overwriteExistingFiles, string sourcePath, string targetPath) => 
-            new Options(
-                options.LocalConvertOnly,
-                overwriteExistingFiles,
-                options.OverwriteExistingPackages,
-                options.ShowParseTree, 
-                options.ExcludeFiles,
-                options.ConvertStandardLibrary,
-                options.RecurseSubdirectories,
-                options.ForceMetadataUpdate,
-                options.OnlyUpdateMetadata,
-                options.TargetGoSrcPath, 
-                sourcePath, 
-                targetPath);
+        }
 
         [Usage]
         public static IEnumerable<Example> Examples

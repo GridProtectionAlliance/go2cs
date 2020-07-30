@@ -81,13 +81,15 @@ namespace go2cs
                     m_targetFile.AppendLine();
             }
 
-            m_targetFile.AppendLine($"// package {Package} -- go2cs converted at {DateTime.UtcNow:yyyy MMMM dd HH:mm:ss} UTC");
+            if (!Options.ExcludeHeaderComments)
+            {
+                m_targetFile.AppendLine($"// package {Package} -- go2cs converted at {DateTime.UtcNow:yyyy MMMM dd HH:mm:ss} UTC");
 
-            if (!PackageImport.Equals("main"))
-                m_targetFile.AppendLine($"// import \"{PackageImport}\" ==> using {PackageUsing}");
+                if (!PackageImport.Equals("main"))
+                    m_targetFile.AppendLine($"// import \"{PackageImport}\" ==> using {PackageUsing}");
 
-            m_targetFile.AppendLine($"// Original source: {SourceFileName}");
-
+                m_targetFile.AppendLine($"// Original source: {SourceFileName}");
+            }
 
             // Add commonly required using statements
             RequiredUsings.Add("static go.builtin");
