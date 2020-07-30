@@ -1,6 +1,6 @@
 # Conversion Strategies
 
-> Strategies updated on 7/23/2020 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
+> Strategies updated on 7/29/2020 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
 
 ## Package Conversion
 Each Go package is converted into static C# partial classes, e.g.: `public static partial class fmt_package`. Using a static partial class allows all functions within separate files to be available with a single import, e.g.: `using fmt = go.fmt_package;`.
@@ -22,12 +22,16 @@ Later, an option could be added to the conversion tool that would allow for 32-b
 
 Note that one sticking point with this strategy is that not all C# indexing constructs currently accept a `long`, so in some places a down-cast from `long` to `int` will be required. For example, although explicit indexers in C# support a `long`, [implicit index support](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support) currently only works with an `int`, this means range operation indices will need to be cast to `int`. FYI, [issue is being discussed](https://github.com/dotnet/runtime/issues/28070) for future C# runtime updates.
 
-## Switch Statements
-Go `switch` statements are very flexible, case statements do not automatically fall-through - so a `break` statement is not required. When the Go `fallthrough` keyword is used, the next case expression is evaluated. Based on work done with the [Manual Tour of Go Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions), converting to simple `if / else if` statements seems like the logical best choice.
+## Expression Switch Statements
+Go expression-based `switch` statements are very flexible. Case statements do not automatically fall-through, so no `break` operation is not required. When the Go `fallthrough` keyword is used, the next case expression is executed, bypassing expression evaluation. Based on work done with the [Manual Tour of Go Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions), converting to simple `if / else if / else` statements is the logical best choice for most cases.
 
-If the original Go `case` statements all use constants and no `fallthough` keyword is being used, a traditional C# `switch` should work OK. Because this creates additional conversion complexity for detection of the proper use case, all for the sake of simply using a switch statement, this will likely be deferred to later. However, as one of the primary `go2cs` goals is to produce visually similar code where possible, the task should not be abandoned.
+If the original Go `case` statements all use constants and no `fallthough` keyword is being used, a traditional C# `switch` seems to work OK. I believe an unhandled edge case may exist here if "re-evaluation" of expression at each case value is required by the original Go code (even though depending on such behavior seems like a poor design choice) since in C# the value is read once and cached, then each case expression is compared to cached expression result.
 
-> FYI, toyed around with an experimental [`SwitchExpression<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/experimental/SwitchExpression.cs) class that used chained expressions and evaluated case statements as lambdas. This generally works like original Go `switch` even with `fallthrough` statements, but resultant code was much more noisy and certainly no cleaner than `if / else if` expansions. It also began to create burdening edge cases with lambda case expressions and captured variables.
+For cases with non-constant expressions and no `fallthough` keyword, a simple `if / else if /else` patten works fine, where final `else` is default case handler.
+
+For cases that use the `fallthough` keyword, all case expressions have to be converted to standalone `if` statements using a thread local flag to check fall-through state and `goto` statements to handle `break` style operations to exit to end of switch. When the  `fallthough` keyword is used, this the most complex conversion scenario -- and the least pretty.
+
+> FYI, toyed around with an experimental [`SwitchExpression<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/experimental/SwitchExpression.cs) class that used chained expressions and evaluated case statements as lambdas. This generally works like original Go `switch` even with `fallthrough` statements, but resultant code was often more noisy and certainly no cleaner than simple `if / else if / else` expansions. It also began to create burdening edge cases with lambda case expressions and captured variables that did not exist in original code.
 
 ## Type Switch Statements
 In the case of Go type-based switch statements, the C# type-based pattern matching works well - even as a `switch` statement. For example, the following Go code using type-switch:
@@ -133,7 +137,7 @@ Also, when a type is embedded in another type, the derived type supports the ext
 This basically means that the proxied extension functions created for derived embedded type values will only be for those found during the conversion process, i.e., from a maintainability perspective these features end at conversion. If a new extension function is added in the C# code, the derived class will not automatically see it. Users will need to do one of the following: (1) maintain code in Go and reconvert, (2) manually add missing proxy extensions, or (3) move on without this Go coding construct in converted C# code, e.g., switching to explicitly implemented interfaces. That said, if things start converting very well in the future, one option could always be to continue direct coding in Go and use a [transpilation](https://en.wikipedia.org/wiki/Source-to-source_compiler) step to automatically convert the code to C# as a pre-build step.
 
 ## Return Tuples
-Many Go functions for built-in types return a tuple of "value and success" or just a "value" where only the declared return type determines which overload to use. To accommodate similar functionality in C#, an overload is defined that takes a bool that returns the tuple style return using a constant like `WithOK`, e.g.:
+Many Go functions for built-in types return a tuple of "value and success" or just a "value" where only the declared return type determines which overload to use. You cannot differentiate C# overloads by return type only, so to accommodate similar functionality in C# an overload is defined that takes a bool parameter. The overload that includes the bool parameter returns the tuple style return value, the actual value of the boolean parameter is ignored. To make this easier to read, a boolean constant like `WithOK` is used, e.g.:
 
 ```CSharp
 var v1 = m["Answer"]; // Does not fail if value doesn't exist, just returns default value
@@ -146,9 +150,16 @@ var n1 = r.Read(b);
 var (n2, err) = r.Read(b, WithErr);
 ```
 
-See [success tuple return example](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/moretypes/mutating-maps/main_package.cs).
+A possible conversion option seems to exist by always returning the tuple and just ignoring the second value of the tuple, e.g.:
+```CSharp
+var (n2, _) = r.Read(b);
+```
 
-Currently these optional tuple returns are not allowed in user code, so normal tuple handling for converted user code should be fine.
+However, these functions do seem to operate as separate overloads in Go such that the behavior of the function can change based on return type specified -- case in point: [type assertions](https://golang.org/ref/spec#Type_assertions). The single value return of a type assertion will cause a [`run-time panic`](https://golang.org/ref/spec#Run_time_panics) if the conversion fails, whereas the tuple return version always returns safely with a boolean success result as the second value.
+
+For an example, see [mutating-maps](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/moretypes/mutating-maps/main_package.cs) under the "moretypes" section in the manual Tour of Go conversions.
+
+Currently these optional tuple returns are not allowed in user code, so common tuple handling for converted user code should work as normal without special handling. The types that support tuple-returns are defined the [`gocore`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/gocore) library.
 
 ## Interfaces
 Go interfaces are not explicitly implemented. Instead, if extension-style functions exist that satisfy all defined interface methods, the class is said to implicitly implement the interface. To accommodate these duck-implemented interfaces, a generic class is created for each interface so that for a given type, interface extension methods can be looked up using reflection. To speed up this operation, as assemblies are loaded, extension methods are [cached in a dictionary](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/TypeExtensions.cs#L121) for quick lookup and any type-specific lookup operations are only done once statically during [type initialization](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/error.cs#L127). To make use of typed generic class any assignments to interface variables will be cast to generic type, for example, see equivalent C# code with [`As`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/error.cs#L50) function for handling Go duck-implemented interfaces:
@@ -159,7 +170,7 @@ var f = (MyFloat)(-math.Sqrt(2)); // MyFloat is a custom type
 a = Abser.As(f);                  // Succeeds only if MyFloat type implements Abser interface methods
 ```
 
-See [interface example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/methods/interfaces).
+For an example, see [interfaces](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/methods/interfaces) under the "methods" section in the manual Tour of Go conversions.
 
 ## Empty Interface
 In Go all objects are said to implement an interface with no methods, this is called the `EmptyInterface`. This operates fundamentally like .NET's `System.Object` class, consequently any time the `EmptyInterface` is encountered during conversion, it is simply replaced with `object`. If there are type specific semantic use cases where this does not work, this strategy may need to be reevaluated.
