@@ -118,8 +118,8 @@ namespace go2cs.Metadata
             return new ArrayTypeInfo
             {
                 Name = Name,
-                TypeName = TypeName,
-                FullTypeName = FullTypeName,
+                TypeName = $"array<{TypeName}>",
+                FullTypeName = $"go.array<{FullTypeName}>",
                 TypeClass = TypeClass,
                 IsPointer = IsPointer,
                 IsByRefPointer = IsByRefPointer,

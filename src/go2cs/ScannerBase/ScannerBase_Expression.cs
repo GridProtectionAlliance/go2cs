@@ -665,12 +665,12 @@ namespace go2cs
                 if (Types.TryGetValue(literalType.arrayType().elementType(), out typeInfo))
                 {
                     string typeName = typeInfo.TypeName;
-                    expressionText = $"new {typeName}[]{literalValue.GetText()}";
+                    expressionText = $"new array<{typeName}>(new {typeName}[]{literalValue.GetText()})";
                     typeInfo = new ArrayTypeInfo
                     {
                         Name = typeName,
-                        TypeName = typeName,
-                        FullTypeName = typeInfo.FullTypeName,
+                        TypeName = $"array<{typeName}>",
+                        FullTypeName = $"go.array<{typeInfo.FullTypeName}>",
                         Length = new ExpressionInfo
                         {
                             Text = literalType.arrayType().arrayLength().GetText(),
