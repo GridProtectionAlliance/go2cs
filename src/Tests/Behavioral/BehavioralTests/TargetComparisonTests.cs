@@ -59,6 +59,9 @@ namespace BehavioralTests
         [TestMethod]
         public void CheckExprSwitchResult() => CheckProjectAgainstTarget("ExprSwitch");
 
+        [TestMethod]
+        public void CheckTypeSwitchResult() => CheckProjectAgainstTarget("TypeSwitch");
+
         private void CheckProjectAgainstTarget(string targetProject)
         {
             string projectPath = Path.GetFullPath($"{RootPath}{targetProject}");

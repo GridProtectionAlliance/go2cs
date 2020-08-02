@@ -19,6 +19,8 @@
 //---------------------------------------------------------
 using System;
 using System.CodeDom.Compiler;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 <#=string.Join(Environment.NewLine, UsingStatements)#>
 <#if (!NamespacePrefix.Equals("go")) {#>

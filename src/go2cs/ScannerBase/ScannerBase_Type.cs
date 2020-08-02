@@ -22,7 +22,6 @@
 //******************************************************************************************************
 
 using go2cs.Metadata;
-using System.Diagnostics;
 using System.Linq;
 
 namespace go2cs
@@ -46,10 +45,10 @@ namespace go2cs
         //  conversion (required)
         protected readonly ParseTreeValues<TypeInfo> Types = new ParseTreeValues<TypeInfo>();
 
-        public override void EnterType_(GoParser.Type_Context context)
-        {
-            Debug.WriteLine($"Enter type: {context.GetText()} -- {context}");
-        }
+        //public override void EnterType_(GoParser.Type_Context context)
+        //{
+        //    Debug.WriteLine($"Enter type: {context.GetText()} -- {context}");
+        //}
 
         public override void ExitType_(GoParser.Type_Context context)
         {

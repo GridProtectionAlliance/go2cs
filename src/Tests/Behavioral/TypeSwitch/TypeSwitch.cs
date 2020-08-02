@@ -1,99 +1,43 @@
-using System;
 using fmt = go.fmt_package;
 using static go.builtin;
+using System;
 
 namespace go
 {
     public static partial class main_package
     {
-        public partial interface I
-        {
-            @string m();
-        }
-
-        public partial struct T : I
-        {
-            public @string name;
-            public I I;
-        }
-
-        public static @string m(this T @ref)
-        {
-            return @ref.name;
-        }
-
-        public partial struct S
-        {
-            public @string name;
-        }
-
-        public static @string m(this S @ref)
-        {
-            return "Am I an I?";
-        }
-
         private static void Main()
-        {
+        { 
             // A type `switch` compares types instead of values.  You
             // can use this to discover the type of an interface
             // value.  In this example, the variable `t` will have the
             // type corresponding to its clause.
             Action<object> whatAmI = i =>
             {
-                switch (i.type())
+                switch (i)
                 {
                     case bool t:
                         fmt.Println("I'm a bool");
                         break;
                     case long t:
-                        fmt.Println($"I'm an int");
+                        fmt.Printf("I'm an int, specifically type %T\n", t);
+                        break;
+                    case ulong t:
+                        fmt.Printf("I'm an int, specifically type %T\n", t);
                         break;
                     default:
-                        {
-                            var t = i;
-                            fmt.Printf("Don't know type {0}\n", GetGoTypeName(t.GetType()));
-                            break;
-                        }
+                    {
+                        var t = i;
+                        fmt.Printf("Don't know type %T\n", t);
+                        break;
+                    }
                 }
             };
-
             whatAmI(true);
             whatAmI(1L);
+            whatAmI(int64(2L));
+            whatAmI(uint64(2L));
             whatAmI("hey");
-
-            object x = 7; // x has dynamic type int and value 7
-            var i = x._<int>(); // i has type int and value 7
-            fmt.Println(i);
-
-            T y = default;
-			
-			y.name = "Me";
-
-            f(y);
-
-            object s = new S("you");
-
-            switch (s.type())
-            {
-                case I _:
-                    fmt.Println("S is an I!!");
-                    break;
-                case null:
-                case long _:
-                    fmt.Println("S is nil or an int");
-                    break;
-                default:
-                    fmt.Println("S is not an I");
-                    break;
-            }
-        }
-
-        private static void f(I y)
-        {
-            //s := y.(string)        // illegal: string does not implement I (missing method m)
-            //r := y.(io.Reader)     // r has type io.Reader and the dynamic type of y must implement both I and io.Reader
-
-            fmt.Println(y.m());
         }
     }
 }

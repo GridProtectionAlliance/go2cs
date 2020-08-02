@@ -44,7 +44,7 @@ using go;
         }
 
         [<#=GeneratedCodeAttribute#>]
-        <#=Scope#> struct <#=InterfaceName#><T> : <#=InterfaceName#>
+        <#=Scope#> class <#=InterfaceName#><T> : <#=InterfaceName#>
         {
             private T m_target;
             private readonly ptr<T>? m_target_ptr;

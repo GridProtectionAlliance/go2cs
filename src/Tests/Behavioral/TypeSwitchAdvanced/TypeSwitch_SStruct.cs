@@ -4,11 +4,13 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 August 14 00:22:21 UTC
+//     Generated on 2020 August 02 20:35:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
 using System.CodeDom.Compiler;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using fmt = go.fmt_package;
@@ -17,8 +19,8 @@ namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial struct S : EmptyInterface
+        [GeneratedCode("go2cs", "0.1.0.0")]
+        public partial struct S
         {
             // Constructors
             public S(NilType _)
@@ -26,7 +28,7 @@ namespace go
                 this.name = default;
             }
 
-            public S(@string name)
+            public S(@string name = default)
             {
                 this.name = name;
             }
@@ -48,7 +50,7 @@ namespace go
             public static implicit operator S(NilType nil) => default(S);
         }
 
-        [GeneratedCode("go2cs", "0.1.1.0")]
+        [GeneratedCode("go2cs", "0.1.0.0")]
         public static S S_cast(dynamic value)
         {
             return new S(value.name);
