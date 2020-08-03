@@ -50,6 +50,7 @@ namespace go2cs
             m_inFunction = true; // May need to scope certain objects, like consts, to current function
             m_originalFunctionName = context.IDENTIFIER().GetText();
             m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
+            m_variables.Clear();
 
             string scope = char.IsUpper(m_originalFunctionName[0]) ? "public" : "private";
 

@@ -69,6 +69,9 @@ namespace go2cs
                     // Any declared variable will be scoped to switch statement, so create a sub-block for it
                     m_targetFile.AppendLine($"{Spacing()}{{");
                     IndentLevel++;
+                    
+                    // Handle storing of current values of any redeclared variables
+                    m_targetFile.Append(OpenRedeclaredVariableBlock(context.simpleStmt().shortVarDecl(), m_exprSwitchExpressionLevel));
                 }
 
                 m_targetFile.Append(string.Format(ExprSwitchStatementMarker, m_exprSwitchExpressionLevel));
@@ -296,7 +299,6 @@ namespace go2cs
 
             if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
             {
-                // TODO: Handle case where short val declaration re-declares a variable already defined in current scope - C# does not allow this. One option: cache current variable value and restore below
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
                     m_targetFile.Replace(string.Format(ExprSwitchStatementMarker, m_exprSwitchExpressionLevel), $"{statement}{Environment.NewLine}");
                 else
@@ -305,6 +307,9 @@ namespace go2cs
                 // Close any locally scoped declared variable sub-block
                 if (!(context.simpleStmt().shortVarDecl() is null))
                 {
+                    // Handle restoration of previous values of any redeclared variables
+                    m_targetFile.Append(CloseRedeclaredVariableBlock(context.simpleStmt().shortVarDecl(), m_exprSwitchExpressionLevel));
+
                     IndentLevel--;
                     m_targetFile.Append($"{Spacing()}}}");
                 }

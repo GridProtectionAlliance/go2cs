@@ -29,8 +29,20 @@ namespace go2cs
 {
     public partial class Converter
     {
+        private readonly ParseTreeValues<string> m_variables = new ParseTreeValues<string>();
         private int m_varIdentifierCount;
         private bool m_varMultipleDeclaration;
+
+        private string GetUniqueIdentifier(ParseTreeValues<string> source, string identifier)
+        {
+            int count = 0;
+            string uniqueIdentifier = identifier;
+
+            while (source.ContainsValue(uniqueIdentifier))
+                uniqueIdentifier = $"{identifier}@@{++count}";
+
+            return uniqueIdentifier;
+        }
 
         public override void EnterVarDecl(GoParser.VarDeclContext context)
         {
@@ -64,7 +76,9 @@ namespace go2cs
             if (m_varIdentifierCount == 0 && m_varMultipleDeclaration)
                 m_targetFile.Append(RemoveFirstLineFeed(CheckForCommentsLeft(context)));
 
-            if (!Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
+            GoParser.IdentifierListContext identifierList = context.identifierList();
+
+            if (!Identifiers.TryGetValue(identifierList, out string[] identifiers))
             {
                 AddWarning(context, $"No identifiers specified in var specification expression: {context.GetText()}");
                 return;
@@ -78,6 +92,12 @@ namespace go2cs
                 return;
             }
 
+            for (int i = 0; i < identifiers.Length; i++)
+            {
+                if (expressions?.Length > i)
+                    m_variables.Add(identifierList.IDENTIFIER(i), GetUniqueIdentifier(m_variables, identifiers[i]));
+            }
+
             Types.TryGetValue(context.type_(), out TypeInfo typeInfo);
 
             string type = typeInfo?.TypeName;
@@ -88,13 +108,18 @@ namespace go2cs
                 string identifier = SanitizedIdentifier(identifiers[i]);
                 string expression = expressions?[i].Text;
                 string typeName = type ?? expressions?[i].Type.TypeName ?? "var";
+                bool isInitialDeclaration = false;
 
                 m_targetFile.Append($"{Spacing()}");
 
                 if (!m_inFunction)
                     m_targetFile.Append($"{(char.IsUpper(identifier[0]) ? "public" : "private")} static ");
 
-                m_targetFile.Append($"{typeName} {identifier}");
+                // Determine if this is the initial declaration
+                if (m_inFunction && m_variables.TryGetValue(identifierList.IDENTIFIER(i), out string variableName))
+                    isInitialDeclaration = !variableName.Contains("@@");
+
+                m_targetFile.Append($"{(isInitialDeclaration ? $"{typeName} " : "")}{identifier}");
 
                 if (!(expression is null))
                     m_targetFile.Append($" = {expression}");

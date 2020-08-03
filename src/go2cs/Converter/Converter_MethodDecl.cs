@@ -36,6 +36,7 @@ namespace go2cs
             m_inFunction = true; // May need to scope certain objects, like consts, to current function
             m_originalFunctionName = context.IDENTIFIER().GetText();
             m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
+            m_variables.Clear();
 
             // Function signature containing result type and parameters have not been visited yet,
             // so we mark their desired positions and replace once the visit has occurred

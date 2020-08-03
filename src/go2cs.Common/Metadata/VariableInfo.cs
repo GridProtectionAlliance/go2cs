@@ -31,5 +31,6 @@ namespace go2cs.Metadata
         public string Name;
         public TypeInfo Type;
         public bool HeapAllocated;
+        public bool Redeclared;
     }
 }

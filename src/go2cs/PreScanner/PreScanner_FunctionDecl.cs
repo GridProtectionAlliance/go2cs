@@ -116,15 +116,22 @@ namespace go2cs
             {
                 string identifier = identifiers[i];
 
-                if (expressions.Length > i)
+                if (expressions.Length <= i)
+                    continue;
+
+                string uniqueIdentifer = GetUniqueIdentifier(m_variables, identifiers[i]);
+                bool redeclared = uniqueIdentifer.Contains("@@");
+
+                m_variables.Add(uniqueIdentifer, new VariableInfo
                 {
-                    m_variables.Add(GetUniqueIdentifier(m_variables, identifiers[i]), new VariableInfo
-                    {
-                        Name = identifier,
-                        Type = typeInfo,
-                        HeapAllocated = expressions[i]?.Text.StartsWith("&") ?? false
-                    });
-                }
+                    Name = identifier,
+                    Type = typeInfo,
+                    HeapAllocated = expressions[i]?.Text.StartsWith("&") ?? false,
+                    Redeclared = redeclared
+                });
+
+                if (redeclared && m_variables.TryGetValue(identifier, out VariableInfo rootVariable))
+                    rootVariable.Redeclared = true;
             }
         }
 
@@ -140,15 +147,22 @@ namespace go2cs
             {
                 string identifier = identifiers[i];
 
-                if (expressions.Length > i)
+                if (expressions.Length <= i)
+                    continue;
+
+                string uniqueIdentifer = GetUniqueIdentifier(m_variables, identifiers[i]);
+                bool redeclared = uniqueIdentifer.Contains("@@");
+
+                m_variables.Add(uniqueIdentifer, new VariableInfo
                 {
-                    m_variables.Add(GetUniqueIdentifier(m_variables, identifiers[i]), new VariableInfo
-                    {
-                        Name = identifier,
-                        Type = TypeInfo.VarType,
-                        HeapAllocated = expressions[i]?.Text.StartsWith("&") ?? false
-                    });
-                }
+                    Name = identifier,
+                    Type = TypeInfo.VarType,
+                    HeapAllocated = expressions[i]?.Text.StartsWith("&") ?? false,
+                    Redeclared = redeclared
+                });
+
+                if (redeclared && m_variables.TryGetValue(identifier, out VariableInfo rootVariable))
+                    rootVariable.Redeclared = true;
             }
         }
 
