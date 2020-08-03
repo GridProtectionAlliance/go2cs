@@ -169,7 +169,7 @@ namespace go2cs
             if (PrimaryExpressions.TryGetValue(context.typeSwitchGuard().primaryExpr(), out ExpressionInfo expression))
             {
                 // Replace type switch expression marker
-                m_targetFile.Replace(string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel), expression.Text);
+                m_targetFile.Replace(string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel), $"{expression.Text}.type()");
             }
             else
             {
@@ -180,7 +180,7 @@ namespace go2cs
             {
                 // TODO: Handle case where short val declaration re-declares a variable already defined in current scope - C# does not allow this. One option: cache current variable value and restore below
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
-                    m_targetFile.Replace(string.Format(TypeSwitchStatementMarker, m_typeSwitchExpressionLevel), statement + Environment.NewLine);
+                    m_targetFile.Replace(string.Format(TypeSwitchStatementMarker, m_typeSwitchExpressionLevel), $"{statement}{Environment.NewLine}");
                 else
                     AddWarning(context, $"Failed to find simple statement for type switch statement: {context.simpleStmt().GetText()}");
 

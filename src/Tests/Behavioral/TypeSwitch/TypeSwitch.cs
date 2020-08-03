@@ -14,7 +14,7 @@ namespace go
             // type corresponding to its clause.
             Action<object> whatAmI = i =>
             {
-                switch (i)
+                switch (i.type())
                 {
                     case bool t:
                         fmt.Println("I'm a bool");
@@ -27,7 +27,7 @@ namespace go
                         break;
                     default:
                     {
-                        var t = i;
+                        var t = i.type();
                         fmt.Printf("Don't know type %T\n", t);
                         break;
                     }
