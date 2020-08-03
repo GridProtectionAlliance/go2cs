@@ -23,69 +23,107 @@ namespace go
             long i = 2L;
             fmt.Print("Write ", i, " as ");
             switch (i)
-            {
-                case 1L:
-                    fmt.Println("one");
+            { // Intra-switch comment
+                case 1L: // Case 1 comment
+                    fmt.Println("one"); /* Case 1 eol comment */
                     break;
-                case 2L:
-                    fmt.Println("two");
+                case 2L: // Case 2 comment
+                    // Comment before
+                    fmt.Println("two"); // Case 2 eol comment
+                    // Comment after
                     break;
-                case 3L:
-                    {
-                        fmt.Println("three");
-                    }
+                case 3L: 
+                    { // Start of block comment
+                        // Before statement comment
+                        fmt.Println("three"); // eol comment
+                        // After statement comment
+                    } // End of block comment
                     break;
-                default:
-                    fmt.Println("unknown");
+                case 4L: 
+                    // Comment before
+                    fmt.Println("four"); // Case 2 eol comment
+                    // Comment after
                     break;
-            } 
+                default: // Default case comment
+                    // Comment before
+                    fmt.Println("unknown"); // Default case eol comment
+                    // Comment after
+                    break;
+            } // End of switch comment
 
             // You can use commas to separate multiple expressions
             // in the same `case` statement. We use the optional
             // `default` case in this example as well.
-            if (time.Now().Weekday() == time.Saturday || time.Now().Weekday() == time.Sunday)
+            // Intra-switch comment
+            if (time.Now().Weekday() == time.Saturday || time.Now().Weekday() == time.Sunday) // Case Sat/Sun comment
+                // Weekend comment
                 fmt.Println("It's the weekend");
-            else if (time.Now().Weekday() == time.Monday)
-                fmt.Println("Ugh, it's Monday");
-            else
+            else if (time.Now().Weekday() == time.Monday) // Case Mon comment
+                // Pre-Monday comment
+                fmt.Println("Ugh, it's Monday"); 
+                // Post-Monday comment
+            else // Case default comment
+                // Pre-default comment
                 fmt.Println("It's a weekday"); 
+                // Post-default comment
+            // End of switch comment
 
             // `switch` without an expression is an alternate way
             // to express if/else logic. Here we also show how the
             // `case` expressions can be non-constants.
             var t = time.Now();
-            if (t.Hour() < 12L)
+            // Intra-switch comment
+            if (t.Hour() < 12L) // Before noon
                 fmt.Println("It's before noon");
-            else
-                fmt.Println("It's after noon"); 
+            else // After noon
+                fmt.Println("It's after noon");
+            // End of switch comment
 
-            // Here is a switch with simple statement and a fallthrough
+            // "i" before should be saved
+            fmt.Printf("i before = %d\n", i); 
+
+            // Here is a switch with simple statement and a redeclared identifier plus a fallthrough
             {
-                long j = 1L;
+                var i__prev1 = i;
 
+                i = 1L;
+
+                // Intra-switch comment
                 if (getNext() == -1L)
                 {
                     fmt.Println("negative");
                     goto __switch_break0;
                 }
-                if (getNext() == 0L)
+                if (getNext() == 0L) // Single-value comment
                 {
-                    fmt.Println("zero");
+                    // Before zero comment
+                    fmt.Println("zero"); 
+                    // After zero comment
                     goto __switch_break0;
                 }
-                if (getNext() == 1L || getNext() == 2L)
+                if (getNext() == 1L || getNext() == 2L) // Multi-value comment
                 {
-                    fmt.Println("one or two");
-                    fallthrough = true;
+                    // Before one-or-two comment
+                    fmt.Println("one or two"); // eol comment
+                    // After one-or-two comment
+                    fallthrough = true; // fallthrough comment
                 }
                 if (fallthrough || getNext() == 3L)
                 {
-                    fmt.Printf("three, but x=%d and j = %d\n", x, j);
+                    fmt.Printf("three, but x=%d and i now = %d\n", x, i);
                 }
-                // default:
-                fmt.Println("plus, always a default here because of fallthrough");
+                // default: // Default case comment
+                    // Pre-default-op comments
+                    fmt.Println("plus, always a default here because of fallthrough"); // eol comment
+                    // Post-default-op comments
+
                 __switch_break0:;
-            }
+
+                i = i__prev1;
+            } // end of switch comment
+
+            // "i" after should be restored
+            fmt.Printf("i after = %d\n", i);
         }
     }
 }

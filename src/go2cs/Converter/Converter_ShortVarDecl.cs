@@ -38,30 +38,34 @@ namespace go2cs
 
         private string OpenRedeclaredVariableBlock(GoParser.ShortVarDeclContext context, int level)
         {
-            StringBuilder block = new StringBuilder();
-
             GoParser.IdentifierListContext identifierList = context.identifierList();
 
-            if (Identifiers.TryGetValue(identifierList, out string[] identifiers))
+            if (!Identifiers.TryGetValue(identifierList, out string[] identifiers))
             {
-                bool addNewLine = false;
-
-                foreach (string identifier in identifiers)
+                // Pre-visit identifiers if they are not defined yet
+                EnterIdentifierList(identifierList);
+                
+                if (!Identifiers.TryGetValue(identifierList, out identifiers))
                 {
-                    if (TryGetFunctionVariable(identifier, out VariableInfo variable) && variable.Redeclared)
-                    {
-                        addNewLine = true;
-                        block.Append($"{Environment.NewLine}{Spacing()}{variable.Type.TypeName ?? "var"} {identifier}__prev{level} = {identifier};");
-                    }
+                    AddWarning(context, $"Failed to find identifier lists needed to hold and restore values for short var declaration statements: {context.GetText()}");
+                    return "";
                 }
+            }
 
-                if (addNewLine)
-                    block.AppendLine();
-            }
-            else
+            StringBuilder block = new StringBuilder();
+            bool addNewLine = false;
+
+            foreach (string identifier in identifiers)
             {
-                AddWarning(context, $"Failed to find identifier lists needed to stack creation for short var declaration statement: {context.GetText()}");
+                if (TryGetFunctionVariable(identifier, out VariableInfo variable) && variable.Redeclared)
+                {
+                    addNewLine = true;
+                    block.Append($"{Spacing()}{variable.Type.TypeName ?? "var"} {identifier}__prev{level} = {identifier};{Environment.NewLine}");
+                }
             }
+
+            if (addNewLine)
+                block.AppendLine();
 
             return block.ToString();
         }
@@ -81,7 +85,7 @@ namespace go2cs
                     if (TryGetFunctionVariable(identifier, out VariableInfo variable) && variable.Redeclared)
                     {
                         addNewLine = true;
-                        block.Append($"{Environment.NewLine}{Spacing()}{identifier} = {identifier}__prev{level};");
+                        block.Append($"{Spacing()}{identifier} = {identifier}__prev{level};{Environment.NewLine}");
                     }
                 }
 
@@ -125,7 +129,7 @@ namespace go2cs
 
                 for (int i = 0; i < length; i++)
                 {
-                    bool isInitialDeclaration = false;
+                    bool isInitialDeclaration = true;
 
                     // Determine if this is the initial declaration
                     if (m_inFunction && m_variables.TryGetValue(identifierList.IDENTIFIER(i), out string variableName))

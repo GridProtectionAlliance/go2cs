@@ -39,6 +39,7 @@ namespace go2cs
         private readonly Stack<HashSet<string>> m_blockLabeledBreaks = new Stack<HashSet<string>>();
         
         private bool m_fallThrough;
+        private string m_fallThroughComment;
 
         public override void ExitStatement(GoParser.StatementContext context)
         {
@@ -373,6 +374,7 @@ namespace go2cs
             //     : 'fallthrough'
 
             m_fallThrough = true;
+            m_fallThroughComment = CheckForCommentsRight(context);
         }
 
         public override void ExitSelectStmt(GoParser.SelectStmtContext context)

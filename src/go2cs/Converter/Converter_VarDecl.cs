@@ -108,7 +108,7 @@ namespace go2cs
                 string identifier = SanitizedIdentifier(identifiers[i]);
                 string expression = expressions?[i].Text;
                 string typeName = type ?? expressions?[i].Type.TypeName ?? "var";
-                bool isInitialDeclaration = false;
+                bool isInitialDeclaration = true;
 
                 m_targetFile.Append($"{Spacing()}");
 

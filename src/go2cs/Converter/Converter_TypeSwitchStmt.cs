@@ -199,7 +199,7 @@ namespace go2cs
             }
 
             IndentLevel--;
-            m_targetFile.Append($"{Spacing()}}}");
+            m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
             m_typeSwitchExpressionLevel--;
         }
     }

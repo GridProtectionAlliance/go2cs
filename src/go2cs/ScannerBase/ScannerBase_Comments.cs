@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,6 +75,16 @@ namespace go2cs
         protected string CheckForCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
         {
             return CheckForComments(context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight, offsetLevel, indentLevel);
+        }
+
+        protected string CheckForCommentsLeft(IParseTree element, int offsetLevel = 0, int indentLevel = -1)
+        {
+            return CheckForComments(element.SourceInterval.a, TokenStream.GetHiddenTokensToLeft, offsetLevel, indentLevel);
+        }
+
+        protected string CheckForCommentsRight(IParseTree element, int offsetLevel = 0, int indentLevel = -1)
+        {
+            return CheckForComments(element.SourceInterval.b, TokenStream.GetHiddenTokensToRight, offsetLevel, indentLevel);
         }
 
         protected string CheckForEndOfLineComment(ParserRuleContext context)
@@ -196,6 +207,19 @@ namespace go2cs
                 WroteLineFeed = EndsWithLineFeed(hiddenText);
 
             return hiddenText;
+        }
+
+        protected (string, string) SplitEOLComment(string source)
+        {
+            string[] lines = source.Split(NewLineDelimeters, StringSplitOptions.None);
+
+            if (lines.Length > 1)
+                return (lines[0], string.Join(Environment.NewLine, lines.Skip(1)));
+
+            if (lines.Length > 0)
+                return (lines[0], string.Empty);
+            
+            return (string.Empty, string.Empty);
         }
 
         protected string FixForwardSpacing(string source, int offsetLevel = 0, int indentLevel = -1, bool firstIsEOLComment = false)

@@ -52,6 +52,19 @@ namespace go2cs
             m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
             m_variables.Clear();
 
+            if (!Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) || parameters is null)
+                parameters = new List<ParameterInfo>();
+
+            string functionSignature = FunctionSignature.Generate(m_originalFunctionName, parameters);
+
+            if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))
+                throw new InvalidOperationException($"Failed to find metadata for method function \"{functionSignature}\".");
+
+            FunctionSignature function = m_currentFunction.Signature;
+
+            if (function is null)
+                throw new InvalidOperationException($"Failed to find signature metadata for function \"{m_currentFunctionName}\".");
+
             string scope = char.IsUpper(m_originalFunctionName[0]) ? "public" : "private";
 
             // Handle Go "main" function as a special case, in C# this should be capitalized "Main"
@@ -78,19 +91,7 @@ namespace go2cs
         {
             bool signatureOnly = context.block() is null;
 
-            if (!Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) || parameters is null)
-                parameters = new List<ParameterInfo>();
-
-            string functionSignature = FunctionSignature.Generate(m_originalFunctionName, parameters);
-
-            if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))
-                throw new InvalidOperationException($"Failed to find metadata for method function \"{functionSignature}\".");
-
             FunctionSignature function = m_currentFunction.Signature;
-
-            if (function is null)
-                throw new InvalidOperationException($"Failed to find signature metadata for function \"{m_currentFunctionName}\".");
-
             bool hasDefer = m_currentFunction.HasDefer;
             bool hasPanic = m_currentFunction.HasPanic;
             bool hasRecover = m_currentFunction.HasRecover;
