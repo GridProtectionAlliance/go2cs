@@ -62,6 +62,9 @@ namespace BehavioralTests
         [TestMethod]
         public void CheckTypeSwitchResult() => CheckProjectAgainstTarget("TypeSwitch");
 
+        [TestMethod]
+        public void CheckForVariantsResult() => CheckProjectAgainstTarget("ForVariants");
+
         private void CheckProjectAgainstTarget(string targetProject)
         {
             string projectPath = Path.GetFullPath($"{RootPath}{targetProject}");

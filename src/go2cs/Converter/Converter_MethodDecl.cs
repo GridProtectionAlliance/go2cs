@@ -50,25 +50,12 @@ namespace go2cs
         public override void ExitMethodDecl(GoParser.MethodDeclContext context)
         {
             bool signatureOnly = false;
-
-            if (!Parameters.TryGetValue(context.receiver()?.parameters(), out List<ParameterInfo> receiverParameters) || receiverParameters is null)
-                receiverParameters = new List<ParameterInfo>();
-
-            if (Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> functionParameters) && !(functionParameters is null))
-                signatureOnly = true;
-            else if (!Parameters.TryGetValue(context.signature()?.parameters(), out functionParameters) || functionParameters is null)
-                functionParameters = new List<ParameterInfo>();
-
-            IEnumerable<ParameterInfo> parameters = receiverParameters.Concat(functionParameters);
-
-            string functionSignature = FunctionSignature.Generate(m_originalFunctionName, parameters);
+            string functionSignature = FunctionSignature.Generate(m_originalFunctionName);
 
             if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))
                 throw new InvalidOperationException($"Failed to find metadata for method function \"{functionSignature}\".");
 
-            MethodSignature method = m_currentFunction.Signature as MethodSignature;
-
-            if (method is null)
+            if (!(m_currentFunction.Signature is MethodSignature method))
                 throw new InvalidOperationException($"Failed to find signature metadata for method function \"{m_currentFunctionName}\".");
 
             bool hasDefer = m_currentFunction.HasDefer;

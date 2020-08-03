@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <RootNamespace>go</RootNamespace>
+    <AssemblyName>ForVariants</AssemblyName>
+    <Product>go2cs</Product>
+    <Copyright>Copyright © 2020</Copyright>
+    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <ApplicationIcon>$(GOPATH)\src\go2cs\go2cs.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
+    <NoWarn>660;661;IDE1006</NoWarn>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="golib">
+      <HintPath>$(GOPATH)\src\go2cs\golib\$(OutDir)golib.dll</HintPath>
+    </Reference>
+    <Reference Include="fmt">
+      <HintPath>$(GOPATH)\src\go2cs\fmt\$(OutDir)fmt_package.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

@@ -23,7 +23,6 @@
 
 using go2cs.Metadata;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using static go2cs.Common;
@@ -52,10 +51,7 @@ namespace go2cs
             m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
             m_variables.Clear();
 
-            if (!Parameters.TryGetValue(context.signature()?.parameters(), out List<ParameterInfo> parameters) || parameters is null)
-                parameters = new List<ParameterInfo>();
-
-            string functionSignature = FunctionSignature.Generate(m_originalFunctionName, parameters);
+            string functionSignature = FunctionSignature.Generate(m_originalFunctionName);
 
             if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))
                 throw new InvalidOperationException($"Failed to find metadata for method function \"{functionSignature}\".");

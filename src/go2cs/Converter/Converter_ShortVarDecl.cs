@@ -38,6 +38,9 @@ namespace go2cs
 
         private string OpenRedeclaredVariableBlock(GoParser.ShortVarDeclContext context, int level)
         {
+            if (context is null)
+                return "";
+
             GoParser.IdentifierListContext identifierList = context.identifierList();
 
             if (!Identifiers.TryGetValue(identifierList, out string[] identifiers))
@@ -72,6 +75,9 @@ namespace go2cs
 
         private string CloseRedeclaredVariableBlock(GoParser.ShortVarDeclContext context, int level)
         {
+            if (context is null)
+                return "";
+
             StringBuilder block = new StringBuilder();
 
             GoParser.IdentifierListContext identifierList = context.identifierList();

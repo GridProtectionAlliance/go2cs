@@ -83,7 +83,7 @@ namespace go2cs
         {
             FunctionInfo functionInfo = ExitMethod(context);
 
-            m_functions.Add(GetUniqueIdentifier(m_functions, functionInfo.Signature.Generate()), functionInfo);
+            m_functions.Add(GetUniqueIdentifier(m_functions, functionInfo.Signature.GenerateLookup()), functionInfo);
         }
 
         public override void ExitMethodDecl(GoParser.MethodDeclContext context)
@@ -98,7 +98,7 @@ namespace go2cs
                 };
             }
 
-            m_functions.Add(GetUniqueIdentifier(m_functions, functionInfo.Signature.Generate()), functionInfo);
+            m_functions.Add(GetUniqueIdentifier(m_functions, functionInfo.Signature.GenerateLookup()), functionInfo);
         }
 
         public override void ExitVarSpec(GoParser.VarSpecContext context)
@@ -156,7 +156,7 @@ namespace go2cs
                 m_variables.Add(uniqueIdentifer, new VariableInfo
                 {
                     Name = identifier,
-                    Type = TypeInfo.VarType,
+                    Type = expressions[i].Type ?? TypeInfo.VarType,
                     HeapAllocated = expressions[i]?.Text.StartsWith("&") ?? false,
                     Redeclared = redeclared
                 });

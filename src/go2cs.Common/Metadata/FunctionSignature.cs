@@ -35,23 +35,19 @@ namespace go2cs.Metadata
         public string Comments;
         public bool IsPromoted;
 
-        public virtual string Generate()
-        {
-            return Generate(Name, Signature.Parameters);
-        }
+        public string GenerateLookup() => Generate(Name);
 
-        public string GetParameterNames()
-        {
-            return string.Join(", ", Signature.Parameters.Select(parameter => parameter.Name));
-        }
+        public virtual string Generate() => Generate(Name, Signature.Parameters);
 
-        public string GetParameterTypes()
-        {
-            return string.Join(", ", Signature.Parameters.Select(parameter => parameter.Type.TypeName));
-        }
+        public string GetParameterNames() => string.Join(", ", Signature.Parameters.Select(parameter => parameter.Name));
 
-        public static string Generate(string functionName, IEnumerable<ParameterInfo> parameters)
+        public string GetParameterTypes() => string.Join(", ", Signature.Parameters.Select(parameter => parameter.Type.TypeName));
+
+        public static string Generate(string functionName, IEnumerable<ParameterInfo> parameters = null)
         {
+            if (parameters is null)
+                parameters = Enumerable.Empty<ParameterInfo>();
+
             return $"{functionName}({string.Join(", ", parameters.Select(parameter => parameter.Type.TypeName))})";
         }
     }
