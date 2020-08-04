@@ -78,24 +78,24 @@ package main
 import "fmt"
 
 func f(y int) {
-	fmt.Print(y)
+    fmt.Print(y)
 }
 
 func main() {
-	i := -1
+    i := -1
 
-	fmt.Println("i =", i)
+    fmt.Println("i =", i)
 
-	for i := 0; i < 5; i++ {
-		f(i)
+    for i := 0; i < 5; i++ {
+        f(i)
 
-		for i := 12; i < 15; i++ {
-			f(i)
-		}
-		fmt.Println()
-	}
+        for i := 12; i < 15; i++ {
+            f(i)
+        }
+        fmt.Println()
+    }
 
-	fmt.Println("i =", i)
+    fmt.Println("i =", i)
 }
 ```
 
@@ -108,10 +108,10 @@ using static go.builtin;
 namespace go
 {
     public static partial class main_package
-    {      
-          private static void f(long y) {
-              fmt.Print(y);
-          }
+    {
+        private static void f(long y) {
+            fmt.Print(y);
+        }
 
         private static void Main() {
             long i = -1L;
@@ -154,12 +154,14 @@ var (v2, ok) = m["Answer", WithOK];
 ```
 
 Similarly functions returning an "value and error" tuple can operate in the same way:
+
 ```csharp
 var n1 = r.Read(b);
 var (n2, err) = r.Read(b, WithErr);
 ```
 
 A possible conversion option seems to exist by always returning the tuple and just ignoring the second value of the tuple, e.g.:
+
 ```csharp
 var (n2, _) = r.Read(b);
 ```
@@ -489,21 +491,21 @@ This automatic dereferencing also applies to extension methods, in other words, 
 * [Manual go101 Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20go101%20Conversions)
 * [Miscellaneous](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Miscellaneous)
 * Example excerpt of converted code from the Go [`errors`](https://github.com/pkg/errors/blob/master/errors.go#L102) package:
-  ```csharp
-  public static partial class errors_package
-  {
-      // New returns an error that formats as the given text.
-      // Each call to New returns a distinct error value even if the text is identical.
-      public static error New(@string text) =>
-          error.As(new errorString(text))!;
+```csharp
+public static partial class errors_package
+{
+    // New returns an error that formats as the given text.
+    // Each call to New returns a distinct error value even if the text is identical.
+    public static error New(@string text) =>
+        error.As(new errorString(text))!;
 
-      // errorString is a trivial implementation of error.
-      private partial struct errorString {
-          public @string s;
-      }
+    // errorString is a trivial implementation of error.
+    private partial struct errorString {
+        public @string s;
+    }
 
-      private static @string Error(this ref errorString e) {
-          return e.s;
-      }
-  }
-  ```
+    private static @string Error(this ref errorString e) {
+        return e.s;
+    }
+}
+```
