@@ -65,6 +65,9 @@ namespace BehavioralTests
         [TestMethod]
         public void CheckForVariantsResult() => CheckProjectAgainstTarget("ForVariants");
 
+        [TestMethod]
+        public void CheckImportOptionsResult() => CheckProjectAgainstTarget("ImportOptions");
+
         private void CheckProjectAgainstTarget(string targetProject)
         {
             string projectPath = Path.GetFullPath($"{RootPath}{targetProject}");
