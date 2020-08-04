@@ -84,7 +84,7 @@ namespace go
 
             // Here is a switch with simple statement and a redeclared identifier plus a fallthrough
             {
-                var i__prev1 = i;
+                long i__prev1 = i;
 
                 i = 1L;
 
