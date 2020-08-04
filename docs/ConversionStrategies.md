@@ -1,6 +1,6 @@
 # Conversion Strategies
 
-> Strategies updated on 7/29/2020 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
+> Strategies updated on 8/4/2020 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
 
 ## Package Conversion
 Each Go package is converted into static C# partial classes, e.g.: `public static partial class fmt_package`. Using a static partial class allows all functions within separate files to be available with a single import, e.g.: `using fmt = go.fmt_package;`.
@@ -21,6 +21,83 @@ In Go the `int` and `uint` types are sized according the platform build target, 
 Later, an option could be added to the conversion tool that would allow for 32-bit build targets where any encountered Go `int` or `uint` would be converted to a C# `int` or `uint`. This option would mean pre-compiled library packages would need to include a 32-bit build as well, so there will be cascading consequences to consider.
 
 Note that one sticking point with this strategy is that not all C# indexing constructs currently accept a `long`, so in some places a down-cast from `long` to `int` will be required. For example, although explicit indexers in C# support a `long`, [implicit index support](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support) currently only works with an `int`, this means range operation indices will need to be cast to `int`. FYI, [issue is being discussed](https://github.com/dotnet/runtime/issues/28070) for future C# runtime updates.
+
+## Short Variable Redeclaration (Shadowing)
+
+When using Go short variable declaration syntax, e.g., `x := 2`, as long as variable result type does not change, the variable can be redeclared. This is different than simply reusing the same variable when the redeclaration occurs in a lesser scope of the outer variable. In these cases the original value is "shadowed" with its current value held on the stack while the new variable instance is manipulated. Once the redeclared variable instance goes out of scope, the higher scoped variable will have its original value. In general, C# code conversions will handle this by holding on to previous value and restoring it's original value when shadowed usage is complete, for example, the following Go code:
+
+```Go
+package main
+
+import "fmt"
+
+func f(y int) {
+	fmt.Print(y)
+}
+
+func main() {
+	i := -1
+
+	fmt.Println("i =", i)
+
+	for i := 0; i < 5; i++ {
+		f(i)
+
+		for i := 12; i < 15; i++ {
+			f(i)
+		}
+		fmt.Println()
+	}
+
+	fmt.Println("i =", i)
+}
+```
+
+would be converted to C# as:
+
+```CSharp
+using fmt = go.fmt_package;
+using static go.builtin;
+
+namespace go
+{
+    public static partial class main_package
+    {      
+          private static void f(long y) {
+              fmt.Print(y);
+          }
+
+        private static void Main() {
+            long i = -1L;
+
+            fmt.Println("i =", i);
+
+            {
+                long i__prev1 = i;
+
+                for (i = 0L; i < 5L; i++) {
+                    f(i);
+
+                    {
+                        long i__prev2 = i;
+
+                        for (i = 12L; i < 15L; i++) {
+                            f(i);
+                        }
+
+                        i = i__prev2;
+                    }
+                    fmt.Println();
+                }
+
+                i = i__prev1;
+            }
+
+            fmt.Println("i =", i);
+        }
+    }
+}
+```
 
 ## Expression Switch Statements
 Go expression-based `switch` statements are very flexible. Case statements do not automatically fall-through, so no `break` operation is not required. When the Go `fallthrough` keyword is used, the next case expression is executed, bypassing expression evaluation. Based on work done with the [Manual Tour of Go Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions), converting to simple `if / else if / else` statements is the logical best choice for most cases.
