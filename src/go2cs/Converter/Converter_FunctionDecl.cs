@@ -23,6 +23,7 @@
 
 using go2cs.Metadata;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using static go2cs.Common;
@@ -103,16 +104,16 @@ namespace go2cs
             if (useFuncExecutionContext)
             {
                 string[] funcExecContextByRefParams = signature.GetByRefParameters(false).ToArray();
+                Stack<string> unusedNames = new Stack<string>(new[] { "__", "_" });
 
                 if (funcExecContextByRefParams.Length > 0)
                 {
                     string[] lambdaByRefParameters = signature.GetByRefParameters(true).ToArray();
-
-                    m_targetFile.Replace(m_functionExecContextMarker, $" => func({string.Join(", ", funcExecContextByRefParams)}, ({string.Join(", ", lambdaByRefParameters)}, Defer {(hasDefer ? "defer" : "_")}, Panic {(hasPanic ? "panic" : "_")}, Recover {(hasRecover ? "recover" : "_")}) =>");
+                    m_targetFile.Replace(m_functionExecContextMarker, $" => func({string.Join(", ", funcExecContextByRefParams)}, ({string.Join(", ", lambdaByRefParameters)}, Defer {(hasDefer ? "defer" : unusedNames.Pop())}, Panic {(hasPanic ? "panic" : unusedNames.Pop())}, Recover {(hasRecover ? "recover" : unusedNames.Pop())}) =>");
                 }
                 else
                 {
-                    m_targetFile.Replace(m_functionExecContextMarker, $" => func(({(hasDefer ? "defer" : "_")}, {(hasPanic ? "panic" : "_")}, {(hasRecover ? "recover" : "_")}) =>");
+                    m_targetFile.Replace(m_functionExecContextMarker, $" => func(({(hasDefer ? "defer" : unusedNames.Pop())}, {(hasPanic ? "panic" : unusedNames.Pop())}, {(hasRecover ? "recover" : unusedNames.Pop())}) =>");
                 }
             }
             else
