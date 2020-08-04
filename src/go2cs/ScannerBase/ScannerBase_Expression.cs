@@ -275,7 +275,7 @@ namespace go2cs
                 // selector
                 //     : '.' IDENTIFIER
 
-                string selectionExpression = $"{primaryExpression.Text}.{SanitizedIdentifier(context.IDENTIFIER().GetText())}";
+                string selectionExpression = $"{SanitizedIdentifier(primaryExpression.Text)}.{SanitizedIdentifier(context.IDENTIFIER().GetText())}";
                 TypeInfo typeInfo = null;
 
                 // TODO: Will need to lookup IDENTIFIER type in metadata to determine type
@@ -555,31 +555,45 @@ namespace go2cs
             {
                 basicLiteral = ReplaceOctalBytes(context.integer().GetText());
 
-                if (long.TryParse(basicLiteral, out _))
+                if (!(context.integer().RUNE_LIT() is null))
                 {
-                    basicLiteral += "L";
-
                     typeInfo = new TypeInfo
                     {
-                        Name = "long",
-                        TypeName = "long",
-                        FullTypeName = "System.Int64",
+                        Name = "char",
+                        TypeName = "char",
+                        FullTypeName = "System.Char",
                         TypeClass = TypeClass.Simple,
                         IsConst = true
                     };
                 }
                 else
                 {
-                    basicLiteral += "UL";
-
-                    typeInfo = new TypeInfo
+                    if (long.TryParse(basicLiteral, out _))
                     {
-                        Name = "ulong",
-                        TypeName = "ulong",
-                        FullTypeName = "System.UInt64",
-                        TypeClass = TypeClass.Simple,
-                        IsConst = true
-                    };
+                        basicLiteral += "L";
+
+                        typeInfo = new TypeInfo
+                        {
+                            Name = "long",
+                            TypeName = "long",
+                            FullTypeName = "System.Int64",
+                            TypeClass = TypeClass.Simple,
+                            IsConst = true
+                        };
+                    }
+                    else
+                    {
+                        basicLiteral += "UL";
+
+                        typeInfo = new TypeInfo
+                        {
+                            Name = "ulong",
+                            TypeName = "ulong",
+                            FullTypeName = "System.UInt64",
+                            TypeClass = TypeClass.Simple,
+                            IsConst = true
+                        };
+                    }
                 }
             }
             else if (!(context.RUNE_LIT() is null))
