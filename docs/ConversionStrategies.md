@@ -14,7 +14,7 @@
 * [Return Tuples](#return-tuples)
 * [Slices](#slices)
 * [Type Aliasing](#type-aliasing)
-* [Defer / Panic / Recover](#defer-panic-recover)
+* [Defer / Panic / Recover](#defer--panic--recover)
 * [Expression Switch Statements](#expression-switch-statements)
 * [Type Switch Statements](#type-switch-statements)
 * [Struct Types](#struct-types)
@@ -53,16 +53,16 @@ In Go all objects are said to implement an interface with no methods, this is ca
 ## Inline Assignment Order of Operations
 All right-hand operands in assignment expressions in Go are evaluated before assignment to left-hand operands. This is tricky, for example, consider the following Go code:
 
-```Go
+```go
 x, y = y, x+y
 ```
 In C#, the following will _not_ produce the same results:
-```CSharp
+```csharp
 x = y;
 y = x+y;
 ```
 Instead,  equivalent code in C# is as follows:
-```CSharp
+```csharp
 var _y1 = x+y;
 x = y;
 y = _y1;
@@ -72,7 +72,7 @@ y = _y1;
 
 When using Go short variable declaration syntax, e.g., `x := 2`, as long as variable result type does not change, the variable can be redeclared. This is different than simply reusing the same variable when the redeclaration occurs in a lesser scope of the outer variable. In these cases the original value is "shadowed" with its current value held on the stack while the new variable instance is manipulated. Once the redeclared variable instance goes out of scope, the higher scoped variable will have its original value. In general, C# code conversions will handle this by holding on to previous value and restoring it's original value when shadowed usage is complete, for example, the following Go code:
 
-```Go
+```go
 package main
 
 import "fmt"
@@ -101,7 +101,7 @@ func main() {
 
 would be converted to C# as:
 
-```CSharp
+```csharp
 using fmt = go.fmt_package;
 using static go.builtin;
 
@@ -148,19 +148,19 @@ namespace go
 ## Return Tuples
 Many Go functions for built-in types return a tuple of "value and success" or just a "value" where only the declared return type determines which overload to use. You cannot differentiate C# overloads by return type only, so to accommodate similar functionality in C# an overload is defined that takes a bool parameter. The overload that includes the bool parameter returns the tuple style return value, the actual value of the boolean parameter is ignored. To make this easier to read, a boolean constant like `WithOK` is used, e.g.:
 
-```CSharp
+```csharp
 var v1 = m["Answer"]; // Does not fail if value doesn't exist, just returns default value
 var (v2, ok) = m["Answer", WithOK];
 ```
 
 Similarly functions returning an "value and error" tuple can operate in the same way:
-```CSharp
+```csharp
 var n1 = r.Read(b);
 var (n2, err) = r.Read(b, WithErr);
 ```
 
 A possible conversion option seems to exist by always returning the tuple and just ignoring the second value of the tuple, e.g.:
-```CSharp
+```csharp
 var (n2, _) = r.Read(b);
 ```
 
@@ -173,7 +173,7 @@ Currently these optional tuple returns are not allowed in user code, so common t
 ## Slices
 Conversion of Go slices is based on the [`slice<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/slice.cs) structure. For example, the following Go code using slice operations:
 
-```Go
+```go
 package main
 
 import (
@@ -204,7 +204,7 @@ func main() {
 
 would be converted to C# as:
 
-```CSharp
+```csharp
 using go;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
@@ -240,12 +240,12 @@ Go supports two kinds of [type aliasing](https://go101.org/article/type-system-o
 For Go "type alias declarations" generally <sup>[[1](#ref1)]</sup> matches aliasing in C# implemented with the `using` keyword, for example, the following Go and C# code are equivalent:
 
 Go type alias declaration:
-```Go
+```go
 type table = map[string]int
 ```
 
 Equivalent C# alias with `using`:
-```CSharp
+```csharp
 using table = go.map<@string, int>;
 ````
 
@@ -262,7 +262,7 @@ Handling Go `defer / panic / recover` operations in C# requires that code conver
 
 The function execution context is required in order to create a [defer](https://golang.org/ref/spec#Defer_statements) call stack and [panic](https://golang.org/pkg/builtin/#panic) / [recover](https://golang.org/pkg/builtin/#recover) exception handling. As an example, consider the following Go code:
 
-```Go
+```go
 package main
 
 import "fmt"
@@ -295,7 +295,7 @@ func g(i int) {
 ```
 
 The Go code gets converted into C# code like the following:
-```CSharp
+```csharp
 using fmt = go.fmt_package;
 using static go.builtin;
 
@@ -335,7 +335,7 @@ public static partial class main_package
 
 Certainly for functions that call `defer`, `panic` or `recover`, the Go function execution context is required. However, if the function does not _directly_ call the functions, nor _indirectly_ call the functions through a lambda, then you should be able to safely remove the wrapping function execution context. For example, in the converted C# code above the `main` function does not directly nor indirectly call `defer`, `panic` or `recover` so the function is safely simplified as follows:
 
-```CSharp
+```csharp
 private static void main() {
     f();
     fmt.Println("Returned normally from f.");
@@ -356,7 +356,7 @@ For cases that use the `fallthough` keyword, all case expressions have to be con
 ## Type Switch Statements
 In the case of Go type-based switch statements, the C# type-based pattern matching works well - even as a `switch` statement. For example, the following Go code using type-switch:
 
-```Go
+```go
 package main
 
 import "fmt"
@@ -381,7 +381,7 @@ func main() {
 
 would be converted to C# as:
 
-```CSharp
+```csharp
 using go;
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -421,7 +421,7 @@ For named Go structure definitions within a function, since C# requires the stru
 
 The conversion code also needs to understand the structure "definition" for casting purposes, that is, if structure definitions match, they can be used interchangeably. For example, the following Go code which declares an intra-function structure and returns it as a dynamically declared structure is valid. One option for conversion is just to use the same declared C# structure when type definitions match (where possible):
 
-```Go
+```go
 package main
 
 import "fmt"
@@ -459,7 +459,7 @@ This basically means that the proxied extension functions created for derived em
 ## Interfaces
 Go interfaces are not explicitly implemented. Instead, if extension-style functions exist that satisfy all defined interface methods, the class is said to implicitly implement the interface. To accommodate these duck-implemented interfaces, a generic class is created for each interface so that for a given type, interface extension methods can be looked up using reflection. To speed up this operation, as assemblies are loaded, extension methods are [cached in a dictionary](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/TypeExtensions.cs#L121) for quick lookup and any type-specific lookup operations are only done once statically during [type initialization](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/error.cs#L127). To make use of typed generic class any assignments to interface variables will be cast to generic type, for example, see equivalent C# code with [`As`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/error.cs#L50) function for handling Go duck-implemented interfaces:
 
-```CSharp
+```csharp
 Abser a;                          // Abser is an interface with methods
 var f = (MyFloat)(-math.Sqrt(2)); // MyFloat is a custom type
 a = Abser.As(f);                  // Succeeds only if MyFloat type implements Abser interface methods
@@ -474,7 +474,7 @@ Conversion of pointer types will use the C# `ref` keyword where possible. When t
 
 ## Implicit Pointer Dereferencing
 In Go, all pointer types are setup to automatically dereference. For example, the following `age` property assignments are equivalent in Go:
-```Go
+```go
 var s struct {age int}
 var ps = &s
 (*ps).age = 20
@@ -489,7 +489,7 @@ This automatic dereferencing also applies to extension methods, in other words, 
 * [Manual go101 Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20go101%20Conversions)
 * [Miscellaneous](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Miscellaneous)
 * Example excerpt of converted code from the Go [`errors`](https://github.com/pkg/errors/blob/master/errors.go#L102) package:
-  ```CSharp
+  ```csharp
   public static partial class errors_package
   {
       // New returns an error that formats as the given text.
