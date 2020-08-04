@@ -38,9 +38,6 @@ namespace go2cs
         private readonly Stack<HashSet<string>> m_blockLabeledContinues = new Stack<HashSet<string>>();
         private readonly Stack<HashSet<string>> m_blockLabeledBreaks = new Stack<HashSet<string>>();
         
-        private bool m_fallThrough;
-        private string m_fallThroughComment;
-
         public override void ExitStatement(GoParser.StatementContext context)
         {
             if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
@@ -366,15 +363,6 @@ namespace go2cs
 
             if (!WroteLineFeed)
                 m_targetFile.AppendLine();
-        }
-
-        public override void ExitFallthroughStmt(GoParser.FallthroughStmtContext context)
-        {
-            // fallthroughStmt
-            //     : 'fallthrough'
-
-            m_fallThrough = true;
-            m_fallThroughComment = CheckForCommentsRight(context);
         }
 
         public override void ExitSelectStmt(GoParser.SelectStmtContext context)

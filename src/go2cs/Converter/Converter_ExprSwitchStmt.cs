@@ -57,6 +57,18 @@ namespace go2cs
         private readonly Stack<ExprSwitchStatement> m_exprSwitchStatements = new Stack<ExprSwitchStatement>();
         private int m_exprSwitchExpressionLevel;
         private int m_exprSwitchBreakCounter;
+        
+        private bool m_fallThrough;
+        private string m_fallThroughComment;
+
+        public override void ExitFallthroughStmt(GoParser.FallthroughStmtContext context)
+        {
+            // fallthroughStmt
+            //     : 'fallthrough'
+
+            m_fallThrough = true;
+            m_fallThroughComment = CheckForCommentsRight(context);
+        }
 
         public override void EnterExprSwitchStmt(GoParser.ExprSwitchStmtContext context)
         {
