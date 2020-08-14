@@ -69,6 +69,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BehavioralTests", "Tests\Be
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForVariants", "Tests\Behavioral\ForVariants\ForVariants.csproj", "{F97F7A06-7769-477D-8034-250B750B4994}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InterfaceCasting", "Tests\Behavioral\InterfaceCasting\InterfaceCasting.csproj", "{1C78DEAC-6392-4657-9D7E-FC6AE9EA10CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -159,6 +161,10 @@ Global
 		{F97F7A06-7769-477D-8034-250B750B4994}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F97F7A06-7769-477D-8034-250B750B4994}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F97F7A06-7769-477D-8034-250B750B4994}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C78DEAC-6392-4657-9D7E-FC6AE9EA10CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C78DEAC-6392-4657-9D7E-FC6AE9EA10CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C78DEAC-6392-4657-9D7E-FC6AE9EA10CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C78DEAC-6392-4657-9D7E-FC6AE9EA10CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -188,6 +194,7 @@ Global
 		{F5D0C4D5-7217-4572-A76C-AAC5BEF6219B} = {65A671E4-4025-48B4-8FD0-9C57FECA553A}
 		{C987106F-68D3-4F7E-82C8-2C55036F8A21} = {65A671E4-4025-48B4-8FD0-9C57FECA553A}
 		{F97F7A06-7769-477D-8034-250B750B4994} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
+		{1C78DEAC-6392-4657-9D7E-FC6AE9EA10CD} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

@@ -69,13 +69,14 @@ namespace go2cs
         public override void EnterTypeName(GoParser.TypeNameContext context)
         {
             string type = context.GetText();
+            string typeName = ConvertToCSTypeName(type);
 
             Types[context.Parent] = new TypeInfo
             {
                 Name = type,
                 TypeName = ConvertToCSTypeName(type),
-                FullTypeName = ConvertToFullCSTypeName(type),
-                TypeClass = TypeClass.Simple
+                FullTypeName = typeName,
+                TypeClass = typeName.Equals("error") ? TypeClass.Interface : TypeClass.Simple
             };
         }
 

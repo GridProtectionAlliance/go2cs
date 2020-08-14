@@ -50,7 +50,8 @@ namespace go2cs
             m_inFunction = true; // May need to scope certain objects, like consts, to current function
             m_originalFunctionName = context.IDENTIFIER().GetText();
             m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
-            m_variables.Clear();
+            m_variableIdentifiers.Clear();
+            m_variableTypes.Clear();
 
             string functionSignature = FunctionSignature.Generate(m_originalFunctionName);
 

@@ -109,14 +109,13 @@ namespace go2cs
             if (!Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
                 typeInfo = TypeInfo.VarType;
 
-            if (!ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions))
-                return;
+            ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions);
 
             for (int i = 0; i < identifiers.Length; i++)
             {
                 string identifier = identifiers[i];
 
-                if (expressions.Length <= i)
+                if (!(expressions is null) && expressions.Length <= i)
                     continue;
 
                 string uniqueIdentifer = GetUniqueIdentifier(m_variables, identifiers[i]);
@@ -126,7 +125,7 @@ namespace go2cs
                 {
                     Name = identifier,
                     Type = typeInfo,
-                    HeapAllocated = expressions[i]?.Text.StartsWith("&") ?? false,
+                    HeapAllocated = expressions?[i]?.Text.StartsWith("&") ?? false,
                     Redeclared = redeclared
                 });
 

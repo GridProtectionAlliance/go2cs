@@ -440,7 +440,7 @@ namespace go2cs
             }
         }
 
-        public override void ExitOperand( GoParser.OperandContext context)
+        public override void ExitOperand(GoParser.OperandContext context)
         {
             // operand
             //     : literal
@@ -771,8 +771,14 @@ namespace go2cs
             else if (!(literalType.typeName() is null))
             {
                 // TODO: Converter will need to override and look at identifier metadata to specify proper expression type
-                expressionText = context.GetText();
-                typeInfo = TypeInfo.ObjectType;
+                expressionText = $"new {literalType.GetText()}({RemoveSurrounding(literalValue.GetText(), "{", "}")})";
+                typeInfo = new TypeInfo
+                {
+                    Name = literalType.GetText(),
+                    TypeName = literalType.GetText(),
+                    FullTypeName = $"go.{literalType.GetText()}",
+                    TypeClass = TypeClass.Simple
+                };
             }
             else
             {

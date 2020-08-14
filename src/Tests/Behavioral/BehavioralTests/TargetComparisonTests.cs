@@ -68,6 +68,9 @@ namespace BehavioralTests
         [TestMethod]
         public void CheckImportOptionsResult() => CheckProjectAgainstTarget("ImportOptions");
 
+        [TestMethod]
+        public void CheckInterfaceCastingResult() => CheckProjectAgainstTarget("InterfaceCasting");
+
         private void CheckProjectAgainstTarget(string targetProject)
         {
             string projectPath = Path.GetFullPath($"{RootPath}{targetProject}");

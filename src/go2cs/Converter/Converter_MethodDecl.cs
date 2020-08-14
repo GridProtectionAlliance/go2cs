@@ -24,7 +24,6 @@
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using static go2cs.Common;
 
 namespace go2cs
@@ -36,7 +35,13 @@ namespace go2cs
             m_inFunction = true; // May need to scope certain objects, like consts, to current function
             m_originalFunctionName = context.IDENTIFIER().GetText();
             m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
-            m_variables.Clear();
+            m_variableIdentifiers.Clear();
+            m_variableTypes.Clear();
+
+            string functionSignature = FunctionSignature.Generate(m_originalFunctionName);
+
+            if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))
+                throw new InvalidOperationException($"Failed to find metadata for method function \"{functionSignature}\".");
 
             // Function signature containing result type and parameters have not been visited yet,
             // so we mark their desired positions and replace once the visit has occurred
@@ -49,12 +54,6 @@ namespace go2cs
 
         public override void ExitMethodDecl(GoParser.MethodDeclContext context)
         {
-            bool signatureOnly = false;
-            string functionSignature = FunctionSignature.Generate(m_originalFunctionName);
-
-            if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))
-                throw new InvalidOperationException($"Failed to find metadata for method function \"{functionSignature}\".");
-
             if (!(m_currentFunction.Signature is MethodSignature method))
                 throw new InvalidOperationException($"Failed to find signature metadata for method function \"{m_currentFunctionName}\".");
 
@@ -112,8 +111,6 @@ namespace go2cs
 
             if (useFuncExecutionContext)
                 m_targetFile.Append(");");
-            else if (signatureOnly)
-                m_targetFile.Append(";");
 
             m_targetFile.Append(CheckForCommentsRight(context));
         }

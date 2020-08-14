@@ -23,13 +23,15 @@
 
 using go2cs.Metadata;
 using System;
+using System.Collections.Generic;
 using static go2cs.Common;
 
 namespace go2cs
 {
     public partial class Converter
     {
-        private readonly ParseTreeValues<string> m_variables = new ParseTreeValues<string>();
+        private readonly ParseTreeValues<string> m_variableIdentifiers = new ParseTreeValues<string>();
+        private readonly Dictionary<string, TypeInfo> m_variableTypes = new Dictionary<string, TypeInfo>();
         private int m_varIdentifierCount;
         private bool m_varMultipleDeclaration;
 
@@ -94,8 +96,8 @@ namespace go2cs
 
             for (int i = 0; i < identifiers.Length; i++)
             {
-                if (expressions?.Length > i)
-                    m_variables.Add(identifierList.IDENTIFIER(i), GetUniqueIdentifier(m_variables, identifiers[i]));
+                if (expressions is null || expressions.Length > i)
+                    m_variableIdentifiers.Add(identifierList.IDENTIFIER(i), GetUniqueIdentifier(m_variableIdentifiers, identifiers[i]));
             }
 
             Types.TryGetValue(context.type_(), out TypeInfo typeInfo);
@@ -108,6 +110,7 @@ namespace go2cs
                 string identifier = SanitizedIdentifier(identifiers[i]);
                 string expression = expressions?[i].Text;
                 string typeName = type ?? expressions?[i].Type.TypeName ?? "var";
+                string variableName = null;
                 bool isInitialDeclaration = true;
 
                 m_targetFile.Append($"{Spacing()}");
@@ -116,8 +119,11 @@ namespace go2cs
                     m_targetFile.Append($"{(char.IsUpper(identifier[0]) ? "public" : "private")} static ");
 
                 // Determine if this is the initial declaration
-                if (m_inFunction && m_variables.TryGetValue(identifierList.IDENTIFIER(i), out string variableName))
+                if (m_inFunction && m_variableIdentifiers.TryGetValue(identifierList.IDENTIFIER(i), out variableName))
                     isInitialDeclaration = !variableName.Contains("@@");
+
+                if (isInitialDeclaration && !string.IsNullOrWhiteSpace(variableName))
+                    m_variableTypes[variableName] = typeInfo;
 
                 m_targetFile.Append($"{(isInitialDeclaration ? $"{typeName} " : "")}{identifier}");
 
@@ -125,6 +131,8 @@ namespace go2cs
                     m_targetFile.Append($" = {expression}");
                 else if (typeInfo?.TypeClass == TypeClass.Array && typeInfo is ArrayTypeInfo arrayTypeInfo)
                     m_targetFile.Append($" = new {typeName}({arrayTypeInfo.Length.Text})");
+                else
+                    m_targetFile.Append(" = default");
 
                 // Since multiple specifications can be on one line, only check for comments after last specification
                 if (i < length - 1 || length == 1)

@@ -16,5 +16,9 @@ func f() error {
 }
 
 func main() {
-    fmt.Printf("%v\n", f()) // error: foo
+    var err error
+
+    err = MyError{"bar"}
+
+    fmt.Printf("%v %v\n", f(), err) // error: foo
 }

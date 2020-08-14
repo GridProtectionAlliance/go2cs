@@ -128,7 +128,7 @@ namespace go2cs
                 for (int i = 0; i < identifiers.Length; i++)
                 {
                     if (expressions.Length > i)
-                        m_variables.Add(identifierList.IDENTIFIER(i), GetUniqueIdentifier(m_variables, identifiers[i]));
+                        m_variableIdentifiers.Add(identifierList.IDENTIFIER(i), GetUniqueIdentifier(m_variableIdentifiers, identifiers[i]));
                 }
 
                 int length = Math.Min(identifiers.Length, expressions.Length);
@@ -136,10 +136,14 @@ namespace go2cs
                 for (int i = 0; i < length; i++)
                 {
                     bool isInitialDeclaration = true;
+                    string variableName = null;
 
                     // Determine if this is the initial declaration
-                    if (m_inFunction && m_variables.TryGetValue(identifierList.IDENTIFIER(i), out string variableName))
+                    if (m_inFunction && m_variableIdentifiers.TryGetValue(identifierList.IDENTIFIER(i), out variableName))
                         isInitialDeclaration = !variableName.Contains("@@");
+
+                    if (isInitialDeclaration && !string.IsNullOrWhiteSpace(variableName))
+                        m_variableTypes[variableName] = expressions[i].Type;
 
                     statement.Append($"{Spacing()}{(isInitialDeclaration ? $"{expressions[i].Type?.TypeName ?? "var"} " : "")}{SanitizedIdentifier(identifiers[i])} = {expressions[i]};");
 

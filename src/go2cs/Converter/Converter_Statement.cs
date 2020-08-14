@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
@@ -177,6 +178,8 @@ namespace go2cs
                 for (int i = 0; i < length; i++)
                 {
                     string assignOP = context.assign_op().GetText();
+                    string leftOperandText = leftOperands[i].Text;
+                    string rightOperandText = rightOperands[i].Text;
 
                     if (assignOP.Equals("<<=") || assignOP.Equals(">>="))
                     {
@@ -192,10 +195,16 @@ namespace go2cs
                     }
                     else
                     {
+                        if (!m_variableTypes.TryGetValue(leftOperandText, out TypeInfo leftOperandType))
+                            leftOperandType = leftOperands[i].Type;
+
+                        if (assignOP == "=" && leftOperandType.TypeClass == TypeClass.Interface)
+                            rightOperandText = $"{leftOperandType.TypeName}.As({rightOperandText})";
+
                         assignOP = $" {assignOP} ";
                     }
 
-                    statement.Append($"{Spacing()}{leftOperands[i]}{assignOP}{rightOperands[i]};");
+                    statement.Append($"{Spacing()}{leftOperandText}{assignOP}{rightOperandText};");
 
                     // Since multiple assignments can be on one line, only check for comments after last assignment
                     if (i < length - 1)
@@ -227,20 +236,20 @@ namespace go2cs
                 AddWarning(context, $"Failed to find type info for: {context.GetText()}");
         }
 
-        public override void ExitArrayType(GoParser.ArrayTypeContext context)
-        {
-            base.ExitArrayType(context);
-        }
+        //public override void ExitArrayType(GoParser.ArrayTypeContext context)
+        //{
+        //    base.ExitArrayType(context);
+        //}
 
-        public override void ExitLiteralType(GoParser.LiteralTypeContext context)
-        {
-            base.ExitLiteralType(context);
-        }
+        //public override void ExitLiteralType(GoParser.LiteralTypeContext context)
+        //{
+        //    base.ExitLiteralType(context);
+        //}
 
-        public override void ExitLiteralValue(GoParser.LiteralValueContext context)
-        {
-            base.ExitLiteralValue(context);
-        }
+        //public override void ExitLiteralValue(GoParser.LiteralValueContext context)
+        //{
+        //    base.ExitLiteralValue(context);
+        //}
 
         public override void ExitGoStmt(GoParser.GoStmtContext context)
         {
@@ -261,6 +270,11 @@ namespace go2cs
             }
         }
 
+        public override void EnterReturnStmt([NotNull] GoParser.ReturnStmtContext context)
+        {
+            base.EnterReturnStmt(context);
+        }
+
         public override void ExitReturnStmt(GoParser.ReturnStmtContext context)
         {
             // returnStmt
@@ -271,9 +285,18 @@ namespace go2cs
             if (ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions))
             {
                 if (expressions.Length > 1)
+                {
                     m_targetFile.Append($" ({string.Join(", ", expressions.Select(expr => expr.Text))})");
+                }
                 else if (expressions.Length > 0)
-                    m_targetFile.Append($" {expressions[0]}");
+                {
+                    TypeInfo resultType = m_currentFunction.Signature.Signature.Result[0].Type;
+                    
+                    if (resultType.TypeClass == TypeClass.Interface)
+                        m_targetFile.Append($" {resultType.TypeName}.As({expressions[0]})");
+                    else
+                        m_targetFile.Append($" {expressions[0]}");
+                }
             }
 
             m_targetFile.Append($";{CheckForCommentsRight(context)}");
