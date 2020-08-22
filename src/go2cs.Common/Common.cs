@@ -66,7 +66,7 @@ namespace go2cs
                 "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while",
                 "__argslist", "__makeref", "__reftype", "__refvalue",
                 // The following keywords are reserved by go2cs, if they are encountered in Go code they should be escaped
-                "WithOK", "WithErr", "WithVal"
+                "WithOK", "WithErr", "WithVal", "InitKeyedValues", "GetGoTypeName", "CastCopy", "ConvertToType"
             },
             StringComparer.Ordinal);
 
