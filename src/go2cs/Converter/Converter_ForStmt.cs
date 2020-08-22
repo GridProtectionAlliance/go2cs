@@ -218,6 +218,7 @@ namespace go2cs
             {
                 Expressions.TryGetValue(context.expression() ?? forClause?.expression(), out ExpressionInfo expression);
                 m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression?.Text ?? "true");
+                m_targetFile.Append(CheckForCommentsRight(context));
             }
             else if (!(forClause is null))
             {
@@ -269,7 +270,7 @@ namespace go2cs
 
                         IndentLevel--;
                         m_targetFile.AppendLine();
-                        m_targetFile.AppendLine($"{Spacing()}}}");
+                        m_targetFile.Append($"{Spacing()}}}");
                     }
                 }
 
@@ -296,6 +297,9 @@ namespace go2cs
                         AddWarning(context, $"Failed to find simple post statement in for clause: {simplePostStatement.GetText()}");
                     }
                 }
+
+                m_targetFile.Append(CheckForCommentsRight(context));
+
             }
             else
             {
@@ -318,11 +322,20 @@ namespace go2cs
                     if (!(expressions is null))
                     {
                         string[] expressionTexts = expressions.Select(expr => expr.Text).ToArray();
-                        string immutable = string.Join(", ", expressionTexts.Select(expr => $"__{expr}"));
-                        string mutable = string.Join(", ", expressionTexts);
+                        m_targetFile.AppendLine();
+
+                        StringBuilder mutable = new StringBuilder();
+
+                        for (int i = 0; i < expressionTexts.Length; i++)
+                        {
+                            if (!expressionTexts[i].Equals("_"))
+                                mutable.Append($"{Environment.NewLine}{Spacing(1)}{expressionTexts[i]} = __{expressionTexts[i]};");
+                        }
+
+                        string immutable = string.Join(", ", expressionTexts.Select(expr => expr == "_" ? "_" : $"__{expr}"));
 
                         m_targetFile.Replace(string.Format(ForRangeExpressionsMarker, m_forExpressionLevel), $"var ({string.Join(", ", immutable)})");
-                        m_targetFile.Replace(string.Format(ForRangeBlockMutableExpressionsMarker, m_forExpressionLevel), $"{Environment.NewLine}{Spacing(1)}var ({mutable}) = ({immutable});");
+                        m_targetFile.Replace(string.Format(ForRangeBlockMutableExpressionsMarker, m_forExpressionLevel), mutable.ToString());
                     }
 
                     if (!(identifiers is null))
@@ -348,7 +361,7 @@ namespace go2cs
 
                             IndentLevel--;
                             m_targetFile.AppendLine();
-                            m_targetFile.AppendLine($"{Spacing()}}}");
+                            m_targetFile.AppendLine($"{Spacing()}}}{Environment.NewLine}");
 
                             StringBuilder mutable = new StringBuilder();
 
@@ -375,7 +388,6 @@ namespace go2cs
                 }
             }
 
-            m_targetFile.AppendLine();
             m_forExpressionLevel--;
         }
     }
