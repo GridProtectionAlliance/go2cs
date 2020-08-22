@@ -51,7 +51,7 @@ namespace go2cs
                     IndentLevel++;
 
                     // Handle storing of current values of any redeclared variables
-                    m_targetFile.Append(OpenRedeclaredVariableBlock(context.simpleStmt().shortVarDecl(), m_ifExpressionLevel));
+                    m_targetFile.Append(OpenRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_ifExpressionLevel));
                 }
 
                 m_targetFile.Append(string.Format(IfStatementMarker, m_ifExpressionLevel));
@@ -100,7 +100,7 @@ namespace go2cs
                 if (!(context.simpleStmt().shortVarDecl() is null))
                 {
                     // Handle restoration of previous values of any redeclared variables
-                    m_targetFile.Append(CloseRedeclaredVariableBlock(context.simpleStmt().shortVarDecl(), m_ifExpressionLevel));
+                    m_targetFile.Append(CloseRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_ifExpressionLevel));
 
                     IndentLevel--;
                     m_targetFile.AppendLine();

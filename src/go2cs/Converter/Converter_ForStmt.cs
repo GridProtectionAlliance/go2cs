@@ -23,6 +23,9 @@
 
 using go2cs.Metadata;
 using System;
+using System.Linq;
+using System.Text;
+using Antlr4.Runtime.Tree;
 
 namespace go2cs
 {
@@ -31,7 +34,8 @@ namespace go2cs
         public const string ForExpressionMarker = ">>MARKER:FOREXPRESSION_LEVEL_{0}<<";
         public const string ForInitStatementMarker = ">>MARKER:FORINITSTATEMENT_LEVEL_{0}<<";
         public const string ForPostStatementMarker = ">>MARKER:FORPOSTSTATEMENT_LEVEL_{0}<<";
-        //public const string ForRangeExpressionsMarker = ">>MARKER:FORRANGEEXPRESSIONS_LEVEL_{0}<<";
+        public const string ForRangeExpressionsMarker = ">>MARKER:FORRANGEEXPRESSIONS_LEVEL_{0}<<";
+        public const string ForRangeBlockMutableExpressionsMarker = ">>MARKER:FORRANGEMUTABLEEXPRESSIONS_LEVEL_{0}<<";
 
         private int m_forExpressionLevel;
 
@@ -136,7 +140,7 @@ namespace go2cs
                         IndentLevel++;
 
                         // Handle storing of current values of any redeclared variables
-                        m_targetFile.Append(OpenRedeclaredVariableBlock(simpleInitStatement.shortVarDecl(), m_forExpressionLevel));
+                        m_targetFile.Append(OpenRedeclaredVariableBlock(simpleInitStatement.shortVarDecl().identifierList(), m_forExpressionLevel));
                     }
                 }
 
@@ -166,17 +170,40 @@ namespace go2cs
                 // rangeClause
                 //     : ( expressionList '=' | identifierList ':=' )? 'range' expression
 
-                if (!(context.rangeClause().identifierList() is null))
-                {
-                    // Any declared variable will be scoped to for statement, so create a sub-block for it
-                    m_targetFile.AppendLine($"{Spacing()}{{");
-                    IndentLevel++;
-                }
+                GoParser.RangeClauseContext rangeClause = context.rangeClause();
 
-                // Handle item iteration style statement - since Go's iteration variables are mutable and
-                // can be pre-declared, a standard for loop is used instead of a foreach. The exception
-                // is for an index and rune iteration over a string which in C# a foreach works fine because
-                // the inferred tuple instance can be readonly since it would not be referenced by Go code.
+                if (!(rangeClause is null))
+                {
+                    if (!(rangeClause.identifierList() is null))
+                    {
+                        GoParser.IdentifierListContext identifiers = rangeClause.identifierList();
+                        bool isRedeclared = false;
+
+                        for (int i = 0; i < identifiers.ChildCount; i++)
+                        {
+                            IParseTree identifer = identifiers.GetChild(i);
+
+                            if (TryGetFunctionVariable(identifer.GetText(), out VariableInfo variable) && variable.Redeclared)
+                            {
+                                isRedeclared = true;
+                                break;
+                            }
+                        }
+                        
+                        if (isRedeclared)
+                        {
+                            m_targetFile.AppendLine($"{Spacing()}{{");
+                            IndentLevel++;
+
+                            // Handle storing of current values of any redeclared variables
+                            m_targetFile.Append(OpenRedeclaredVariableBlock(rangeClause.identifierList(), m_forExpressionLevel));
+                        }
+                    }
+
+                    m_targetFile.AppendLine($"{Spacing()}foreach ({string.Format(ForRangeExpressionsMarker, m_forExpressionLevel)} in {string.Format(ForExpressionMarker, m_forExpressionLevel)})");
+                    PushInnerBlockPrefix(string.Format(ForRangeBlockMutableExpressionsMarker, m_forExpressionLevel));
+                    PushInnerBlockSuffix(null);
+                }
             }
         }
 
@@ -235,14 +262,14 @@ namespace go2cs
                     if (isRedeclared || !useForStyleStatement && !(simpleInitStatement.shortVarDecl() is null))
                     {
                         // Handle restoration of previous values of any redeclared variables
-                        string closeRedeclarations = CloseRedeclaredVariableBlock(simpleInitStatement.shortVarDecl(), m_forExpressionLevel);
+                        string closeRedeclarations = CloseRedeclaredVariableBlock(simpleInitStatement.shortVarDecl().identifierList(), m_forExpressionLevel);
 
                         if (!string.IsNullOrEmpty(closeRedeclarations))
                             m_targetFile.Append($"{Environment.NewLine}{RemoveLastLineFeed(closeRedeclarations)}");
 
                         IndentLevel--;
                         m_targetFile.AppendLine();
-                        m_targetFile.Append($"{Spacing()}}}");
+                        m_targetFile.AppendLine($"{Spacing()}}}");
                     }
                 }
 
@@ -275,17 +302,80 @@ namespace go2cs
                 // rangeClause
                 //     : (expressionList '=' | identifierList ':=' )? 'range' expression
 
-                if (!(context.rangeClause().identifierList() is null))
+                GoParser.RangeClauseContext rangeClause = context.rangeClause();
+
+                ExpressionInfo[] expressions = null;
+                string[] identifiers = null;
+
+                if (!(rangeClause is null))
                 {
-                    // Close any locally scoped declared variable sub-block
-                    IndentLevel--;
-                    m_targetFile.AppendLine();
-                    m_targetFile.Append($"{Spacing()}}}");
+                    if (!(rangeClause.identifierList() is null) && !Identifiers.TryGetValue(rangeClause.identifierList(), out identifiers))
+                        AddWarning(context, $"Failed to find identifier list in range expression: {rangeClause.identifierList().GetText()}");
+
+                    if (!(rangeClause.expressionList() is null) && !ExpressionLists.TryGetValue(rangeClause.expressionList(), out expressions))
+                        AddWarning(context, $"Failed to find expression list in range expression: {rangeClause.expressionList().GetText()}");
+
+                    if (!(expressions is null))
+                    {
+                        string[] expressionTexts = expressions.Select(expr => expr.Text).ToArray();
+                        string immutable = string.Join(", ", expressionTexts.Select(expr => $"__{expr}"));
+                        string mutable = string.Join(", ", expressionTexts);
+
+                        m_targetFile.Replace(string.Format(ForRangeExpressionsMarker, m_forExpressionLevel), $"var ({string.Join(", ", immutable)})");
+                        m_targetFile.Replace(string.Format(ForRangeBlockMutableExpressionsMarker, m_forExpressionLevel), $"{Environment.NewLine}{Spacing(1)}var ({mutable}) = ({immutable});");
+                    }
+
+                    if (!(identifiers is null))
+                    {
+                        bool isRedeclared = false;
+
+                        foreach (string identifier in identifiers)
+                        {
+                            if (TryGetFunctionVariable(identifier, out VariableInfo variable) && variable.Redeclared)
+                            {
+                                isRedeclared = true;
+                                break;
+                            }
+                        }
+
+                        if (isRedeclared)
+                        {
+                            // Handle restoration of previous values of any redeclared variables
+                            string closeRedeclarations = CloseRedeclaredVariableBlock(rangeClause.identifierList(), m_forExpressionLevel);
+
+                            if (!string.IsNullOrEmpty(closeRedeclarations))
+                                m_targetFile.Append(RemoveLastLineFeed(closeRedeclarations));
+
+                            IndentLevel--;
+                            m_targetFile.AppendLine();
+                            m_targetFile.AppendLine($"{Spacing()}}}");
+
+                            StringBuilder mutable = new StringBuilder();
+
+                            for (int i = 0; i < identifiers.Length; i++)
+                            {
+                                if (!identifiers[i].Equals("_"))
+                                    mutable.Append($"{Environment.NewLine}{Spacing(2)}{identifiers[i]} = __{identifiers[i]};");
+                            }
+
+                            string immutable = string.Join(", ", identifiers.Select(expr => expr == "_" ? "_" : $"__{expr}"));
+
+                            m_targetFile.Replace(string.Format(ForRangeExpressionsMarker, m_forExpressionLevel), $"var ({string.Join(", ", immutable)})");
+                            m_targetFile.Replace(string.Format(ForRangeBlockMutableExpressionsMarker, m_forExpressionLevel), mutable.ToString());
+                        }
+                        else
+                        {
+                            m_targetFile.Replace(string.Format(ForRangeExpressionsMarker, m_forExpressionLevel), $"var ({string.Join(", ", identifiers)})");
+                            m_targetFile.Replace(string.Format(ForRangeBlockMutableExpressionsMarker, m_forExpressionLevel), "");
+                        }
+                    }
+
+                    Expressions.TryGetValue(rangeClause.expression(), out ExpressionInfo expression);
+                    m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression?.Text ?? "true");
                 }
             }
 
-            m_targetFile.Append(CheckForCommentsRight(context));
-
+            m_targetFile.AppendLine();
             m_forExpressionLevel--;
         }
     }

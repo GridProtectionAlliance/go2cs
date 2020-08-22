@@ -428,11 +428,27 @@ namespace go2cs
                 if (ExpressionLists.TryGetValue(argumentsContext.expressionList(), out ExpressionInfo[] expressions))
                     arguments.AddRange(expressions.Select(expr => expr.Text));
 
-                PrimaryExpressions[context] = new ExpressionInfo
+                if (primaryExpression.Text == "new")
                 {
-                    Text = $"{primaryExpression}({string.Join(", ", arguments)})",
-                    Type = primaryExpression.Type
-                };
+                    //string argName = $"ptr<{arguments[0]}>";
+                    TypeInfo argType = expressions[0].Type.Clone();
+
+                    argType.IsPointer = true;
+
+                    PrimaryExpressions[context] = new ExpressionInfo
+                    {
+                        Text = $"@new<{arguments[0]}>()",
+                        Type = argType
+                    };
+                }
+                else
+                {
+                    PrimaryExpressions[context] = new ExpressionInfo
+                    {
+                        Text = $"{primaryExpression}({string.Join(", ", arguments)})",
+                        Type = primaryExpression.Type
+                    };
+                }
             }
             else
             {
@@ -658,6 +674,21 @@ namespace go2cs
 
             GoParser.LiteralTypeContext literalType = context.literalType();
             GoParser.LiteralValueContext literalValue = context.literalValue();
+            GoParser.KeyedElementContext[] keyedElements = literalValue.elementList().keyedElement();
+            bool isDynamicSizedArray = !(literalType.elementType() is null);
+            List<(string key, string element)> elements = new List<(string key, string element)>();
+            bool hasKeyedElement = false;
+
+            foreach (GoParser.KeyedElementContext keyedElement in keyedElements)
+            {
+                string key = keyedElement.key()?.GetText();
+                string element = keyedElement.element().GetText();
+
+                elements.Add((key, element));
+
+                if (!(key is null) && !hasKeyedElement)
+                    hasKeyedElement = true;
+            }
 
             string expressionText;
             TypeInfo typeInfo;
@@ -674,12 +705,26 @@ namespace go2cs
                     TypeClass = TypeClass.Struct
                 };
             }
-            else if (!(literalType.arrayType() is null))
+            else if (!(literalType.arrayType() is null) || isDynamicSizedArray)
             {
-                if (Types.TryGetValue(literalType.arrayType().elementType(), out typeInfo))
+                if (Types.TryGetValue(literalType.arrayType()?.elementType() ?? literalType.elementType(), out typeInfo))
                 {
+                    if (typeInfo.TypeClass == TypeClass.Interface)
+                    {
+                        for (int i = 0; i < elements.Count; i++)
+                        {
+                            (string key, string element) = elements[i];
+                            elements[i] = (key, $"{typeInfo.TypeName}.As({element})");
+                        }
+                    }
+
                     string typeName = typeInfo.TypeName;
-                    expressionText = $"new array<{typeName}>(new {typeName}[]{literalValue.GetText()})";
+                    string arrayLength = isDynamicSizedArray ? "-1" : literalType.arrayType().arrayLength().GetText();
+
+                    expressionText = hasKeyedElement ? 
+                        $"new array<{typeName}>(InitKeyedValues<{typeName}>({(isDynamicSizedArray ? "": $"{arrayLength}, ")}{string.Join(", ", elements.Select(kvp => kvp.key is null ? kvp.element : $"({kvp.key}, {kvp.element})"))}))" :
+                        $"new array<{typeName}>(new {typeName}[] {{ {string.Join(", ", elements.Select(kvp => kvp.element))} }})";
+
                     typeInfo = new ArrayTypeInfo
                     {
                         Name = typeName,
@@ -687,7 +732,7 @@ namespace go2cs
                         FullTypeName = $"go.array<{typeInfo.FullTypeName}>",
                         Length = new ExpressionInfo
                         {
-                            Text = literalType.arrayType().arrayLength().GetText(),
+                            Text = arrayLength,
                             Type = new TypeInfo
                             {
                                 Name = "long",
@@ -706,32 +751,25 @@ namespace go2cs
                     return;
                 }
             }
-            else if(!(literalType.elementType() is null))
-            {
-                if (Types.TryGetValue(literalType.elementType(), out typeInfo))
-                {
-                    string typeName = typeInfo.TypeName;
-                    expressionText = $"new {typeName}[]{literalValue.GetText()}";
-                    typeInfo = new TypeInfo
-                    {
-                        Name = typeName,
-                        TypeName = typeName,
-                        FullTypeName = typeInfo.FullTypeName,
-                        TypeClass = TypeClass.Array
-                    };
-                }
-                else
-                {
-                    AddWarning(context, $"Failed to find element type for the array type expression in \"{context.GetText()}\"");
-                    return;
-                }
-            }
             else if (!(literalType.sliceType() is null))
             {
                 if (Types.TryGetValue(literalType.sliceType().elementType(), out typeInfo))
                 {
                     string typeName = typeInfo.TypeName;
-                    expressionText = $"slice(new {typeName}[]{literalValue.GetText()})";
+
+                    if (typeInfo.TypeClass == TypeClass.Interface)
+                    {
+                        for (int i = 0; i < elements.Count; i++)
+                        {
+                            (string key, string element) = elements[i];
+                            elements[i] = (key, $"{typeInfo.TypeName}.As({element})");
+                        }
+                    }
+
+                    expressionText = hasKeyedElement ?
+                        $"new slice<{typeName}>(InitKeyedValues<{typeName}>({string.Join(", ", elements.Select(kvp => kvp.key is null ? kvp.element : $"({kvp.key}, {kvp.element})"))}))" :
+                        $"new slice<{typeName}>(new {typeName}[] {{ {string.Join(", ", elements.Select(kvp => kvp.element))} }})";
+
                     typeInfo = new TypeInfo
                     {
                         Name = typeName,
@@ -752,6 +790,7 @@ namespace go2cs
                 if (Types.TryGetValue(literalType.mapType().type_(), out typeInfo) && Types.TryGetValue(literalType.mapType().elementType(), out TypeInfo elementTypeInfo))
                 {
                     expressionText = $"/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<{typeInfo.TypeName}, {elementTypeInfo.TypeName}>{literalValue.GetText()}";
+                    
                     typeInfo = new MapTypeInfo
                     {
                         Name = "map",
@@ -770,8 +809,9 @@ namespace go2cs
             }
             else if (!(literalType.typeName() is null))
             {
-                // TODO: Converter will need to override and look at identifier metadata to specify proper expression type
+                // TODO: Need to determine how to properly employ keyed elements here - guess is type aliases to array/slice/map would need to map back to original implementations
                 expressionText = $"new {literalType.GetText()}({RemoveSurrounding(literalValue.GetText(), "{", "}")})";
+                
                 typeInfo = new TypeInfo
                 {
                     Name = literalType.GetText(),
@@ -847,11 +887,11 @@ namespace go2cs
             //     : IDENTIFIER
             //     | qualifiedIdent
 
-            // TODO: Converter will need to override and look at identifier metadata to specify proper expression type
+            // TODO: var assignment is temporary, to resolve actual type, converter would override to load identifier metadata and recursively resolve identifier based components
             Operands[operandContext] = new ExpressionInfo
             {
                 Text = context.GetText(),
-                Type = TypeInfo.ObjectType
+                Type = TypeInfo.VarType
             };
         }
 

@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using Antlr4.Runtime.Misc;
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
@@ -115,6 +116,9 @@ namespace go2cs
             {
                 string identifier = identifiers[i];
 
+                if (identifier.Equals("_"))
+                    continue;
+
                 if (!(expressions is null) && expressions.Length <= i)
                     continue;
 
@@ -146,6 +150,9 @@ namespace go2cs
             {
                 string identifier = identifiers[i];
 
+                if (identifier.Equals("_"))
+                    continue;
+
                 if (expressions.Length <= i)
                     continue;
 
@@ -155,7 +162,7 @@ namespace go2cs
                 m_variables.Add(uniqueIdentifer, new VariableInfo
                 {
                     Name = identifier,
-                    Type = expressions[i].Type ?? TypeInfo.VarType,
+                    Type = expressions[i]?.Type ?? TypeInfo.VarType,
                     HeapAllocated = expressions[i]?.Text.StartsWith("&") ?? false,
                     Redeclared = redeclared
                 });
@@ -163,6 +170,73 @@ namespace go2cs
                 if (redeclared && m_variables.TryGetValue(identifier, out VariableInfo rootVariable))
                     rootVariable.Redeclared = true;
             }
+        }
+
+        public override void ExitRecvStmt(GoParser.RecvStmtContext context)
+        {
+            CheckIdentifiers(context.identifierList(), context.expression());
+        }
+
+        public override void ExitRangeClause(GoParser.RangeClauseContext context)
+        {
+            CheckIdentifiers(context.identifierList(), context.expression());
+        }
+
+        private void CheckIdentifiers(GoParser.IdentifierListContext identifierList, GoParser.ExpressionContext expression)
+        {
+            if (!Identifiers.TryGetValue(identifierList, out string[] identifiers))
+                return;
+
+            Expressions.TryGetValue(expression, out ExpressionInfo expressionInfo);
+
+            for (int i = 0; i < identifiers.Length; i++)
+            {
+                string identifier = identifiers[i];
+
+                if (identifier.Equals("_"))
+                    continue;
+
+                string uniqueIdentifer = GetUniqueIdentifier(m_variables, identifiers[i]);
+                bool redeclared = uniqueIdentifer.Contains("@@");
+
+                m_variables.Add(uniqueIdentifer, new VariableInfo
+                {
+                    Name = identifier,
+                    Type = expressionInfo?.Type ?? TypeInfo.VarType,
+                    HeapAllocated = expressionInfo?.Text.StartsWith("&") ?? false,
+                    Redeclared = redeclared
+                });
+
+                if (redeclared && m_variables.TryGetValue(identifier, out VariableInfo rootVariable))
+                    rootVariable.Redeclared = true;
+            }
+        }
+
+        public override void ExitTypeSwitchGuard(GoParser.TypeSwitchGuardContext context)
+        {
+            if (context.IDENTIFIER() is null)
+                return;
+
+            string identifier = context.IDENTIFIER().GetText();
+
+            if (identifier.Equals("_"))
+                return;
+
+            Expressions.TryGetValue(context.primaryExpr(), out ExpressionInfo expression);
+
+            string uniqueIdentifer = GetUniqueIdentifier(m_variables, identifier);
+            bool redeclared = uniqueIdentifer.Contains("@@");
+
+            m_variables.Add(uniqueIdentifer, new VariableInfo
+            {
+                Name = identifier,
+                Type = expression?.Type ?? TypeInfo.VarType,
+                HeapAllocated = expression?.Text.StartsWith("&") ?? false,
+                Redeclared = redeclared
+            });
+
+            if (redeclared && m_variables.TryGetValue(identifier, out VariableInfo rootVariable))
+                rootVariable.Redeclared = true;
         }
 
         // TODO: Look for cases where a pointer is assigned to an address of a variable,

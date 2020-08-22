@@ -157,12 +157,5 @@ namespace go2cs
 
             m_targetFile.Append(CheckForCommentsRight(context));
         }
-
-        //public override void ExitFunction(GoParser.FunctionContext context)
-        //{
-        //    string tempBlock = RemoveSurrounding(context.block().GetText(), "{", "}");
-
-        //    m_targetFile.AppendLine(FixForwardSpacing(tempBlock));
-        //}
     }
 }

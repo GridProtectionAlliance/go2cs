@@ -78,6 +78,8 @@ namespace go2cs
 
         public GoParser Parser { get; }
 
+        public FileMetadata Metadata { get; } // Only available after pre-scan
+
         public string SourceFileName { get; }
 
         public string SourceFilePath { get; }
@@ -111,6 +113,11 @@ namespace go2cs
             SourceFilePath = sourceFilePath;
             TargetFileName = targetFileName;
             TargetFilePath = targetFilePath;
+
+            FolderMetadata folderMetadata = GetFolderMetadata(Options, SourceFileName);
+
+            if (!(folderMetadata is null) && folderMetadata.Files.TryGetValue(fileName, out FileMetadata metadata))
+                Metadata = metadata;
         }
 
         public virtual void Scan(bool showParseTree)
@@ -461,6 +468,9 @@ namespace go2cs
 
         protected string GetUniqueIdentifier<T>(IDictionary<string, T> source, string identifier)
         {
+            if (identifier.Equals("_"))
+                return identifier;
+
             int count = 0;
             string uniqueIdentifier = identifier;
 

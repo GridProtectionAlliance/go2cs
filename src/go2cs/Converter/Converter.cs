@@ -46,23 +46,18 @@ namespace go2cs
 
         private StringBuilder m_targetFile = new StringBuilder();
 
-        public FileMetadata Metadata { get; }
-
         public Dictionary<string, (string targetImport, string targetUsing)> ImportAliases { get; }
 
         public Dictionary<string, FolderMetadata> ImportMetadata { get; }
 
         public Converter(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
         {
-            FolderMetadata folderMetadata = GetFolderMetadata(Options, SourceFileName);
-
-            if (folderMetadata is null || !folderMetadata.Files.TryGetValue(fileName, out FileMetadata metadata))
+            if (Metadata is null)
                 throw new InvalidOperationException($"Failed to load metadata for \"{fileName}\" - file conversion canceled.");
 
-            Metadata = metadata;
-            Package = metadata.Package;
-            PackageImport = metadata.PackageImport;
-            ImportAliases = metadata.ImportAliases;
+            Package = Metadata.Package;
+            PackageImport = Metadata.PackageImport;
+            ImportAliases = Metadata.ImportAliases;
             ImportMetadata = new Dictionary<string, FolderMetadata>(StringComparer.Ordinal);
         }
 

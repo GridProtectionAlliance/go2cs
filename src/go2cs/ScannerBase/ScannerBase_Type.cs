@@ -70,13 +70,19 @@ namespace go2cs
         {
             string type = context.GetText();
             string typeName = ConvertToCSTypeName(type);
+            TypeClass typeClass = TypeClass.Simple;
+
+            if (typeName.Equals("error") || (Metadata?.Interfaces.TryGetValue(typeName, out _) ?? false))
+                typeClass = TypeClass.Interface;
+            else if (Metadata?.Structs.TryGetValue(typeName, out _) ?? false)
+                typeClass = TypeClass.Struct;
 
             Types[context.Parent] = new TypeInfo
             {
                 Name = type,
                 TypeName = ConvertToCSTypeName(type),
                 FullTypeName = typeName,
-                TypeClass = typeName.Equals("error") ? TypeClass.Interface : TypeClass.Simple
+                TypeClass = typeClass
             };
         }
 

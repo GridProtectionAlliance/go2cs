@@ -36,12 +36,10 @@ namespace go2cs
             return m_inFunction && (m_currentFunction?.Variables?.TryGetValue(identifier, out variable) ?? false) && !(variable is null);
         }
 
-        private string OpenRedeclaredVariableBlock(GoParser.ShortVarDeclContext context, int level)
+        private string OpenRedeclaredVariableBlock(GoParser.IdentifierListContext identifierList, int level)
         {
-            if (context is null)
+            if (identifierList is null)
                 return "";
-
-            GoParser.IdentifierListContext identifierList = context.identifierList();
 
             if (!Identifiers.TryGetValue(identifierList, out string[] identifiers))
             {
@@ -50,7 +48,7 @@ namespace go2cs
                 
                 if (!Identifiers.TryGetValue(identifierList, out identifiers))
                 {
-                    AddWarning(context, $"Failed to find identifier lists needed to hold and restore values for short var declaration statements: {context.GetText()}");
+                    AddWarning(identifierList, $"Failed to find identifier lists needed to hold and restore values for short var declaration statements: {identifierList.GetText()}");
                     return "";
                 }
             }
@@ -73,14 +71,12 @@ namespace go2cs
             return block.ToString();
         }
 
-        private string CloseRedeclaredVariableBlock(GoParser.ShortVarDeclContext context, int level)
+        private string CloseRedeclaredVariableBlock(GoParser.IdentifierListContext identifierList, int level)
         {
-            if (context is null)
+            if (identifierList is null)
                 return "";
 
             StringBuilder block = new StringBuilder();
-
-            GoParser.IdentifierListContext identifierList = context.identifierList();
 
             if (Identifiers.TryGetValue(identifierList, out string[] identifiers))
             {
@@ -100,7 +96,7 @@ namespace go2cs
             }
             else
             {
-                AddWarning(context, $"Failed to find identifier lists needed to stack creation for short var declaration statement: {context.GetText()}");
+                AddWarning(identifierList, $"Failed to find identifier lists needed to stack creation for short var declaration statement: {identifierList.GetText()}");
             }
 
             return block.ToString();

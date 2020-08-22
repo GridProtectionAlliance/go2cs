@@ -86,7 +86,7 @@ namespace go2cs
                     IndentLevel++;
                     
                     // Handle storing of current values of any redeclared variables
-                    m_targetFile.Append(OpenRedeclaredVariableBlock(context.simpleStmt().shortVarDecl(), m_exprSwitchExpressionLevel));
+                    m_targetFile.Append(OpenRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_exprSwitchExpressionLevel));
                 }
 
                 m_targetFile.Append(string.Format(ExprSwitchStatementMarker, m_exprSwitchExpressionLevel));
@@ -327,7 +327,7 @@ namespace go2cs
                 if (!(context.simpleStmt().shortVarDecl() is null))
                 {
                     // Handle restoration of previous values of any redeclared variables
-                    m_targetFile.Append(CloseRedeclaredVariableBlock(context.simpleStmt().shortVarDecl(), m_exprSwitchExpressionLevel));
+                    m_targetFile.Append(CloseRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_exprSwitchExpressionLevel));
 
                     IndentLevel--;
                     m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");

@@ -38,7 +38,8 @@ namespace go2cs
             m_variableIdentifiers.Clear();
             m_variableTypes.Clear();
 
-            string functionSignature = FunctionSignature.Generate(m_originalFunctionName);
+            string receiverTypeName = context.receiver().parameters().parameterDecl()[0].type_().GetText().Replace("*", "ref ");
+            string functionSignature = FunctionSignature.Generate(m_originalFunctionName, new[] { receiverTypeName });
 
             if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))
                 throw new InvalidOperationException($"Failed to find metadata for method function \"{functionSignature}\".");
