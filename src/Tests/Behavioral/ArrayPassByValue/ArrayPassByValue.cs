@@ -26,7 +26,7 @@ namespace go
             fmt.Println(a[0L], a[1L]);
             fmt.Println();
 
-            array<long> primes = new array<long>(new long[]{2,3,5,7,11,13});
+            array<long> primes = new array<long>(new long[] { 2, 3, 5, 7, 11, 13 });
             fmt.Println(primes);
         }
 

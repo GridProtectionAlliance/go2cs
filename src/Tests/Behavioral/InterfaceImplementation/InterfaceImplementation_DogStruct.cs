@@ -4,11 +4,13 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 August 14 00:22:20 UTC
+//     Generated on 2020 August 22 19:47:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
 using System.CodeDom.Compiler;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using fmt = go.fmt_package;
@@ -17,8 +19,8 @@ namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial struct Dog : EmptyInterface
+        [GeneratedCode("go2cs", "0.1.0.0")]
+        public partial struct Dog
         {
             // Constructors
             public Dog(NilType _)
@@ -27,7 +29,7 @@ namespace go
                 this.Breed = default;
             }
 
-            public Dog(@string Name, @string Breed)
+            public Dog(@string Name = default, @string Breed = default)
             {
                 this.Name = Name;
                 this.Breed = Breed;
@@ -50,7 +52,7 @@ namespace go
             public static implicit operator Dog(NilType nil) => default(Dog);
         }
 
-        [GeneratedCode("go2cs", "0.1.1.0")]
+        [GeneratedCode("go2cs", "0.1.0.0")]
         public static Dog Dog_cast(dynamic value)
         {
             return new Dog(value.Name, value.Breed);

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 August 14 00:22:20 UTC
+//     Generated on 2020 August 22 19:47:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,71 +22,129 @@ namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial interface Animal : EmptyInterface
+        [GeneratedCode("go2cs", "0.1.0.0")]
+        public partial interface Animal
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+            public static Animal As<T>(in T target) => (Animal<T>)target!;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+            public static Animal As<T>(ptr<T> target_ptr) => (Animal<T>)target_ptr;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+            public static Animal? As(object target) =>
+                typeof(Animal<>).CreateInterfaceHandler<Animal>(target);
         }
 
-        [GeneratedCode("go2cs", "0.1.1.0")]
-        public struct Animal<T> : Animal
+        [GeneratedCode("go2cs", "0.1.0.0")]
+        public class Animal<T> : Animal
         {
             private T m_target;
+            private readonly ptr<T>? m_target_ptr;
+            private readonly bool m_target_is_ptr;
 
-            public T Target => m_target;
+            public ref T Target
+            {
+                get
+                {
+                    if (m_target_is_ptr && !(m_target_ptr is null))
+                        return ref m_target_ptr.Value;
 
-            private delegate @string TypeByVal(T value);
+                    return ref m_target;
+                }
+            }
+
+            public Animal(in T target) => m_target = target;
+
+            public Animal(ptr<T> target_ptr)
+            {
+                m_target_ptr = target_ptr;
+                m_target_is_ptr = true;
+            }
+
             private delegate @string TypeByRef(ref T value);
+            private delegate @string TypeByVal(T value);
 
-            private static readonly TypeByVal s_TypeByVal;
             private static readonly TypeByRef s_TypeByRef;
+            private static readonly TypeByVal s_TypeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string Type() => s_TypeByRef?.Invoke(ref m_target) ?? s_TypeByVal(m_target);
+            public @string Type()
+            {
+                T target = m_target;
 
-            private delegate @string SwimByVal(T value);
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.Value;
+                if (s_TypeByRef is null)
+                    return s_TypeByVal!(target);
+
+                return s_TypeByRef(ref target);
+            }
+
             private delegate @string SwimByRef(ref T value);
+            private delegate @string SwimByVal(T value);
 
-            private static readonly SwimByVal s_SwimByVal;
             private static readonly SwimByRef s_SwimByRef;
+            private static readonly SwimByVal s_SwimByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string Swim() => s_SwimByRef?.Invoke(ref m_target) ?? s_SwimByVal(m_target);
+            public @string Swim()
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.Value;
+                if (s_SwimByRef is null)
+                    return s_SwimByVal!(target);
+
+                return s_SwimByRef(ref target);
+            }
 
             [DebuggerStepperBoundary]
             static Animal()
             {
                 Type targetType = typeof(T);
+                Type targetTypeByRef = targetType.MakeByRefType();
                 MethodInfo extensionMethod;
 
-                extensionMethod = targetType.GetExtensionMethod("Type");
+               extensionMethod = targetTypeByRef.GetExtensionMethod("Type");
 
-                if ((object)extensionMethod != null)
-                {
+                if (!(extensionMethod is null))
                     s_TypeByRef = extensionMethod.CreateStaticDelegate(typeof(TypeByRef)) as TypeByRef;
 
-                    if ((object)s_TypeByRef == null)
+                if (s_TypeByRef is null)
+                {
+                    extensionMethod = targetType.GetExtensionMethod("Type");
+
+                    if (!(extensionMethod is null))
                         s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
                 }
 
-                if ((object)s_TypeByRef == null && (object)s_TypeByVal == null)
-                    throw new NotImplementedException($"{targetType.Name} does not implement Animal.Type method", new Exception("Type"));
+                if (s_TypeByRef is null && s_TypeByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement Animal.Type method", new Exception("Type"));
 
-                extensionMethod = targetType.GetExtensionMethod("Swim");
+               extensionMethod = targetTypeByRef.GetExtensionMethod("Swim");
 
-                if ((object)extensionMethod != null)
-                {
+                if (!(extensionMethod is null))
                     s_SwimByRef = extensionMethod.CreateStaticDelegate(typeof(SwimByRef)) as SwimByRef;
 
-                    if ((object)s_SwimByRef == null)
+                if (s_SwimByRef is null)
+                {
+                    extensionMethod = targetType.GetExtensionMethod("Swim");
+
+                    if (!(extensionMethod is null))
                         s_SwimByVal = extensionMethod.CreateStaticDelegate(typeof(SwimByVal)) as SwimByVal;
                 }
 
-                if ((object)s_SwimByRef == null && (object)s_SwimByVal == null)
-                    throw new NotImplementedException($"{targetType.Name} does not implement Animal.Swim method", new Exception("Swim"));
+                if (s_SwimByRef is null && s_SwimByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement Animal.Swim method", new Exception("Swim"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static explicit operator Animal<T>(T target) => new Animal<T> { m_target = target };
+            public static explicit operator Animal<T>(in ptr<T> target_ptr) => new Animal<T>(target_ptr);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+            public static explicit operator Animal<T>(in T target) => new Animal<T>(target);
 
             // Enable comparisons between nil and Animal<T> interface instance
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -101,42 +159,17 @@ namespace go
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, Animal<T> value) => value != nil;
         }
-
-        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static Animal Animal_cast<T>(T target)
-        {
-            if (typeof(Animal).IsAssignableFrom(typeof(T)))
-                return target as Animal;
-
-            return (Animal<T>)target;
-        }
     }
 }
 
 namespace go
 {
-    public partial class NilType
-    {
-        // Enable comparisons between nil and Animal interface
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(go.main_package.Animal value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(go.main_package.Animal value, NilType nil) => !(value == nil);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(NilType nil, go.main_package.Animal value) => value == nil;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(NilType nil, go.main_package.Animal value) => value != nil;
-    }
-
     public static class main_AnimalExtensions
     {
         private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new ConcurrentDictionary<Type, MethodInfo>();
 
-        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static T TypeAssert<T>(this go.main_package.Animal target)
+        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static T _<T>(this go.main_package.Animal target)
         {
             try
             {
@@ -144,50 +177,50 @@ namespace go
             }
             catch (NotImplementedException ex)
             {
-                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {typeof(T).FullName}: missing method {ex.InnerException?.Message}");
+                throw new PanicException($"interface conversion: {GetGoTypeName(target.GetType())} is not {GetGoTypeName(typeof(T))}: missing method {ex.InnerException?.Message}");
             }
         }
 
-        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static bool TryTypeAssert<T>(this go.main_package.Animal target, out T result)
+        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static bool _<T>(this go.main_package.Animal target, out T result)
         {
             try
             {
-                result = target.TypeAssert<T>();
+                result = target._<T>();
                 return true;
             }
             catch (PanicException)
             {
-                result = default(T);
+                result = default!;
                 return false;
             }
         }
 
-        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static object TypeAssert(this go.main_package.Animal target, Type type)
+        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static object? _(this go.main_package.Animal target, Type type)
         {
             try
             {
-                MethodInfo conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(go.main_package.Animal<>).GetExplicitGenericConversionOperator(type));
+                MethodInfo? conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(go.main_package.Animal<>).GetExplicitGenericConversionOperator(type));
 
-                if ((object)conversionOperator == null)
-                    throw new PanicException($"panic: interface conversion: failed to create converter for {target.GetType().FullName} to {type.FullName}");
+                if (conversionOperator is null)
+                    throw new PanicException($"interface conversion: failed to create converter for {GetGoTypeName(target.GetType())} to {GetGoTypeName(type)}");
 
-                dynamic result = conversionOperator.Invoke(null, new object[] { target });
-                return result.Target;
+                dynamic? result = conversionOperator.Invoke(null, new object[] { target });
+                return result?.Target;
             }
             catch (NotImplementedException ex)
             {
-                throw new PanicException($"panic: interface conversion: {target.GetType().FullName} is not {type.FullName}: missing method {ex.InnerException?.Message}");
+                throw new PanicException($"interface conversion: {GetGoTypeName(target.GetType())} is not {GetGoTypeName(type)}: missing method {ex.InnerException?.Message}");
             }
         }
 
-        [GeneratedCode("go2cs", "0.1.1.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static bool TryTypeAssert(this go.main_package.Animal target, Type type, out object result)
+        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static bool _(this go.main_package.Animal target, Type type, out object? result)
         {
             try
             {
-                result = target.TypeAssert(type);
+                result = target._(type);
                 return true;
             }
             catch (PanicException)

@@ -4,11 +4,13 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 August 14 00:22:20 UTC
+//     Generated on 2020 August 22 19:47:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
 using System.CodeDom.Compiler;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using fmt = go.fmt_package;
@@ -17,8 +19,8 @@ namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial struct Frog : EmptyInterface
+        [GeneratedCode("go2cs", "0.1.0.0")]
+        public partial struct Frog
         {
             // Constructors
             public Frog(NilType _)
@@ -27,7 +29,7 @@ namespace go
                 this.Color = default;
             }
 
-            public Frog(@string Name, @string Color)
+            public Frog(@string Name = default, @string Color = default)
             {
                 this.Name = Name;
                 this.Color = Color;
@@ -50,7 +52,7 @@ namespace go
             public static implicit operator Frog(NilType nil) => default(Frog);
         }
 
-        [GeneratedCode("go2cs", "0.1.1.0")]
+        [GeneratedCode("go2cs", "0.1.0.0")]
         public static Frog Frog_cast(dynamic value)
         {
             return new Frog(value.Name, value.Color);
