@@ -1159,6 +1159,82 @@ namespace go
             };
         }
 
+        /// <summary>
+        /// Converts keyed value initializer into an array.
+        /// </summary>
+        /// <param name="length">Length of target array.</param>
+        /// <param name="keyedValues">Keyed values.</param>
+        /// <returns>Array from keyed value initializer.</returns>
+        /// <typeparam name="T">Type of values.</typeparam>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T[] InitKeyedValues<T>(int length, params object[] keyedValues) where T : struct
+        {
+            T[] values = new T[length];
+
+            foreach (object keyedValue in keyedValues)
+            {
+                switch (keyedValue)
+                {
+                    case T value:
+                        values[values.Length] = value;
+
+                        break;
+                    case (var index, T indexValue):
+                        {
+                            if (!(index is null))
+                            {
+                                if (index.TryCastAsInteger(out ulong key))
+                                    values[key] = indexValue;
+                            }
+
+                            break;
+                        }
+                }
+            }
+
+            return values;
+        }
+
+        /// <summary>
+        /// Converts keyed value initializer into an array.
+        /// </summary>
+        /// <param name="keyedValues">Keyed values.</param>
+        /// <returns>Array from keyed value initializer.</returns>
+        /// <typeparam name="T">Type of values.</typeparam>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T[] InitKeyedValues<T>(params object[] keyedValues) where T : struct
+        {
+            List<T> values = new List<T>();
+
+            foreach (object keyedValue in keyedValues)
+            {
+                switch (keyedValue)
+                {
+                    case T value:
+                        values.Add(value);
+
+                        break;
+                    case (var index, T indexValue):
+                        {
+                            if (!(index is null))
+                            {
+                                if (index.TryCastAsInteger(out ulong key))
+                                {
+                                    for (ulong i = (ulong)values.Count; i < key; i++)
+                                        values.Add(default);
+
+                                    values.Add(indexValue);
+                                }
+                            }
+
+                            break;
+                        }
+                }
+            }
+
+            return values.ToArray();
+        }
+
         // ** Go Function Execution Context Handlers **/
 
         /// <summary>

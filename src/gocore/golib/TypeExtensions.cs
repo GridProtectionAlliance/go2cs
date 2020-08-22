@@ -354,14 +354,108 @@ namespace go
             }
         }
 
+        /// <summary>
+        /// Tries to cast input value as an integer.
+        /// </summary>
+        /// <param name="value">Value to try to cast.</param>
+        /// <param name="integer">Casted value.</param>
+        /// <returns><c>true</c> if cast succeeded; otherwise, <c>false</c>.</returns>
+        public static bool TryCastAsInteger(this object value, out ulong integer)
+        {
+            switch (value)
+            {
+                case char charVal:
+                    integer = charVal;
+                    return true;
+                case bool boolVal:
+                    integer = boolVal ? 1UL : 0UL;
+                    return true;
+                case sbyte sbyteVal:
+                    integer = (ulong)sbyteVal;
+                    return true;
+                case byte byteVal:
+                    integer = byteVal;
+                    return true;
+                case short shortVal:
+                    integer = (ulong)shortVal;
+                    return true;
+                case ushort ushortVal:
+                    integer = ushortVal;
+                    return true;
+                case int intVal:
+                    integer = (ulong)intVal;
+                    return true;
+                case uint uintVal:
+                    integer = uintVal;
+                    return true;
+                case long longVal:
+                    integer = (ulong)longVal;
+                    return true;
+                case ulong ulongVal:
+                    integer = ulongVal;
+                    return true;
+            }
+
+            integer = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to cast input value as an integer.
+        /// </summary>
+        /// <typeparam name="T">Type of value.</typeparam>
+        /// <param name="value">Value to try to cast.</param>
+        /// <param name="integer">Casted value.</param>
+        /// <returns><c>true</c> if cast succeeded; otherwise, <c>false</c>.</returns>
+        public static bool TryCastAsInteger<T>(this T value, out ulong integer) where T : unmanaged, IConvertible => 
+            ((object)value).TryCastAsInteger(out integer);
+
+        /// <summary>
+        /// Determines if <see cref="IConvertible"/> <paramref name="value"/> is a numeric type.
+        /// </summary>
+        /// <param name="value">Value to check.</param>
+        /// <returns><c>true</c> is <paramref name="value"/> is a numeric type; othwerwise, <c>false</c>.</returns>
+        public static bool IsNumeric(this IConvertible value) => 
+            !(value is null) && IsNumericType(value.GetTypeCode());
+
+        /// <summary>
+        /// Determines if <paramref name="typeCode"/> is a numeric type, i.e., one of:
+        /// <see cref="TypeCode.Boolean"/>, <see cref="TypeCode.SByte"/>, <see cref="TypeCode.Byte"/>,
+        /// <see cref="TypeCode.Int16"/>, <see cref="TypeCode.UInt16"/>, <see cref="TypeCode.Int32"/>,
+        /// <see cref="TypeCode.UInt32"/>, <see cref="TypeCode.Int64"/>, <see cref="TypeCode.UInt64"/>
+        /// <see cref="TypeCode.Single"/>, <see cref="TypeCode.Double"/> or <see cref="TypeCode.Decimal"/>.
+        /// </summary>
+        /// <param name="typeCode"><see cref="TypeCode"/> value to check.</param>
+        /// <returns><c>true</c> if <paramref name="typeCode"/> is a numeric type; otherwise, <c>false</c>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNumericType(this TypeCode typeCode)
+        {
+            return typeCode switch
+            {
+                TypeCode.Boolean => true,
+                TypeCode.SByte => true,
+                TypeCode.Byte => true,
+                TypeCode.Int16 => true,
+                TypeCode.UInt16 => true,
+                TypeCode.Int32 => true,
+                TypeCode.UInt32 => true,
+                TypeCode.Int64 => true,
+                TypeCode.UInt64 => true,
+                TypeCode.Single => true,
+                TypeCode.Double => true,
+                TypeCode.Decimal => true,
+                _ => false
+            };
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsConversionOperator(MethodInfo method, Type genericOfType, Type targetType)
         {
             ParameterInfo[] parameters = method.GetParameters();
 
-            return method.Name == "op_Explicit" && 
-                   method.ReturnType == genericOfType && 
-                   parameters.Length == 1 && 
+            return method.Name == "op_Explicit" &&
+                   method.ReturnType == genericOfType &&
+                   parameters.Length == 1 &&
                    parameters[0].ParameterType == targetType;
         }
     }
