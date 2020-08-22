@@ -44,25 +44,24 @@ namespace go2cs.Metadata
             IsPromoted = functionSignature.IsPromoted;
         }
 
+        // Go method declarations act overloadable, unlike function declarations
+        public override string GenerateLookup() => Generate(Name, GetReceiverParameterTypeNames());
+
         public override string Generate()
         {
-            IEnumerable<ParameterInfo> parameters = ReceiverParameters.Concat(Signature.Parameters);
+            IEnumerable<string> parameters = GetReceiverParameterTypeNames().Concat(Signature.Parameters.Select(parameter => parameter.Type.TypeName));
             return Generate(Name, parameters);
         }
 
-        public string GenerateReceiverParametersSignature(bool prefixByRef)
-        {
-            return $"this {string.Join(", ", GetReceiverParameters(prefixByRef))}";
-        }
+        public IEnumerable<string> GetReceiverParameterTypeNames() => new[] { ReceiverParameters[0].Type.TypeName };
 
-        public IEnumerable<String> GetReceiverParameters(bool prefixByRef)
-        {
-            return ReceiverParameters.Select(parameter => $"{parameter.Type.TypeName} {(prefixByRef && parameter.Type.IsByRefPointer ? "_" : "")}{parameter.Name}");
-        }
+        public string GenerateReceiverParametersSignature(bool prefixByRef) =>
+            $"this {string.Join(", ", GetReceiverParameters(prefixByRef))}";
 
-        public IEnumerable<String> GetByRefReceiverParameters(bool includeType)
-        {
-            return ReceiverParameters.Where(parameter => parameter.Type.IsByRefPointer).Select(parameter => $"{(includeType ? $"{parameter.Type.TypeName} " : "_")}{parameter.Name}");
-        }
+        public IEnumerable<string> GetReceiverParameters(bool prefixByRef) =>
+            ReceiverParameters.Select(parameter => $"{parameter.Type.TypeName} {(prefixByRef && parameter.Type.IsByRefPointer ? "_" : "")}{parameter.Name}");
+
+        public IEnumerable<string> GetByRefReceiverParameters(bool includeType) => 
+            ReceiverParameters.Where(parameter => parameter.Type.IsByRefPointer).Select(parameter => $"{(includeType ? $"{parameter.Type.TypeName} " : "_")}{parameter.Name}");
     }
 }

@@ -243,7 +243,7 @@ if (!NamespacePrefix.Equals("go")) {
                     Scope = "public",
                     ParameterSignature = decl.Signature.GenerateParametersSignature(false),
                     ParameterNames = GetParameterNames(decl),
-                    ParameterTypes = GetParameterTypes(decl),
+                    ParameterTypes = GetParameterTypeNames(decl),
                     ResultType = decl.Signature.GenerateResultSignature()
                 }
                 .TransformText()));
@@ -632,9 +632,9 @@ private string GetParameterNames(FunctionSignature function)
     return parameterNames;
 }
 
-private string GetParameterTypes(FunctionSignature function)
+private string GetParameterTypeNames(FunctionSignature function)
 {
-    string parameterTypes = function.GetParameterTypes();
+    string parameterTypes = function.GetParameterTypeNames();
 
     if (parameterTypes.Length > 0)
         parameterTypes = ", " + parameterTypes;
