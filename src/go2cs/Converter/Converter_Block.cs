@@ -93,7 +93,10 @@ namespace go2cs
             if (m_blockInnerPrefixInjection.Count > 0)
                 m_targetFile.Append(m_blockInnerPrefixInjection.Pop());
 
-            m_targetFile.Append(RemoveFirstDuplicateLineFeed(CheckForCommentsLeft(context.statementList(), 1)));
+            if (context.statementList() is null)
+                m_targetFile.Append(RemoveFirstDuplicateLineFeed(CheckForCommentsRight(context.children[0], 1)));
+            else
+                m_targetFile.Append(RemoveFirstDuplicateLineFeed(CheckForCommentsLeft(context.statementList(), 1)));
 
             if (!WroteLineFeed)
                 m_targetFile.AppendLine();
@@ -109,7 +112,7 @@ namespace go2cs
 
             GoParser.StatementListContext statementListContext = context.statementList();
 
-            if (statementListContext.statement().Length > 0)
+            if (statementListContext?.statement()?.Length > 0)
                 m_firstStatementIsReturn = !(statementListContext.statement(0).returnStmt() is null);
 
             if (m_blockInnerSuffixInjection.Count > 0)
