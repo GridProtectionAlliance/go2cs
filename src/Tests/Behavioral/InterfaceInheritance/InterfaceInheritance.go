@@ -44,8 +44,8 @@ func main() {
     var v2 V = T2{"bar"}
     v1.N()
     v2.M()
-    v1.String()
-    v2.Error()
+    fmt.Print(v1.String())
+    fmt.Print(v2.Error())
     n[v1] = 3
     n[v2] = 4
     fmt.Println(n)

@@ -1,8 +1,5 @@
-// package main -- go2cs converted at 2018 August 14 00:22:20 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\InterfaceInheritance.go
 using fmt = go.fmt_package;
 using static go.builtin;
-using System.Collections.Generic;
 
 namespace go
 {
@@ -60,22 +57,22 @@ namespace go
 
         private static void Main()
         {
-            var m = make(typeof(Dictionary<I, @int>));
-            I i1 = T1{"foo"};
-            I i2 = T2{"bar"};
-            m[i1] = 1;
-            m[i2] = 2;
+            var m = make_map<I, long>();
+            I i1 = I.As(new T1("foo"));
+            I i2 = I.As(new T2("bar"));
+            m[i1] = 1L;
+            m[i2] = 2L;
             fmt.Println(m);
 
-            var n = make(typeof(Dictionary<V, @int>));
-            V v1 = T1{"foo"};
-            V v2 = T2{"bar"};
+            var n = make_map<V, long>();
+            V v1 = V.As(new T1("foo"));
+            V v2 = V.As(new T2("bar"));
             v1.N();
             v2.M();
-            v1.String();
-            v2.Error();
-            n[v1] = 3;
-            n[v2] = 4;
+            fmt.Print(v1.String());
+            fmt.Print(v2.Error());
+            n[v1] = 3L;
+            n[v2] = 4L;
             fmt.Println(n);
         }
     }
