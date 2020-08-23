@@ -23,7 +23,6 @@
 
 using static go.builtin;
 using io = go.io_package;
-using int64 = System.Int64;
 
 namespace go
 {
@@ -35,7 +34,7 @@ namespace go
         // The zero value for Reader operates like a Reader of an empty string.
         public partial struct Reader {
             public @string s;
-            public int64 i;
+            public long i;
             public int prevRune;
         }
 
@@ -45,23 +44,24 @@ namespace go
             return ptr(new Reader(s, 0, -1));
         }
 
-        public static (int n, error err) Read(this ptr<Reader> r, in slice<byte> b) =>
+        public static (long n, error err) Read(this ptr<Reader> r, in slice<byte> b) =>
             Read(ref r.Value, b);
 
         // Size returns the original length of the underlying string.
         // Size is the number of bytes available for reading via ReadAt.
         // The returned value is always the same and is not affected by calls
         // to any other method.
-        public static (int n, error err) Read(this ref Reader r, in slice<byte> b) {
-            int n = default; error err = default!;
+        public static (long n, error err) Read(this ref Reader r, in slice<byte> b) {
+            long n;
+            error err = default!;
 
-            if (r.i >= (int64)len(r.s)) {
+            if (r.i >= len(r.s))
                 return (0, io.EOF);
-            }
 
             r.prevRune = -1;
-            n = copy( b, r.s[(int)r.i..]);
-            r.i += (int64)n;
+            n = copy(b, r.s[(int)r.i..]);
+            r.i += n;
+
             return (n, err);
         }
 
