@@ -422,30 +422,67 @@ namespace go2cs
                 GoParser.ArgumentsContext argumentsContext = context.arguments();
                 List<string> arguments = new List<string>();
 
-                if (Types.TryGetValue(argumentsContext.type_(), out TypeInfo typeInfo))
-                    arguments.Add($"typeof({typeInfo.TypeName})");
+                Types.TryGetValue(argumentsContext.type_(), out TypeInfo typeInfo);
 
                 if (ExpressionLists.TryGetValue(argumentsContext.expressionList(), out ExpressionInfo[] expressions))
                     arguments.AddRange(expressions.Select(expr => expr.Text));
 
-                if (primaryExpression.Text == "new")
+                string argumentList = string.Join(", ", arguments);
+
+                if (primaryExpression.Text == "new" && !(typeInfo is null))
                 {
-                    //string argName = $"ptr<{arguments[0]}>";
                     TypeInfo argType = expressions[0].Type.Clone();
 
                     argType.IsPointer = true;
 
                     PrimaryExpressions[context] = new ExpressionInfo
                     {
-                        Text = $"@new<{arguments[0]}>()",
+                        Text = $"@new<{typeInfo.TypeName}>({argumentList})",
                         Type = argType
                     };
                 }
+                else if (primaryExpression.Text == "make" && !(typeInfo is null))
+                {
+                    switch (typeInfo.TypeClass)
+                    {
+                        case TypeClass.Slice:
+                            PrimaryExpressions[context] = new ExpressionInfo
+                            {
+                                Text = $"make_slice<{RemoveSurrounding(typeInfo.TypeName, "slice<", ">")}>({argumentList})",
+                                Type = primaryExpression.Type
+                            };
+                            break;
+                        case TypeClass.Map:
+                            PrimaryExpressions[context] = new ExpressionInfo
+                            {
+                                Text = $"make_map<{RemoveSurrounding(typeInfo.TypeName, "map<", ">")}>({argumentList})",
+                                Type = primaryExpression.Type
+                            };
+                            break;
+                        case TypeClass.Channel:
+                            PrimaryExpressions[context] = new ExpressionInfo
+                            {
+                                Text = $"make_channel<{RemoveSurrounding(typeInfo.TypeName, "channel<", ">")}>({argumentList})",
+                                Type = primaryExpression.Type
+                            };
+                            break;
+                        default:
+                            PrimaryExpressions[context] = new ExpressionInfo
+                            {
+                                Text = $"{primaryExpression}<{typeInfo.TypeName}>({argumentList})",
+                                Type = primaryExpression.Type
+                            };
+                            break;
+                    }
+                }
                 else
                 {
+                    if (!(typeInfo is null))
+                        argumentList = $"typeof({typeInfo.TypeName}){(string.IsNullOrEmpty(argumentList) ? "" : $", {argumentList}")}";
+
                     PrimaryExpressions[context] = new ExpressionInfo
                     {
-                        Text = $"{primaryExpression}({string.Join(", ", arguments)})",
+                        Text = $"{primaryExpression}({argumentList})",
                         Type = primaryExpression.Type
                     };
                 }
