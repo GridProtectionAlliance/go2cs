@@ -83,6 +83,8 @@ using go;
                 .TransformText()#><#
             }#>
 
+            
+            public string ToString(string format, IFormatProvider formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static <#=InterfaceName#>()
