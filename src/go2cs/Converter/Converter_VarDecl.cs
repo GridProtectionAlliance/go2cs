@@ -125,14 +125,23 @@ namespace go2cs
                 if (isInitialDeclaration && !string.IsNullOrWhiteSpace(variableName))
                     m_variableTypes[variableName] = typeInfo;
 
-                m_targetFile.Append($"{(isInitialDeclaration ? $"{typeName} " : "")}{identifier}");
+                m_targetFile.Append($"{(isInitialDeclaration ? $"{typeName} " : "")}{identifier} = ");
 
                 if (!(expression is null))
-                    m_targetFile.Append($" = {expression}");
+                {
+                    if (typeInfo?.TypeClass == TypeClass.Interface)
+                        m_targetFile.Append($"{typeInfo.TypeName}.As({expression})");
+                    else
+                        m_targetFile.Append($"{expression}");
+                }
                 else if (typeInfo?.TypeClass == TypeClass.Array && typeInfo is ArrayTypeInfo arrayTypeInfo)
-                    m_targetFile.Append($" = new {typeName}({arrayTypeInfo.Length.Text})");
+                {
+                    m_targetFile.Append($"new {typeName}({arrayTypeInfo.Length.Text})");
+                }
                 else
-                    m_targetFile.Append(" = default");
+                {
+                    m_targetFile.Append("default");
+                }
 
                 // Since multiple specifications can be on one line, only check for comments after last specification
                 if (i < length - 1 || length == 1)
