@@ -57,7 +57,7 @@ namespace go
         /// const specification in a (usually parenthesized) const declaration.
         /// It is zero-indexed.
         /// </summary>
-        public const int iota = 0;
+        public const long iota = 0;
 
         /// <summary>
         /// Defines a constant to return a tuple that includes a boolean success indicator.
@@ -129,7 +129,7 @@ namespace go
         /// <param name="array">Target array pointer.</param>
         /// <returns>The length of the <paramref name="array"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int cap<T>(in array<T> array) => array.Length;
+        public static long cap<T>(in array<T> array) => array.Length;
 
         /// <summary>
         /// Gets the maximum length the <paramref name="slice"/> can reach when resliced.
@@ -137,7 +137,7 @@ namespace go
         /// <param name="slice">Target slice pointer.</param>
         /// <returns>The capacity of the <paramref name="slice"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int cap<T>(in slice<T> slice) => slice.Capacity;
+        public static long cap<T>(in slice<T> slice) => slice.Capacity;
 
         /// <summary>
         /// Gets the maximum capacity of the <paramref name="channel"/>.
@@ -145,7 +145,7 @@ namespace go
         /// <param name="channel">Target channel pointer.</param>
         /// <returns>The capacity of the <paramref name="channel"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int cap<T>(in channel<T> channel) => channel.Capacity;
+        public static long cap<T>(in channel<T> channel) => channel.Capacity;
 
         /// <summary>
         /// Closes the channel.
@@ -185,7 +185,7 @@ namespace go
         /// The number of elements copied, which will be the minimum of len(src) and len(dst).
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int copy<T1, T2>(in slice<T1> dst, in slice<T2> src)
+        public static long copy<T1, T2>(in slice<T1> dst, in slice<T2> src)
         {
             if (dst == nil)
                 throw new InvalidOperationException("Destination slice array reference is null.");
@@ -193,7 +193,7 @@ namespace go
             if (src == nil)
                 throw new InvalidOperationException("Source slice array reference is null.");
 
-            int min = Min(dst.Length, src.Length);
+            long min = Min(dst.Length, src.Length);
 
             if (min > 0)
             {
@@ -203,7 +203,7 @@ namespace go
                 }
                 else
                 {
-                    for (int i = 0; i < min; i++)
+                    for (long i = 0; i < min; i++)
                         dst[dst.Low + i] = (T1)ConvertToType((IConvertible)src[src.Low + i]!);
                 }
             }
@@ -224,7 +224,7 @@ namespace go
         /// As a special case, it also will copy bytes from a string to a slice of bytes.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int copy(in slice<byte> dst, in @string src)
+        public static long copy(in slice<byte> dst, in @string src)
         {
             slice<byte> bytes = src;
             return copy(dst, bytes);
@@ -275,7 +275,7 @@ namespace go
         /// <param name="array">Target channel pointer.</param>
         /// <returns>The length of the <paramref name="array"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int len<T>(in array<T> array) => array.Length;
+        public static long len<T>(in array<T> array) => array.Length;
 
         /// <summary>
         /// Gets the length of the <paramref name="slice"/>.
@@ -283,7 +283,7 @@ namespace go
         /// <param name="slice">Target channel pointer.</param>
         /// <returns>The length of the <paramref name="slice"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int len<T>(in slice<T> slice) => slice.Length;
+        public static long len<T>(in slice<T> slice) => slice.Length;
 
         /// <summary>
         /// Gets the length of the <paramref name="str"/>.
@@ -291,7 +291,7 @@ namespace go
         /// <param name="str">Target channel pointer.</param>
         /// <returns>The length of the <paramref name="str"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int len(in @string str) => str.Length;
+        public static long len(in @string str) => str.Length;
 
         /// <summary>
         /// Gets the length of the <paramref name="str"/>.
@@ -299,7 +299,7 @@ namespace go
         /// <param name="str">Target channel pointer.</param>
         /// <returns>The length of the <paramref name="str"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int len(string str) => str.Length;
+        public static long len(string str) => str.Length;
 
         /// <summary>
         /// Gets the length of the <paramref name="map"/>.
@@ -307,7 +307,7 @@ namespace go
         /// <param name="map">Target map.</param>
         /// <returns>The length of the <paramref name="map"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int len<TKey, TValue>(in map<TKey, TValue> map) where TKey : notnull => map.Count;
+        public static long len<TKey, TValue>(in map<TKey, TValue> map) where TKey : notnull => map.Count;
 
         /// <summary>
         /// Gets the length of the <paramref name="channel"/>.
@@ -315,7 +315,7 @@ namespace go
         /// <param name="channel">Target channel pointer.</param>
         /// <returns>The length of the <paramref name="channel"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int len<T>(in channel<T> channel) => channel.Length;
+        public static long len<T>(in channel<T> channel) => channel.Length;
 
         /// <summary>
         /// Allocates and initializes a slice object.
@@ -323,21 +323,21 @@ namespace go
         /// <param name="size">Specifies the slice length.</param>
         /// <param name="capacity">Specified slice capacity; must be no smaller than the length.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static slice<T> make_slice<T>(int size, int capacity = 0) => new slice<T>(size, capacity);
+        public static slice<T> make_slice<T>(long size, long capacity = 0) => new slice<T>((int)size, (int)capacity);
 
         /// <summary>
         /// Allocates and initializes a map object.
         /// </summary>
         // <param name="size">Specifies the number of map elements.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static map<TKey, TValue> make_map<TKey, TValue>(int size = 0) where TKey : notnull => new map<TKey, TValue>(size);
+        public static map<TKey, TValue> make_map<TKey, TValue>(long size = 0) where TKey : notnull => new map<TKey, TValue>((int)size);
 
         /// <summary>
         /// Allocates and initializes a channel object.
         /// </summary>
         /// <param name="size">Specifies the buffer capacity.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static channel<T> make_channel<T>(int size = 1) => new channel<T>(size);
+        public static channel<T> make_channel<T>(long size = 1) => new channel<T>((int)size);
 
         /// <summary>
         /// Allocates and initializes a new object.
@@ -347,7 +347,7 @@ namespace go
         /// <typeparam name="T">Type of object.</typeparam>
         /// <returns>New object.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static T make<T>(int p1 = 0, int p2 = -1) where T : new()
+        public static T make<T>(long p1 = 0, long p2 = -1) where T : new()
         {
             if (p1 == 0 && p2 == 0)
                 return new T();
@@ -436,7 +436,7 @@ namespace go
         /// <param name="message">Fatal error message.</param>
         /// <param name="code">Application exit code.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary, DebuggerNonUserCode]
-        public static void fatal(string message, int code = 1)
+        public static void fatal(string message, long code = 1)
         {
             if (!string.IsNullOrEmpty(message))
                 message = $"fatal error: {message}";
@@ -1062,9 +1062,9 @@ namespace go
         /// <typeparam name="TSource">Source type.</typeparam>
         /// <typeparam name="TDest">Destination type.</typeparam>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CastCopy<TSource, TDest>(this TSource[] source, int sourceIndex, TDest[] dest, int destinationIndex, Func<TSource, TDest> cast, int length)
+        public static void CastCopy<TSource, TDest>(this TSource[] source, long sourceIndex, TDest[] dest, long destinationIndex, Func<TSource, TDest> cast, long length)
         {
-            for (int i = 0; i < length; i++)
+            for (long i = 0; i < length; i++)
                 dest[destinationIndex + i] = cast(source[sourceIndex + i]);
         }
 
@@ -1081,7 +1081,7 @@ namespace go
         /// <typeparam name="TSource">Source type.</typeparam>
         /// <typeparam name="TDest">Destination type.</typeparam>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CastCopy<TSource, TDest>(this TSource[] source, TDest[] dest, Func<TSource, TDest> cast, int length = -1)
+        public static void CastCopy<TSource, TDest>(this TSource[] source, TDest[] dest, Func<TSource, TDest> cast, long length = -1)
         {
             if (length == -1)
                 length = source.Length;
@@ -1167,7 +1167,7 @@ namespace go
         /// <returns>Array from keyed value initializer.</returns>
         /// <typeparam name="T">Type of values.</typeparam>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T[] InitKeyedValues<T>(int length, params object[] keyedValues) where T : struct
+        public static T[] InitKeyedValues<T>(long length, params object[] keyedValues) where T : struct
         {
             T[] values = new T[length];
 
