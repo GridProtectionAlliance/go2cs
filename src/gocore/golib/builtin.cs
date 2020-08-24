@@ -445,7 +445,7 @@ namespace go
             throw new InvalidOperationException($"{message} [{code}]");
         #else
             Console.Error.WriteLine(message);
-            Environment.Exit(code);
+            Environment.Exit((int)code);
         #endif
         }
 
