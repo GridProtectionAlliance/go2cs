@@ -7,8 +7,9 @@ Converts source code developed using the Go programming language (see [Go Langua
 
 * Convert Go code into C# so that Go code can be directly used within .NET ecosystem.
   * This is the primary goal of `go2cs`.
-* Convert Go code into visually similar C# code -- see [conversion strategies](ConversionStrategies.md).
-  * Go is a minimalist language, as such it provides high-level functionality provided by the compiler. Converted C# code will have more visible code than Go used to provide equivalent functionality, however most of this code will be behind the scenes in separate files using partial class functionality.
+* Convert Go code into behaviorally and visually similar C# code -- see [conversion strategies](ConversionStrategies.md).
+  * Code conversions focus first on making sure C# code runs as behaviorally similar to Go code as possible. This means, for now, leaving out things like code conversions into `async` functions, instead just making things operate the way they do in Go, like simply running a function on the current thread or running in on the thread pool when using a [`goroutine`](https://golang.org/ref/spec#Go_statements).
+  * C# conversions attempt to make code visually similar to original Go code to make it easier to identity corresponding functionality. As Go is a minimalist language, it provides high-level functionality provided by the compiler, much more often than C# does. As such, converted C# code will have more visible code than Go used to provide equivalent functionality, however most of this code will be behind the scenes in separate files using partial class functionality.
 * Convert Go units test to C# and verify results are the same (TBD).
   * For most unit tests defined in Go, it should be possible to create an equivalent converted C# unit test. In many cases it may also be possible to successfully compare "outputs" of both unit tests as an additional validation test.
 * Convert Go code into managed C# code.
