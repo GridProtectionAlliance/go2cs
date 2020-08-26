@@ -75,14 +75,14 @@ namespace go2cs
 
             if (context.expression()?.Length == 2)
             {
-                ExpressionInfo leftOperand = Expressions[context.expression(0)];
-                ExpressionInfo rightOperand = Expressions[context.expression(1)];
+                string leftOperand = Expressions.TryGetValue(context.expression(0), out ExpressionInfo leftOperandExpression) ? leftOperandExpression.Text : context.expression(0).GetText();
+                string rightOperand = Expressions.TryGetValue(context.expression(1), out ExpressionInfo rightOperandExpression) ? rightOperandExpression.Text : context.expression(1).GetText();
                 string binaryOP = context.children[1].GetText();
 
                 if (binaryOP.Equals("<<") || binaryOP.Equals(">>"))
                 {
-                    if (!int.TryParse(rightOperand.Text, out int _))
-                        rightOperand.Text = $"(int)({rightOperand.Text})";
+                    if (!int.TryParse(rightOperand, out int _))
+                        rightOperand = $"(int)({rightOperand})";
                 }
 
                 binaryOP = binaryOP.Equals("&^") ? " & ~" : $" {binaryOP} ";
@@ -110,7 +110,7 @@ namespace go2cs
                     Expressions[context] = new ExpressionInfo
                     {
                         Text = expression,
-                        Type = leftOperand.Type
+                        Type = leftOperandExpression.Type ?? TypeInfo.VarType
                     };
                 }
             }
@@ -431,7 +431,7 @@ namespace go2cs
 
                 if (primaryExpression.Text == "new" && !(typeInfo is null))
                 {
-                    TypeInfo argType = expressions[0].Type.Clone();
+                    TypeInfo argType = expressions?[0].Type.Clone() ?? TypeInfo.VarType.Clone();
 
                     argType.IsPointer = true;
 
@@ -711,20 +711,23 @@ namespace go2cs
 
             GoParser.LiteralTypeContext literalType = context.literalType();
             GoParser.LiteralValueContext literalValue = context.literalValue();
-            GoParser.KeyedElementContext[] keyedElements = literalValue.elementList().keyedElement();
+            GoParser.KeyedElementContext[] keyedElements = literalValue.elementList()?.keyedElement();
             bool isDynamicSizedArray = !(literalType.elementType() is null);
             List<(string key, string element)> elements = new List<(string key, string element)>();
             bool hasKeyedElement = false;
 
-            foreach (GoParser.KeyedElementContext keyedElement in keyedElements)
+            if (!(keyedElements is null))
             {
-                string key = keyedElement.key()?.GetText();
-                string element = keyedElement.element().GetText();
+                foreach (GoParser.KeyedElementContext keyedElement in keyedElements)
+                {
+                    string key = keyedElement.key()?.GetText();
+                    string element = keyedElement.element().GetText();
 
-                elements.Add((key, element));
+                    elements.Add((key, element));
 
-                if (!(key is null) && !hasKeyedElement)
-                    hasKeyedElement = true;
+                    if (!(key is null) && !hasKeyedElement)
+                        hasKeyedElement = true;
+                }
             }
 
             string expressionText;
