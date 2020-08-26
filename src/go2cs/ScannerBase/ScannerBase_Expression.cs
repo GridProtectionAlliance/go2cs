@@ -275,17 +275,17 @@ namespace go2cs
                 // selector
                 //     : '.' IDENTIFIER
 
-                string selectionExpression = $"{SanitizedIdentifier(primaryExpression.Text)}.{SanitizedIdentifier(context.IDENTIFIER().GetText())}";
+                string selectionExpression = $"{SanitizedIdentifier(primaryExpression?.Text ??"")}.{SanitizedIdentifier(context.IDENTIFIER().GetText())}";
                 TypeInfo typeInfo = null;
 
                 // TODO: Will need to lookup IDENTIFIER type in metadata to determine type
-                if (primaryExpression.Type.FullTypeName == "System.Object")
+                if (primaryExpression is null || primaryExpression.Type.FullTypeName == "System.Object")
                     typeInfo = TypeInfo.VarType;
 
                 PrimaryExpressions[context] = new ExpressionInfo
                 {
                     Text = selectionExpression,
-                    Type = typeInfo ?? primaryExpression.Type
+                    Type = typeInfo ?? primaryExpression?.Type
                 };
             }
             else if (!(context.index() is null))
