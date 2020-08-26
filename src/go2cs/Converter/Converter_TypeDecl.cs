@@ -83,7 +83,7 @@ namespace go2cs
             if (Metadata.Interfaces.TryGetValue(originalIdentifier, out InterfaceInfo interfaceInfo))
             {
                 // Handle interface type declaration
-                string ancillaryInterfaceFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}Interface.cs");
+                string ancillaryInterfaceFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}Interface")}.cs");
 
                 FunctionSignature[] localFunctions = interfaceInfo.GetLocalMethods().ToArray();
                 List<FunctionSignature> allFunctions = localFunctions.ToList();
@@ -128,7 +128,7 @@ namespace go2cs
             else if (Metadata.Structs.TryGetValue(originalIdentifier, out StructInfo structInfo))
             {
                 // Handle struct type declaration
-                string ancillaryStructFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}Struct.cs");
+                string ancillaryStructFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}Struct")}.cs");
 
                 Dictionary<string, List<FunctionSignature>> promotedFunctions = new Dictionary<string, List<FunctionSignature>>(StringComparer.Ordinal);
                 HashSet<string> inheritedTypeNames = new HashSet<string>(StringComparer.Ordinal);
@@ -251,7 +251,7 @@ namespace go2cs
                 else
                 {
                     // Handle named type declaration, e.g., "type MyFloat float64"
-                    string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.TypeName)}).cs");
+                    string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.TypeName)})")}.cs");
 
                     // TODO: The following works OK for a primitive type re-definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
                     using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
