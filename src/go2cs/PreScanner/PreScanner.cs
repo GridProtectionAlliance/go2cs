@@ -74,6 +74,11 @@ namespace go2cs
 
             BinaryFormatter formatter = new BinaryFormatter();
 
+            string directory = Path.GetDirectoryName(FolderMetadataFileName);
+
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
             using FileStream stream = File.Create(FolderMetadataFileName);
             formatter.Serialize(stream, folderMetadata);
         }
