@@ -172,6 +172,17 @@ namespace go2cs
             return filePath;
         }
 
+        public static string GetValidPathName(string filePath, int limit = 100)
+        {
+            if (filePath.Length > limit)
+            {
+                string hash = GetMD5HashFromString(filePath);
+                return $"{filePath.Substring(0, limit - hash.Length)}{hash}";
+            }
+
+            return filePath;
+        }
+
         public static string GetDirectoryName(string filePath)
         {
             // Test for case where valid path does not end in directory separator, Path.GetDirectoryName assumes
