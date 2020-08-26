@@ -132,12 +132,12 @@ namespace go2cs
         {
             int index = line.LastIndexOf("\r\n", StringComparison.Ordinal);
 
-            if (index == line.Length - 2)
+            if (index > -1 && index == line.Length - 2)
                 return line.Substring(0, index);
 
             index = line.LastIndexOf('\n');
 
-            if (index == line.Length - 1)
+            if (index > -1 && index == line.Length - 1)
                 line = line.Substring(0, index);
 
             return line;
