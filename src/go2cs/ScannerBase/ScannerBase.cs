@@ -224,6 +224,13 @@ namespace go2cs
             {
                 string filePath = Path.GetDirectoryName(sourcePath) ?? "";
 
+                if (File.ReadAllText(sourcePath).Contains("// +build ignore"))
+                {
+                    TotalSkippedFiles++;
+                    Console.WriteLine($"Encountered \"+build ignore\" directive for \"{sourcePath}\", skipping scan...");
+                    return;
+                }
+
                 if (filePath.StartsWith(GoRoot, StringComparison.OrdinalIgnoreCase))
                     ScanFile(Options.Clone(options, options.OverwriteExistingFiles, sourcePath, Path.Combine(options.TargetGoSrcPath, filePath.Substring(GoRoot.Length))), sourcePath, showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
                 else
@@ -247,7 +254,7 @@ namespace go2cs
                         string targetDirectory = options.TargetPath;
 
                         if (!string.IsNullOrEmpty(targetDirectory))
-                            targetDirectory = Path.Combine(targetDirectory, subDirectory.Substring(sourcePath.Length));
+                            targetDirectory = Path.Combine(targetDirectory, RemovePathPrefix(subDirectory.Substring(sourcePath.Length)));
 
                         Scan(Options.Clone(options, options.OverwriteExistingPackages, subDirectory, targetDirectory), showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
                     }
@@ -284,7 +291,18 @@ namespace go2cs
             GoLexer lexer = new GoLexer(inputStream);
             CommonTokenStream tokenStream = new CommonTokenStream(lexer);
             GoParser parser = new GoParser(tokenStream);
-            ScannerBase scanner = createNewScanner(tokenStream, parser, options, fileName);
+            ScannerBase scanner;
+
+            try
+            {
+                scanner = createNewScanner(tokenStream, parser, options, fileName);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                TotalSkippedFiles++;
+                return;
+            }
 
             parser.RemoveErrorListeners();
             parser.AddErrorListener(new ParserErrorListener(scanner));
@@ -294,7 +312,6 @@ namespace go2cs
                 scanner.BeforeScan();
                 scanner.Scan(showParseTree);
                 scanner.AfterScan();
-
             }
             else
             {
@@ -379,10 +396,6 @@ namespace go2cs
             sourceFilePath = Path.GetDirectoryName(sourceFileName) ?? "";
             targetFileName = $"{Path.GetFileNameWithoutExtension(sourceFileName)}.cs";
             targetFilePath = string.IsNullOrWhiteSpace(options.TargetPath) || sourceFilePath.StartsWith(options.TargetGoSrcPath) ? sourceFilePath : Path.GetFullPath(options.TargetPath);
-
-            //if (!Directory.Exists(targetFilePath))
-            //    Directory.CreateDirectory(targetFilePath);
-
             targetFileName = Path.Combine(targetFilePath, targetFileName);
         }
 
@@ -543,7 +556,7 @@ namespace go2cs
             if (!Path.IsPathRooted(filePath))
                 filePath = Path.Combine(GoPath, filePath);
 
-            return filePath;
+            return Path.GetFullPath(filePath);
         }
 
         private static bool DefaultFileNeedsScan(Options options, string fileName, out string message)

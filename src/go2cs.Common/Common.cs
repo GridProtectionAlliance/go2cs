@@ -172,6 +172,28 @@ namespace go2cs
             return filePath;
         }
 
+        public static string RemovePathPrefix(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                filePath = "";
+            }
+            else
+            {
+                char prefixChar = filePath[0];
+
+                while ((prefixChar == Path.DirectorySeparatorChar || prefixChar == Path.AltDirectorySeparatorChar) && filePath.Length > 0)
+                {
+                    filePath = filePath.Substring(1);
+
+                    if (filePath.Length > 0)
+                        prefixChar = filePath[0];
+                }
+            }
+
+            return filePath;
+        }
+
         public static string GetValidPathName(string filePath, int limit = 100)
         {
             if (filePath.Length > limit)

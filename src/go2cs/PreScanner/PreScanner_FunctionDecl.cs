@@ -45,6 +45,9 @@ namespace go2cs
 
         private FunctionInfo ExitMethod(GoParser.IFunctionContext context)
         {
+            if (context.IDENTIFIER() is null)
+                return null;
+
             string identifer = context.IDENTIFIER().GetText();
             GoParser.SignatureContext signatureContext = context.signature();
 
@@ -84,12 +87,18 @@ namespace go2cs
         {
             FunctionInfo functionInfo = ExitMethod(context);
 
+            if (functionInfo is null)
+                return;
+
             m_functions.Add(GetUniqueIdentifier(m_functions, functionInfo.Signature.GenerateLookup()), functionInfo);
         }
 
         public override void ExitMethodDecl(GoParser.MethodDeclContext context)
         {
             FunctionInfo functionInfo = ExitMethod(context);
+
+            if (functionInfo is null)
+                return;
 
             if (Parameters.TryGetValue(context.receiver().parameters(), out List<ParameterInfo> parameters))
             {

@@ -33,12 +33,13 @@ namespace go2cs
         public override void EnterMethodDecl(GoParser.MethodDeclContext context)
         {
             m_inFunction = true; // May need to scope certain objects, like consts, to current function
-            m_originalFunctionName = context.IDENTIFIER().GetText();
+            m_originalFunctionName = context.IDENTIFIER()?.GetText() ?? "_";
             m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
             m_variableIdentifiers.Clear();
             m_variableTypes.Clear();
 
-            string receiverTypeName = context.receiver().parameters().parameterDecl()[0].type_().GetText().Replace("*", "ref ");
+            GoParser.ParameterDeclContext[] receiverParameters = context.receiver().parameters().parameterDecl();
+            string receiverTypeName = receiverParameters.Length > 0 ? receiverParameters[0].type_().GetText().Replace("*", "ref ") : "object";
             string functionSignature = FunctionSignature.Generate(m_originalFunctionName, new[] { receiverTypeName });
 
             if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))

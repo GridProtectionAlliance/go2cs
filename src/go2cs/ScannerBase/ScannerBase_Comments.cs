@@ -52,6 +52,9 @@ namespace go2cs
 
         protected bool LineTerminatorAhead(ParserRuleContext context, int tokenOffset = 0)
         {
+            if (context is null)
+                return false;
+
             int tokenIndex = context.Stop.TokenIndex + tokenOffset;
             IList<IToken> hiddenChannel = TokenStream.GetHiddenTokensToRight(tokenIndex, TokenConstants.HiddenChannel);
 
@@ -69,26 +72,41 @@ namespace go2cs
 
         protected string CheckForCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
         {
+            if (context is null)
+                return "";
+
             return CheckForComments(context.Start.TokenIndex, TokenStream.GetHiddenTokensToLeft, offsetLevel, indentLevel);
         }
 
         protected string CheckForCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
         {
+            if (context is null)
+                return "";
+
             return CheckForComments(context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight, offsetLevel, indentLevel);
         }
 
         protected string CheckForCommentsLeft(IParseTree element, int offsetLevel = 0, int indentLevel = -1)
         {
+            if (element is null)
+                return "";
+
             return CheckForComments(element.SourceInterval.a, TokenStream.GetHiddenTokensToLeft, offsetLevel, indentLevel);
         }
 
         protected string CheckForCommentsRight(IParseTree element, int offsetLevel = 0, int indentLevel = -1)
         {
+            if (element is null)
+                return "";
+
             return CheckForComments(element.SourceInterval.b, TokenStream.GetHiddenTokensToRight, offsetLevel, indentLevel);
         }
 
         protected string CheckForEndOfLineComment(ParserRuleContext context)
         {
+            if (context is null)
+                return "";
+
             StringBuilder comments = new StringBuilder();
             IList<IToken> lineCommentChannel = TokenStream.GetHiddenTokensToRight(context.Stop.TokenIndex, TokenConstants.HiddenChannel);
 
@@ -114,6 +132,9 @@ namespace go2cs
 
         protected bool EndsWithLineFeed(string line)
         {
+            if (string.IsNullOrWhiteSpace(line))
+                return false;
+
             int index = line.LastIndexOf('\n');
 
             if (index == -1)
@@ -130,6 +151,9 @@ namespace go2cs
 
         protected string RemoveLastLineFeed(string line)
         {
+            if (string.IsNullOrWhiteSpace(line))
+                return "";
+
             int index = line.LastIndexOf("\r\n", StringComparison.Ordinal);
 
             if (index > -1 && index == line.Length - 2)
@@ -145,6 +169,9 @@ namespace go2cs
 
         protected string RemoveFirstLineFeed(string line)
         {
+            if (string.IsNullOrWhiteSpace(line))
+                return "";
+
             int index = line.IndexOf("\r\n", StringComparison.Ordinal);
 
             if (index == 0)
@@ -250,7 +277,7 @@ namespace go2cs
 
                 foreach (string line in workLines)
                 {
-                    if (line.Length == 0)
+                    if (line.Length == 0 || commonIndex >= line.Length)
                         continue;
 
                     tested = true;

@@ -48,7 +48,7 @@ namespace go2cs
         public override void EnterFunctionDecl(GoParser.FunctionDeclContext context)
         {
             m_inFunction = true; // May need to scope certain objects, like consts, to current function
-            m_originalFunctionName = context.IDENTIFIER().GetText();
+            m_originalFunctionName = context.IDENTIFIER()?.GetText() ?? "_";
             m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
             m_variableIdentifiers.Clear();
             m_variableTypes.Clear();

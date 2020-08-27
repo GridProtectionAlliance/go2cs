@@ -83,7 +83,7 @@ namespace go2cs
             if (context.typeSwitchCase().typeList() is null)
             {
                 GoParser.TypeSwitchStmtContext parent = context.Parent as GoParser.TypeSwitchStmtContext;
-                string identifier = parent == null ? "" : SanitizedIdentifier(parent.typeSwitchGuard().IDENTIFIER().GetText());
+                string identifier = parent == null ? "" : SanitizedIdentifier(parent.typeSwitchGuard().IDENTIFIER()?.GetText()) ?? "";
 
                 m_typeSwitchDefaultCase.Peek().Append($"{Environment.NewLine}{Spacing()}default:{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
 
@@ -121,7 +121,7 @@ namespace go2cs
                 m_targetFile.Append(caseBlock);
 
                 GoParser.TypeSwitchStmtContext parent = context.Parent as GoParser.TypeSwitchStmtContext;
-                string identifier = parent == null ? "_" : SanitizedIdentifier(parent.typeSwitchGuard().IDENTIFIER().GetText());
+                string identifier = parent == null ? "_" : SanitizedIdentifier(parent.typeSwitchGuard().IDENTIFIER()?.GetText()) ?? "_";
 
                 GoParser.TypeListContext typeList = context.typeSwitchCase().typeList();
                 StringBuilder caseTypeExpressions = new StringBuilder();

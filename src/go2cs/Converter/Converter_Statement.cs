@@ -56,7 +56,11 @@ namespace go2cs
             //     : IDENTIFIER ':' statement
 
             PushBlock();
-            m_labels.Add(SanitizedIdentifier(context.IDENTIFIER().GetText()), false);
+
+            string label = SanitizedIdentifier(context.IDENTIFIER()?.GetText());
+
+            if (!string.IsNullOrEmpty(label) && !m_labels.ContainsKey(label))
+                m_labels.Add(label, false);
 
             // Check labeled continue in for loop
             // Check labeled break in for loop, select and switch
@@ -67,10 +71,13 @@ namespace go2cs
             // labeledStmt
             //     : IDENTIFIER ':' statement
 
-            string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
+            string label = SanitizedIdentifier(context.IDENTIFIER()?.GetText());
             string statement = PopBlock(false);
 
-            m_targetFile.Append($"{label}:{CheckForCommentsRight(context)}");
+            if (!string.IsNullOrEmpty(label))
+                m_targetFile.Append($"{label}:");
+
+            m_targetFile.Append($"{CheckForCommentsRight(context)}");
 
             if (!WroteLineFeed)
                 m_targetFile.AppendLine();
@@ -198,7 +205,7 @@ namespace go2cs
                         if (!m_variableTypes.TryGetValue(leftOperandText, out TypeInfo leftOperandType))
                             leftOperandType = leftOperands[i].Type;
 
-                        if (assignOP == "=" && leftOperandType.TypeClass == TypeClass.Interface)
+                        if (assignOP == "=" && leftOperandType?.TypeClass == TypeClass.Interface)
                             rightOperandText = $"{leftOperandType.TypeName}.As({rightOperandText})";
 
                         assignOP = $" {assignOP} ";
@@ -290,9 +297,10 @@ namespace go2cs
                 }
                 else if (expressions.Length > 0)
                 {
-                    TypeInfo resultType = m_currentFunction.Signature.Signature.Result[0].Type;
+                    ParameterInfo[] result = m_currentFunction?.Signature.Signature.Result;
+                    TypeInfo resultType = result?.Length > 0 ? result[0].Type : TypeInfo.ObjectType;
                     
-                    if (resultType.TypeClass == TypeClass.Interface)
+                    if (resultType?.TypeClass == TypeClass.Interface)
                         m_targetFile.Append($" {resultType.TypeName}.As({expressions[0]})");
                     else
                         m_targetFile.Append($" {expressions[0]}");

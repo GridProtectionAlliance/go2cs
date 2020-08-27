@@ -749,7 +749,7 @@ namespace go2cs
             {
                 if (Types.TryGetValue(literalType.arrayType()?.elementType() ?? literalType.elementType(), out typeInfo))
                 {
-                    if (typeInfo.TypeClass == TypeClass.Interface)
+                    if (typeInfo?.TypeClass == TypeClass.Interface)
                     {
                         for (int i = 0; i < elements.Count; i++)
                         {
@@ -758,7 +758,7 @@ namespace go2cs
                         }
                     }
 
-                    string typeName = typeInfo.TypeName;
+                    string typeName = typeInfo?.TypeName ?? "object";
                     string arrayLength = isDynamicSizedArray ? "-1" : literalType.arrayType().arrayLength().GetText();
 
                     expressionText = hasKeyedElement ? 
