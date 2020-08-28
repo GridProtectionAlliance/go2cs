@@ -60,6 +60,8 @@ namespace go2cs
 
         protected readonly DependencyCounter RequiredUsings = new DependencyCounter();
 
+        private static readonly Regex s_buildDirective = new Regex(@"^\s*\/\/\s*\+build", RegexOptions.Singleline | RegexOptions.Compiled);
+
         protected sealed class ParserErrorListener : IAntlrErrorListener<IToken>
         {
             private readonly ScannerBase m_scanner;
@@ -224,13 +226,6 @@ namespace go2cs
             {
                 string filePath = Path.GetDirectoryName(sourcePath) ?? "";
 
-                if (File.ReadAllText(sourcePath).Contains("// +build ignore"))
-                {
-                    TotalSkippedFiles++;
-                    Console.WriteLine($"Encountered \"+build ignore\" directive for \"{sourcePath}\", skipping scan...");
-                    return;
-                }
-
                 if (filePath.StartsWith(GoRoot, StringComparison.OrdinalIgnoreCase))
                     ScanFile(Options.Clone(options, options.OverwriteExistingFiles, sourcePath, Path.Combine(options.TargetGoSrcPath, filePath.Substring(GoRoot.Length))), sourcePath, showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
                 else
@@ -270,6 +265,39 @@ namespace go2cs
         {
             if (fileNeedsScan is null)
                 fileNeedsScan = DefaultFileNeedsScan;
+
+            if (!options.SkipBuildIgnoreDirectiveCheck)
+            {
+                string[] source = File.ReadAllLines(fileName);
+                bool foundIgnoreBuildDirective = false;
+
+                foreach (string line in source)
+                {
+                    // Directives must come before package definition
+                    if (line.TrimStart().StartsWith("package "))
+                        break;
+
+                    if (!s_buildDirective.IsMatch(line))
+                        continue;
+
+                    int index = line.IndexOf("+build", StringComparison.Ordinal);
+
+                    HashSet<string> directives = new HashSet<string>(line.Substring(index + 6).Split(' ', StringSplitOptions.RemoveEmptyEntries), StringComparer.Ordinal);
+
+                    if (directives.Contains("ignore"))
+                    {
+                        foundIgnoreBuildDirective = true;
+                        break;
+                    }
+                }
+
+                if (foundIgnoreBuildDirective)
+                {
+                    Console.WriteLine($"Encountered \"+build ignore\" directive for \"{fileName}\", skipping scan...");
+                    handleSkippedScan?.Invoke(options, fileName, showParseTree);
+                    return;
+                }
+            }
 
             if (s_processedFiles.Contains(fileName))
                 return;
@@ -392,24 +420,40 @@ namespace go2cs
 
         protected static void GetFilePaths(Options options, string fileName, out string sourceFileName, out string sourceFilePath, out string targetFileName, out string targetFilePath)
         {
+            string rootSourcePath = GetAbsolutePath(options.RootSourcePath);
+            string rootTargetPath = Path.GetFullPath(options.RootTargetPath);
+
             sourceFileName = Path.GetFullPath(fileName);
             sourceFilePath = Path.GetDirectoryName(sourceFileName) ?? "";
             targetFileName = $"{Path.GetFileNameWithoutExtension(sourceFileName)}.cs";
-            targetFilePath = string.IsNullOrWhiteSpace(options.TargetPath) || sourceFilePath.StartsWith(options.TargetGoSrcPath) ? sourceFilePath : Path.GetFullPath(options.TargetPath);
+
+            if (string.IsNullOrWhiteSpace(options.TargetPath))
+                targetFilePath = string.IsNullOrWhiteSpace(options.TargetGoSrcPath) ? sourceFilePath : options.TargetGoSrcPath;
+            else
+                targetFilePath = options.TargetPath;
+
+            string targetSubDirectory = RemovePathSuffix(RemovePathPrefix(targetFilePath.Substring(rootTargetPath.Length)));
+            string sourceSubDirectory = RemovePathSuffix(RemovePathPrefix(sourceFilePath.Substring(rootSourcePath.Length)));
+
+            if (!targetSubDirectory.Equals(sourceSubDirectory))
+                targetFilePath = Path.Combine(targetFilePath, sourceSubDirectory);
+
+            targetFilePath = AddPathSuffix(targetFilePath);
             targetFileName = Path.Combine(targetFilePath, targetFileName);
         }
 
-        protected static string GetFolderMetadataFileName(Options options, string fileName)
+        protected static string GetFolderMetadataFileName(Options options, string fileName, string targetFilePath = null)
         {
-            GetFilePaths(options, fileName, out _, out _, out _, out string targetFilePath);
-            targetFilePath = AddPathSuffix(targetFilePath);
+            if (string.IsNullOrWhiteSpace(targetFilePath))
+                GetFilePaths(options, fileName, out _, out _, out _, out targetFilePath);
+
             string lastDirName = GetLastDirectoryName(targetFilePath);
             return $"{targetFilePath}{lastDirName}.metadata";
         }
 
-        protected static FolderMetadata GetFolderMetadata(Options options, string fileName)
+        protected static FolderMetadata GetFolderMetadata(Options options, string fileName, string targetFilePath = null)
         {
-            string folderMetadataFileName = GetFolderMetadataFileName(options, fileName);
+            string folderMetadataFileName = GetFolderMetadataFileName(options, fileName, targetFilePath);
 
             if (!File.Exists(folderMetadataFileName))
                 return null;

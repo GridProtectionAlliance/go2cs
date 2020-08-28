@@ -74,7 +74,8 @@ namespace go2cs
                 parametersSignature = $"({receiverParametersSignature}, {parametersSignature})";
 
             // Scope of an extension function is based on scope of the receiver type
-            string scope = char.IsUpper(method.ReceiverParameters[0].Type.TypeName[0]) ? "public" : "private";
+            string receiverType = method.ReceiverParameters?.Length > 0 ? method.ReceiverParameters[0].Type.TypeName : "object";
+            string scope = char.IsUpper(receiverType[0]) ? "public" : "private";
             resultSignature = $"{scope} static {resultSignature}";
 
             // Replace function markers

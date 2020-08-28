@@ -73,11 +73,20 @@ namespace go2cs
         [Option('g', Required = false, Default = DefaultTargetGoSrcPath, HelpText = "Target path for converted Go standard library source files.")]
         public string TargetGoSrcPath { get; }
 
+        [Option('k', Required = false, Default = false, HelpText = "Skip check for \"+build ignore\" directive and attempt conversion anyway.")]
+        public bool SkipBuildIgnoreDirectiveCheck { get; }
+
         [Value(0, Required = true, HelpText = "Go source path or file name to convert.")]
         public string SourcePath { get; }
 
         [Value(1, Required = false, HelpText = "Target path for converted files. If not specified, all files (except for Go standard library files) will be converted to source path.")]
         public string TargetPath { get; }
+
+        [Option(Hidden = true)]
+        public string RootSourcePath { get; }
+
+        [Option(Hidden = true)]
+        public string RootTargetPath { get; }
 
         public Options(
             bool localConvertOnly,
@@ -91,8 +100,11 @@ namespace go2cs
             bool forceMetadataUpdate,
             bool onlyUpdateMetadata,
             string targetGoSrcPath,
+            bool skipBuildIgnoreDirectiveCheck,
             string sourcePath,
-            string targetPath)
+            string targetPath,
+            string rootSourcePath,
+            string rootTargetPath)
         {
             if (string.IsNullOrEmpty(excludeFiles))
                 excludeFiles = DefaultExcludeFiles;
@@ -111,8 +123,11 @@ namespace go2cs
             ForceMetadataUpdate = forceMetadataUpdate;
             OnlyUpdateMetadata = onlyUpdateMetadata;
             TargetGoSrcPath = AddPathSuffix(Path.GetFullPath(Environment.ExpandEnvironmentVariables(targetGoSrcPath)));
+            SkipBuildIgnoreDirectiveCheck = skipBuildIgnoreDirectiveCheck;
             SourcePath = sourcePath is null ? null : Environment.ExpandEnvironmentVariables(sourcePath);
             TargetPath = targetPath is null ? null : Environment.ExpandEnvironmentVariables(targetPath);
+            RootSourcePath = rootSourcePath ?? SourcePath;
+            RootTargetPath = rootTargetPath ?? (string.IsNullOrWhiteSpace(TargetPath) ? TargetGoSrcPath : TargetPath);
 
             m_excludeExpression = new Regex(ExcludeFiles, RegexOptions.Compiled | RegexOptions.Singleline);
         }
@@ -132,8 +147,11 @@ namespace go2cs
                 options.ForceMetadataUpdate,
                 options.OnlyUpdateMetadata,
                 options.TargetGoSrcPath, 
+                options.SkipBuildIgnoreDirectiveCheck,
                 sourcePath, 
-                targetPath);
+                targetPath,
+                options.RootSourcePath,
+                options.RootTargetPath);
 
         // Private constructor only used by examples
         private Options(bool localConvertOnly, string sourcePath, bool convertStandardLibrary = false, bool recurseSubdirectories = false)

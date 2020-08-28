@@ -154,8 +154,8 @@ namespace go2cs
                 return;
 
             // Check meta-data status for imports
-            GetFilePaths(options, fileName, out string sourceFileName, out string _, out string _, out string _);
-            FolderMetadata folderMetadata = GetFolderMetadata(options, sourceFileName);
+            GetFilePaths(options, fileName, out string sourceFileName, out _, out _, out string targetFilePath);
+            FolderMetadata folderMetadata = GetFolderMetadata(options, sourceFileName, targetFilePath);
 
             if (!(folderMetadata is null) && folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata fileMetadata))
             {
