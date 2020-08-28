@@ -126,8 +126,8 @@ namespace go2cs
             SkipBuildIgnoreDirectiveCheck = skipBuildIgnoreDirectiveCheck;
             SourcePath = sourcePath is null ? null : Environment.ExpandEnvironmentVariables(sourcePath);
             TargetPath = targetPath is null ? null : Environment.ExpandEnvironmentVariables(targetPath);
-            RootSourcePath = rootSourcePath ?? SourcePath;
-            RootTargetPath = rootTargetPath ?? (string.IsNullOrWhiteSpace(TargetPath) ? TargetGoSrcPath : TargetPath);
+            RootSourcePath = rootSourcePath ?? SourcePath ?? "";
+            RootTargetPath = rootTargetPath ?? (string.IsNullOrWhiteSpace(TargetPath) && ConvertStandardLibrary ? TargetGoSrcPath : TargetPath) ?? "";
 
             m_excludeExpression = new Regex(ExcludeFiles, RegexOptions.Compiled | RegexOptions.Singleline);
         }

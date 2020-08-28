@@ -321,9 +321,12 @@ namespace go2cs
             GoParser parser = new GoParser(tokenStream);
             ScannerBase scanner;
 
+        #if !DEBUG
             try
             {
+        #endif
                 scanner = createNewScanner(tokenStream, parser, options, fileName);
+        #if !DEBUG
             }
             catch (Exception ex)
             {
@@ -331,6 +334,7 @@ namespace go2cs
                 TotalSkippedFiles++;
                 return;
             }
+        #endif
 
             parser.RemoveErrorListeners();
             parser.AddErrorListener(new ParserErrorListener(scanner));
@@ -421,19 +425,19 @@ namespace go2cs
         protected static void GetFilePaths(Options options, string fileName, out string sourceFileName, out string sourceFilePath, out string targetFileName, out string targetFilePath)
         {
             string rootSourcePath = GetAbsolutePath(options.RootSourcePath);
-            string rootTargetPath = Path.GetFullPath(options.RootTargetPath);
+            string rootTargetPath = string.IsNullOrEmpty(options.RootTargetPath) ? options.RootTargetPath : Path.GetFullPath(options.RootTargetPath);
 
             sourceFileName = Path.GetFullPath(fileName);
             sourceFilePath = Path.GetDirectoryName(sourceFileName) ?? "";
             targetFileName = $"{Path.GetFileNameWithoutExtension(sourceFileName)}.cs";
 
             if (string.IsNullOrWhiteSpace(options.TargetPath))
-                targetFilePath = string.IsNullOrWhiteSpace(options.TargetGoSrcPath) ? sourceFilePath : options.TargetGoSrcPath;
+                targetFilePath = !options.ConvertStandardLibrary || string.IsNullOrWhiteSpace(options.TargetGoSrcPath) ? sourceFilePath : options.TargetGoSrcPath;
             else
                 targetFilePath = options.TargetPath;
 
             string targetSubDirectory = RemovePathSuffix(RemovePathPrefix(targetFilePath.Substring(rootTargetPath.Length)));
-            string sourceSubDirectory = RemovePathSuffix(RemovePathPrefix(sourceFilePath.Substring(rootSourcePath.Length)));
+            string sourceSubDirectory = sourceFilePath.StartsWith(rootSourcePath) ? RemovePathSuffix(RemovePathPrefix(sourceFilePath.Substring(rootSourcePath.Length))) : "";
 
             if (!targetSubDirectory.Equals(sourceSubDirectory))
                 targetFilePath = Path.Combine(targetFilePath, sourceSubDirectory);
@@ -464,10 +468,13 @@ namespace go2cs
             FolderMetadata folderMetadata;
             BinaryFormatter formatter = new BinaryFormatter();
 
+        #if !DEBUG
             try
             {
+        #endif
                 using FileStream stream = File.OpenRead(folderMetadataFileName);
                 folderMetadata = formatter.Deserialize(stream) as FolderMetadata;
+        #if !DEBUG
             }
             catch (Exception ex)
             {
@@ -476,6 +483,7 @@ namespace go2cs
                 if (!folderMetadataFileName.Equals(s_currentFolderMetadataFileName, StringComparison.OrdinalIgnoreCase))
                     Console.WriteLine($"Failed to load folder metadata from \"{folderMetadataFileName}\": {ex.Message}");
             }
+        #endif
 
             s_currentFolderMetadataFileName = folderMetadataFileName;
             s_currentFolderMetadata = folderMetadata;
