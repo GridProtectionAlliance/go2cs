@@ -140,8 +140,10 @@ namespace go2cs
 
         private static void WriteProjectFiles(Options options)
         {
+        #if !DEBUG
             try
             {
+        #endif
                 // Map of package names to list of package path and file names
                 Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData;
 
@@ -153,11 +155,13 @@ namespace go2cs
 
                 if (options.ConvertStandardLibrary && options.RecurseSubdirectories && AddPathSuffix(options.SourcePath).Equals(GoPath))
                     ProcessStandardLibraryPackages(options, groupedPackageData);
+        #if !DEBUG
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to write project files: {ex.Message}");
             }
+        #endif
         }
 
         private static Dictionary<string, List<(string, string[])>> CreateGroupedPackageData()

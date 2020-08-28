@@ -74,8 +74,10 @@ namespace go2cs
 
             BinaryFormatter formatter = new BinaryFormatter();
 
+        #if !DEBUG
             try
             {
+        #endif
                 string directory = Path.GetDirectoryName(FolderMetadataFileName);
 
                 if (!Directory.Exists(directory))
@@ -83,11 +85,13 @@ namespace go2cs
 
                 using FileStream stream = File.Create(FolderMetadataFileName);
                 formatter.Serialize(stream, folderMetadata);
+        #if !DEBUG
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to write metadata file \"{FolderMetadataFileName}\": {ex.Message}");
             }
+        #endif
         }
 
         protected override void BeforeScan()
