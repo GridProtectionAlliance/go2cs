@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 22 19:47:42 UTC
+//     Generated on 2020 August 28 06:03:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -99,6 +99,8 @@ namespace go
 
                 return s_SwimByRef(ref target);
             }
+            
+            public string ToString(string format, IFormatProvider formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Animal()

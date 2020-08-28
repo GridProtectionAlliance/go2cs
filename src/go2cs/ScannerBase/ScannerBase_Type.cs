@@ -23,6 +23,7 @@
 
 using go2cs.Metadata;
 using System.Linq;
+using static go2cs.Common;
 
 namespace go2cs
 {
@@ -44,11 +45,6 @@ namespace go2cs
         //  arguments (optional)
         //  conversion (required)
         protected readonly ParseTreeValues<TypeInfo> Types = new ParseTreeValues<TypeInfo>();
-
-        //public override void EnterType_(GoParser.Type_Context context)
-        //{
-        //    Debug.WriteLine($"Enter type: {context.GetText()} -- {context}");
-        //}
 
         public override void ExitType_(GoParser.Type_Context context)
         {
@@ -84,6 +80,34 @@ namespace go2cs
                 FullTypeName = typeName,
                 TypeClass = typeClass
             };
+        }
+
+        public override void EnterTypeSpec(GoParser.TypeSpecContext context)
+        {
+            GoParser.Type_Context typeContext = context.type_();
+            string identifier = SanitizedIdentifier(context.IDENTIFIER().GetText());
+            string type = typeContext.GetText();
+
+            if (type.StartsWith("interface{"))
+            {
+                Types[typeContext] = new TypeInfo
+                {
+                    Name = identifier,
+                    TypeName = ConvertToCSTypeName(identifier),
+                    FullTypeName = ConvertToCSTypeName(identifier),
+                    TypeClass = TypeClass.Interface
+                };
+            }
+            else if (type.StartsWith("struct{"))
+            {
+                Types[typeContext] = new TypeInfo
+                {
+                    Name = identifier,
+                    TypeName = ConvertToCSTypeName(identifier),
+                    FullTypeName = ConvertToCSTypeName(identifier),
+                    TypeClass = TypeClass.Struct
+                };
+            }
         }
 
         public override void ExitPointerType(GoParser.PointerTypeContext context)
@@ -261,32 +285,47 @@ namespace go2cs
             };
         }
 
-        public override void ExitInterfaceType(GoParser.InterfaceTypeContext context)
-        {
-            if (context.methodSpec()?.Length == 0)
-            {
-                // Handle empty interface type as a special case
-                Types[context.Parent.Parent] = TypeInfo.ObjectType;
+        //public override void ExitInterfaceType(GoParser.InterfaceTypeContext context)
+        //{
+        //    if (context.methodSpec()?.Length == 0)
+        //    {
+        //        // Handle empty interface type as a special case
+        //        Types[context.Parent.Parent] = TypeInfo.ObjectType;
 
-                // Object is more universal than EmptyInterface - which is handy when literals are involved
-                //Types[context.Parent.Parent] = TypeInfo.EmptyInterfaceType;
-            }
-            else
-            {
-                // TODO: Turn into a strongly typed object and declare prior to function
-                // All other intra-function scoped declared interfaces
-                // are defined as dynamic so they can behave like ducks
-                Types[context.Parent.Parent] = TypeInfo.DynamicType;
-            }
-        }
+        //        // Object is more universal than EmptyInterface - which is handy when literals are involved
+        //        //Types[context.Parent.Parent] = TypeInfo.EmptyInterfaceType;
+        //    }
+        //    else
+        //    {
+        //        // TODO: Turn into a strongly typed object and declare prior to function
+        //        // All other intra-function scoped declared interfaces
+        //        // are defined as dynamic so they can behave like ducks
+        //        Types[context.Parent.Parent] = TypeInfo.DynamicType;
+        //    }
+        //}
 
-        public override void ExitStructType(GoParser.StructTypeContext context)
-        {
-            // TODO: Turn into a strongly typed object and declare prior to function
-            // All intra-function scoped declared structures are
-            // defined as dynamic so they can behave like ducks
-            Types[context.Parent.Parent] = TypeInfo.DynamicType;
-        }
+        //public override void ExitStructType(GoParser.StructTypeContext context)
+        //{
+        //    // TODO: Turn into a strongly typed object and declare prior to function
+
+        //    if (context.Parent.Parent is GoParser.Type_Context typeContext)
+        //    {
+        //        Types[context.Parent.Parent] = new TypeInfo
+        //        {
+        //            Name = "",
+        //            TypeName = ConvertToCSTypeName(""),
+        //            FullTypeName = ConvertToCSTypeName(""),
+        //            TypeClass = TypeClass.Struct
+        //        };
+        //    }
+        //    else
+        //    {
+        //        // All intra-function scoped declared structures are
+        //        // defined as dynamic so they can behave like ducks
+        //        AddWarning(context, $"Unhandled struct type: {context.GetText()}");
+        //    }
+
+        //}
 
         public override void ExitFunctionType(GoParser.FunctionTypeContext context)
         {

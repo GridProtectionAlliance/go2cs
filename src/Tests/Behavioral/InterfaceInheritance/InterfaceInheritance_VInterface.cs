@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 August 23 15:59:56 UTC
+//     Generated on 2020 August 28 06:03:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -110,6 +110,25 @@ namespace go
                 
             }
 
+            private delegate @string StringByRef(ref T value);
+            private delegate @string StringByVal(T value);
+
+            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByVal s_StringByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public @string String()
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.Value;
+                if (s_StringByRef is null)
+                    return s_StringByVal!(target);
+
+                return s_StringByRef(ref target);
+            }
+
             private delegate @string ErrorByRef(ref T value);
             private delegate @string ErrorByVal(T value);
 
@@ -169,6 +188,22 @@ namespace go
 
                 if (s_MByRef is null && s_MByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement V.M method", new Exception("M"));
+
+               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+
+                if (!(extensionMethod is null))
+                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+
+                if (s_StringByRef is null)
+                {
+                    extensionMethod = targetType.GetExtensionMethod("String");
+
+                    if (!(extensionMethod is null))
+                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
+                }
+
+                if (s_StringByRef is null && s_StringByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement V.String method", new Exception("String"));
 
                extensionMethod = targetTypeByRef.GetExtensionMethod("Error");
 

@@ -26,6 +26,7 @@ using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Antlr4.Runtime.Tree;
 using static go2cs.Common;
 
 namespace go2cs
@@ -429,17 +430,37 @@ namespace go2cs
 
                 string argumentList = string.Join(", ", arguments);
 
-                if (primaryExpression.Text == "new" && !(typeInfo is null))
+                if (primaryExpression.Text == "new")
                 {
-                    TypeInfo argType = expressions?[0].Type.Clone() ?? TypeInfo.VarType.Clone();
-
-                    argType.IsPointer = true;
-
-                    PrimaryExpressions[context] = new ExpressionInfo
+                    if (typeInfo is null)
                     {
-                        Text = $"@new<{typeInfo.TypeName}>({argumentList})",
-                        Type = argType
-                    };
+                        string typeName = expressions?[0].Text;
+                        TypeInfo argType = null;
+
+                        foreach (TypeInfo typeInfoValue in Types.Values)
+                        {
+                            if (typeInfoValue.TypeName.Equals(typeName))
+                            {
+                                argType = typeInfoValue.Clone();
+                                break;
+                            }
+                        }
+
+                        if (argType == null)
+                            argType = TypeInfo.ObjectType.Clone();
+
+                        argType.IsPointer = true;
+                        argType.Name = argType.TypeName = $"ptr<{argType.TypeName}>";
+                        argType.FullTypeName = $"go.{argType.TypeName}";
+
+                        PrimaryExpressions[context] = new ExpressionInfo { Text = $"@new<{typeName}>()", Type = argType };
+                    }
+                    else
+                    {
+                        TypeInfo argType = expressions?[0].Type.Clone() ?? TypeInfo.VarType.Clone();
+                        argType.IsPointer = true;
+                        PrimaryExpressions[context] = new ExpressionInfo { Text = $"@new<{typeInfo.TypeName}>({argumentList})", Type = argType };
+                    }
                 }
                 else if (primaryExpression.Text == "make" && !(typeInfo is null))
                 {

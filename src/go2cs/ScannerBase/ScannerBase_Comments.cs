@@ -132,7 +132,7 @@ namespace go2cs
 
         protected bool EndsWithLineFeed(string line)
         {
-            if (string.IsNullOrWhiteSpace(line))
+            if (string.IsNullOrEmpty(line))
                 return false;
 
             int index = line.LastIndexOf('\n');
@@ -151,7 +151,7 @@ namespace go2cs
 
         protected string RemoveLastLineFeed(string line)
         {
-            if (string.IsNullOrWhiteSpace(line))
+            if (string.IsNullOrEmpty(line))
                 return "";
 
             int index = line.LastIndexOf("\r\n", StringComparison.Ordinal);
@@ -169,7 +169,7 @@ namespace go2cs
 
         protected string RemoveFirstLineFeed(string line)
         {
-            if (string.IsNullOrWhiteSpace(line))
+            if (string.IsNullOrEmpty(line))
                 return "";
 
             int index = line.IndexOf("\r\n", StringComparison.Ordinal);

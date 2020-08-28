@@ -25,11 +25,11 @@ namespace go
 
         private static void Main()
         {
-            var f = @new<Frog>();
-            var d = @new<Dog>();
+            ptr<Frog> f = @new<Frog>();
+            ptr<Dog> d = @new<Dog>();
             array<Animal> zoo = new array<Animal>(new Animal[] { Animal.As(f), Animal.As(d) });
 
-            Animal a = null;
+            Animal a = Animal.As(null);
             fmt.Printf("%T\n", a);
 
             {
