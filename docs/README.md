@@ -28,7 +28,7 @@ Work remaining to _properly_ parse and convert all Go source library files, with
 
 Note that simple conversions currently depend on a small subset of the Go source library, [`src/gocore`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/gocore), that was manually converted. As the project progresses, there will be a merger of automatically converted code and manually converted code. For example, the [`builtin`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/builtin.cs) library functions will always require some special attention since many of its features are implemented outside normal Go code, such as with assembly routines.
 
-As a strategy to automate conversion of native system calls in Go code, i.e., a function declaration without a body that provides a signature for a native external function, is to create a [`partial method`](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/partial-method) in C# for the native call. A manually created file that implements the partial method can now be added that will exist along side the auto-converted files and not be overwritten during conversion.
+A strategy to automate conversion of native system calls in Go code, i.e., a function declaration without a body that provides a signature for a native external function, is to create a [`partial method`](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/partial-method) in C# for the native call. A manually created file that implements the partial method can now be added that will exist along side the auto-converted files and not be overwritten during conversion.
 
 ### Recent Activity
 Converted code now targets .NET Core only, specifically version 3.1 and C# 8.0 with goal to support .NET 5.0 and C# 9.0 when it comes out. Many basic conversion now work.
@@ -57,7 +57,7 @@ go2cs -o -i C:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue
 
 This will convert Go code to C#. You can then build and run both the Go and C# versions and compare results.
 
-> **Debugging with Visual Studio:** After running the `deploy-gocore.bat` script you can run conversion code from within Visual Studio by right-clicking on the go2cs project, selecting "Properties" then clicking on the "Debug" tab. In the "Application arguments:" text box you can enter the command line test parameters, e.g., `-o -i -h C:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue`. When the active solution configuration targets "Debug" you can run go2cs project to convert Go code, then run converted code.
+> **Debugging with Visual Studio:** After running the `deploy-gocore.bat` script you can run conversion code from within Visual Studio by right-clicking on the go2cs project, selecting "Properties" then clicking on the "Debug" tab. In the "Application arguments:" text box you can enter the command line test parameters, e.g., `-o -i -h C:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue`. When the active solution configuration targets "Debug" you can run the go2cs project to convert Go code, then run converted code.
 
 ## Installation
 
