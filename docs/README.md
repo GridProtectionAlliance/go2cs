@@ -31,7 +31,7 @@ Note that simple conversions currently depend on a small subset of the Go source
 A strategy to automate conversion of native system calls in Go code, i.e., a function declaration without a body that provides a signature for a native external function, is to create a [`partial method`](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/partial-method) in C# for the native call. A manually created file that implements the partial method can now be added that will exist along side the auto-converted files and not be overwritten during conversion.
 
 ### Recent Activity
-Converted code now targets .NET Core only, specifically version 3.1 and C# 8.0 with goal to support .NET 5.0 and C# 9.0 when it comes out. Many basic conversion now work.
+Converted code now targets .NET Core only, specifically version 3.1 and C# 8.0 with goal to support .NET 5.0 and C# 9.0 when it comes out.
 
 Currently, work to improve code conversions is progressing by walking through each of the [behavioral testing](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral) projects. Iterating through each of these simple use cases improves overall automated code conversion quality.
 
