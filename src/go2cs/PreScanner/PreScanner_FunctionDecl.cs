@@ -132,6 +132,8 @@ namespace go2cs
                     continue;
 
                 string uniqueIdentifer = GetUniqueIdentifier(m_variables, identifiers[i]);
+
+                // TODO: This is not enough to detect redeclaraion use cases where say only two for loops use the same variable
                 bool redeclared = uniqueIdentifer.Contains("@@");
 
                 m_variables.Add(uniqueIdentifer, new VariableInfo
@@ -166,6 +168,8 @@ namespace go2cs
                     continue;
 
                 string uniqueIdentifer = GetUniqueIdentifier(m_variables, identifiers[i]);
+
+                // TODO: This is not enough to detect redeclaraion use cases where say only two for loops use the same variable
                 bool redeclared = uniqueIdentifer.Contains("@@");
 
                 m_variables.Add(uniqueIdentifer, new VariableInfo
@@ -206,6 +210,8 @@ namespace go2cs
                     continue;
 
                 string uniqueIdentifer = GetUniqueIdentifier(m_variables, identifiers[i]);
+
+                // TODO: This is not enough to detect redeclaraion use cases where say only two for loops use the same variable
                 bool redeclared = uniqueIdentifer.Contains("@@");
 
                 m_variables.Add(uniqueIdentifer, new VariableInfo
@@ -234,6 +240,8 @@ namespace go2cs
             Expressions.TryGetValue(context.primaryExpr(), out ExpressionInfo expression);
 
             string uniqueIdentifer = GetUniqueIdentifier(m_variables, identifier);
+
+            // TODO: This is not enough to detect redeclaraion use cases where say only two for loops use the same variable
             bool redeclared = uniqueIdentifer.Contains("@@");
 
             m_variables.Add(uniqueIdentifer, new VariableInfo
