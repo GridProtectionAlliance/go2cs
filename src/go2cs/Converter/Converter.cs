@@ -55,8 +55,6 @@ namespace go2cs
             if (Metadata is null)
                 throw new InvalidOperationException($"Failed to load metadata for \"{fileName}\" - file conversion canceled.");
 
-            Package = Metadata.Package;
-            PackageImport = Metadata.PackageImport;
             ImportAliases = Metadata.ImportAliases;
             ImportMetadata = new Dictionary<string, FolderMetadata>(StringComparer.Ordinal);
         }
@@ -194,7 +192,7 @@ namespace go2cs
                 string mainPackagePath = Path.GetDirectoryName(mainPackageFile) ?? "";
                 string assemblyName = Path.GetFileNameWithoutExtension(mainPackageFileName);
 
-                FolderMetadata folderMetadata = GetFolderMetadata(options, mainPackageFile);
+                FolderMetadata folderMetadata = GetFolderMetadata(options, null, mainPackageFile);
                 string sourceFileName = Path.Combine(Path.GetDirectoryName(mainPackageFile) ?? "", $"{Path.GetFileNameWithoutExtension(mainPackageFile)}.go");
 
                 if (folderMetadata is null || !folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata metadata))
@@ -230,7 +228,7 @@ namespace go2cs
                         string assemblyName = packageData.Key;
                         string libraryProjectFile = Path.Combine(rootPackage.path, $"{assemblyName}.csproj");
 
-                        FolderMetadata folderMetadata = GetFolderMetadata(options, fileName);
+                        FolderMetadata folderMetadata = GetFolderMetadata(options, null, fileName);
                         string sourceFileName = Path.Combine(Path.GetDirectoryName(fileName) ?? "", $"{Path.GetFileNameWithoutExtension(fileName)}.go");
 
                         if (folderMetadata is null || !folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata metadata))

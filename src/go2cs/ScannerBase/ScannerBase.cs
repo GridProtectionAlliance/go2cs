@@ -109,14 +109,14 @@ namespace go2cs
             TokenStream = tokenStream;
             Parser = parser;
 
-            GetFilePaths(options, fileName, out string sourceFileName, out string sourceFilePath, out string targetFileName, out string targetFilePath);
+            GetFilePaths(options, null, fileName, out string sourceFileName, out string sourceFilePath, out string targetFileName, out string targetFilePath);
 
             SourceFileName = sourceFileName;
             SourceFilePath = sourceFilePath;
             TargetFileName = targetFileName;
             TargetFilePath = targetFilePath;
 
-            FolderMetadata folderMetadata = GetFolderMetadata(Options, SourceFileName);
+            FolderMetadata folderMetadata = GetFolderMetadata(Options, null, SourceFileName, targetFilePath);
 
             if (!(folderMetadata is null) && folderMetadata.Files.TryGetValue(fileName, out FileMetadata metadata))
                 Metadata = metadata;
@@ -422,17 +422,21 @@ namespace go2cs
             }
         }
 
-        protected static void GetFilePaths(Options options, string fileName, out string sourceFileName, out string sourceFilePath, out string targetFileName, out string targetFilePath)
+        protected static void GetFilePaths(Options options, string rootSourcePath, string fileName, out string sourceFileName, out string sourceFilePath, out string targetFileName, out string targetFilePath)
         {
-            string rootSourcePath = GetAbsolutePath(options.RootSourcePath);
             string rootTargetPath = string.IsNullOrEmpty(options.RootTargetPath) ? options.RootTargetPath : Path.GetFullPath(options.RootTargetPath);
+
+            rootTargetPath = string.IsNullOrWhiteSpace(rootTargetPath) ? Path.GetFullPath(options.TargetGoSrcPath) : rootTargetPath;
+
+            if (string.IsNullOrWhiteSpace(rootSourcePath))
+                rootSourcePath = GetAbsolutePath(options.RootSourcePath);
 
             sourceFileName = Path.GetFullPath(fileName);
             sourceFilePath = Path.GetDirectoryName(sourceFileName) ?? "";
             targetFileName = $"{Path.GetFileNameWithoutExtension(sourceFileName)}.cs";
 
             if (string.IsNullOrWhiteSpace(options.TargetPath))
-                targetFilePath = !options.ConvertStandardLibrary || string.IsNullOrWhiteSpace(options.TargetGoSrcPath) ? sourceFilePath : options.TargetGoSrcPath;
+                targetFilePath = !options.ConvertStandardLibrary || string.IsNullOrWhiteSpace(options.TargetGoSrcPath) ? sourceFilePath : Path.GetFullPath(options.TargetGoSrcPath);
             else
                 targetFilePath = options.TargetPath;
 
@@ -446,18 +450,18 @@ namespace go2cs
             targetFileName = Path.Combine(targetFilePath, targetFileName);
         }
 
-        protected static string GetFolderMetadataFileName(Options options, string fileName, string targetFilePath = null)
+        protected static string GetFolderMetadataFileName(Options options, string rootSourcePath, string fileName, string targetFilePath = null)
         {
             if (string.IsNullOrWhiteSpace(targetFilePath))
-                GetFilePaths(options, fileName, out _, out _, out _, out targetFilePath);
+                GetFilePaths(options, rootSourcePath, fileName, out _, out _, out _, out targetFilePath);
 
             string lastDirName = GetLastDirectoryName(targetFilePath);
             return $"{targetFilePath}{lastDirName}.metadata";
         }
 
-        protected static FolderMetadata GetFolderMetadata(Options options, string fileName, string targetFilePath = null)
+        protected static FolderMetadata GetFolderMetadata(Options options, string rootSourcePath, string fileName, string targetFilePath = null)
         {
-            string folderMetadataFileName = GetFolderMetadataFileName(options, fileName, targetFilePath);
+            string folderMetadataFileName = GetFolderMetadataFileName(options, rootSourcePath, fileName, targetFilePath);
 
             if (!File.Exists(folderMetadataFileName))
                 return null;
@@ -496,17 +500,21 @@ namespace go2cs
             int lastSlash = targetImport.LastIndexOf('/');
             string packageName = lastSlash > -1 ? targetImport.Substring(lastSlash + 1) : targetImport;
             string importPath = $"{AddPathSuffix(targetImport.Replace("/", "\\"))}{packageName}.go";
-            string goRootImport = Path.Combine(options.TargetGoSrcPath, importPath);
-            string goPathImport = Path.Combine(GoPath, "go2cs", importPath);
+            string go2csPath = Path.Combine(GoPath, "go2cs");
+            string goRootImport = Path.Combine(GoRoot, importPath);
+            string goPathImport = Path.Combine(go2csPath, importPath);
+            string targetPath = string.IsNullOrWhiteSpace(options.TargetGoSrcPath) ? go2csPath : options.TargetGoSrcPath;
             FolderMetadata metadata;
-            warning = default;
 
-            metadata = GetFolderMetadata(options, goRootImport);
+            warning = default;
+            options = Options.Clone(options, options.OverwriteExistingFiles, GoRoot, targetPath);
+            metadata = GetFolderMetadata(options, GoRoot, goRootImport);
 
             if (!(metadata is null))
                 return metadata;
 
-            metadata = GetFolderMetadata(options, goPathImport);
+            options = Options.Clone(options, options.OverwriteExistingFiles, go2csPath, targetPath);
+            metadata = GetFolderMetadata(options, go2csPath, goPathImport);
 
             if (!(metadata is null))
                 return metadata;
@@ -514,8 +522,8 @@ namespace go2cs
             StringBuilder loadWarning = new StringBuilder();
 
             loadWarning.AppendLine($"WARNING: Failed to locate package metadata for \"{targetImport}\" import at either:");
-            loadWarning.AppendLine($"    {GetFolderMetadataFileName(options, goRootImport)} (from -g Go source target path)");
-            loadWarning.AppendLine($"    {GetFolderMetadataFileName(options, goPathImport)} (from %GOPATH%)");
+            loadWarning.AppendLine($"    {GetFolderMetadataFileName(options, GoRoot, goRootImport)} (from -g Go source target path)");
+            loadWarning.AppendLine($"    {GetFolderMetadataFileName(options, go2csPath, goPathImport)} (from %GOPATH%)");
 
             warning = loadWarning.ToString();
             return null;

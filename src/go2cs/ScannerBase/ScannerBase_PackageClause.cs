@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  PreScanner_PackageClause.cs - Gbtc
+//  ScannerBase_PackageClause.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -26,7 +26,7 @@ using static go2cs.Common;
 
 namespace go2cs
 {
-    public partial class PreScanner
+    public partial class ScannerBase
     {
         public string Package { get; private set; }
 

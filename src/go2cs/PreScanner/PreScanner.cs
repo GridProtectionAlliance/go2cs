@@ -51,7 +51,7 @@ namespace go2cs
 
         public PreScanner(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
         {
-            FolderMetadataFileName = GetFolderMetadataFileName(options, fileName);
+            FolderMetadataFileName = GetFolderMetadataFileName(options, null, fileName);
         }
 
         public override void Scan(bool _)
@@ -59,7 +59,7 @@ namespace go2cs
             // Base class walks parse tree
             base.Scan(false);
 
-            FolderMetadata folderMetadata = GetFolderMetadata(Options, SourceFileName) ?? new FolderMetadata();
+            FolderMetadata folderMetadata = GetFolderMetadata(Options, null, SourceFileName) ?? new FolderMetadata();
             FileMetadata fileMetadata = folderMetadata.Files.GetOrAdd(SourceFileName, new FileMetadata());
 
             fileMetadata.Package = Package;
@@ -138,7 +138,7 @@ namespace go2cs
             if (options.ForceMetadataUpdate)
                 return true;
 
-            FolderMetadata folderMetadata = GetFolderMetadata(options, fileName);
+            FolderMetadata folderMetadata = GetFolderMetadata(options, null, fileName);
 
             if (folderMetadata is null || !folderMetadata.Files.TryGetValue(fileName, out FileMetadata fileMetadata))
                 return true;
@@ -158,7 +158,7 @@ namespace go2cs
                 return;
 
             // Check meta-data status for imports
-            GetFilePaths(options, fileName, out string sourceFileName, out _, out _, out string targetFilePath);
+            GetFilePaths(options, null, fileName, out string sourceFileName, out _, out _, out string targetFilePath);
             FolderMetadata folderMetadata = GetFolderMetadata(options, sourceFileName, targetFilePath);
 
             if (!(folderMetadata is null) && folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata fileMetadata))

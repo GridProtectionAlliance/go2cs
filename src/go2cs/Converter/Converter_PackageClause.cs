@@ -30,10 +30,6 @@ namespace go2cs
 {
     public partial class Converter
     {
-        public string Package { get; }
-
-        public string PackageImport { get; }
-
         public string PackageUsing { get; private set; }
 
         public string PackageNamespace { get; private set; }
@@ -44,6 +40,8 @@ namespace go2cs
 
         public override void EnterPackageClause(GoParser.PackageClauseContext context)
         {
+            base.EnterPackageClause(context);
+
             // Go package clause is the first keyword encountered - cache details that
             // will be written out after imports. C# import statements (i.e., usings)
             // typically occur before namespace and class definitions
