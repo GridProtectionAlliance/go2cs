@@ -22,7 +22,7 @@ Picking up this project again now that .NET 5.0 is forthcoming and some of the n
 ### Automated Code Conversion of Go Standard Library
 
 An initial conversion of the full Go source code has been completed, you can find the results in the repo:
-[`src/go-src-converted`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted). This was certainly a milestone, i.e., a full successful conversion of the entire Go source library using the [ANTLR4 Golang grammar](https://github.com/antlr/grammars-v4/tree/master/golang) without failing. The converted is looking good:
+[`src/go-src-converted`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted). This was certainly a milestone, i.e., a full successful conversion of the entire Go source library using the [ANTLR4 Golang grammar](https://github.com/antlr/grammars-v4/tree/master/golang) without failing. The converted code is looking good, here are few examples:
 
 * [errors/errors.go](https://github.com/golang/go/blob/master/src/errors/errors.go) => [errors/errors.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/errors/errors.cs)
 * [fmt/format.go](https://github.com/golang/go/blob/master/src/fmt/format.go) => [fmt/format.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/fmt/format.cs)
