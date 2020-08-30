@@ -19,14 +19,18 @@ Converts source code developed using the Go programming language (see [Go Langua
 
 Picking up this project again now that .NET 5.0 is forthcoming and some of the new changes are conducive to this project's original goals, such as [publishing as a self-contained executable](https://docs.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained).
 
-### Automated Code Conversion Status
+### Automated Code Conversion of Go Standard Library
 
-The initial conversion of the full Go source code has been completed, you can find the results in the repo:
-[`src/go-src-converted`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted). This was certainly a milestone, a full successful conversion of the entire Go source library without failing.
+An initial conversion of the full Go source code has been completed, you can find the results in the repo:
+[`src/go-src-converted`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted). This was certainly a milestone, i.e., a full successful conversion of the entire Go source library using the [ANTLR4 Golang grammar](https://github.com/antlr/grammars-v4/tree/master/golang) without failing. The converted is looking good:
 
-Work remaining to _properly_ parse and convert all Go source library files, with its many use cases and edge cases, can be inferred by examining the warnings in the [`build log`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/build.log) for this initial conversion.
+* [errors/errors.go](https://github.com/golang/go/blob/master/src/errors/errors.go) => [errors/errors.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/errors/errors.cs)
+* [fmt/format.go](https://github.com/golang/go/blob/master/src/fmt/format.go) => [fmt/format.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/fmt/format.cs)
+* [compress/gzip/gunzip.go](https://github.com/golang/go/blob/master/src/compress/gzip/gunzip.go) => [compress/gzip/gunzip.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/compress/gzip/gunzip.cs)
 
-Note that simple conversions currently depend on a small subset of the Go source library, [`src/gocore`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/gocore), that was manually converted. As the project progresses, there will be a merger of automatically converted code and manually converted code. For example, the [`builtin`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/builtin.cs) library functions will always require some special attention since many of its features are implemented outside normal Go code, such as with assembly routines.
+Not all converted standard library code will compile yet in C# yet - work remaining to _properly_ parse and convert all Go source library files, with its many use cases and edge cases, can be inferred by examining the warnings in the [`build log`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/build.log) for this initial conversion. This log should help lay out a road map of remaining tasks.
+
+Note that go2cs simple conversions currently depend on a small subset of the Go source library, [`src/gocore`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/gocore), that was manually converted. As the project progresses, there will be a merger of automatically converted code and manually converted code. For example, the [`builtin`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/builtin.cs) Go library functions will always require some special attention since many of its features are implemented outside normal Go code, such as with assembly routines.
 
 A strategy to automate conversion of native system calls in Go code, i.e., a function declaration without a body that provides a signature for a native external function, is to create a [`partial method`](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/partial-method) in C# for the native call. A manually created file that implements the partial method can now be added that will exist along side the auto-converted files and not be overwritten during conversion.
 
@@ -35,13 +39,11 @@ Converted code now targets .NET Core only, specifically version 3.1 and C# 8.0 w
 
 Currently, work to improve code conversions is progressing by walking through each of the [behavioral testing](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral) projects. Iterating through each of these simple use cases improves overall automated code conversion quality.
 
-As a new conversion strategy to cover various code use cases and improve automated code conversion reliability, sets of common Go sample code have been manually converted to C# using the current [C# Go Library](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/). As an example, all relevant code samples from the "[Tour of Go](https://tour.golang.org/welcome/1)" have been converted to C#, [see converted code](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/). Ultimately would like to see this in head-to-head mode using [Try .NET](https://github.com/dotnet/try), for example:
+Sets of common Go sample code have been manually converted to C# using the current [C# Go Library](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/). As an example, all relevant code samples from the "[Tour of Go](https://tour.golang.org/welcome/1)" have been converted to C#, [see converted code](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/). Ultimately would like to see this in head-to-head mode using [Try .NET](https://github.com/dotnet/try), for example:
 ![go2cs](images/HeadToHead-Small.png)
 Currently converted code will not execute with latest release of Try .NET (see [posted issue](https://github.com/dotnet/try/issues/859)). Will be watching for an update.
 
 As releases are made for updated `go2cs` executables, this will also include updates to pre-converted [Go Standard Library libraries for reference from NuGet](https://www.nuget.org/packages?q=%22package+in+.NET+for+use+with+go2cs%22).
-
-Before posting an issue for usage related questions consider using the [go2cs discussions forum](https://discussions.gridprotectionalliance.org/c/gpa-products/Golang-to-C-Converter/).
 
 ## Testing
 
@@ -66,6 +68,8 @@ This will convert Go code to C#. You can then build and run both the Go and C# v
 Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. This should compile as a standalone executable for your target platform with no external dependencies, see [publish profiles](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go2cs/Properties/PublishProfiles).
 
 ## Usage
+
+> Before posting an issue for usage related questions consider using the [go2cs discussions forum](https://discussions.gridprotectionalliance.org/c/gpa-products/Golang-to-C-Converter/).
 
 1. Make sure source  application already compiles with Go (e.g., `go build`) before starting conversion. That means any needed dependencies should already be downloaded and available, e.g., with `go get`.
 
