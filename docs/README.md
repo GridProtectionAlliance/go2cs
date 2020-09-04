@@ -3,6 +3,8 @@
 
 Converts source code developed using the Go programming language (see [Go Language Specification](https://golang.org/ref/spec)) to the C# programming language (see [C# Language Specification](https://github.com/dotnet/csharplang/blob/master/spec/README.md)).
 
+![CodeQL](https://github.com/GridProtectionAlliance/go2cs/workflows/CodeQL/badge.svg)
+
 ## Goals
 
 * Convert Go code into C# so that Go code can be directly used within .NET ecosystem.
