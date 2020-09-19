@@ -34,6 +34,7 @@ namespace go2cs
 
             // Add package to import queue
             ImportQueue.Add(CurrentImportPath);
+            Imports.Add(CurrentImportPath.Replace('/', '.'));
         }
     }
 }

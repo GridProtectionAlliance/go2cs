@@ -160,6 +160,7 @@ namespace go2cs
         protected static readonly string GoPath;
         protected static readonly string[] NewLineDelimeters;
         protected static readonly HashSet<string> ImportQueue;
+        protected static readonly List<string> Imports;
 
         private static readonly HashSet<string> s_processedFiles;
         private static readonly HashSet<string> s_processedImports;
@@ -195,6 +196,7 @@ namespace go2cs
             s_processedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             s_processedImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             ImportQueue = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            Imports = new List<string>();
         }
 
         public static int TotalProcessedFiles => s_processedFiles.Count - TotalSkippedFiles;
@@ -210,6 +212,7 @@ namespace go2cs
             s_processedFiles.Clear();
             s_processedImports.Clear();
             ImportQueue.Clear();
+            Imports.Clear();
             TotalSkippedFiles = 0;
             TotalSkippedPackages = 0;
             TotalWarnings = 0;

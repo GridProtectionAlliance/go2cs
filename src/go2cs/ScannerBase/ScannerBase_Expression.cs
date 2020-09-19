@@ -26,8 +26,8 @@ using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Antlr4.Runtime.Tree;
 using static go2cs.Common;
+using System.Reflection.Metadata;
 
 namespace go2cs
 {
@@ -200,6 +200,8 @@ namespace go2cs
 
         public override void ExitPrimaryExpr(GoParser.PrimaryExprContext context)
         {
+            string packageImport = $"{PackageImport.Replace('/', '.')}";
+
             // primaryExpr
             //     : operand
             //     | conversion
@@ -444,14 +446,38 @@ namespace go2cs
                                 argType = typeInfoValue.Clone();
                                 break;
                             }
+
+                            if (typeInfoValue.TypeName.Equals($"{packageImport}.{typeName}"))
+                            {
+                                argType = typeInfoValue.Clone();
+                                break;
+                            }
+
+                            foreach (string import in Imports)
+                            {
+                                if (typeInfoValue.TypeName.Equals($"{import}.{typeName}"))
+                                {
+                                    argType = typeInfoValue.Clone();
+                                    break;
+                                }
+                            }
+
+                            if (!(argType is null))
+                                break;
+                            
+                            if (typeInfoValue.Name.Equals(typeName))
+                            {
+                                argType = typeInfoValue.Clone();
+                                break;
+                            }
                         }
 
                         if (argType == null)
                             argType = TypeInfo.ObjectType.Clone();
 
                         argType.IsPointer = true;
-                        argType.Name = argType.TypeName = $"ptr<{argType.TypeName}>";
-                        argType.FullTypeName = $"go.{argType.TypeName}";
+                        argType.Name = argType.TypeName = $"ptr<{argType.Name}>";
+                        argType.FullTypeName = $"go.ptr<{argType.FullTypeName}>";
 
                         PrimaryExpressions[context] = new ExpressionInfo { Text = $"@new<{typeName}>()", Type = argType };
                     }
@@ -459,7 +485,7 @@ namespace go2cs
                     {
                         TypeInfo argType = expressions?[0].Type.Clone() ?? TypeInfo.VarType.Clone();
                         argType.IsPointer = true;
-                        PrimaryExpressions[context] = new ExpressionInfo { Text = $"@new<{typeInfo.TypeName}>({argumentList})", Type = argType };
+                        PrimaryExpressions[context] = new ExpressionInfo { Text = $"@new<{typeInfo.Name}>({argumentList})", Type = argType };
                     }
                 }
                 else if (primaryExpression.Text == "make" && !(typeInfo is null))

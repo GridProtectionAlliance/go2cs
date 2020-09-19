@@ -85,7 +85,8 @@ namespace go2cs
         public override void EnterTypeSpec(GoParser.TypeSpecContext context)
         {
             GoParser.Type_Context typeContext = context.type_();
-            string identifier = $"{PackageImport.Replace('/', '.')}.{SanitizedIdentifier(context.IDENTIFIER().GetText())}";
+            string identifier = SanitizedIdentifier(context.IDENTIFIER().GetText());
+            string typeName = $"{PackageImport.Replace('/', '.')}.{identifier}";
             string type = typeContext.GetText();
 
             if (type.StartsWith("interface{"))
@@ -93,8 +94,8 @@ namespace go2cs
                 Types[typeContext] = new TypeInfo
                 {
                     Name = identifier,
-                    TypeName = identifier,
-                    FullTypeName = $"go.{identifier}",
+                    TypeName = typeName,
+                    FullTypeName = $"go.{typeName}",
                     TypeClass = TypeClass.Interface
                 };
             }
@@ -103,8 +104,8 @@ namespace go2cs
                 Types[typeContext] = new TypeInfo
                 {
                     Name = identifier,
-                    TypeName = identifier,
-                    FullTypeName = $"go.{identifier}",
+                    TypeName = typeName,
+                    FullTypeName = $"go.{typeName}_package",
                     TypeClass = TypeClass.Struct
                 };
             }
