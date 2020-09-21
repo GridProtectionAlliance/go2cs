@@ -301,9 +301,9 @@ namespace go2cs
                     TypeInfo resultType = result?.Length > 0 ? result[0].Type : TypeInfo.ObjectType;
                     
                     if (resultType?.TypeClass == TypeClass.Interface)
-                        m_targetFile.Append($" {resultType.TypeName}.As({expressions[0]})");
+                        m_targetFile.Append($" {resultType.TypeName}.As({expressions[0].ToString().Trim()})");
                     else
-                        m_targetFile.Append($" {expressions[0]}");
+                        m_targetFile.Append($" {expressions[0].ToString().Trim()}");
                 }
             }
 

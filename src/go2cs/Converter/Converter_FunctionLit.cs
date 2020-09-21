@@ -108,6 +108,7 @@ namespace go2cs
                     }
                 }
             }
+
             RequiredUsings.Add("System");
 
             string typeList = signature.GenerateParameterTypeList();

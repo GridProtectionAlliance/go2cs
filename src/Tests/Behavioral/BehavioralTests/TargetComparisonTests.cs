@@ -77,6 +77,9 @@ namespace BehavioralTests
         [TestMethod]
         public void CheckInterfaceInheritanceResult() => CheckProjectAgainstTarget("InterfaceInheritance");
 
+        [TestMethod]
+        public void CheckLambdaFunctionsResult() => CheckProjectAgainstTarget("LambdaFunctions");
+
         private void CheckProjectAgainstTarget(string targetProject)
         {
             string projectPath = Path.GetFullPath($"{RootPath}{targetProject}");
