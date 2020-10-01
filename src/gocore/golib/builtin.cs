@@ -377,6 +377,14 @@ namespace go
         /// </summary>
         /// <typeparam name="T">Target type of reference.</typeparam>
         /// <param name="target">Target value.</param>
+        /// <returns>Pointer to heap allocated copy of <paramref name="target"/> value.</returns>
+        public static ptr<T> heap<T>(in T target) => heap(target, out ptr<T> _);
+
+        /// <summary>
+        /// Creates a new heap allocated copy of existing <paramref name="target"/> value.
+        /// </summary>
+        /// <typeparam name="T">Target type of reference.</typeparam>
+        /// <param name="target">Target value.</param>
         /// <param name="pointer">Out reference to pointer to heap allocated copy of <paramref name="target"/> value.</param>
         /// <returns>Pointer to heap allocated copy of <paramref name="target"/> value.</returns>
         /// <remarks>
