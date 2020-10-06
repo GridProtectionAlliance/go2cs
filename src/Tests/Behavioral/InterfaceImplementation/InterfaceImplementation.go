@@ -31,17 +31,22 @@ func main() {
 
 	fmt.Printf("%T\n", a)
 
-	for _, a = range zoo {
-		fmt.Println(a.Type(), "can", a.Swim())
-	}
+	ShowZoo(&zoo)
 
-	// Post for comment
-
+	// Post function comment
 	fmt.Printf("%T\n", a)
 
 	// vowels[ch] is true if ch is a vowel
 	vowels := [128]bool{'a': true, 'e': true, 'i': true, 'o': true, 'u': true, 'y': true}
 	fmt.Println(vowels)
+}
+
+func ShowZoo(zoo *[2]Animal) {
+	var a Animal = nil
+
+	for _, a = range *zoo {
+		fmt.Println(a.Type(), "can", a.Swim())
+	}
 }
 
 func (f *Frog) Type() string {

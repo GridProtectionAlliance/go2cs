@@ -2,10 +2,10 @@
 <#@ template debug="false" hostspecific="false" language="C#" #>
 
 
-            private delegate <#=ResultType#> <#=FunctionName#>ByRef(ref T value<#=PrefixedParameterSignature#>);
+            private delegate <#=ResultType#> <#=FunctionName#>ByPtr(ptr<T> value<#=PrefixedParameterSignature#>);
             private delegate <#=ResultType#> <#=FunctionName#>ByVal(T value<#=PrefixedParameterSignature#>);
 
-            private static readonly <#=FunctionName#>ByRef s_<#=FunctionName#>ByRef;
+            private static readonly <#=FunctionName#>ByPtr s_<#=FunctionName#>ByPtr;
             private static readonly <#=FunctionName#>ByVal s_<#=FunctionName#>ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -14,26 +14,28 @@
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;<#
+                    target = m_target_ptr.val;<#
                 
             if (ResultType == "void"){#>
 
-                if (s_<#=FunctionName#>ByRef is null)
+
+                if (s_<#=FunctionName#>ByPtr is null || !m_target_is_ptr)
                 {
                     s_<#=FunctionName#>ByVal!(target<#=ParameterNames#>);
                     return;
                 }
 
-                s_<#=FunctionName#>ByRef(ref target<#=ParameterNames#>);
+                s_<#=FunctionName#>ByPtr(m_target_ptr<#=ParameterNames#>);
                 return;
                 <#
             }
             else {#>
 
-                if (s_<#=FunctionName#>ByRef is null)
+
+                if (s_<#=FunctionName#>ByPtr is null || !m_target_is_ptr)
                     return s_<#=FunctionName#>ByVal!(target<#=ParameterNames#>);
 
-                return s_<#=FunctionName#>ByRef(ref target<#=ParameterNames#>);<#
+                return s_<#=FunctionName#>ByPtr(m_target_ptr<#=ParameterNames#>);<#
             }#>
 
             }<#+

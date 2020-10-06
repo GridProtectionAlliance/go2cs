@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 September 03 05:10:37 UTC
+//     Generated on 2020 October 06 00:34:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate void MByRef(ref T value);
+            private delegate void MByPtr(ptr<T> value);
             private delegate void MByVal(T value);
 
-            private static readonly MByRef s_MByRef;
+            private static readonly MByPtr s_MByPtr;
             private static readonly MByVal s_MByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,14 +74,15 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_MByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_MByPtr is null || !m_target_is_ptr)
                 {
                     s_MByVal!(target);
                     return;
                 }
 
-                s_MByRef(ref target);
+                s_MByPtr(m_target_ptr);
                 return;
                 
             }
@@ -92,23 +93,20 @@ namespace go
             static I()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("M");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("M");
 
                 if (!(extensionMethod is null))
-                    s_MByRef = extensionMethod.CreateStaticDelegate(typeof(MByRef)) as MByRef;
+                    s_MByPtr = extensionMethod.CreateStaticDelegate(typeof(MByPtr)) as MByPtr;
 
-                if (s_MByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("M");
+                extensionMethod = targetType.GetExtensionMethod("M");
 
-                    if (!(extensionMethod is null))
-                        s_MByVal = extensionMethod.CreateStaticDelegate(typeof(MByVal)) as MByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_MByVal = extensionMethod.CreateStaticDelegate(typeof(MByVal)) as MByVal;
 
-                if (s_MByRef is null && s_MByVal is null)
+                if (s_MByPtr is null && s_MByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement I.M method", new Exception("M"));
             }
 

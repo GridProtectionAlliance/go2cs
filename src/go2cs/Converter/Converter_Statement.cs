@@ -208,6 +208,14 @@ namespace go2cs
                         if (assignOP == "=" && leftOperandType?.TypeClass == TypeClass.Interface)
                             rightOperandText = $"{leftOperandType.TypeName}.As({rightOperandText})";
 
+                        if (assignOP == "=" && leftOperandType is PointerTypeInfo)
+                        {
+                            string targetVariable = rightOperandText.Replace("_addr_", "");
+
+                            if (m_variableTypes.TryGetValue(targetVariable, out TypeInfo rightOperandType) && rightOperandType is PointerTypeInfo)
+                                rightOperandText = $"addr({targetVariable})";
+                        }
+
                         assignOP = $" {assignOP} ";
                     }
 

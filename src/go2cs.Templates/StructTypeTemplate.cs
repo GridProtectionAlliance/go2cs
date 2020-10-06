@@ -153,7 +153,7 @@ if (!NamespacePrefix.Equals("go")) {
                         PromotedField = kvp.Key,
                         FunctionName = decl.Name,
                         Scope = "public",
-                        ParameterSignature = decl.Signature.GenerateParametersSignature(false),
+                        ParameterSignature = decl.Signature.GenerateParametersSignature(),
                         ParameterNames = GetParameterNames(decl),
                         ParameterTypes = GetParameterTypeNames(decl),
                         ResultType = decl.Signature.GenerateResultSignature()
@@ -172,7 +172,7 @@ if (!NamespacePrefix.Equals("go")) {
             {
 
                 FieldInfo promotedStruct = GetPromotedStruct(kvp.Key);
-                bool isPointer = promotedStruct?.Type.IsPointer ?? false;
+                bool isPointer = promotedStruct?.Type is PointerTypeInfo;
             
             
             #line default
@@ -426,7 +426,7 @@ if (!NamespacePrefix.Equals("go")) {
             this.Write("(");
             
             #line 138 "C:\Projects\go2cs\src\go2cs.Templates\StructTypeTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(string.Join(", ", StructFields.Select(field => $"{(field.Type.IsPointer ? "ref " : "")}{field.Type.TypeName} {field.Name} = default"))));
+            this.Write(this.ToStringHelper.ToStringWithCulture(string.Join(", ", StructFields.Select(field => $"{(field.Type is PointerTypeInfo ? "ref " : "")}{field.Type.TypeName} {field.Name} = default"))));
             
             #line default
             #line hidden
@@ -459,7 +459,7 @@ if (!NamespacePrefix.Equals("go")) {
             this.Write(">(");
             
             #line 146 "C:\Projects\go2cs\src\go2cs.Templates\StructTypeTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(decl.Type.IsPointer ? "ref " : ""));
+            this.Write(this.ToStringHelper.ToStringWithCulture(decl.Type is PointerTypeInfo ? "ref " : ""));
             
             #line default
             #line hidden
@@ -652,7 +652,7 @@ private string GetParameterNames(FunctionSignature function)
 
 private string GetConstructorParameterNames()
 {
-    return string.Join(", ", StructFields.Select(field => $"{(field.Type.IsPointer ? "ref " : "")}value.{field.Name}"));
+    return string.Join(", ", StructFields.Select(field => $"{(field.Type is PointerTypeInfo ? "ref " : "")}value.{field.Name}"));
 }
 
 private string GetParameterTypeNames(FunctionSignature function)

@@ -55,7 +55,7 @@ using go;
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -75,7 +75,7 @@ using go;
                 {
                     FunctionName = decl.Name,
                     Scope = "public",
-                    ParameterSignature = decl.Signature.GenerateParametersSignature(false),
+                    ParameterSignature = decl.Signature.GenerateParametersSignature(),
                     ParameterNames = GetParameterNames(decl),
                     ParameterTypes = GetParameterTypeNames(decl),
                     ResultType = decl.Signature.GenerateResultSignature()
@@ -90,7 +90,7 @@ using go;
             static <#=InterfaceName#>()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;<#
                 
                 foreach (var decl in Functions)

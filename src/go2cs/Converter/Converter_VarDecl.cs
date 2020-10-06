@@ -104,6 +104,7 @@ namespace go2cs
 
             string type = typeInfo?.TypeName;
             int length = Math.Min(identifiers.Length, expressions?.Length ?? int.MaxValue);
+            bool isPointer = typeInfo is PointerTypeInfo;
 
             for (int i = 0; i < length; i++)
             {
@@ -112,6 +113,9 @@ namespace go2cs
                 string typeName = type ?? expressions?[i].Type.TypeName ?? "var";
                 string variableName = null;
                 bool isInitialDeclaration = true;
+                VariableInfo variable = null;
+                bool heapAllocated = false;
+                bool defaultInit = false;
 
                 m_targetFile.Append($"{Spacing()}");
 
@@ -123,16 +127,37 @@ namespace go2cs
                     isInitialDeclaration = !variableName.Contains("@@");
 
                 if (isInitialDeclaration && !string.IsNullOrWhiteSpace(variableName))
+                {
                     m_variableTypes[variableName] = typeInfo;
+                    m_currentFunction.Variables.TryGetValue(variableName, out variable);
+                }
 
-                m_targetFile.Append($"{(isInitialDeclaration ? $"{typeName} " : "")}{identifier} = ");
+                if (isInitialDeclaration)
+                {
+                    if ((variable?.HeapAllocated ?? false) && !isPointer)
+                    {
+                        heapAllocated = true;
+                        m_targetFile.Append($"ref {typeName} {identifier} = ref heap(");
+                    }
+                    else
+                    {
+                        m_targetFile.Append($"{typeName} {identifier}");
+
+                        if (!isPointer)
+                            m_targetFile.Append(" = ");
+                    }
+                }
+                else
+                {
+                    m_targetFile.Append($"{identifier} = ");
+                }
 
                 if (!(expression is null))
                 {
                     if (typeInfo?.TypeClass == TypeClass.Interface)
                         m_targetFile.Append($"{typeInfo.TypeName}.As({expression})");
                     else
-                        m_targetFile.Append($"{expression}");
+                        m_targetFile.Append(expression);
                 }
                 else if (typeInfo?.TypeClass == TypeClass.Array && typeInfo is ArrayTypeInfo arrayTypeInfo)
                 {
@@ -140,7 +165,18 @@ namespace go2cs
                 }
                 else
                 {
-                    m_targetFile.Append("default");
+                    defaultInit = true;
+
+                    if (!heapAllocated && !isPointer)
+                        m_targetFile.Append("default");
+                }
+
+                if (heapAllocated)
+                {
+                    if (!defaultInit)
+                        m_targetFile.Append(", ");
+
+                    m_targetFile.Append($"out ptr<{typeName}> _addr_{identifier})");
                 }
 
                 // Since multiple specifications can be on one line, only check for comments after last specification

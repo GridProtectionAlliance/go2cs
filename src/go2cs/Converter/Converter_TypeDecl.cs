@@ -120,7 +120,7 @@ namespace go2cs
 
                 foreach (FunctionSignature function in localFunctions)
                 {
-                    m_targetFile.Append($"{Spacing(1)}{function.Signature.GenerateResultSignature()} {SanitizedIdentifier(function.Name)}({function.Signature.GenerateParametersSignature(false)});{(string.IsNullOrWhiteSpace(function.Comments) ? Environment.NewLine : $" {function.Comments.TrimStart()}")}");
+                    m_targetFile.Append($"{Spacing(1)}{function.Signature.GenerateResultSignature()} {SanitizedIdentifier(function.Name)}({function.Signature.GenerateParametersSignature()});{(string.IsNullOrWhiteSpace(function.Comments) ? Environment.NewLine : $" {function.Comments.TrimStart()}")}");
                 }
 
                 m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
@@ -171,7 +171,7 @@ namespace go2cs
                         FieldInfo promotedStruct = field.Clone();
 
                         promotedStruct.Type.TypeName = $"ref {promotedStruct.Type.Name}";
-                        promotedStruct.Name = $"{promotedStruct.Name} => ref {promotedStruct.Name}_{(promotedStruct.Type.IsPointer ? "ptr" : "val")}";
+                        promotedStruct.Name = $"{promotedStruct.Name} => ref {promotedStruct.Name}_{(promotedStruct.Type is PointerTypeInfo ? "ptr" : "val")}";
 
                         fields.Add(promotedStruct);
                     }

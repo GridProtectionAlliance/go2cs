@@ -152,10 +152,10 @@ namespace go
         public bool IsClosed
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => m_isClosed.Value;
+            get => m_isClosed.val;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            private set => m_isClosed.Value = value;
+            private set => m_isClosed.val = value;
         }
 
         public bool SendIsReady

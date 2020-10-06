@@ -35,6 +35,22 @@ namespace go2cs
         private bool m_hasPanic;
         private bool m_hasRecover;
 
+        public override void ExitUnaryExpr(GoParser.UnaryExprContext context)
+        {
+            base.ExitUnaryExpr(context);
+
+            ExpressionInfo expression = null;
+
+            if (!(context.primaryExpr() is null) && !PrimaryExpressions.ContainsKey(context.primaryExpr()) ||
+                !(context.expression() is null) && !Expressions.TryGetValue(context.expression(), out expression) ||
+                expression is null)
+                return;
+
+            // Taking the address of a variable means making a stack variable heap allocated
+            if (context.children[0].GetText().Equals("&", StringComparison.Ordinal) && m_variables.TryGetValue(expression.Text, out VariableInfo variable))
+                variable.HeapAllocated = true;
+        }
+
         private void EnterMethod()
         {
             m_variables.Clear();

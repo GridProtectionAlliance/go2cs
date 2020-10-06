@@ -39,7 +39,20 @@ namespace go2cs
             m_variableTypes.Clear();
 
             GoParser.ParameterDeclContext[] receiverParameters = context.receiver().parameters().parameterDecl();
-            string receiverTypeName = receiverParameters.Length > 0 ? receiverParameters[0].type_().GetText().Replace("*", "ref ") : "object";
+            string receiverTypeName;
+
+            if (receiverParameters.Length > 0)
+            {
+                receiverTypeName = receiverParameters[0].type_().GetText();
+
+                if (receiverTypeName.StartsWith("*"))
+                    receiverTypeName = $"ptr<{receiverTypeName.Substring(1)}>";
+            }
+            else
+            {
+                receiverTypeName = "object";
+            }
+
             string functionSignature = FunctionSignature.Generate(m_originalFunctionName, new[] { receiverTypeName });
 
             if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))
@@ -64,8 +77,8 @@ namespace go2cs
             bool hasRecover = m_currentFunction.HasRecover;
             bool useFuncExecutionContext = hasDefer || hasPanic || hasRecover;
             Signature signature = method.Signature;
-            string receiverParametersSignature = method.GenerateReceiverParametersSignature(useFuncExecutionContext);
-            string parametersSignature = signature.GenerateParametersSignature(useFuncExecutionContext);
+            string receiverParametersSignature = method.GenerateReceiverParametersSignature();
+            string parametersSignature = signature.GenerateParametersSignature();
             string resultSignature = signature.GenerateResultSignature();
 
             if (signature.Parameters.Length == 0)
@@ -84,23 +97,8 @@ namespace go2cs
 
             if (useFuncExecutionContext)
             {
-                List<string> funcExecContextByRefParams = new List<string>(method.GetByRefReceiverParameters(false));
                 Stack<string> unusedNames = new Stack<string>(new[] { "__", "_" });
-
-                funcExecContextByRefParams.AddRange(signature.GetByRefParameters(false));
-
-                if (funcExecContextByRefParams.Count > 0)
-                {
-                    List<string> lambdaByRefParameters = new List<string>(method.GetByRefReceiverParameters(true));
-
-                    lambdaByRefParameters.AddRange(signature.GetByRefParameters(true));
-
-                    m_targetFile.Replace(m_functionExecContextMarker, $" => func({string.Join(", ", funcExecContextByRefParams)}, ({string.Join(", ", lambdaByRefParameters)}, Defer {(hasDefer ? "defer" : unusedNames.Pop())}, Panic {(hasPanic ? "panic" : unusedNames.Pop())}, Recover {(hasRecover ? "recover" : unusedNames.Pop())}) =>");
-                }
-                else
-                {
-                    m_targetFile.Replace(m_functionExecContextMarker, $" => func(({(hasDefer ? "defer" : unusedNames.Pop())}, {(hasPanic ? "panic" : unusedNames.Pop())}, {(hasRecover ? "recover" : unusedNames.Pop())}) =>");
-                }
+                m_targetFile.Replace(m_functionExecContextMarker, $" => func(({(hasDefer ? "defer" : unusedNames.Pop())}, {(hasPanic ? "panic" : unusedNames.Pop())}, {(hasRecover ? "recover" : unusedNames.Pop())}) =>");
             }
             else
             {

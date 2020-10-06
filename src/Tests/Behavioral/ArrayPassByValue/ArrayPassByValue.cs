@@ -7,7 +7,7 @@ namespace go
     {
         private static void Main()
         {
-            array<@string> a = new array<@string>(2L);
+            ref array<@string> a = ref heap(new array<@string>(2L), out ptr<array<@string>> _addr_a);
 
             a[0L] = "Hello";
             a[1L] = "World";
@@ -17,7 +17,7 @@ namespace go
             fmt.Println();
 
             a[0L] = "Hello";
-            test2(ref a);
+            test2(_addr_a);
             fmt.Println(a[0L], a[1L]);
             fmt.Println();
 
@@ -41,8 +41,10 @@ namespace go
             fmt.Println(a[0L], a[1L]);
         }
 
-        private static void test2(ref array<@string> a)
+        private static void test2(ptr<array<@string>> _addr_a)
         {
+            ref array<@string> a = ref _addr_a.val;
+
             fmt.Println(a[0L], a[1L]);
             a[0L] = "Goodbye";
             fmt.Println(a[0L], a[1L]);

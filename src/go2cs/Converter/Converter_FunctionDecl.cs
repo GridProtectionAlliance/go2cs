@@ -45,6 +45,33 @@ namespace go2cs
         private string m_functionParametersMarker;
         private string m_functionExecContextMarker;
 
+        public override void ExitUnaryExpr(GoParser.UnaryExprContext context)
+        {
+            base.ExitUnaryExpr(context);
+
+            if (!m_inFunction || !(context.primaryExpr() is null) && PrimaryExpressions.ContainsKey(context.primaryExpr()) 
+                || context.expression() is null || !Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
+                return;
+
+            ParameterInfo[] parameters = m_currentFunction.Signature.Signature.Parameters;
+            string unaryOP = context.children[0].GetText();
+
+            if (!unaryOP.Equals("*", StringComparison.Ordinal))
+                return;
+
+            ParameterInfo pointerParam = parameters.FirstOrDefault(parameter => parameter.Name.Equals(expression.Text));
+                        
+            if (!(pointerParam is null) && pointerParam.Type is PointerTypeInfo pointer && pointer.TargetTypeInfo.TypeClass == TypeClass.Array)
+            {
+                // Dereference array type parameters
+                UnaryExpressions[context] = new ExpressionInfo
+                {
+                    Text = expression.Text,
+                    Type = pointer.TargetTypeInfo
+                };
+            }
+        }
+
         public override void EnterFunctionDecl(GoParser.FunctionDeclContext context)
         {
             m_inFunction = true; // May need to scope certain objects, like consts, to current function
@@ -95,33 +122,8 @@ namespace go2cs
             bool hasRecover = m_currentFunction.HasRecover;
             bool useFuncExecutionContext = hasDefer || hasPanic || hasRecover;
             Signature signature = function.Signature;
-            string parametersSignature = $"({signature.GenerateParametersSignature(useFuncExecutionContext)})";
+            string parametersSignature = $"({signature.GenerateParametersSignature()})";
             string resultSignature = signature.GenerateResultSignature();
-
-            // Replace function markers
-            m_targetFile.Replace(m_functionResultTypeMarker, resultSignature);
-            m_targetFile.Replace(m_functionParametersMarker, parametersSignature);
-
-            if (useFuncExecutionContext)
-            {
-                string[] funcExecContextByRefParams = signature.GetByRefParameters(false).ToArray();
-                Stack<string> unusedNames = new Stack<string>(new[] { "__", "_" });
-
-                if (funcExecContextByRefParams.Length > 0)
-                {
-                    string[] lambdaByRefParameters = signature.GetByRefParameters(true).ToArray();
-                    m_targetFile.Replace(m_functionExecContextMarker, $" => func({string.Join(", ", funcExecContextByRefParams)}, ({string.Join(", ", lambdaByRefParameters)}, Defer {(hasDefer ? "defer" : unusedNames.Pop())}, Panic {(hasPanic ? "panic" : unusedNames.Pop())}, Recover {(hasRecover ? "recover" : unusedNames.Pop())}) =>");
-                }
-                else
-                {
-                    m_targetFile.Replace(m_functionExecContextMarker, $" => func(({(hasDefer ? "defer" : unusedNames.Pop())}, {(hasPanic ? "panic" : unusedNames.Pop())}, {(hasRecover ? "recover" : unusedNames.Pop())}) =>");
-                }
-            }
-            else
-            {
-                m_targetFile.Replace(m_functionExecContextMarker, "");
-            }
-
             string blockPrefix = "";
 
             if (!signatureOnly)
@@ -129,18 +131,61 @@ namespace go2cs
                 // TODO: Double check if any other types need clone-type copy operations
                 // For any array parameters, Go copies the array by value
                 StringBuilder arrayClones = new StringBuilder();
+                StringBuilder arrayRefs = new StringBuilder();
 
                 foreach (ParameterInfo parameter in signature.Parameters)
                 {
                     if (parameter.Type.TypeClass == TypeClass.Array)
                         arrayClones.AppendLine($"{Spacing(1)}{parameter.Name} = {parameter.Name}.Clone();");
+
+                    if (parameter.Type is PointerTypeInfo pointer && pointer.TargetTypeInfo.TypeClass == TypeClass.Array)
+                        arrayRefs.AppendLine($"{Spacing(1)}ref {pointer.TargetTypeInfo.TypeName} {parameter.Name} = ref _addr_{parameter.Name}.val;");
                 }
 
                 if (arrayClones.Length > 0)
                 {
                     arrayClones.Insert(0, Environment.NewLine);
-                    blockPrefix = arrayClones.ToString();
+                    blockPrefix += arrayClones.ToString();
                 }
+
+                if (arrayRefs.Length > 0)
+                {
+                    arrayRefs.Insert(0, Environment.NewLine);
+                    blockPrefix += arrayRefs.ToString();
+
+                    StringBuilder updatedSignature = new StringBuilder();
+                    bool initialParam = true;
+
+                    foreach (ParameterInfo parameter in signature.Parameters)
+                    {
+                        if (!initialParam)
+                            updatedSignature.Append(", ");
+
+                        initialParam = false;
+                        updatedSignature.Append($"{(parameter.IsVariadic ? "params " : "")}{parameter.Type.TypeName} ");
+
+                        if (parameter.Type is PointerTypeInfo pointer && pointer.TargetTypeInfo.TypeClass == TypeClass.Array)
+                            updatedSignature.Append("_addr_");
+
+                        updatedSignature.Append(parameter.Name);
+                    }
+
+                    parametersSignature = $"({updatedSignature})";
+                }
+            }
+
+            // Replace function markers
+            m_targetFile.Replace(m_functionResultTypeMarker, resultSignature);
+            m_targetFile.Replace(m_functionParametersMarker, parametersSignature);
+
+            if (useFuncExecutionContext)
+            {
+                Stack<string> unusedNames = new Stack<string>(new[] { "__", "_" });
+                m_targetFile.Replace(m_functionExecContextMarker, $" => func(({(hasDefer ? "defer" : unusedNames.Pop())}, {(hasPanic ? "panic" : unusedNames.Pop())}, {(hasRecover ? "recover" : unusedNames.Pop())}) =>");
+            }
+            else
+            {
+                m_targetFile.Replace(m_functionExecContextMarker, "");
             }
 
             m_targetFile.Replace(string.Format(FunctionBlockPrefixMarker, m_currentFunctionName), blockPrefix);

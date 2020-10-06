@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 September 03 05:10:37 UTC
+//     Generated on 2020 October 06 00:34:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate void NByRef(ref T value);
+            private delegate void NByPtr(ptr<T> value);
             private delegate void NByVal(T value);
 
-            private static readonly NByRef s_NByRef;
+            private static readonly NByPtr s_NByPtr;
             private static readonly NByVal s_NByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,22 +74,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_NByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_NByPtr is null || !m_target_is_ptr)
                 {
                     s_NByVal!(target);
                     return;
                 }
 
-                s_NByRef(ref target);
+                s_NByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate void MByRef(ref T value);
+            private delegate void MByPtr(ptr<T> value);
             private delegate void MByVal(T value);
 
-            private static readonly MByRef s_MByRef;
+            private static readonly MByPtr s_MByPtr;
             private static readonly MByVal s_MByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,22 +99,23 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_MByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_MByPtr is null || !m_target_is_ptr)
                 {
                     s_MByVal!(target);
                     return;
                 }
 
-                s_MByRef(ref target);
+                s_MByPtr(m_target_ptr);
                 return;
                 
             }
 
-            private delegate @string StringByRef(ref T value);
+            private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByRef s_StringByRef;
+            private static readonly StringByPtr s_StringByPtr;
             private static readonly StringByVal s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -122,17 +124,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_StringByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByRef(ref target);
+                return s_StringByPtr(m_target_ptr);
             }
 
-            private delegate @string ErrorByRef(ref T value);
+            private delegate @string ErrorByPtr(ptr<T> value);
             private delegate @string ErrorByVal(T value);
 
-            private static readonly ErrorByRef s_ErrorByRef;
+            private static readonly ErrorByPtr s_ErrorByPtr;
             private static readonly ErrorByVal s_ErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -141,11 +144,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_ErrorByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_ErrorByPtr is null || !m_target_is_ptr)
                     return s_ErrorByVal!(target);
 
-                return s_ErrorByRef(ref target);
+                return s_ErrorByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -154,71 +158,59 @@ namespace go
             static V()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("N");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("N");
 
                 if (!(extensionMethod is null))
-                    s_NByRef = extensionMethod.CreateStaticDelegate(typeof(NByRef)) as NByRef;
+                    s_NByPtr = extensionMethod.CreateStaticDelegate(typeof(NByPtr)) as NByPtr;
 
-                if (s_NByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("N");
+                extensionMethod = targetType.GetExtensionMethod("N");
 
-                    if (!(extensionMethod is null))
-                        s_NByVal = extensionMethod.CreateStaticDelegate(typeof(NByVal)) as NByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_NByVal = extensionMethod.CreateStaticDelegate(typeof(NByVal)) as NByVal;
 
-                if (s_NByRef is null && s_NByVal is null)
+                if (s_NByPtr is null && s_NByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement V.N method", new Exception("N"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("M");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("M");
 
                 if (!(extensionMethod is null))
-                    s_MByRef = extensionMethod.CreateStaticDelegate(typeof(MByRef)) as MByRef;
+                    s_MByPtr = extensionMethod.CreateStaticDelegate(typeof(MByPtr)) as MByPtr;
 
-                if (s_MByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("M");
+                extensionMethod = targetType.GetExtensionMethod("M");
 
-                    if (!(extensionMethod is null))
-                        s_MByVal = extensionMethod.CreateStaticDelegate(typeof(MByVal)) as MByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_MByVal = extensionMethod.CreateStaticDelegate(typeof(MByVal)) as MByVal;
 
-                if (s_MByRef is null && s_MByVal is null)
+                if (s_MByPtr is null && s_MByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement V.M method", new Exception("M"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
                 if (!(extensionMethod is null))
-                    s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
-                if (s_StringByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("String");
+                extensionMethod = targetType.GetExtensionMethod("String");
 
-                    if (!(extensionMethod is null))
-                        s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
-                if (s_StringByRef is null && s_StringByVal is null)
+                if (s_StringByPtr is null && s_StringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement V.String method", new Exception("String"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Error");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
 
                 if (!(extensionMethod is null))
-                    s_ErrorByRef = extensionMethod.CreateStaticDelegate(typeof(ErrorByRef)) as ErrorByRef;
+                    s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
 
-                if (s_ErrorByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Error");
+                extensionMethod = targetType.GetExtensionMethod("Error");
 
-                    if (!(extensionMethod is null))
-                        s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
 
-                if (s_ErrorByRef is null && s_ErrorByVal is null)
+                if (s_ErrorByPtr is null && s_ErrorByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement V.Error method", new Exception("Error"));
             }
 

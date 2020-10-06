@@ -574,14 +574,13 @@ namespace go2cs
             if (parts.Length == 2)
                 fullTypeName = $"ptr<{parts[1]}>";
 
-            return new TypeInfo
+            return new PointerTypeInfo
             {
                 Name = typeInfo.Name,
                 TypeName = typeName,
                 FullTypeName = fullTypeName,
-                IsPointer = true,
-                IsByRefPointer = false,
-                TypeClass = TypeClass.Simple
+                TypeClass = TypeClass.Simple,
+                TargetTypeInfo = typeInfo
             };
         }
 
@@ -603,14 +602,13 @@ namespace go2cs
             if (parts.Length == 2)
                 fullTypeName = $"*{parts[1]}";
 
-            return new TypeInfo
+            return new PointerTypeInfo
             {
                 Name = typeInfo.Name,
                 TypeName = typeName,
                 FullTypeName = fullTypeName,
-                IsPointer = true,
-                IsByRefPointer = false,
-                TypeClass = TypeClass.Simple
+                TypeClass = TypeClass.Simple,
+                TargetTypeInfo = typeInfo
             };
         }
 

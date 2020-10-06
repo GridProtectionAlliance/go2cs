@@ -80,6 +80,9 @@ namespace BehavioralTests
         [TestMethod]
         public void CheckLambdaFunctionsResult() => CheckProjectAgainstTarget("LambdaFunctions");
 
+        [TestMethod]
+        public void CheckPointerToPointerResult() => CheckProjectAgainstTarget("PointerToPointer");
+
         private void CheckProjectAgainstTarget(string targetProject)
         {
             string projectPath = Path.GetFullPath($"{RootPath}{targetProject}");

@@ -55,13 +55,7 @@ namespace go2cs.Metadata
 
         public IEnumerable<string> GetReceiverParameterTypeNames() => new[] { ReceiverParameters?.Length > 0 ? ReceiverParameters[0].Type.TypeName : "object" };
 
-        public string GenerateReceiverParametersSignature(bool prefixByRef) =>
-            $"this {string.Join(", ", GetReceiverParameters(prefixByRef))}";
-
-        public IEnumerable<string> GetReceiverParameters(bool prefixByRef) =>
-            ReceiverParameters.Select(parameter => $"{parameter.Type.TypeName} {(prefixByRef && parameter.Type.IsByRefPointer ? "_" : "")}{parameter.Name}");
-
-        public IEnumerable<string> GetByRefReceiverParameters(bool includeType) => 
-            ReceiverParameters.Where(parameter => parameter.Type.IsByRefPointer).Select(parameter => $"{(includeType ? $"{parameter.Type.TypeName} " : "_")}{parameter.Name}");
+        public string GenerateReceiverParametersSignature() =>
+            $"this {string.Join(", ", ReceiverParameters.Select(parameter => $"{parameter.Type.TypeName} {parameter.Name}"))}";
     }
 }

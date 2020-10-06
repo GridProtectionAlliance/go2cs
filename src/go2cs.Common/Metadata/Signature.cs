@@ -37,19 +37,9 @@ namespace go2cs.Metadata
 
         public string GenerateParameterTypeList() => string.Join(", ", Parameters.Select(parameter => parameter.Type.TypeName));
 
-        public string GenerateParametersSignature(bool prefixByRef)
+        public string GenerateParametersSignature()
         {
-            return string.Join(", ", GetParameters(prefixByRef));
-        }
-
-        public IEnumerable<String> GetParameters(bool prefixByRef)
-        {
-            return Parameters.Select(parameter => $"{(parameter.IsVariadic ? "params " : "")}{parameter.Type.TypeName} {(prefixByRef && parameter.Type.IsByRefPointer ? "_" : "")}{parameter.Name}");
-        }
-
-        public IEnumerable<String> GetByRefParameters(bool includeType)
-        {
-            return Parameters.Where(parameter => parameter.Type.IsByRefPointer).Select(parameter => $"{(includeType ? $"{parameter.Type.TypeName} " : "_")}{parameter.Name}");
+            return string.Join(", ", Parameters.Select(parameter => $"{(parameter.IsVariadic ? "params " : "")}{parameter.Type.TypeName} {parameter.Name}"));
         }
 
         public string GenerateResultSignature()

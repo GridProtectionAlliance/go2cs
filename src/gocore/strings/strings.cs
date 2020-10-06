@@ -41,11 +41,11 @@ namespace go
         // NewReader returns a new Reader reading from s.
         // It is similar to bytes.NewBufferString but more efficient and read-only.
         public static ptr<Reader> NewReader(@string s) {
-            return ptr(new Reader(s, 0, -1));
+            return addr(new Reader(s, 0, -1));
         }
 
         public static (long n, error err) Read(this ptr<Reader> r, in slice<byte> b) =>
-            Read(ref r.Value, b);
+            Read(ref r.val, b);
 
         // Size returns the original length of the underlying string.
         // Size is the number of bytes available for reading via ReadAt.

@@ -25,8 +25,19 @@ namespace go
 {
     public static unsafe partial class main_package
     {
+        private static ref int Test()
+        {
+            ref int c = ref addr(12).val;
+
+            return ref c;
+        }
+
         private static void Main()
         {
+            ref int c = ref Test();
+
+            Console.WriteLine(c);
+
             bool b = false;
             @string s = "hello";
             //int i = 12;
@@ -50,7 +61,7 @@ namespace go
 
             Console.WriteLine("Ref int out1 = {0}", value);
 
-            value = Main9().Value;
+            value = Main9().val;
 
             Console.WriteLine("Ref int out2 = {0}", value);
             Console.WriteLine();
@@ -81,7 +92,7 @@ namespace go
 
         private static ref NumError syntaxError(@string fn, @string str)
         {
-            return ref new ptr<NumError>(new NumError{Func = fn, Num = str, Err = null}).Value;
+            return ref new ptr<NumError>(new NumError{Func = fn, Num = str, Err = null}).val;
         }
 
         public struct ColorList
@@ -139,11 +150,11 @@ namespace go
             // MyError structure promotion
             private readonly ptr<MyError> m_MyErrorRef;
 
-            private ref MyError MyError_val => ref m_MyErrorRef.Value;
+            private ref MyError MyError_val => ref m_MyErrorRef.val;
 
-            public ref DateTime When => ref m_MyErrorRef.Value.When;
+            public ref DateTime When => ref m_MyErrorRef.val.When;
 
-            public ref string What => ref m_MyErrorRef.Value.What;            
+            public ref string What => ref m_MyErrorRef.val.What;            
 
             [DebuggerStepperBoundary]
             static MyCustomError()
@@ -239,7 +250,7 @@ namespace go
 
             fmt f = new fmt();
 
-            val(ref f.buf.Value);
+            val(ref f.buf.val);
 
             f.clearFlags();
 
@@ -492,25 +503,25 @@ namespace go
         {
             ptr<int> i = new ptr<int>(42), j = new ptr<int>(2701);
 
-            ref int p = ref i.Value;
+            ref int p = ref i.val;
             Console.WriteLine(p);
             p = 21;
             Console.WriteLine(i);
 
-            p = ref j.Value;
+            p = ref j.val;
             p = p / 37;
             Console.WriteLine(j);
 
             ptr<Vertex> v = new ptr<Vertex>(new Vertex { X = 1, Y = 2 });
-            ref Vertex pv = ref v.Value;
+            ref Vertex pv = ref v.val;
 
             pv.X = 12;
 
             pv.X = 99;
 
-            PrintVertex(ref v.Value);
+            PrintVertex(ref v.val);
 
-            return ref i.Value;
+            return ref i.val;
         }
 
         private static ptr<int> Main9()

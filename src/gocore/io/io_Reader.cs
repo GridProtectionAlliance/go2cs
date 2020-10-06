@@ -65,7 +65,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -91,7 +91,7 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
+                    target = m_target_ptr.val;
 
                 if (s_ReadByRef is null)
                     return s_ReadByVal!(target, p);
@@ -111,7 +111,7 @@ namespace go
                     case "v":
                         {
                             if (m_target_is_ptr)
-                                return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.Value}";
+                                return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.val}";
 
                             return m_target?.ToString() ?? "<nil>";
                         }

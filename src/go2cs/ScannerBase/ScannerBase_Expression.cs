@@ -27,7 +27,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static go2cs.Common;
-using System.Reflection.Metadata;
 
 namespace go2cs
 {
@@ -167,15 +166,13 @@ namespace go2cs
                     }
                     else if (unaryOP.Equals("&", StringComparison.Ordinal))
                     {
-                        // TODO: Handle pointer acquisition context - may need to augment pre-scan metadata for heap allocation notation
                         unaryOP = null;
-                        unaryExpression = $"ref {expression}";
+                        unaryExpression = $"_addr_{expression}";
                     }
                     else if (unaryOP.Equals("*", StringComparison.Ordinal))
                     {
-                        // TODO: Handle pointer dereference context - if this is a ref variable, Value call is unnecessary
                         unaryOP = null;
-                        unaryExpression = $"{expression}.Value";
+                        unaryExpression = $"{expression}.val";
                     }
 
                     if (!(unaryOP is null))
@@ -231,41 +228,64 @@ namespace go2cs
 
                 if (Types.TryGetValue(context.conversion().type_(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.conversion().expression(), out ExpressionInfo expression))
                 {
-                    if (typeInfo.TypeName.StartsWith("*(*"))
+                    // TODO: Complex pointer expression needs special handling consideration - could opt for unsafe implementation
+                    //if (typeInfo.TypeName.StartsWith("*(*"))
+                    //{
+                    //    PrimaryExpressions[context] = new ExpressionInfo
+                    //    {
+                    //        Text = $"{expression}.Value",
+                    //        Type = typeInfo
+                    //    };
+                    //}
+                    //else
+                    
+                    if (typeInfo is PointerTypeInfo)
                     {
-                        // TODO: Complex pointer expression needs special handling consideration - could opt for unsafe implementation
                         PrimaryExpressions[context] = new ExpressionInfo
                         {
-                            Text = $"{expression}.Value",
+                            Text = $"new ptr<{typeInfo.TypeName}>({expression})",
+                            Type = typeInfo
+                        };
+                    }
+                    else if (typeInfo.IsDerefPointer)
+                    {
+                        string functionName = typeInfo.TypeName;
+                        FunctionInfo functionInfo = null;
+                        Metadata?.Functions.TryGetValue($"{functionName}()", out functionInfo);
+
+                        if (!(functionInfo is null))
+                        {
+                            typeInfo = functionInfo.Signature.Signature.Result[0].Type;
+
+                            if (typeInfo is PointerTypeInfo pointerTypeInfo)
+                                typeInfo = pointerTypeInfo.TargetTypeInfo;
+                        }
+                        else
+                        {
+                            typeInfo = TypeInfo.ObjectType;
+                        }
+
+                        PrimaryExpressions[context] = new ExpressionInfo
+                        {
+                            Text = $"{functionName}({expression}).val",
+                            Type = typeInfo
+                        };
+                    }
+                    else if (typeInfo.TypeClass == TypeClass.Struct)
+                    {
+                        PrimaryExpressions[context] = new ExpressionInfo
+                        {
+                            Text = $"{typeInfo.TypeName}_cast({expression})",
                             Type = typeInfo
                         };
                     }
                     else
                     {
-                        if (typeInfo.IsPointer)
+                        PrimaryExpressions[context] = new ExpressionInfo
                         {
-                            PrimaryExpressions[context] = new ExpressionInfo
-                            {
-                                Text = $"new ptr<{typeInfo.TypeName}>({expression})",
-                                Type = typeInfo
-                            };
-                        }
-                        else if (typeInfo.TypeClass == TypeClass.Struct)
-                        {
-                            PrimaryExpressions[context] = new ExpressionInfo
-                            {
-                                Text = $"{typeInfo.TypeName}_cast({expression})",
-                                Type = typeInfo
-                            };
-                        }
-                        else
-                        {
-                            PrimaryExpressions[context] = new ExpressionInfo
-                            {
-                                Text = $"({typeInfo.TypeName}){expression}",
-                                Type = typeInfo
-                            };
-                        }
+                            Text = $"({typeInfo.TypeName}){expression}",
+                            Type = typeInfo
+                        };
                     }
                 }
                 else
@@ -475,16 +495,41 @@ namespace go2cs
                         if (argType == null)
                             argType = TypeInfo.ObjectType.Clone();
 
-                        argType.IsPointer = true;
-                        argType.Name = argType.TypeName = $"ptr<{argType.Name}>";
-                        argType.FullTypeName = $"go.ptr<{argType.FullTypeName}>";
+                        argType = new PointerTypeInfo
+                        {
+                            Name = $"ptr<{argType.Name}>",
+                            TypeName = $"ptr<{argType.Name}>",
+                            FullTypeName = $"go.ptr<{argType.FullTypeName}>",
+                            TypeClass = argType.TypeClass,
+                            IsDerefPointer = argType.IsDerefPointer,
+                            IsByRefPointer = argType.IsByRefPointer,
+                            IsConst = argType.IsConst,
+                            TargetTypeInfo = argType
+                        };
 
                         PrimaryExpressions[context] = new ExpressionInfo { Text = $"@new<{typeName}>()", Type = argType };
                     }
                     else
                     {
-                        TypeInfo argType = expressions?[0].Type.Clone() ?? TypeInfo.VarType.Clone();
-                        argType.IsPointer = true;
+                        TypeInfo argType = expressions?[0].Type;
+
+                        if (!(argType is PointerTypeInfo))
+                        {
+                            argType = expressions?[0].Type.Clone() ?? TypeInfo.VarType.Clone();
+
+                            argType = new PointerTypeInfo
+                            {
+                                Name = $"ptr<{argType.Name}>",
+                                TypeName = $"ptr<{argType.Name}>",
+                                FullTypeName = $"go.ptr<{argType.FullTypeName}>",
+                                TypeClass = argType.TypeClass,
+                                IsDerefPointer = argType.IsDerefPointer,
+                                IsByRefPointer = argType.IsByRefPointer,
+                                IsConst = argType.IsConst,
+                                TargetTypeInfo = argType
+                            };
+                        }
+
                         PrimaryExpressions[context] = new ExpressionInfo { Text = $"@new<{typeInfo.Name}>({argumentList})", Type = argType };
                     }
                 }
@@ -817,6 +862,7 @@ namespace go2cs
                         Name = typeName,
                         TypeName = $"array<{typeName}>",
                         FullTypeName = $"go.array<{typeInfo.FullTypeName}>",
+                        TargetTypeInfo = typeInfo,
                         Length = new ExpressionInfo
                         {
                             Text = arrayLength,
@@ -1010,7 +1056,7 @@ namespace go2cs
             string receiver;
 
             if (receiverType?.children.Count == 4)
-                receiver = $"ref {receiverType.typeName().GetText()}";
+                receiver = $"ptr<{receiverType.typeName().GetText()}>";
             else
                 receiver = context.GetText();
 

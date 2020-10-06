@@ -27,7 +27,7 @@ namespace go
         {
             ptr<Frog> f = @new<Frog>();
             ptr<Dog> d = @new<Dog>();
-            array<Animal> zoo = new array<Animal>(new Animal[] { Animal.As(f), Animal.As(d) });
+            ref array<Animal> zoo = ref heap(new array<Animal>(new Animal[] { Animal.As(f), Animal.As(d) }), out ptr<array<Animal>> _addr_zoo);
 
             Animal a = Animal.As(null);
             fmt.Printf("%T\n", a);
@@ -46,14 +46,9 @@ namespace go
 
             fmt.Printf("%T\n", a);
 
-            foreach (var (_, __a) in zoo)
-            {
-                a = __a;
-                fmt.Println(a.Type(), "can", a.Swim());
-            } 
+            ShowZoo(_addr_zoo); 
 
-            // Post for comment
-
+            // Post function comment
             fmt.Printf("%T\n", a); 
 
             // vowels[ch] is true if ch is a vowel
@@ -61,22 +56,36 @@ namespace go
             fmt.Println(vowels);
         }
 
-        private static @string Type(this ref Frog f)
+        public static void ShowZoo(ptr<array<Animal>> _addr_zoo)
+        {
+            ref array<Animal> zoo = ref _addr_zoo.val;
+
+            Animal a = Animal.As(null);
+
+            foreach (var (_, __a) in zoo)
+            {
+                a = __a;
+                fmt.Println(a.Type(), "can", a.Swim());
+            }
+
+        }
+
+        private static @string Type(this ptr<Frog> f)
         {
             return "Frog";
         }
 
-        private static @string Swim(this ref Frog f)
+        private static @string Swim(this ptr<Frog> f)
         {
             return "Kick";
         }
 
-        private static @string Swim(this ref Dog d)
+        private static @string Swim(this ptr<Dog> d)
         {
             return "Paddle";
         }
 
-        private static @string Type(this ref Dog d)
+        private static @string Type(this ptr<Dog> d)
         {
             return "Doggie";
         }

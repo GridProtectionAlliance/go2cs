@@ -2,20 +2,17 @@
 <#@ template debug="false" hostspecific="false" language="C#" #>
 
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("<#=FunctionName#>");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("<#=FunctionName#>");
 
                 if (!(extensionMethod is null))
-                    s_<#=FunctionName#>ByRef = extensionMethod.CreateStaticDelegate(typeof(<#=FunctionName#>ByRef)) as <#=FunctionName#>ByRef;
+                    s_<#=FunctionName#>ByPtr = extensionMethod.CreateStaticDelegate(typeof(<#=FunctionName#>ByPtr)) as <#=FunctionName#>ByPtr;
 
-                if (s_<#=FunctionName#>ByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("<#=FunctionName#>");
+                extensionMethod = targetType.GetExtensionMethod("<#=FunctionName#>");
 
-                    if (!(extensionMethod is null))
-                        s_<#=FunctionName#>ByVal = extensionMethod.CreateStaticDelegate(typeof(<#=FunctionName#>ByVal)) as <#=FunctionName#>ByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_<#=FunctionName#>ByVal = extensionMethod.CreateStaticDelegate(typeof(<#=FunctionName#>ByVal)) as <#=FunctionName#>ByVal;
 
-                if (s_<#=FunctionName#>ByRef is null && s_<#=FunctionName#>ByVal is null)
+                if (s_<#=FunctionName#>ByPtr is null && s_<#=FunctionName#>ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement <#=InterfaceName#>.<#=FunctionName#> method", new Exception("<#=FunctionName#>"));<#+
 // Template Parameters
 public string FunctionName;

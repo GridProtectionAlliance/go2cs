@@ -52,7 +52,7 @@ using go;
                         PromotedField = kvp.Key,
                         FunctionName = decl.Name,
                         Scope = "public",
-                        ParameterSignature = decl.Signature.GenerateParametersSignature(false),
+                        ParameterSignature = decl.Signature.GenerateParametersSignature(),
                         ParameterNames = GetParameterNames(decl),
                         ParameterTypes = GetParameterTypeNames(decl),
                         ResultType = decl.Signature.GenerateResultSignature()
@@ -65,7 +65,7 @@ using go;
             {
 
                 FieldInfo promotedStruct = GetPromotedStruct(kvp.Key);
-                bool isPointer = promotedStruct?.Type.IsPointer ?? false;
+                bool isPointer = promotedStruct?.Type is PointerTypeInfo;
             #>
 
             // <#=kvp.Key#> structure promotion - sourced from <#=isPointer ? "pointer" : "value copy"#>
@@ -135,7 +135,7 @@ using go;
             {#>
 
 
-            public <#=StructName#>(<#=string.Join(", ", StructFields.Select(field => $"{(field.Type.IsPointer ? "ref " : "")}{field.Type.TypeName} {field.Name} = default"))#>)
+            public <#=StructName#>(<#=string.Join(", ", StructFields.Select(field => $"{(field.Type is PointerTypeInfo ? "ref " : "")}{field.Type.TypeName} {field.Name} = default"))#>)
             {<#
             foreach (var decl in StructFields)
             {
@@ -143,7 +143,7 @@ using go;
                 {
                     // Promoted struct #>
 
-                this.m_<#=decl.Name#>Ref = new ptr<<#=decl.Type.TypeName#>>(<#=decl.Type.IsPointer ? "ref " : ""#><#=decl.Name#>);<#
+                this.m_<#=decl.Name#>Ref = new ptr<<#=decl.Type.TypeName#>>(<#=decl.Type is PointerTypeInfo ? "ref " : ""#><#=decl.Name#>);<#
                 }
                 else
                 {
@@ -206,7 +206,7 @@ private string GetParameterNames(FunctionSignature function)
 
 private string GetConstructorParameterNames()
 {
-    return string.Join(", ", StructFields.Select(field => $"{(field.Type.IsPointer ? "ref " : "")}value.{field.Name}"));
+    return string.Join(", ", StructFields.Select(field => $"{(field.Type is PointerTypeInfo ? "ref " : "")}value.{field.Name}"));
 }
 
 private string GetParameterTypeNames(FunctionSignature function)

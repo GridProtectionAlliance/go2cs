@@ -42,8 +42,8 @@ namespace go
     /// <para>
     /// If <typeparamref name="T"/> is a <see cref="System.ValueType"/>, e.g., a struct, note that
     /// value will be "boxed" for heap allocation. Since boxed value will be a new copy of original
-    /// value, make sure to use ref-based <see cref="Value"/> for updates instead of a local stack
-    /// copy of value. See the <see cref="builtin.heap{T}"/> helper function and notes on boxing:
+    /// value, make sure to use ref-based <see cref="val"/> for updates instead of a local stack
+    /// copy of value. See the <see cref="builtin.heap{T}(out ptr{T})"/> and notes on boxing:
     /// https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing
     /// </para>
     /// <para>
@@ -52,16 +52,10 @@ namespace go
     /// </remarks>
     public sealed class ptr<T>
     {
-        private T m_value;
-        
-        public ref T Value
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref m_value;
-        }
+        private T m_val;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ptr(in T value) => m_value = value;
+        public ptr(in T value) => m_val = value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ptr(NilType _) : this(default(T)!) { }
@@ -69,8 +63,14 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ptr() : this(default(T)!) { }
 
+        public ref T val
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => ref m_val;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString() => $"&{m_value?.ToString() ?? "nil"}";
+        public override string ToString() => $"&{m_val?.ToString() ?? "nil"}";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool Equals(ptr<T>? other)
@@ -83,17 +83,17 @@ namespace go
 
             if (IsReferenceType)
             {
-                if (m_value is null && other.m_value is null)
+                if (m_val is null && other.m_val is null)
                     return true;
 
-                if (m_value is null || other.m_value is null)
+                if (m_val is null || other.m_val is null)
                     return false;
 
-                if (ReferenceEquals(m_value, other.m_value))
+                if (ReferenceEquals(m_val, other.m_val))
                     return true;
             }
 
-            return m_value!.Equals(other.m_value);
+            return m_val!.Equals(other.m_val);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -101,7 +101,7 @@ namespace go
 
         // ReSharper disable once NonReadonlyMemberInGetHashCode
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode() => m_value?.GetHashCode() ?? 0;
+        public override int GetHashCode() => m_val?.GetHashCode() ?? 0;
 
         // WISH: Would be super cool if this operator supported "ref" return, like:
         //     public static ref T operator ~(ptr<T> value) => ref value.m_value;
@@ -119,7 +119,7 @@ namespace go
         //     ref vp = 999;
         // As it stands, this operator just returns a copy of the structure value:
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T operator ~(ptr<T> value) => value.m_value;
+        public static T operator ~(ptr<T> value) => value.m_val;
 
         // I posted a suggestion for at least the "ref" operator:
         // https://github.com/dotnet/roslyn/issues/45881
@@ -131,7 +131,7 @@ namespace go
 
         // Enable comparisons between nil and @ref<T> interface instance
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(ptr<T> value, NilType _) => value.Equals(null!);
+        public static bool operator ==(ptr<T> value, NilType _) => value is null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(ptr<T> value, NilType nil) => !(value == nil);

@@ -153,7 +153,7 @@ namespace go
         /// <param name="ptr"></param>
         /// <returns>Object pointer value as string in hexadecimal format.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string PrintPointer<T>(this ptr<T> ptr) => ptr.Value.PrintPointer();
+        public static string PrintPointer<T>(this ptr<T> ptr) => ptr.val.PrintPointer();
 
         /// <summary>
         /// Gets an object's pointer value, for display purposes, in hexadecimal format.

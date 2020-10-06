@@ -45,13 +45,9 @@ namespace go2cs.Metadata
         public string TypeName;
         public string FullTypeName;
         public TypeClass TypeClass;
-        public bool IsPointer;
+        public bool IsDerefPointer;
         public bool IsByRefPointer;
         public bool IsConst;
-
-        // TODO: Cross reference heap allocated variable, for
-        // variables that leave the stack by "&" address,
-        // "defer" or "go"
 
         public virtual TypeInfo Clone()
         {
@@ -61,7 +57,7 @@ namespace go2cs.Metadata
                 TypeName = TypeName,
                 FullTypeName = FullTypeName,
                 TypeClass = TypeClass,
-                IsPointer = IsPointer,
+                IsDerefPointer = IsDerefPointer,
                 IsByRefPointer = IsByRefPointer,
                 IsConst = IsConst
             };
@@ -109,8 +105,30 @@ namespace go2cs.Metadata
     }
 
     [Serializable]
+    public class PointerTypeInfo : TypeInfo
+    {
+        public TypeInfo TargetTypeInfo;
+
+        public override TypeInfo Clone()
+        {
+            return new PointerTypeInfo
+            {
+                Name = Name,
+                TypeName = $"ptr<{TypeName}>",
+                FullTypeName = $"go.ptr<{FullTypeName}>",
+                TypeClass = TypeClass,
+                IsDerefPointer = IsDerefPointer,
+                IsByRefPointer = IsByRefPointer,
+                IsConst = IsConst,
+                TargetTypeInfo = TargetTypeInfo
+            };
+        }
+    }
+
+    [Serializable]
     public class ArrayTypeInfo : TypeInfo
     {
+        public TypeInfo TargetTypeInfo;
         public ExpressionInfo Length;
 
         public override TypeInfo Clone()
@@ -121,9 +139,10 @@ namespace go2cs.Metadata
                 TypeName = $"array<{TypeName}>",
                 FullTypeName = $"go.array<{FullTypeName}>",
                 TypeClass = TypeClass,
-                IsPointer = IsPointer,
+                IsDerefPointer = IsDerefPointer,
                 IsByRefPointer = IsByRefPointer,
                 IsConst = IsConst,
+                TargetTypeInfo = TargetTypeInfo,
                 Length = Length
             };
         }
@@ -143,7 +162,7 @@ namespace go2cs.Metadata
                 TypeName = TypeName,
                 FullTypeName = FullTypeName,
                 TypeClass = TypeClass,
-                IsPointer = IsPointer,
+                IsDerefPointer = IsDerefPointer,
                 IsByRefPointer = IsByRefPointer,
                 IsConst = IsConst,
                 KeyTypeInfo = KeyTypeInfo,

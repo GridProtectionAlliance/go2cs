@@ -299,7 +299,6 @@ namespace go2cs
                 }
 
                 m_targetFile.Append(CheckForCommentsRight(context));
-
             }
             else
             {

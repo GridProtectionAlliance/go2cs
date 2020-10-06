@@ -61,7 +61,7 @@ namespace go2cs
                 if (TryGetFunctionVariable(identifier, out VariableInfo variable) && variable.Redeclared)
                 {
                     addNewLine = true;
-                    block.Append($"{Spacing()}{variable.Type.TypeName ?? "var"} {identifier}__prev{level} = {identifier};{Environment.NewLine}");
+                    block.AppendLine($"{Spacing()}{variable.Type.TypeName ?? "var"} {identifier}__prev{level} = {identifier};");
                 }
             }
 
@@ -87,7 +87,7 @@ namespace go2cs
                     if (TryGetFunctionVariable(identifier, out VariableInfo variable) && variable.Redeclared)
                     {
                         addNewLine = true;
-                        block.Append($"{Spacing()}{identifier} = {identifier}__prev{level};{Environment.NewLine}");
+                        block.AppendLine($"{Spacing()}{identifier} = {identifier}__prev{level};");
                     }
                 }
 
@@ -131,17 +131,66 @@ namespace go2cs
 
                 for (int i = 0; i < length; i++)
                 {
+                    string identifier = SanitizedIdentifier(identifiers[i]);
+                    string expression = expressions[i].Text;
+                    TypeInfo typeInfo = expressions[i].Type;
+                    bool isPointer = typeInfo is PointerTypeInfo;
+                    string typeName = typeInfo.TypeName ?? "var";
                     bool isInitialDeclaration = true;
+                    VariableInfo variable = null;
+                    bool heapAllocated = false;
                     string variableName = null;
+
+                    statement.Append($"{Spacing()}");
 
                     // Determine if this is the initial declaration
                     if (m_inFunction && m_variableIdentifiers.TryGetValue(identifierList.IDENTIFIER(i), out variableName))
                         isInitialDeclaration = !variableName.Contains("@@");
 
                     if (isInitialDeclaration && !string.IsNullOrWhiteSpace(variableName))
+                    {
                         m_variableTypes[variableName] = expressions[i].Type;
+                        m_currentFunction.Variables.TryGetValue(variableName, out variable);
+                    }
 
-                    statement.Append($"{Spacing()}{(isInitialDeclaration ? $"{expressions[i].Type?.TypeName ?? "var"} " : "")}{SanitizedIdentifier(identifiers[i])} = {expressions[i]};");
+                    if (isInitialDeclaration)
+                    {
+                        if ((variable?.HeapAllocated ?? false) && !isPointer)
+                        {
+                            heapAllocated = true;
+                            statement.Append($"ref {typeName} {identifier} = ref heap(");
+                        }
+                        else
+                        {
+                            statement.Append($"{typeName} {identifier} = ");
+                        }
+                    }
+                    else
+                    {
+                        statement.Append($"{identifier} = ");
+                    }
+
+                    if (!(expression is null))
+                    {
+                        if (typeInfo?.TypeClass == TypeClass.Interface)
+                            statement.Append($"{typeInfo.TypeName}.As({expression})");
+                        else
+                            statement.Append(expression);
+                    }
+                    else if (typeInfo?.TypeClass == TypeClass.Array && typeInfo is ArrayTypeInfo arrayTypeInfo)
+                    {
+                        statement.Append($"new {typeName}({arrayTypeInfo.Length.Text})");
+                    }
+                    else
+                    {
+                        AddWarning(context, $"Encountered short var declaration with no target expression: {context.GetText()}");
+                        statement.Append("default");
+                    }
+
+                    if (heapAllocated)
+                        statement.Append($", out ptr<{typeName}> _addr_{identifier})");
+
+                    statement.Append(";");
 
                     // Since multiple declarations can be on one line, only check for comments after last declaration
                     if (i < length - 1)

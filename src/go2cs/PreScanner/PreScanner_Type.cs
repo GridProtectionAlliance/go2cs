@@ -63,8 +63,17 @@ namespace go2cs
                     {
                         if (anonymousField.ChildCount > 1 && anonymousField.children[0].GetText() == "*")
                         {
-                            typeInfo = typeInfo.Clone();
-                            typeInfo.IsPointer = true;
+                            typeInfo = new PointerTypeInfo
+                            {
+                                Name = $"ptr<{typeInfo.TypeName}>",
+                                TypeName = $"ptr<{typeInfo.TypeName}>",
+                                FullTypeName = $"go.ptr<{typeInfo.FullTypeName}>",
+                                TypeClass = typeInfo.TypeClass,
+                                IsDerefPointer = typeInfo.IsDerefPointer,
+                                IsByRefPointer = typeInfo.IsByRefPointer,
+                                IsConst = typeInfo.IsConst,
+                                TargetTypeInfo = typeInfo
+                            };
                         }
 
                         fields.Add(new FieldInfo

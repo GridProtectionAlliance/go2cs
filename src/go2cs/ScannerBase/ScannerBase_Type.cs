@@ -22,7 +22,6 @@
 //******************************************************************************************************
 
 using go2cs.Metadata;
-using System.Linq;
 using static go2cs.Common;
 
 namespace go2cs
@@ -72,6 +71,8 @@ namespace go2cs
                 typeClass = TypeClass.Interface;
             else if (Metadata?.Structs.TryGetValue(typeName, out _) ?? false)
                 typeClass = TypeClass.Struct;
+            else if (Metadata?.Functions.TryGetValue($"{typeName}()", out _) ?? false)
+                typeClass = TypeClass.Function;
 
             Types[context.Parent] = new TypeInfo
             {
@@ -121,58 +122,57 @@ namespace go2cs
                 return;
             }
 
-            if (name.StartsWith("**"))
+            if (typeInfo.TypeClass == TypeClass.Function)
             {
-                int count = 0;
-
-                while (name[count] == '*')
-                    count++;
-
-                count = count - (typeInfo.IsByRefPointer ? 1 : 0);
-
-                string prefix = string.Join("", Enumerable.Range(0, count).Select(i => "ptr<"));
-                string suffix = new string('>', count);
-
-                typeInfo = ConvertByRefToBasicPointer(typeInfo);
-
-                Types[context.Parent.Parent] = new TypeInfo
-                {
-                    Name = name,
-                    TypeName = $"{prefix}{typeInfo.TypeName}{suffix}",
-                    FullTypeName = $"{prefix}{typeInfo.FullTypeName}{suffix}",
-                    IsPointer = true,
-                    IsByRefPointer = false,
-                    TypeClass = TypeClass.Simple
-                };
+                typeInfo = typeInfo.Clone();
+                typeInfo.IsDerefPointer = true;
+                Types[context.Parent.Parent] = typeInfo;
+                return;
             }
-            else if (name.StartsWith("*(*") && name.EndsWith(")"))
+
+            typeInfo = ConvertByRefToBasicPointer(typeInfo);
+
+            Types[context.Parent.Parent] = new PointerTypeInfo
             {
-                typeInfo = ConvertByRefToNativePointer(typeInfo);
+                Name = name,
+                TypeName = $"ptr<{typeInfo.TypeName}>",
+                FullTypeName = $"ptr<{typeInfo.FullTypeName}>",
+                TypeClass = TypeClass.Simple,
+                TargetTypeInfo = typeInfo
+            };
 
-                Types[context.Parent.Parent] = new TypeInfo
-                {
-                    Name = name,
-                    TypeName = $"*({typeInfo.TypeName})",
-                    FullTypeName = $"*({typeInfo.FullTypeName})",
-                    IsPointer = true,
-                    IsByRefPointer = false,
-                    TypeClass = TypeClass.Simple
-                };
+            // Native unsafe pointer option
+            //if (name.StartsWith("*(*") && name.EndsWith(")"))
+            //{
+            //    typeInfo = ConvertByRefToNativePointer(typeInfo);
 
-                UsesUnsafePointers = true;
-            }
-            else
-            {
-                Types[context.Parent.Parent] = new TypeInfo
-                {
-                    Name = name,
-                    TypeName = $"ref {typeInfo.TypeName}",
-                    FullTypeName = $"ref {typeInfo.FullTypeName}",
-                    IsPointer = true,
-                    IsByRefPointer = true,
-                    TypeClass = TypeClass.Simple
-                };
-            }
+            //    Types[context.Parent.Parent] = new TypeInfo
+            //    {
+            //        Name = name,
+            //        TypeName = $"*({typeInfo.TypeName})",
+            //        FullTypeName = $"*({typeInfo.FullTypeName})",
+            //        IsPointer = true,
+            //        IsByRefPointer = false,
+            //        TypeClass = TypeClass.Simple
+            //    };
+
+            //    UsesUnsafePointers = true;
+            //}
+
+
+            // ByRef pointer option
+            //else
+            //{
+            //    Types[context.Parent.Parent] = new TypeInfo
+            //    {
+            //        Name = name,
+            //        TypeName = $"ref {typeInfo.TypeName}",
+            //        FullTypeName = $"ref {typeInfo.FullTypeName}",
+            //        IsPointer = true,
+            //        IsByRefPointer = true,
+            //        TypeClass = TypeClass.Simple
+            //    };
+            //}
         }
 
         public override void ExitArrayType(GoParser.ArrayTypeContext context)
@@ -224,6 +224,7 @@ namespace go2cs
                 TypeName = $"array<{typeInfo.TypeName}>",
                 FullTypeName = $"go.array<{typeInfo.FullTypeName}>",
                 TypeClass = TypeClass.Array,
+                TargetTypeInfo = typeInfo,
                 Length = length
             };
         }

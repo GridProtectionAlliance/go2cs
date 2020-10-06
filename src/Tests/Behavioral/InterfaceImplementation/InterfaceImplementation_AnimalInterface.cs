@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 September 19 11:14:40 UTC
+//     Generated on 2020 October 06 00:34:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace go
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -62,10 +62,10 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate @string TypeByRef(ref T value);
+            private delegate @string TypeByPtr(ptr<T> value);
             private delegate @string TypeByVal(T value);
 
-            private static readonly TypeByRef s_TypeByRef;
+            private static readonly TypeByPtr s_TypeByPtr;
             private static readonly TypeByVal s_TypeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,17 +74,18 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_TypeByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_TypeByPtr is null || !m_target_is_ptr)
                     return s_TypeByVal!(target);
 
-                return s_TypeByRef(ref target);
+                return s_TypeByPtr(m_target_ptr);
             }
 
-            private delegate @string SwimByRef(ref T value);
+            private delegate @string SwimByPtr(ptr<T> value);
             private delegate @string SwimByVal(T value);
 
-            private static readonly SwimByRef s_SwimByRef;
+            private static readonly SwimByPtr s_SwimByPtr;
             private static readonly SwimByVal s_SwimByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,11 +94,12 @@ namespace go
                 T target = m_target;
 
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.Value;
-                if (s_SwimByRef is null)
+                    target = m_target_ptr.val;
+
+                if (s_SwimByPtr is null || !m_target_is_ptr)
                     return s_SwimByVal!(target);
 
-                return s_SwimByRef(ref target);
+                return s_SwimByPtr(m_target_ptr);
             }
             
             public string ToString(string format, IFormatProvider formatProvider) => format;
@@ -106,39 +108,33 @@ namespace go
             static Animal()
             {
                 Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
+                Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Type");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Type");
 
                 if (!(extensionMethod is null))
-                    s_TypeByRef = extensionMethod.CreateStaticDelegate(typeof(TypeByRef)) as TypeByRef;
+                    s_TypeByPtr = extensionMethod.CreateStaticDelegate(typeof(TypeByPtr)) as TypeByPtr;
 
-                if (s_TypeByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Type");
+                extensionMethod = targetType.GetExtensionMethod("Type");
 
-                    if (!(extensionMethod is null))
-                        s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
 
-                if (s_TypeByRef is null && s_TypeByVal is null)
+                if (s_TypeByPtr is null && s_TypeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Animal.Type method", new Exception("Type"));
 
-               extensionMethod = targetTypeByRef.GetExtensionMethod("Swim");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("Swim");
 
                 if (!(extensionMethod is null))
-                    s_SwimByRef = extensionMethod.CreateStaticDelegate(typeof(SwimByRef)) as SwimByRef;
+                    s_SwimByPtr = extensionMethod.CreateStaticDelegate(typeof(SwimByPtr)) as SwimByPtr;
 
-                if (s_SwimByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Swim");
+                extensionMethod = targetType.GetExtensionMethod("Swim");
 
-                    if (!(extensionMethod is null))
-                        s_SwimByVal = extensionMethod.CreateStaticDelegate(typeof(SwimByVal)) as SwimByVal;
-                }
+                if (!(extensionMethod is null))
+                    s_SwimByVal = extensionMethod.CreateStaticDelegate(typeof(SwimByVal)) as SwimByVal;
 
-                if (s_SwimByRef is null && s_SwimByVal is null)
+                if (s_SwimByPtr is null && s_SwimByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Animal.Swim method", new Exception("Swim"));
             }
 

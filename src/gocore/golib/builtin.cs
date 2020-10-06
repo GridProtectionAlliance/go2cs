@@ -50,6 +50,11 @@ namespace go
 {
     public static class builtin
     {
+        private static class Zero<T>
+        {
+            public static T Default = default!;
+        }
+
         private static readonly ThreadLocal<bool> s_fallthrough = new ThreadLocal<bool>();
 
         /// <summary>
@@ -272,26 +277,50 @@ namespace go
         /// <summary>
         /// Gets the length of the <paramref name="array"/>.
         /// </summary>
-        /// <param name="array">Target channel pointer.</param>
+        /// <param name="array">Target array.</param>
         /// <returns>The length of the <paramref name="array"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
         public static long len<T>(in array<T> array) => array.Length;
 
         /// <summary>
+        /// Gets the length of the <paramref name="array"/>.
+        /// </summary>
+        /// <param name="array">Target array pointer.</param>
+        /// <returns>The length of the <paramref name="array"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static long len<T>(in ptr<array<T>> array) => array.val.Length;
+
+        /// <summary>
         /// Gets the length of the <paramref name="slice"/>.
         /// </summary>
-        /// <param name="slice">Target channel pointer.</param>
+        /// <param name="slice">Target slice.</param>
         /// <returns>The length of the <paramref name="slice"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
         public static long len<T>(in slice<T> slice) => slice.Length;
 
         /// <summary>
+        /// Gets the length of the <paramref name="slice"/>.
+        /// </summary>
+        /// <param name="slice">Target slice pointer.</param>
+        /// <returns>The length of the <paramref name="slice"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static long len<T>(in ptr<slice<T>> slice) => slice.val.Length;
+
+        /// <summary>
         /// Gets the length of the <paramref name="str"/>.
         /// </summary>
-        /// <param name="str">Target channel pointer.</param>
+        /// <param name="str">Target string.</param>
         /// <returns>The length of the <paramref name="str"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
         public static long len(in @string str) => str.Length;
+
+        /// <summary>
+        /// Gets the length of the <paramref name="str"/>.
+        /// </summary>
+        /// <param name="str">Target string pointer.</param>
+        /// <returns>The length of the <paramref name="str"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static long len(in ptr<@string> str) => str.val.Length;
 
         /// <summary>
         /// Gets the length of the <paramref name="str"/>.
@@ -310,12 +339,28 @@ namespace go
         public static long len<TKey, TValue>(in map<TKey, TValue> map) where TKey : notnull => map.Count;
 
         /// <summary>
+        /// Gets the length of the <paramref name="map"/>.
+        /// </summary>
+        /// <param name="map">Target map pointer.</param>
+        /// <returns>The length of the <paramref name="map"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static long len<TKey, TValue>(in ptr<map<TKey, TValue>> map) where TKey : notnull => map.val.Count;
+
+        /// <summary>
+        /// Gets the length of the <paramref name="channel"/>.
+        /// </summary>
+        /// <param name="channel">Target channel.</param>
+        /// <returns>The length of the <paramref name="channel"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static long len<T>(in channel<T> channel) => channel.Length;
+
+        /// <summary>
         /// Gets the length of the <paramref name="channel"/>.
         /// </summary>
         /// <param name="channel">Target channel pointer.</param>
         /// <returns>The length of the <paramref name="channel"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static long len<T>(in channel<T> channel) => channel.Length;
+        public static long len<T>(in ptr<channel<T>> channel) => channel.val.Length;
 
         /// <summary>
         /// Allocates and initializes a slice object.
@@ -364,13 +409,12 @@ namespace go
         }
 
         /// <summary>
-        /// Creates a new heap allocated copy of existing <paramref name="target"/> value.
+        /// Gets a reference to a zero value instance of type <typeparamref name="T"/>.
         /// </summary>
         /// <typeparam name="T">Target type of reference.</typeparam>
-        /// <param name="target">Target value.</param>
-        /// <returns>Pointer to heap allocated copy of <paramref name="target"/> value.</returns>
+        /// <returns>Reference to a zero value instance of type <typeparamref name="T"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static ptr<T> ptr<T>(in T target) => new ptr<T>(target);
+        public static ref T zero<T>() => ref Zero<T>.Default;
 
         /// <summary>
         /// Creates a new heap allocated copy of existing <paramref name="target"/> value.
@@ -378,7 +422,28 @@ namespace go
         /// <typeparam name="T">Target type of reference.</typeparam>
         /// <param name="target">Target value.</param>
         /// <returns>Pointer to heap allocated copy of <paramref name="target"/> value.</returns>
-        public static ptr<T> heap<T>(in T target) => heap(target, out ptr<T> _);
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static ptr<T> addr<T>(in T target) => new ptr<T>(target);
+
+        /// <summary>
+        /// Creates a new heap allocated instance of the zero value for type <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="pointer">Out reference to pointer to heap allocated copy of <paramref name="target"/> value.</param>
+        /// <typeparam name="T">Target type of reference.</typeparam>
+        /// <returns>Reference to heap allocated instance of the zero value for type <typeparamref name="T"/>.</returns>
+        /// <remarks>
+        /// This is a convenience function to allow default local struct ref and <see cref="go.ptr{T}"/>
+        /// to be created in a single call, e.g.:
+        /// <code language="cs">
+        ///     ref var v = ref heap(out ptr&lt;Vertex&gt; v_ptr);
+        /// </code>
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static ref T heap<T>(out ptr<T> pointer)
+        {
+            pointer = addr(default(T)!);
+            return ref pointer.val;
+        }
 
         /// <summary>
         /// Creates a new heap allocated copy of existing <paramref name="target"/> value.
@@ -386,19 +451,19 @@ namespace go
         /// <typeparam name="T">Target type of reference.</typeparam>
         /// <param name="target">Target value.</param>
         /// <param name="pointer">Out reference to pointer to heap allocated copy of <paramref name="target"/> value.</param>
-        /// <returns>Pointer to heap allocated copy of <paramref name="target"/> value.</returns>
+        /// <returns>Reference to heap allocated copy of <paramref name="target"/> value.</returns>
         /// <remarks>
         /// This is a convenience function to allow local struct ref and <see cref="go.ptr{T}"/>
         /// to be created in a single call, e.g.:
         /// <code language="cs">
-        ///     ref var v = ref heap(new Vertex(40.68433, -74.39967), out var v_ptr).Value;
+        ///     ref var v = ref heap(new Vertex(40.68433, -74.39967), out var v_ptr);
         /// </code>
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static ptr<T> heap<T>(in T target, out ptr<T> pointer)
+        public static ref T heap<T>(in T target, out ptr<T> pointer)
         {
-            pointer = ptr(target);
-            return pointer;
+            pointer = addr(target);
+            return ref pointer.val;
         }
 
         /// <summary>

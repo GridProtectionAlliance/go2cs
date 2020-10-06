@@ -203,7 +203,7 @@ if (!NamespacePrefix.Equals("go")) {
                 get
                 {
                     if (m_target_is_ptr && !(m_target_ptr is null))
-                        return ref m_target_ptr.Value;
+                        return ref m_target_ptr.val;
 
                     return ref m_target;
                 }
@@ -241,7 +241,7 @@ if (!NamespacePrefix.Equals("go")) {
                 {
                     FunctionName = decl.Name,
                     Scope = "public",
-                    ParameterSignature = decl.Signature.GenerateParametersSignature(false),
+                    ParameterSignature = decl.Signature.GenerateParametersSignature(),
                     ParameterNames = GetParameterNames(decl),
                     ParameterTypes = GetParameterTypeNames(decl),
                     ResultType = decl.Signature.GenerateResultSignature()
@@ -267,8 +267,8 @@ if (!NamespacePrefix.Equals("go")) {
             #line default
             #line hidden
             this.Write("()\r\n            {\r\n                Type targetType = typeof(T);\r\n                " +
-                    "Type targetTypeByRef = targetType.MakeByRefType();\r\n                MethodInfo e" +
-                    "xtensionMethod;");
+                    "Type targetTypeByPtr = typeof(ptr<T>);\r\n                MethodInfo extensionMeth" +
+                    "od;");
             
             #line 94 "C:\Projects\go2cs\src\go2cs.Templates\InterfaceTypeTemplate.tt"
 
