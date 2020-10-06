@@ -28,26 +28,25 @@ using System.Runtime.CompilerServices;
 namespace go
 {
     /// <summary>
-    /// Represents a heap allocated reference to an instance of type <typeparamref name="T"/>
-    /// where <typeparamref name="T"/> is a managed type, e.g., a class.
+    /// Represents a heap allocated reference to an instance of type <typeparamref name="T"/>.
     /// </summary>
-    /// <typeparam name="T">Reference type for heap based reference.</typeparam>
+    /// <typeparam name="T">Type for heap based reference.</typeparam>
     /// <remarks>
     /// <para>
-    /// A .NET class is always allocated on the heap and registered for garbage collection.
-    /// The <see cref="ptr{T}"/> class is used to create a reference to a heap allocated instance
-    /// of type <typeparamref name="T"/> so that the type can (1) have scope beyond the current
-    /// stack, and (2) have the ability to create a safe pointer to the type, i.e., a reference.
+    /// A new .NET class instance is always allocated on the heap and registered for garbage collection.
+    /// The <see cref="ptr{T}"/> class is used to create a reference to a heap allocated instance of type
+    /// <typeparamref name="T"/> so that the type can (1) have scope beyond the current stack, and (2)
+    /// have the ability to create a safe pointer to the type, i.e., a reference.
     /// </para>
     /// <para>
-    /// If <typeparamref name="T"/> is a <see cref="System.ValueType"/>, e.g., a struct, note that
-    /// value will be "boxed" for heap allocation. Since boxed value will be a new copy of original
-    /// value, make sure to use ref-based <see cref="val"/> for updates instead of a local stack
-    /// copy of value. See the <see cref="builtin.heap{T}(out ptr{T})"/> and notes on boxing:
+    /// If <typeparamref name="T"/> is a <see cref="System.ValueType"/>, e.g., a struct, note that value
+    /// will be "boxed" for heap allocation. Since boxed value will be a new copy of original value, make
+    /// sure to use ref-based <see cref="val"/> for updates instead of a local stack copy of value.
+    /// See the <see cref="builtin.heap{T}(out ptr{T})"/> and notes on boxing:
     /// https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing
     /// </para>
     /// <para>
-    /// So long as a reference to this class exists, so will the value <typeparamref name="T"/>.
+    /// So long as a reference to this class exists, so will the value of type <typeparamref name="T"/>.
     /// </para>
     /// </remarks>
     public sealed class ptr<T>
