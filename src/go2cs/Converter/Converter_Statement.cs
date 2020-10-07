@@ -310,29 +310,28 @@ namespace go2cs
 
             if (ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions))
             {
-                StringBuilder returnExpression = new StringBuilder();
                 ParameterInfo[] resultParameters = CurrentFunction?.Signature.Signature.Result;
 
                 if (expressions.Length > 1)
-                    returnExpression.Append('(');
+                    m_targetFile.Append('(');
 
                 for (int i = 0; i < expressions.Length; i++)
                 {
                     if (i > 0)
-                        returnExpression.Append(", ");
+                        m_targetFile.Append(", ");
 
                     TypeInfo resultType = resultParameters?.Length > i ? resultParameters[i].Type : TypeInfo.ObjectType;
 
                     if (resultType?.TypeClass == TypeClass.Interface)
-                        m_targetFile.Append($"{resultType.TypeName}.As({expressions[i].ToString().Trim()})");
+                        m_targetFile.Append($"{resultType.TypeName}.As({expressions[i].ToString().Trim()}{(expressions[i].ToString().Trim().Equals("null") || expressions[i].Type is PointerTypeInfo || expressions[i].Type.TypeClass == TypeClass.Interface ? "!" : "")})!");
                     else if (resultType is PointerTypeInfo && !(expressions[i].Type is PointerTypeInfo))
-                        m_targetFile.Append($"{AddressPrefix}{expressions[i].ToString().Trim()}");
+                        m_targetFile.Append($"{AddressPrefix}{expressions[i].ToString().Trim()}!");
                     else
                         m_targetFile.Append($"{expressions[i].ToString().Trim()}");
                 }
                 
                 if (expressions.Length > 1)
-                    returnExpression.Append(')');
+                    m_targetFile.Append(')');
             }
 
             m_targetFile.Append($";{CheckForCommentsRight(context)}");
