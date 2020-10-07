@@ -455,6 +455,8 @@ namespace go2cs
                 ParameterInfo[] parameters = null;
                 string functionName = primaryExpression.Text;
                 FunctionInfo functionInfo = null;
+
+                // TODO: Need to lookup functions from imported libraries as well
                 Metadata?.Functions.TryGetValue($"{functionName}()", out functionInfo);
 
                 if (!(functionInfo is null))
