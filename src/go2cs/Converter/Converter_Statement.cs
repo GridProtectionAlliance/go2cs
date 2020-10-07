@@ -208,20 +208,20 @@ namespace go2cs
                         if (assignOP == "=" && leftOperandType?.TypeClass == TypeClass.Interface)
                             rightOperandText = $"{leftOperandType.TypeName}.As({rightOperandText})";
 
-                        if (assignOP == "=" && !(leftOperandType is PointerTypeInfo) && rightOperandText.StartsWith("_addr", StringComparison.Ordinal))
+                        if (assignOP == "=" && !(leftOperandType is PointerTypeInfo) && rightOperandText.StartsWith(AddressPrefix, StringComparison.Ordinal))
                         {
-                            string targetVariable = rightOperandText.Replace("_addr_", "");
+                            string targetVariable = rightOperandText.Replace(AddressPrefix, "");
 
                             if (m_variableTypes.TryGetValue(targetVariable, out TypeInfo rightOperandType) && !(rightOperandType is PointerTypeInfo))
                             {
-                                rightOperandText = $"{rightOperandText};{Environment.NewLine}{Spacing()}{leftOperandText} = ref _addr_{leftOperandText}.val";
-                                leftOperandText = $"_addr_{leftOperandText}";
+                                rightOperandText = $"{rightOperandText};{Environment.NewLine}{Spacing()}{leftOperandText} = ref {AddressPrefix}{leftOperandText}.val";
+                                leftOperandText = $"{AddressPrefix}{leftOperandText}";
                             }
                         }
 
                         if (assignOP == "=" && leftOperandType is PointerTypeInfo)
                         {
-                            string targetVariable = rightOperandText.Replace("_addr_", "");
+                            string targetVariable = rightOperandText.Replace(AddressPrefix, "");
 
                             if (m_variableTypes.TryGetValue(targetVariable, out TypeInfo rightOperandType) && rightOperandType is PointerTypeInfo)
                                 rightOperandText = $"addr({targetVariable})";
@@ -326,7 +326,7 @@ namespace go2cs
                     if (resultType?.TypeClass == TypeClass.Interface)
                         m_targetFile.Append($"{resultType.TypeName}.As({expressions[i].ToString().Trim()})");
                     else if (resultType is PointerTypeInfo && !(expressions[i].Type is PointerTypeInfo))
-                        m_targetFile.Append($"_addr_{expressions[i].ToString().Trim()}");
+                        m_targetFile.Append($"{AddressPrefix}{expressions[i].ToString().Trim()}");
                     else
                         m_targetFile.Append($"{expressions[i].ToString().Trim()}");
                 }

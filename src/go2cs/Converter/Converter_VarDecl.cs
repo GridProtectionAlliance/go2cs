@@ -176,7 +176,7 @@ namespace go2cs
                     if (!defaultInit)
                         m_targetFile.Append(", ");
 
-                    m_targetFile.Append($"out ptr<{typeName}> _addr_{identifier})");
+                    m_targetFile.Append($"out ptr<{typeName}> {AddressPrefix}{identifier})");
                 }
 
                 // Since multiple specifications can be on one line, only check for comments after last specification

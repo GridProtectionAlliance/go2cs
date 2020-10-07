@@ -167,7 +167,7 @@ namespace go2cs
                     else if (unaryOP.Equals("&", StringComparison.Ordinal))
                     {
                         unaryOP = null;
-                        unaryExpression = $"_addr_{expression}";
+                        unaryExpression = $"{AddressPrefix}{expression}";
                     }
                     else if (unaryOP.Equals("*", StringComparison.Ordinal))
                     {
@@ -470,8 +470,8 @@ namespace go2cs
                             ParameterInfo parameter = parameters?.Length > i ? parameters[i] : null;
                             CurrentFunction.Variables.TryGetValue(expression.Text, out VariableInfo variable);
 
-                            if (parameter?.Type is PointerTypeInfo && !(expression.Type is PointerTypeInfo) && !(variable?.Type is PointerTypeInfo) && !expression.Text.StartsWith("_addr_", StringComparison.Ordinal))
-                                arguments.Add($"_addr_{expression}");
+                            if (parameter?.Type is PointerTypeInfo && !(expression.Type is PointerTypeInfo) && !(variable?.Type is PointerTypeInfo) && !expression.Text.StartsWith(AddressPrefix, StringComparison.Ordinal))
+                                arguments.Add($"{AddressPrefix}{expression}");
                             else
                                 arguments.Add(expression.Text);
                         }

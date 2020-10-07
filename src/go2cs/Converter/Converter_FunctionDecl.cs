@@ -145,7 +145,7 @@ namespace go2cs
 
                     // All pointers in Go can be implicitly dereferenced, so setup a "local ref" instance to each
                     if (parameter.Type is PointerTypeInfo pointer)
-                        implicitPointers.AppendLine($"{Spacing(1)}ref {pointer.TargetTypeInfo.TypeName} {parameter.Name} = ref _addr_{parameter.Name}.val;");
+                        implicitPointers.AppendLine($"{Spacing(1)}ref {pointer.TargetTypeInfo.TypeName} {parameter.Name} = ref {AddressPrefix}{parameter.Name}.val;");
                 }
 
                 if (arrayClones.Length > 0)
@@ -171,7 +171,7 @@ namespace go2cs
                         updatedSignature.Append($"{(parameter.IsVariadic ? "params " : "")}{parameter.Type.TypeName} ");
 
                         if (parameter.Type is PointerTypeInfo)
-                            updatedSignature.Append("_addr_");
+                            updatedSignature.Append(AddressPrefix);
 
                         updatedSignature.Append(parameter.Name);
                     }

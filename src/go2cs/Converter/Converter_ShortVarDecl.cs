@@ -188,7 +188,7 @@ namespace go2cs
                     }
 
                     if (heapAllocated)
-                        statement.Append($", out ptr<{typeName}> _addr_{identifier})");
+                        statement.Append($", out ptr<{typeName}> {AddressPrefix}{identifier})");
 
                     statement.Append(";");
 

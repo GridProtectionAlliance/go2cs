@@ -55,6 +55,7 @@ namespace go2cs
     {
         public const string RootNamespace = "go";
         public const string ClassSuffix = "_package";
+        public const string AddressPrefix = "_addr_";
 
         private readonly List<string> m_warnings = new List<string>();
 
