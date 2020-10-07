@@ -120,6 +120,8 @@ namespace go2cs
 
             if (!EndsWithLineFeed(m_targetFile.ToString()))
                 m_targetFile.AppendLine();
+            else
+                m_targetFile = new StringBuilder(RemoveLastDuplicateLineFeed(m_targetFile.ToString()));
 
             m_targetFile.Append($"{Spacing()}}}");
 
