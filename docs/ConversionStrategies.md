@@ -1,6 +1,6 @@
 # Conversion Strategies
 
-> Strategies updated on 8/4/2020 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
+> Strategies updated on 10/6/2020 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
 
 ## Topics
 
@@ -38,11 +38,17 @@ Go constants hold arbitrary-precision literals with expression support. Applying
 
 ## Handling "int" and "uint" Types
 
-In Go the `int` and `uint` types are sized according the platform build target, i.e., 32-bit or 64-bit. In C# an `int` and `uint` is always 32-bits and a `long` and `ulong` is always 64-bits. Although an option exists to create custom `@int` and `@uint` structures that are compiled to 32-bit or 64-bit lengths based on a selected target build platform, e.g., using a `#ifdef TARGET32BIT` directive, and be implicitly castable to C# integer types, the current thinking is to only target 64-bit platforms for conversion. It seems that 64-bit deployments are likely the most common use case and this helps keeps things simple for now. This means any encountered Go `int` or `uint` will simply be converted to a C# `long` or `ulong`.
+In Go the `int` and `uint` types are sized according the platform build target, i.e., 32-bit or 64-bit. In C# an `int` and `uint` is always 32-bits and a `long` and `ulong` is always 64-bits - this means any encountered Go `int` or `uint` are simply be converted to a C# `long` or `ulong` for now.
 
-Later, an option could be added to the conversion tool that would allow for 32-bit build targets where any encountered Go `int` or `uint` would be converted to a C# `int` or `uint`. This option would mean pre-compiled library packages would need to include a 32-bit build as well, so there will be cascading consequences to consider.
+> As of C# 9.0, new native types exist that act exactly like their Go counterparts, specifically [`nint` and `nuint`](https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-9#performance-and-interop).
 
-Note that one sticking point with this strategy is that not all C# indexing constructs currently accept a `long`, so in some places a down-cast from `long` to `int` will be required. For example, although explicit indexers in C# support a `long`, [implicit index support](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support) currently only works with an `int`, this means range operation indices will need to be cast to `int`. FYI, [issue is being discussed](https://github.com/dotnet/runtime/issues/28070) for future C# runtime updates.
+Note that one sticking point with the strategy of "always use a `long`" has been that not all C# indexing constructs currently accept a `long`, so in some places a down-cast from `long` to `int` is needed. For example, although explicit indexers in C# support a `long`, [implicit index support](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support) currently only works with an `int`, this means range operation indices will need to be cast to `int`. FYI, [issue is being discussed](https://github.com/dotnet/runtime/issues/28070) for future C# runtime updates.
+
+> With the new C# 9.0 `nint` and `nuint` types, the compiler is _supposed_ to auto-handle this `long` vs `int` issue. So as long as we can declare an indexer with `nint`, everything should be good - we will see.
+
+~~Although an option exists to create custom `@int` and `@uint` structures that are compiled to 32-bit or 64-bit lengths based on a selected target build platform, e.g., using a `#ifdef TARGET32BIT` directive, and be implicitly castable to C# integer types, the current thinking is to only target 64-bit platforms for conversion. It seems that 64-bit deployments are likely the most common use case and this helps keeps things simple for now. This means any encountered Go `int` or `uint` will simply be converted to a C# `long` or `ulong`.~~
+
+~~Later, an option could be added to the conversion tool that would allow for 32-bit build targets where any encountered Go `int` or `uint` would be converted to a C# `int` or `uint`. This option would mean pre-compiled library packages would need to include a 32-bit build as well, so there will be cascading consequences to consider.~~
 
 ## The "nil" Value
 In Go `nil` is the equivalent of C# `null`. Where possible converted code will use the [`NilType`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/NilType.cs#L33) with a default instance called `nil` that equals `null` defined in [`go.builtin`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/builtin.cs#L75). Generally the `NilType` will work properly for compares, but cannot be used during assignments (no overloads or operators exist for this operation) - so assignments to heap based elements, like an interface, will convert to `null`.
@@ -259,6 +265,8 @@ For Go "type definitions" the aliased type becomes a new, distinct type, however
 
 Note that aliased types operate similarly to type embedding when it comes to extension method function receivers, i.e., aliased type supports the extension methods of the base types. Like with embedded types this is more tricky in C# because of duck-implemented interfaces (see [interface strategies](#interfaces)), but the solution is the same, i.e., creating proxy extension functions for the aliased type for all underlying type extensions.
 
+> An active [C# 10 proposal](https://github.com/dotnet/csharplang/issues/3428) includes the possibility for a `typedef` like option using "global" using implementations. That would easily take care of this issue, but since C# 10 is at least a year out (10/6/20), some proxy implementation like is detailed above is going to be required for now :-(
+
 ## Defer / Panic / Recover
 Handling Go `defer / panic / recover` operations in C# requires that code conversions create a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/GoFunc.cs#L63).
 
@@ -470,9 +478,13 @@ a = Abser.As(f);                  // Succeeds only if MyFloat type implements Ab
 For an example, see [interfaces](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/methods/interfaces) under the "methods" section in the manual Tour of Go conversions.
 
 ## Pointers
-Conversion of pointer types will use the C# `ref` keyword where possible. When this strategy does not work, a heap allocated instance of the base type will be created (see [`ptr<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/ptr.cs)).
+~~Conversion of pointer types will use the C# `ref` keyword where possible. When this strategy does not work, a heap allocated instance of the base type will be created (see [`ptr<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/ptr.cs)).~~
 
-> C# unsafe pointers do not always work as a replacement for Go pointers since with C# (1) pointer types in structures cannot not refer to types that contain heap-allocated elements (e.g., arrays or slices that reference an array) as this would prevent pointer arithmetic for ambiguously sized elements, and (2) returning standard pointers to stack-allocated structures from a function is not allowed, instead you need to allocate the structure on the heap by creating a reference-type wrapper and then safely return a pointer to the reference.
+Pointer conversions have been updated to always use [`ptr<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/ptr.cs) since the use of the C# `ref` keyword presents complications of needing to perform escape analysis of a pointer, e.g., when you pass a `ref` pointer to a function, it may call code expecting a heap allocated pointer.
+
+This is a simplification of code conversion that could come with a performance penalty, i.e., unnecessary heap allocations when an address of a variable needs to be taken. Future conversion implementations can add an escape analysis step to see if source code will safely allow for simple `ref` style operations and use the stack allocated variable when heap allocations are determined to be not necessary, similar to the way [Go does this](https://golang.org/doc/faq#stack_or_heap) at compile time. That said, there is indication that anytime Go uses pointers, [data is allocated on the heap](https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/#some-pointers). If this is consistently true, then the go2cs conversion performance penalty with heap allocations should already match Go. Regardless, an escape analysis step could provide a future optimization.
+
+> C# unsafe pointers do not always work as a replacement for Go pointers since with C# (1) pointer types in structures cannot not refer to types that contain heap-allocated elements (e.g., arrays or slices that reference an array) as this would prevent pointer arithmetic for ambiguously sized elements, and (2) returning standard pointers to stack-allocated structures from a function is not allowed, instead you need to allocate the structure on the heap by creating a reference-type wrapper and then safely return a pointer to the reference. Since Go also supports unsafe pointer operations using the [`unsafe`](https://golang.org/pkg/unsafe/) package, conversion of this package will likely involve use of C# unsafe pointers. 
 
 ## Implicit Pointer Dereferencing
 In Go, all pointer types are setup to automatically dereference. For example, the following `age` property assignments are equivalent in Go:
