@@ -89,11 +89,15 @@ namespace go2cs
                 string identifier = identifiers[i];
                 string expression = expressions?[i].Text ?? $"{m_iota++}";
                 string typeName = type ?? expressions?[i].Type.TypeName ?? "var";
+                string castAs = $"({typeName})";
+
+                if (type?.Equals(expressions?[i].Type.TypeName) ?? false)
+                    castAs = "";
 
                 if (InFunction)
-                    m_targetFile.Append($"{Spacing()}const {typeName} {identifier} = {expression};");
+                    m_targetFile.Append($"{Spacing()}const {typeName} {identifier} = {castAs}{expression};");
                 else
-                    m_targetFile.Append($"{Spacing()}{(char.IsUpper(identifier[0]) ? "public" : "private")} static readonly {typeName} {identifier} = {expression};");
+                    m_targetFile.Append($"{Spacing()}{(char.IsUpper(identifier[0]) ? "public" : "private")} static readonly {typeName} {identifier} = {castAs}{expression};");
 
                 // Since multiple specifications can be on one line, only check for comments after last specification
                 if (i < length - 1)
