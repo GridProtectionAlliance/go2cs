@@ -34,7 +34,7 @@ namespace go2cs
 
         public override void EnterPackageClause(GoParser.PackageClauseContext context)
         {
-            Package = SanitizedIdentifier(context.IDENTIFIER().GetText());
+            Package = SanitizedIdentifier(context.IDENTIFIER()?.GetText()) ?? "";
 
             if (Package.Equals("main"))
             {

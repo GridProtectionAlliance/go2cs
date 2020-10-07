@@ -73,7 +73,7 @@ namespace go2cs
 
         protected string CheckForCommentsLeft(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
         {
-            if (context is null)
+            if (context?.Start is null)
                 return "";
 
             return CheckForComments(context.Start.TokenIndex, TokenStream.GetHiddenTokensToLeft, offsetLevel, indentLevel);
@@ -81,7 +81,7 @@ namespace go2cs
 
         protected string CheckForCommentsRight(ParserRuleContext context, int offsetLevel = 0, int indentLevel = -1)
         {
-            if (context is null)
+            if (context?.Stop is null)
                 return "";
 
             return CheckForComments(context.Stop.TokenIndex, TokenStream.GetHiddenTokensToRight, offsetLevel, indentLevel);
