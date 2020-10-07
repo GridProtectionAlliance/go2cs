@@ -126,7 +126,9 @@ namespace go2cs
 
                 foreach (ParameterInfo parameter in receiverParameters.Concat(signature.Parameters))
                 {
-                    if (!initialParam)
+                    if (initialParam)
+                        updatedSignature.Append("this ");
+                    else 
                         updatedSignature.Append(", ");
 
                     initialParam = false;
