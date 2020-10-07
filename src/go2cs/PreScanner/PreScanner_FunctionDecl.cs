@@ -91,11 +91,15 @@ namespace go2cs
 
         public override void EnterFunctionDecl(GoParser.FunctionDeclContext context)
         {
+            base.EnterFunctionDecl(context);
+
             EnterMethod();
         }
 
         public override void EnterMethodDecl(GoParser.MethodDeclContext context)
         {
+            base.EnterMethodDecl(context);
+
             EnterMethod();
         }
 
@@ -107,6 +111,8 @@ namespace go2cs
                 return;
 
             m_functions.Add(GetUniqueIdentifier(m_functions, functionInfo.Signature.GenerateLookup()), functionInfo);
+
+            base.ExitFunctionDecl(context);
         }
 
         public override void ExitMethodDecl(GoParser.MethodDeclContext context)
@@ -125,6 +131,8 @@ namespace go2cs
             }
 
             m_functions.Add(GetUniqueIdentifier(m_functions, functionInfo.Signature.GenerateLookup()), functionInfo);
+
+            base.ExitMethodDecl(context);
         }
 
         public override void ExitVarSpec(GoParser.VarSpecContext context)
