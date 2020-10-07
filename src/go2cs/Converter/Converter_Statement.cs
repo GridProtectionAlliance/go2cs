@@ -208,6 +208,17 @@ namespace go2cs
                         if (assignOP == "=" && leftOperandType?.TypeClass == TypeClass.Interface)
                             rightOperandText = $"{leftOperandType.TypeName}.As({rightOperandText})";
 
+                        if (assignOP == "=" && !(leftOperandType is PointerTypeInfo) && rightOperandText.StartsWith("_addr", StringComparison.Ordinal))
+                        {
+                            string targetVariable = rightOperandText.Replace("_addr_", "");
+
+                            if (m_variableTypes.TryGetValue(targetVariable, out TypeInfo rightOperandType) && !(rightOperandType is PointerTypeInfo))
+                            {
+                                rightOperandText = $"{rightOperandText};{Environment.NewLine}{Spacing()}{leftOperandText} = ref _addr_{leftOperandText}.val";
+                                leftOperandText = $"_addr_{leftOperandText}";
+                            }
+                        }
+
                         if (assignOP == "=" && leftOperandType is PointerTypeInfo)
                         {
                             string targetVariable = rightOperandText.Replace("_addr_", "");
@@ -295,24 +306,33 @@ namespace go2cs
             // returnStmt
             //     : 'return' expressionList?
 
-            m_targetFile.Append($"{Spacing()}return");
+            m_targetFile.Append($"{Spacing()}return ");
 
             if (ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions))
             {
+                StringBuilder returnExpression = new StringBuilder();
+                ParameterInfo[] resultParameters = CurrentFunction?.Signature.Signature.Result;
+
                 if (expressions.Length > 1)
+                    returnExpression.Append('(');
+
+                for (int i = 0; i < expressions.Length; i++)
                 {
-                    m_targetFile.Append($" ({string.Join(", ", expressions.Select(expr => expr.Text))})");
-                }
-                else if (expressions.Length > 0)
-                {
-                    ParameterInfo[] result = m_currentFunction?.Signature.Signature.Result;
-                    TypeInfo resultType = result?.Length > 0 ? result[0].Type : TypeInfo.ObjectType;
-                    
+                    if (i > 0)
+                        returnExpression.Append(", ");
+
+                    TypeInfo resultType = resultParameters?.Length > i ? resultParameters[i].Type : TypeInfo.ObjectType;
+
                     if (resultType?.TypeClass == TypeClass.Interface)
-                        m_targetFile.Append($" {resultType.TypeName}.As({expressions[0].ToString().Trim()})");
+                        m_targetFile.Append($"{resultType.TypeName}.As({expressions[i].ToString().Trim()})");
+                    else if (resultType is PointerTypeInfo && !(expressions[i].Type is PointerTypeInfo))
+                        m_targetFile.Append($"_addr_{expressions[i].ToString().Trim()}");
                     else
-                        m_targetFile.Append($" {expressions[0].ToString().Trim()}");
+                        m_targetFile.Append($"{expressions[i].ToString().Trim()}");
                 }
+                
+                if (expressions.Length > 1)
+                    returnExpression.Append(')');
             }
 
             m_targetFile.Append($";{CheckForCommentsRight(context)}");

@@ -32,49 +32,32 @@ namespace go2cs
     {
         public override void EnterMethodDecl(GoParser.MethodDeclContext context)
         {
-            m_inFunction = true; // May need to scope certain objects, like consts, to current function
-            m_originalFunctionName = context.IDENTIFIER()?.GetText() ?? "_";
-            m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
+            base.EnterMethodDecl(context);
+
             m_variableIdentifiers.Clear();
             m_variableTypes.Clear();
 
-            GoParser.ParameterDeclContext[] receiverParameters = context.receiver().parameters().parameterDecl();
-            string receiverTypeName;
 
-            if (receiverParameters.Length > 0)
-            {
-                receiverTypeName = receiverParameters[0].type_().GetText();
-
-                if (receiverTypeName.StartsWith("*"))
-                    receiverTypeName = $"ptr<{receiverTypeName.Substring(1)}>";
-            }
-            else
-            {
-                receiverTypeName = "object";
-            }
-
-            string functionSignature = FunctionSignature.Generate(m_originalFunctionName, new[] { receiverTypeName });
-
-            if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))
-                throw new InvalidOperationException($"Failed to find metadata for method function \"{functionSignature}\".");
+            if (CurrentFunction is null)
+                throw new InvalidOperationException($"Failed to find metadata for method function \"{CurrentFunctionName}\".");
 
             // Function signature containing result type and parameters have not been visited yet,
             // so we mark their desired positions and replace once the visit has occurred
-            m_functionResultTypeMarker = string.Format(FunctionResultTypeMarker, m_currentFunctionName);
-            m_functionParametersMarker = string.Format(FunctionParametersMarker, m_currentFunctionName);
-            m_functionExecContextMarker = string.Format(FunctionExecContextMarker, m_currentFunctionName);
+            m_functionResultTypeMarker = string.Format(FunctionResultTypeMarker, CurrentFunctionName);
+            m_functionParametersMarker = string.Format(FunctionParametersMarker, CurrentFunctionName);
+            m_functionExecContextMarker = string.Format(FunctionExecContextMarker, CurrentFunctionName);
 
-            m_targetFile.AppendLine($"{Spacing()}{m_functionResultTypeMarker} {m_currentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
+            m_targetFile.AppendLine($"{Spacing()}{m_functionResultTypeMarker} {CurrentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
         }
 
         public override void ExitMethodDecl(GoParser.MethodDeclContext context)
         {
-            if (!(m_currentFunction.Signature is MethodSignature method))
-                throw new InvalidOperationException($"Failed to find signature metadata for method function \"{m_currentFunctionName}\".");
+            if (!(CurrentFunction.Signature is MethodSignature method))
+                throw new InvalidOperationException($"Failed to find signature metadata for method function \"{CurrentFunctionName}\".");
 
-            bool hasDefer = m_currentFunction.HasDefer;
-            bool hasPanic = m_currentFunction.HasPanic;
-            bool hasRecover = m_currentFunction.HasRecover;
+            bool hasDefer = CurrentFunction.HasDefer;
+            bool hasPanic = CurrentFunction.HasPanic;
+            bool hasRecover = CurrentFunction.HasRecover;
             bool useFuncExecutionContext = hasDefer || hasPanic || hasRecover;
             Signature signature = method.Signature;
             string receiverParametersSignature = method.GenerateReceiverParametersSignature();
@@ -105,15 +88,12 @@ namespace go2cs
                 m_targetFile.Replace(m_functionExecContextMarker, "");
             }
 
-            m_currentFunction = null;
-            m_currentFunctionName = null;
-            m_originalFunctionName = null;
-            m_inFunction = false;
-
             if (useFuncExecutionContext)
                 m_targetFile.Append(");");
 
             m_targetFile.Append(CheckForCommentsRight(context));
+
+            base.ExitMethodDecl(context);
         }
     }
 }

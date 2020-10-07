@@ -1,6 +1,6 @@
 # Conversion Strategies
 
-> Strategies updated on 10/6/2020 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
+> Strategies updated on 10/7/2020 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
 
 ## Topics
 
@@ -496,6 +496,24 @@ ps.age = 20
 ```
 This automatic dereferencing also applies to extension methods, in other words, an extension-style method for a non-pointer type will work for the type as well as a pointer to the type.
 
+In practice, conversions will handle implicit dereferencing of pointer parameters by using C# local `ref` variables, for example, the following Go code:
+```go
+func PrintValPtr(ptr *int) {
+    fmt.Printf("Value available at *ptr = %d\n", *ptr )
+    *ptr++;
+}
+```
+becomes:
+```csharp
+public static void PrintValPtr(ptr<long> _addr_ptr)
+{
+    ref long ptr = ref _addr_ptr.val;
+
+    fmt.Printf("Value available at *ptr = %d\n", ptr);
+    ptr++;
+}
+```
+
 ## Examples
 
 * [Behavioral Tests](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral)
@@ -516,7 +534,9 @@ public static partial class errors_package
         public @string s;
     }
 
-    private static @string Error(this ref errorString e) {
+    private static @string Error(this ptr<errorString> _addr_e) {
+        ref errorString e = ref _addr_e.val;
+
         return e.s;
     }
 }

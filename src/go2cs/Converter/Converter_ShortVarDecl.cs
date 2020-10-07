@@ -33,7 +33,7 @@ namespace go2cs
         private bool TryGetFunctionVariable(string identifier, out VariableInfo variable)
         {
             variable = default;
-            return m_inFunction && (m_currentFunction?.Variables?.TryGetValue(identifier, out variable) ?? false) && !(variable is null);
+            return InFunction && (CurrentFunction?.Variables?.TryGetValue(identifier, out variable) ?? false) && !(variable is null);
         }
 
         private string OpenRedeclaredVariableBlock(GoParser.IdentifierListContext identifierList, int level)
@@ -144,13 +144,13 @@ namespace go2cs
                     statement.Append($"{Spacing()}");
 
                     // Determine if this is the initial declaration
-                    if (m_inFunction && m_variableIdentifiers.TryGetValue(identifierList.IDENTIFIER(i), out variableName))
+                    if (InFunction && m_variableIdentifiers.TryGetValue(identifierList.IDENTIFIER(i), out variableName))
                         isInitialDeclaration = !variableName.Contains("@@");
 
                     if (isInitialDeclaration && !string.IsNullOrWhiteSpace(variableName))
                     {
                         m_variableTypes[variableName] = expressions[i].Type;
-                        m_currentFunction.Variables.TryGetValue(variableName, out variable);
+                        CurrentFunction.Variables.TryGetValue(variableName, out variable);
                     }
 
                     if (isInitialDeclaration)

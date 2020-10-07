@@ -74,8 +74,8 @@ namespace go2cs
             string identifier = SanitizedIdentifier(originalIdentifier);
 
             // TODO: Sub-function strategy, declare directly prior to function using PushBlock / PopBlock operations and a new replacement marker
-            if (m_inFunction)
-                AddWarning(context, $"Type specification made from within function \"{m_currentFunctionName}\" - this is will not compile in C#");
+            if (InFunction)
+                AddWarning(context, $"Type specification made from within function \"{CurrentFunctionName}\" - this is will not compile in C#");
 
             if (m_typeIdentifierCount == 0 && m_typeMultipleDeclaration)
                 m_targetFile.Append(RemoveFirstLineFeed(CheckForCommentsLeft(context)));

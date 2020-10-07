@@ -67,7 +67,6 @@ namespace go
                 a = __a;
                 fmt.Println(a.Type(), "can", a.Swim());
             }
-
         }
 
         private static @string Type(this ptr<Frog> f)

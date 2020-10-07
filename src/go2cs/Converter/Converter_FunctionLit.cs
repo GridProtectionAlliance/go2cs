@@ -52,7 +52,7 @@ namespace go2cs
             }
             else
             {
-                AddWarning(context, $"Failed to find signature for function literal inside \"{m_currentFunctionName}\" function");
+                AddWarning(context, $"Failed to find signature for function literal inside \"{CurrentFunctionName}\" function");
             }
 
             // Replace marker for function literal
@@ -71,7 +71,7 @@ namespace go2cs
 
             if (!(context?.Parent.Parent is GoParser.OperandContext operandContext))
             {
-                AddWarning(context, $"Could not derive parent operand context from function literal inside \"{m_currentFunctionName}\" function: \"{context.GetText()}\"");
+                AddWarning(context, $"Could not derive parent operand context from function literal inside \"{CurrentFunctionName}\" function: \"{context?.GetText()}\"");
                 PopBlock();
                 return;
             }

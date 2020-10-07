@@ -26,6 +26,7 @@ using Antlr4.Runtime.Tree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 
 namespace go2cs
@@ -135,15 +136,35 @@ namespace go2cs
             if (string.IsNullOrEmpty(line))
                 return false;
 
-            int index = line.LastIndexOf('\n');
+            while (line.Length > 0)
+            {
+                char lastChar = line[^1];
 
-            if (index == -1)
+                if (char.IsWhiteSpace(lastChar) && lastChar != '\r' && lastChar != '\n')
+                    line = line.Substring(0, line.Length - 1);
+                else
+                    break;
+            }
+
+            if (line.Length == 0)
                 return false;
 
-            if (index == line.Length - 1)
-                return true;
+            int index = line.LastIndexOf(Environment.NewLine, StringComparison.Ordinal);
 
-            if (line.Substring(index + 1).Trim().Length == 0)
+            if (index == -1)
+            {
+                index = line.LastIndexOf('\n');
+
+                if (index == -1)
+                    return false;
+
+                if (index == line.Length - 1)
+                    return true;
+
+                return false;
+            }
+
+            if (index == line.Length - 2)
                 return true;
 
             return false;

@@ -45,6 +45,7 @@ func EscapePrintValPtr(ptr *int) *int {
     i := 99
     ptr = &i
     fmt.Printf("Intra-function updated value available at *ptr = %d\n", *ptr )
+    PrintValPtr(ptr);
     return ptr;
 }
 

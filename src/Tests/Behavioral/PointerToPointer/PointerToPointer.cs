@@ -38,30 +38,40 @@ namespace go
             PrintValPtr2Ptr2Ptr(ppptr);
         }
 
-        public static void PrintValPtr(ptr<long> ptr)
+        public static void PrintValPtr(ptr<long> _addr_ptr)
         {
-            fmt.Printf("Value available at *ptr = %d\n", ptr.val);
-            ptr.val++;
+            ref long ptr = ref _addr_ptr.val;
 
+            fmt.Printf("Value available at *ptr = %d\n", ptr);
+            ptr++;
         }
 
-        public static ptr<long> EscapePrintValPtr(ptr<long> ptr)
+        public static ptr<long> EscapePrintValPtr(ptr<long> _addr_ptr)
         {
-            fmt.Printf("Value available at *ptr = %d\n", ptr.val);
+            ref long ptr = ref _addr_ptr.val;
+
+            fmt.Printf("Value available at *ptr = %d\n", ptr);
             ref long i = ref heap(99L, out ptr<long> _addr_i);
-            ptr = _addr_i;
-            fmt.Printf("Intra-function updated value available at *ptr = %d\n", ptr.val);
-            return ptr;
+            _addr_ptr = _addr_i;
+            ptr = ref _addr_ptr.val;
+            fmt.Printf("Intra-function updated value available at *ptr = %d\n", ptr);
+            PrintValPtr(_addr_ptr);
+
+            return _addr_ptr;
         }
 
-        public static void PrintValPtr2Ptr(ptr<ptr<long>> pptr)
+        public static void PrintValPtr2Ptr(ptr<ptr<long>> _addr_pptr)
         {
-            fmt.Printf("Value available at **pptr = %d\n", pptr.val.val);
+            ref ptr<long> pptr = ref _addr_pptr.val;
+
+            fmt.Printf("Value available at **pptr = %d\n", pptr.val);
         }
 
-        public static void PrintValPtr2Ptr2Ptr(ptr<ptr<ptr<long>>> ppptr)
+        public static void PrintValPtr2Ptr2Ptr(ptr<ptr<ptr<long>>> _addr_ppptr)
         {
-            fmt.Printf("Value available at ***pptr = %d\n", ppptr.val.val.val);
+            ref ptr<ptr<long>> ppptr = ref _addr_ppptr.val;
+
+            fmt.Printf("Value available at ***pptr = %d\n", ppptr.val.val);
         }
     }
 }

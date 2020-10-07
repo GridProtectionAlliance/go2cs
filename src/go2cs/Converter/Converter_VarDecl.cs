@@ -119,17 +119,17 @@ namespace go2cs
 
                 m_targetFile.Append($"{Spacing()}");
 
-                if (!m_inFunction)
+                if (!InFunction)
                     m_targetFile.Append($"{(char.IsUpper(identifier[0]) ? "public" : "private")} static ");
 
                 // Determine if this is the initial declaration
-                if (m_inFunction && m_variableIdentifiers.TryGetValue(identifierList.IDENTIFIER(i), out variableName))
+                if (InFunction && m_variableIdentifiers.TryGetValue(identifierList.IDENTIFIER(i), out variableName))
                     isInitialDeclaration = !variableName.Contains("@@");
 
                 if (isInitialDeclaration && !string.IsNullOrWhiteSpace(variableName))
                 {
                     m_variableTypes[variableName] = typeInfo;
-                    m_currentFunction.Variables.TryGetValue(variableName, out variable);
+                    CurrentFunction.Variables.TryGetValue(variableName, out variable);
                 }
 
                 if (isInitialDeclaration)

@@ -56,6 +56,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "library", "library", "{6F09E8D8-D54E-46B1-875C-987A40094FF5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "behavioral", "behavioral", "{65A671E4-4025-48B4-8FD0-9C57FECA553A}"
+	ProjectSection(SolutionItems) = preProject
+		Tests\Behavioral\clear-metadata.bat = Tests\Behavioral\clear-metadata.bat
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArrayPassByValue", "Tests\Behavioral\ArrayPassByValue\ArrayPassByValue.csproj", "{3C8F82FF-CDD1-465E-8A51-2B15847BC8F5}"
 EndProject

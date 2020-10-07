@@ -172,7 +172,11 @@ namespace go2cs
                     else if (unaryOP.Equals("*", StringComparison.Ordinal))
                     {
                         unaryOP = null;
-                        unaryExpression = $"{expression}.val";
+
+                        if (!expression.Text.EndsWith(".val"))
+                            unaryExpression = $"{expression}.val";
+                        else
+                            unaryExpression = expression.Text;
                     }
 
                     if (!(unaryOP is null))
@@ -228,7 +232,7 @@ namespace go2cs
 
                 if (Types.TryGetValue(context.conversion().type_(), out TypeInfo typeInfo) && Expressions.TryGetValue(context.conversion().expression(), out ExpressionInfo expression))
                 {
-                    // TODO: Complex pointer expression needs special handling consideration - could opt for unsafe implementation
+                    // TODO: Complex pointer expression may need special handling - could opt for unsafe implementation
                     //if (typeInfo.TypeName.StartsWith("*(*"))
                     //{
                     //    PrimaryExpressions[context] = new ExpressionInfo
@@ -447,8 +451,36 @@ namespace go2cs
 
                 Types.TryGetValue(argumentsContext.type_(), out TypeInfo typeInfo);
 
+                // Attempt to lookup expression with arguments as a "function"
+                ParameterInfo[] parameters = null;
+                string functionName = primaryExpression.Text;
+                FunctionInfo functionInfo = null;
+                Metadata?.Functions.TryGetValue($"{functionName}()", out functionInfo);
+
+                if (!(functionInfo is null))
+                    parameters = functionInfo.Signature.Signature.Parameters;
+
                 if (ExpressionLists.TryGetValue(argumentsContext.expressionList(), out ExpressionInfo[] expressions))
-                    arguments.AddRange(expressions.Select(expr => expr.Text));
+                {
+                    if (InFunction && !(CurrentFunction is null))
+                    {
+                        for (int i = 0; i < expressions.Length; i++)
+                        {
+                            ExpressionInfo expression = expressions[i];
+                            ParameterInfo parameter = parameters?.Length > i ? parameters[i] : null;
+                            CurrentFunction.Variables.TryGetValue(expression.Text, out VariableInfo variable);
+
+                            if (parameter?.Type is PointerTypeInfo && !(expression.Type is PointerTypeInfo) && !(variable?.Type is PointerTypeInfo) && !expression.Text.StartsWith("_addr_", StringComparison.Ordinal))
+                                arguments.Add($"_addr_{expression}");
+                            else
+                                arguments.Add(expression.Text);
+                        }
+                    }
+                    else
+                    {
+                        arguments.AddRange(expressions.Select(expression => expression.Text));
+                    }
+                }
 
                 string argumentList = string.Join(", ", arguments);
 

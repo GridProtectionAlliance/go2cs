@@ -96,6 +96,14 @@ namespace go2cs
 
         protected bool UsesUnsafePointers { get; set; }
 
+        protected bool InFunction { get; set; }
+
+        protected FunctionInfo CurrentFunction { get; set; }
+
+        protected string OriginalFunctionName { get; set; }
+        
+        protected string CurrentFunctionName { get; set; }
+
         protected ScannerBase(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName)
         {
             Options = options;

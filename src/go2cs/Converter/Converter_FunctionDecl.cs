@@ -26,7 +26,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using static go2cs.Common;
 
 namespace go2cs
 {
@@ -37,10 +36,6 @@ namespace go2cs
         public const string FunctionExecContextMarker = ">>MARKER:FUNCTION_{0}_EXEC_CONTEXT<<";
         public const string FunctionBlockPrefixMarker = ">>MARKER:FUNCTION_{0}_BLOCK_PREFIX<<";
 
-        private bool m_inFunction;
-        private FunctionInfo m_currentFunction;
-        private string m_originalFunctionName;
-        private string m_currentFunctionName;
         private string m_functionResultTypeMarker;
         private string m_functionParametersMarker;
         private string m_functionExecContextMarker;
@@ -49,11 +44,11 @@ namespace go2cs
         {
             base.ExitUnaryExpr(context);
 
-            if (!m_inFunction || !(context.primaryExpr() is null) && PrimaryExpressions.ContainsKey(context.primaryExpr()) 
+            if (!InFunction || !(context.primaryExpr() is null) && PrimaryExpressions.ContainsKey(context.primaryExpr()) 
                 || context.expression() is null || !Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
                 return;
 
-            ParameterInfo[] parameters = m_currentFunction.Signature.Signature.Parameters;
+            ParameterInfo[] parameters = CurrentFunction.Signature.Signature.Parameters;
             string unaryOP = context.children[0].GetText();
 
             if (!unaryOP.Equals("*", StringComparison.Ordinal))
@@ -61,41 +56,52 @@ namespace go2cs
 
             ParameterInfo pointerParam = parameters.FirstOrDefault(parameter => parameter.Name.Equals(expression.Text));
                         
-            if (!(pointerParam is null) && pointerParam.Type is PointerTypeInfo pointer && pointer.TargetTypeInfo.TypeClass == TypeClass.Array)
+            if (!(pointerParam is null) && pointerParam.Type is PointerTypeInfo pointer)
             {
-                // Dereference array type parameters
+                TypeInfo targetType = pointer.TargetTypeInfo.Clone();
+                targetType.IsByRefPointer = true;
+
+                string derefPointerExpression = expression.Text;
+
+                // Handle pointer-to-pointer dereferencing
+                int derefs = pointer.Name.Count(chr => chr == '*');
+
+                if (derefs > 1)
+                {
+                    for (int i = 1; i < derefs; i++)
+                        derefPointerExpression += ".val";
+                }
+
+                // Implicitly dereference pointer parameter when dereference operator (*) is used
                 UnaryExpressions[context] = new ExpressionInfo
                 {
-                    Text = expression.Text,
-                    Type = pointer.TargetTypeInfo
+                    Text = derefPointerExpression,
+                    Type = targetType
                 };
             }
         }
 
         public override void EnterFunctionDecl(GoParser.FunctionDeclContext context)
         {
-            m_inFunction = true; // May need to scope certain objects, like consts, to current function
-            m_originalFunctionName = context.IDENTIFIER()?.GetText() ?? "_";
-            m_currentFunctionName = SanitizedIdentifier(m_originalFunctionName);
+            base.EnterFunctionDecl(context);
+
             m_variableIdentifiers.Clear();
             m_variableTypes.Clear();
 
-            string functionSignature = FunctionSignature.Generate(m_originalFunctionName);
+            if (CurrentFunction is null)
+                throw new InvalidOperationException($"Failed to find metadata for function \"{CurrentFunctionName}\".");
 
-            if (!Metadata.Functions.TryGetValue(functionSignature, out m_currentFunction))
-                throw new InvalidOperationException($"Failed to find metadata for method function \"{functionSignature}\".");
-
-            FunctionSignature function = m_currentFunction.Signature;
+            FunctionSignature function = CurrentFunction.Signature;
 
             if (function is null)
-                throw new InvalidOperationException($"Failed to find signature metadata for function \"{m_currentFunctionName}\".");
+                throw new InvalidOperationException($"Failed to find signature metadata for function \"{CurrentFunctionName}\".");
 
-            string scope = char.IsUpper(m_originalFunctionName[0]) ? "public" : "private";
+            string scope = char.IsUpper(OriginalFunctionName[0]) ? "public" : "private";
 
             // Handle Go "main" function as a special case, in C# this should be capitalized "Main"
-            if (m_currentFunctionName.Equals("main"))
+            if (CurrentFunctionName.Equals("main"))
             {
-                m_currentFunctionName = "Main";
+                CurrentFunctionName = "Main";
                 
                 // Track file names that contain main function in main package
                 if (Package.Equals("main"))
@@ -104,22 +110,22 @@ namespace go2cs
 
             // Function signature containing result type and parameters have not been visited yet,
             // so we mark their desired positions and replace once the visit has occurred
-            m_functionResultTypeMarker = string.Format(FunctionResultTypeMarker, m_currentFunctionName);
-            m_functionParametersMarker = string.Format(FunctionParametersMarker, m_currentFunctionName);
-            m_functionExecContextMarker = string.Format(FunctionExecContextMarker, m_currentFunctionName);
-            PushInnerBlockPrefix(string.Format(FunctionBlockPrefixMarker, m_currentFunctionName));
+            m_functionResultTypeMarker = string.Format(FunctionResultTypeMarker, CurrentFunctionName);
+            m_functionParametersMarker = string.Format(FunctionParametersMarker, CurrentFunctionName);
+            m_functionExecContextMarker = string.Format(FunctionExecContextMarker, CurrentFunctionName);
+            PushInnerBlockPrefix(string.Format(FunctionBlockPrefixMarker, CurrentFunctionName));
 
-            m_targetFile.AppendLine($"{Spacing()}{scope} static {m_functionResultTypeMarker} {m_currentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
+            m_targetFile.AppendLine($"{Spacing()}{scope} static {m_functionResultTypeMarker} {CurrentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
         }
 
         public override void ExitFunctionDecl(GoParser.FunctionDeclContext context)
         {
             bool signatureOnly = context.block() is null;
 
-            FunctionSignature function = m_currentFunction.Signature;
-            bool hasDefer = m_currentFunction.HasDefer;
-            bool hasPanic = m_currentFunction.HasPanic;
-            bool hasRecover = m_currentFunction.HasRecover;
+            FunctionSignature function = CurrentFunction.Signature;
+            bool hasDefer = CurrentFunction.HasDefer;
+            bool hasPanic = CurrentFunction.HasPanic;
+            bool hasRecover = CurrentFunction.HasRecover;
             bool useFuncExecutionContext = hasDefer || hasPanic || hasRecover;
             Signature signature = function.Signature;
             string parametersSignature = $"({signature.GenerateParametersSignature()})";
@@ -128,18 +134,18 @@ namespace go2cs
 
             if (!signatureOnly)
             {
-                // TODO: Double check if any other types need clone-type copy operations
-                // For any array parameters, Go copies the array by value
                 StringBuilder arrayClones = new StringBuilder();
-                StringBuilder arrayRefs = new StringBuilder();
+                StringBuilder implicitPointers = new StringBuilder();
 
                 foreach (ParameterInfo parameter in signature.Parameters)
                 {
+                    // For any array parameters, Go copies the array by value
                     if (parameter.Type.TypeClass == TypeClass.Array)
                         arrayClones.AppendLine($"{Spacing(1)}{parameter.Name} = {parameter.Name}.Clone();");
 
-                    if (parameter.Type is PointerTypeInfo pointer && pointer.TargetTypeInfo.TypeClass == TypeClass.Array)
-                        arrayRefs.AppendLine($"{Spacing(1)}ref {pointer.TargetTypeInfo.TypeName} {parameter.Name} = ref _addr_{parameter.Name}.val;");
+                    // All pointers in Go can be implicitly dereferenced, so setup a "local ref" instance to each
+                    if (parameter.Type is PointerTypeInfo pointer)
+                        implicitPointers.AppendLine($"{Spacing(1)}ref {pointer.TargetTypeInfo.TypeName} {parameter.Name} = ref _addr_{parameter.Name}.val;");
                 }
 
                 if (arrayClones.Length > 0)
@@ -148,10 +154,10 @@ namespace go2cs
                     blockPrefix += arrayClones.ToString();
                 }
 
-                if (arrayRefs.Length > 0)
+                if (implicitPointers.Length > 0)
                 {
-                    arrayRefs.Insert(0, Environment.NewLine);
-                    blockPrefix += arrayRefs.ToString();
+                    implicitPointers.Insert(0, Environment.NewLine);
+                    blockPrefix += implicitPointers.ToString();
 
                     StringBuilder updatedSignature = new StringBuilder();
                     bool initialParam = true;
@@ -164,7 +170,7 @@ namespace go2cs
                         initialParam = false;
                         updatedSignature.Append($"{(parameter.IsVariadic ? "params " : "")}{parameter.Type.TypeName} ");
 
-                        if (parameter.Type is PointerTypeInfo pointer && pointer.TargetTypeInfo.TypeClass == TypeClass.Array)
+                        if (parameter.Type is PointerTypeInfo)
                             updatedSignature.Append("_addr_");
 
                         updatedSignature.Append(parameter.Name);
@@ -188,12 +194,7 @@ namespace go2cs
                 m_targetFile.Replace(m_functionExecContextMarker, "");
             }
 
-            m_targetFile.Replace(string.Format(FunctionBlockPrefixMarker, m_currentFunctionName), blockPrefix);
-
-            m_currentFunction = null;
-            m_currentFunctionName = null;
-            m_originalFunctionName = null;
-            m_inFunction = false;
+            m_targetFile.Replace(string.Format(FunctionBlockPrefixMarker, CurrentFunctionName), blockPrefix);
 
             if (useFuncExecutionContext)
                 m_targetFile.Append(");");
@@ -201,6 +202,8 @@ namespace go2cs
                 m_targetFile.Append(";");
 
             m_targetFile.Append(CheckForCommentsRight(context));
+
+            base.ExitFunctionDecl(context);
         }
     }
 }

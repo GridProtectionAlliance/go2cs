@@ -90,7 +90,7 @@ namespace go2cs
                 string expression = expressions?[i].Text ?? $"{m_iota++}";
                 string typeName = type ?? expressions?[i].Type.TypeName ?? "var";
 
-                if (m_inFunction)
+                if (InFunction)
                     m_targetFile.Append($"{Spacing()}const {typeName} {identifier} = {expression};");
                 else
                     m_targetFile.Append($"{Spacing()}{(char.IsUpper(identifier[0]) ? "public" : "private")} static readonly {typeName} {identifier} = {expression};");
