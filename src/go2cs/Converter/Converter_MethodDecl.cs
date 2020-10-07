@@ -24,6 +24,8 @@
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using static go2cs.Common;
 
 namespace go2cs
@@ -46,6 +48,7 @@ namespace go2cs
             m_functionResultTypeMarker = string.Format(FunctionResultTypeMarker, CurrentFunctionName);
             m_functionParametersMarker = string.Format(FunctionParametersMarker, CurrentFunctionName);
             m_functionExecContextMarker = string.Format(FunctionExecContextMarker, CurrentFunctionName);
+            PushInnerBlockPrefix(string.Format(FunctionBlockPrefixMarker, CurrentFunctionName));
 
             m_targetFile.AppendLine($"{Spacing()}{m_functionResultTypeMarker} {CurrentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
         }
@@ -63,6 +66,7 @@ namespace go2cs
             string receiverParametersSignature = method.GenerateReceiverParametersSignature();
             string parametersSignature = signature.GenerateParametersSignature();
             string resultSignature = signature.GenerateResultSignature();
+            ParameterInfo[] receiverParameters = method.ReceiverParameters ?? Array.Empty<ParameterInfo>();
 
             if (signature.Parameters.Length == 0)
                 parametersSignature = $"({receiverParametersSignature})";
@@ -70,9 +74,72 @@ namespace go2cs
                 parametersSignature = $"({receiverParametersSignature}, {parametersSignature})";
 
             // Scope of an extension function is based on scope of the receiver type
-            string receiverType = method.ReceiverParameters?.Length > 0 ? method.ReceiverParameters[0].Type.TypeName : "object";
+            string receiverType = receiverParameters?.Length > 0 ? receiverParameters[0].Type.TypeName : "object";
             string scope = char.IsUpper(receiverType[0]) ? "public" : "private";
             resultSignature = $"{scope} static {resultSignature}";
+            string blockPrefix = "";
+
+            StringBuilder resultParameters = new StringBuilder();
+            StringBuilder arrayClones = new StringBuilder();
+            StringBuilder implicitPointers = new StringBuilder();
+
+            foreach (ParameterInfo parameter in signature.Result)
+            {
+                if (!string.IsNullOrEmpty(parameter.Name))
+                    resultParameters.AppendLine($"{Spacing(1)}{parameter.Type.TypeName} {parameter.Name} = default{(parameter.Type is PointerTypeInfo || parameter.Type.TypeClass == TypeClass.Interface ? "!" : "")};");
+            }
+
+            foreach (ParameterInfo parameter in receiverParameters.Concat(signature.Parameters))
+            {
+                // For any array parameters, Go copies the array by value
+                if (parameter.Type.TypeClass == TypeClass.Array)
+                    arrayClones.AppendLine($"{Spacing(1)}{parameter.Name} = {parameter.Name}.Clone();");
+
+                // All pointers in Go can be implicitly dereferenced, so setup a "local ref" instance to each
+                if (parameter.Type is PointerTypeInfo pointer)
+                    implicitPointers.AppendLine($"{Spacing(1)}ref {pointer.TargetTypeInfo.TypeName} {parameter.Name} = ref {AddressPrefix}{parameter.Name}.val;");
+            }
+
+            if (resultParameters.Length > 0)
+            {
+                resultParameters.Insert(0, Environment.NewLine);
+                blockPrefix += resultParameters.ToString();
+            }
+
+            if (arrayClones.Length > 0)
+            {
+                if (blockPrefix.Length == 0)
+                    arrayClones.Insert(0, Environment.NewLine);
+
+                blockPrefix += arrayClones.ToString();
+            }
+
+            if (implicitPointers.Length > 0)
+            {
+                if (blockPrefix.Length == 0)
+                    implicitPointers.Insert(0, Environment.NewLine);
+
+                blockPrefix += implicitPointers.ToString();
+
+                StringBuilder updatedSignature = new StringBuilder();
+                bool initialParam = true;
+
+                foreach (ParameterInfo parameter in receiverParameters.Concat(signature.Parameters))
+                {
+                    if (!initialParam)
+                        updatedSignature.Append(", ");
+
+                    initialParam = false;
+                    updatedSignature.Append($"{(parameter.IsVariadic ? "params " : "")}{parameter.Type.TypeName} ");
+
+                    if (parameter.Type is PointerTypeInfo)
+                        updatedSignature.Append(AddressPrefix);
+
+                    updatedSignature.Append(parameter.Name);
+                }
+
+                parametersSignature = $"({updatedSignature})";
+            }
 
             // Replace function markers
             m_targetFile.Replace(m_functionResultTypeMarker, resultSignature);
@@ -87,6 +154,8 @@ namespace go2cs
             {
                 m_targetFile.Replace(m_functionExecContextMarker, "");
             }
+
+            m_targetFile.Replace(string.Format(FunctionBlockPrefixMarker, CurrentFunctionName), blockPrefix);
 
             if (useFuncExecutionContext)
                 m_targetFile.Append(");");

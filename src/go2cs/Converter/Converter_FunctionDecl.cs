@@ -134,8 +134,15 @@ namespace go2cs
 
             if (!signatureOnly)
             {
+                StringBuilder resultParameters = new StringBuilder();
                 StringBuilder arrayClones = new StringBuilder();
                 StringBuilder implicitPointers = new StringBuilder();
+
+                foreach (ParameterInfo parameter in signature.Result)
+                {
+                    if (!string.IsNullOrEmpty(parameter.Name))
+                        resultParameters.AppendLine($"{Spacing(1)}{parameter.Type.TypeName} {parameter.Name} = default{(parameter.Type is PointerTypeInfo || parameter.Type.TypeClass == TypeClass.Interface ? "!" : "")};");
+                }
 
                 foreach (ParameterInfo parameter in signature.Parameters)
                 {
@@ -148,15 +155,25 @@ namespace go2cs
                         implicitPointers.AppendLine($"{Spacing(1)}ref {pointer.TargetTypeInfo.TypeName} {parameter.Name} = ref {AddressPrefix}{parameter.Name}.val;");
                 }
 
+                if (resultParameters.Length > 0)
+                {
+                    resultParameters.Insert(0, Environment.NewLine);
+                    blockPrefix += resultParameters.ToString();
+                }
+
                 if (arrayClones.Length > 0)
                 {
-                    arrayClones.Insert(0, Environment.NewLine);
+                    if (blockPrefix.Length == 0)
+                        arrayClones.Insert(0, Environment.NewLine);
+
                     blockPrefix += arrayClones.ToString();
                 }
 
                 if (implicitPointers.Length > 0)
                 {
-                    implicitPointers.Insert(0, Environment.NewLine);
+                    if (blockPrefix.Length == 0)
+                        implicitPointers.Insert(0, Environment.NewLine);
+
                     blockPrefix += implicitPointers.ToString();
 
                     StringBuilder updatedSignature = new StringBuilder();
