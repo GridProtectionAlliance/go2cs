@@ -5,8 +5,8 @@
             private delegate <#=ResultType#> <#=FunctionName#>ByPtr(ptr<T> value<#=PrefixedParameterSignature#>);
             private delegate <#=ResultType#> <#=FunctionName#>ByVal(T value<#=PrefixedParameterSignature#>);
 
-            private static readonly <#=FunctionName#>ByPtr s_<#=FunctionName#>ByPtr;
-            private static readonly <#=FunctionName#>ByVal s_<#=FunctionName#>ByVal;
+            private static readonly <#=FunctionName#>ByPtr? s_<#=FunctionName#>ByPtr;
+            private static readonly <#=FunctionName#>ByVal? s_<#=FunctionName#>ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             <#=Scope#> <#=ResultType#> <#=FunctionName#>(<#=ParameterSignature#>)

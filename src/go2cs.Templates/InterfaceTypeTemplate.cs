@@ -257,9 +257,9 @@ if (!NamespacePrefix.Equals("go")) {
             
             #line default
             #line hidden
-            this.Write("\r\n            \r\n            public string ToString(string format, IFormatProvider" +
-                    " formatProvider) => format;\r\n\r\n            [DebuggerStepperBoundary]\r\n          " +
-                    "  static ");
+            this.Write("\r\n            \r\n            public string ToString(string? format, IFormatProvide" +
+                    "r? formatProvider) => format;\r\n\r\n            [DebuggerStepperBoundary]\r\n        " +
+                    "    static ");
             
             #line 91 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceTypeTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(InterfaceName));

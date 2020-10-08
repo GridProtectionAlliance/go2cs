@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 01:03:40 UTC
+//     Generated on 2020 October 08 23:54:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,7 +16,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using fmt = go.fmt_package;
 
-
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -40,7 +40,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Animal<T> : Animal
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -66,8 +66,8 @@ namespace go
             private delegate @string TypeByPtr(ptr<T> value);
             private delegate @string TypeByVal(T value);
 
-            private static readonly TypeByPtr s_TypeByPtr;
-            private static readonly TypeByVal s_TypeByVal;
+            private static readonly TypeByPtr? s_TypeByPtr;
+            private static readonly TypeByVal? s_TypeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Type()
@@ -86,8 +86,8 @@ namespace go
             private delegate @string SwimByPtr(ptr<T> value);
             private delegate @string SwimByVal(T value);
 
-            private static readonly SwimByPtr s_SwimByPtr;
-            private static readonly SwimByVal s_SwimByVal;
+            private static readonly SwimByPtr? s_SwimByPtr;
+            private static readonly SwimByVal? s_SwimByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Swim()
@@ -103,7 +103,7 @@ namespace go
                 return s_SwimByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Animal()

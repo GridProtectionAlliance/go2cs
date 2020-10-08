@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 01:03:42 UTC
+//     Generated on 2020 October 08 23:51:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -40,7 +40,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class V<T> : V
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -66,8 +66,8 @@ namespace go
             private delegate void NByPtr(ptr<T> value);
             private delegate void NByVal(T value);
 
-            private static readonly NByPtr s_NByPtr;
-            private static readonly NByVal s_NByVal;
+            private static readonly NByPtr? s_NByPtr;
+            private static readonly NByVal? s_NByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void N()
@@ -91,8 +91,8 @@ namespace go
             private delegate void MByPtr(ptr<T> value);
             private delegate void MByVal(T value);
 
-            private static readonly MByPtr s_MByPtr;
-            private static readonly MByVal s_MByVal;
+            private static readonly MByPtr? s_MByPtr;
+            private static readonly MByVal? s_MByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void M()
@@ -113,31 +113,11 @@ namespace go
                 
             }
 
-            private delegate @string StringByPtr(ptr<T> value);
-            private delegate @string StringByVal(T value);
-
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string String()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_StringByPtr is null || !m_target_is_ptr)
-                    return s_StringByVal!(target);
-
-                return s_StringByPtr(m_target_ptr);
-            }
-
             private delegate @string ErrorByPtr(ptr<T> value);
             private delegate @string ErrorByVal(T value);
 
-            private static readonly ErrorByPtr s_ErrorByPtr;
-            private static readonly ErrorByVal s_ErrorByVal;
+            private static readonly ErrorByPtr? s_ErrorByPtr;
+            private static readonly ErrorByVal? s_ErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Error()
@@ -153,7 +133,7 @@ namespace go
                 return s_ErrorByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static V()
@@ -187,19 +167,6 @@ namespace go
 
                 if (s_MByPtr is null && s_MByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement V.M method", new Exception("M"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
-
-                if (!(extensionMethod is null))
-                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("String");
-
-                if (!(extensionMethod is null))
-                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-
-                if (s_StringByPtr is null && s_StringByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement V.String method", new Exception("String"));
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
 

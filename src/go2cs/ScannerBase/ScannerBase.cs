@@ -29,8 +29,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using static go2cs.Common;
 
@@ -482,14 +482,13 @@ namespace go2cs
                 return s_currentFolderMetadata;
 
             FolderMetadata folderMetadata;
-            BinaryFormatter formatter = new BinaryFormatter();
 
         #if !DEBUG
             try
             {
         #endif
-                using FileStream stream = File.OpenRead(folderMetadataFileName);
-                folderMetadata = formatter.Deserialize(stream) as FolderMetadata;
+                string serializedData = File.ReadAllText(folderMetadataFileName);
+                folderMetadata = JsonSerializer.Deserialize<FolderMetadata>(serializedData);
         #if !DEBUG
             }
             catch (Exception ex)

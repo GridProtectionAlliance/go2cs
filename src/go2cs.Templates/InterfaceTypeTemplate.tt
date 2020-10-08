@@ -85,7 +85,7 @@ using go;
             }#>
 
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static <#=InterfaceName#>()

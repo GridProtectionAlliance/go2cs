@@ -27,7 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
 
 #pragma warning disable SCS0018 // Path traversal
 
@@ -72,8 +72,6 @@ namespace go2cs
             fileMetadata.Functions = m_functions;
             fileMetadata.LastUpdate = DateTime.UtcNow;
 
-            BinaryFormatter formatter = new BinaryFormatter();
-
         #if !DEBUG
             try
             {
@@ -83,8 +81,8 @@ namespace go2cs
                 if (!Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
 
-                using FileStream stream = File.Create(FolderMetadataFileName);
-                formatter.Serialize(stream, folderMetadata);
+                string serializedData = JsonSerializer.Serialize(folderMetadata);
+                File.WriteAllText(FolderMetadataFileName, serializedData);
         #if !DEBUG
             }
             catch (Exception ex)
