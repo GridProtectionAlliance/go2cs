@@ -3,8 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CommandLine.Infrastructure;
 using CommandLine.CSharpx;
+using ReferenceEqualityComparer = CommandLine.Infrastructure.ReferenceEqualityComparer;
 
 namespace CommandLine.Core
 {

@@ -245,7 +245,7 @@ namespace go
         {
             // Note that match by function name alone is sufficient as Go does not currently support function overloading by adjusting signature:
             // https://golang.org/doc/faq#overloading
-            return targetType.GetExtensionMethods().Where(methodInfo => methodInfo.Name == methodName).OrderBy(GetExtensionTargetType, new TypePrecedenceComparer(targetType)).FirstOrDefault();
+            return targetType.GetExtensionMethods().Where(methodInfo => methodInfo.Name == methodName).OrderBy(GetExtensionTargetType, new TypePrecedenceComparer(targetType)).FirstOrDefault()!;
         }
 
         /// <summary>
@@ -326,7 +326,7 @@ namespace go
 
             return genericOfType
                    .GetMethods(BindingFlags.Static | BindingFlags.Public)
-                   .FirstOrDefault(method => IsConversionOperator(method, genericOfType, targetType));
+                   .FirstOrDefault(method => IsConversionOperator(method, genericOfType, targetType))!;
         }
 
         /// <summary>

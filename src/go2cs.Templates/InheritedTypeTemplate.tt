@@ -16,6 +16,8 @@ using System.Runtime.CompilerServices;
 using go;
 <#}#>
 
+#nullable enable
+
 <#=NamespaceHeader#>
     public static partial class <#=PackageName#>_package
     {

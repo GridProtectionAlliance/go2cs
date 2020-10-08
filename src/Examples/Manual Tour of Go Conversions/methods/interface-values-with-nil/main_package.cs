@@ -67,7 +67,7 @@ static partial class main_package
         describe(i);
         i.M();
 
-        i = I.As(ptr(new T("hello")));
+        i = I.As(addr(new T("hello")));
         describe(i);
         i.M();
     }

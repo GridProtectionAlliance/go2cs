@@ -27,7 +27,7 @@ public static partial class main_package
                 if (m_target_ptr is null)
                     return ref m_target;
 
-                return ref m_target_ptr.Value;
+                return ref m_target_ptr.val;
             }
         }
 
@@ -46,8 +46,8 @@ public static partial class main_package
                 return s_AbsByRef?.Invoke(ref m_target) ??
                        s_AbsByVal!(m_target);
 
-            return s_AbsByRef?.Invoke(ref m_target_ptr.Value) ??
-                       s_AbsByVal!(m_target_ptr.Value);
+            return s_AbsByRef?.Invoke(ref m_target_ptr.val) ??
+                       s_AbsByVal!(m_target_ptr.val);
         }
 
         static Abser()

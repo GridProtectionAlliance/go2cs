@@ -29,7 +29,7 @@ using static go.builtin;
 
 static class main_package
 {
-    static void sum(slice<int> s, ref channel<int> c) {
+    static void sum(slice<long> s, ref channel<int> c) {
         var sum = 0;
         foreach ((long, int) _tuple in s) {
             var (_, v) = _tuple;
@@ -39,11 +39,11 @@ static class main_package
     }
 
     static void Main() {
-        var s = slice(new[] { 7, 2, 8, -9, 4, 0 });
+        var s = slice(new[] { 7L, 2L, 8L, -9L, 4L, 0L });
 
         var c = make_channel<int>();
-        go_(() => sum(s[..(len(s)/2)], ref c));
-        go_(() => sum(s[(len(s)/2)..], ref c));
+        go_(() => sum(s[..(int)(len(s)/2)], ref c));
+        go_(() => sum(s[(int)(len(s)/2)..], ref c));
 
         var x = c.Receive(); // receive from c
         var y = c.Receive();

@@ -53,11 +53,11 @@ static class main_package
 
     static void Main() {
         // 'c' and 'quit' escape stack in goroutine below, so we use pointers
-        ref var c = ref heap(make_channel<int>(), out var c__ptr).Value;
-        ref var quit = ref heap(make_channel<int>(), out var quit__ptr).Value;
+        ref var c = ref heap(make_channel<int>(), out var c__ptr);
+        ref var quit = ref heap(make_channel<int>(), out var quit__ptr);
         go_(() => {
-            ref var c = ref c__ptr.Value;
-            ref var quit = ref quit__ptr.Value;
+            ref var c = ref c__ptr.val;
+            ref var quit = ref quit__ptr.val;
 
             for (int i = 0; i < 10; i++) {
                 fmt.Println(c.Receive());

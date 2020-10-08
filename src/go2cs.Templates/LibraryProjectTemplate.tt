@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>go</RootNamespace>
     <AssemblyName><#=AssemblyName#></AssemblyName>
     <Product>go2cs</Product>

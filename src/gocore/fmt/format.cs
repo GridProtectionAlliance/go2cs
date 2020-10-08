@@ -63,7 +63,7 @@ namespace go
         {
             if (args.Length == 1 && !(args[0] is @string) && !(args[0] is string) && args[0] is IEnumerable array)
             {
-                Console.WriteLine($"[{string.Join(" ", array.Cast<object>().Select(ToString))}]");
+                Console.WriteLine($"[{string.Join(" ", array.Cast<object>().Select(ToString!))}]");
                 return;
             }
 

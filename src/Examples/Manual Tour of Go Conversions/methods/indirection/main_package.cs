@@ -48,19 +48,19 @@ static partial class main
     }
 
     public static void ScaleFunc(ptr<Vertex> v__ptr, float64 f) {
-        ref var v = ref v__ptr.Value;
+        ref var v = ref v__ptr.val;
         v.X = v.X * f;
         v.Y = v.Y * f;
     }
 
     static void Main() {
         // Address of v taken in this function, so we heap allocate and get a pointer
-        ref var v = ref heap(new Vertex(3, 4), out var v__ptr).Value;
+        ref var v = ref heap(new Vertex(3, 4), out var v__ptr);
         v.Scale(2);
         ScaleFunc(v__ptr, 10);
 
-        var p = ptr(new Vertex(4, 3));
-        p.Value.Scale(3);
+        var p = addr(new Vertex(4, 3));
+        p.val.Scale(3);
         ScaleFunc(p, 8);
 
         fmt.Println(v, p);

@@ -72,7 +72,7 @@ namespace go
         public (TValue, bool) this[TKey key, bool _]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Map.TryGetValue(key, out TValue value) ? (value, true) : (default, false)!;
+            get => Map.TryGetValue(key, out TValue value) ? (value!, true) : (default!, false);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,7 +104,7 @@ namespace go
         public override bool Equals(object? obj) => obj is map<TKey, TValue> other && Equals(other);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString() => $"map[{string.Join(" ", m_map.Select(kvp => $"{kvp.Key}:{kvp.Value}").Take(20))}{(Count > 20 ? " ..." : "")}]";
+        public override string ToString() => $"map[{(m_map is null ? "nil" : string.Join(" ", m_map.Select(kvp => $"{kvp.Key}:{kvp.Value}").Take(20)))}{(Count > 20 ? " ..." : "")}]";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode() => Map.GetHashCode();

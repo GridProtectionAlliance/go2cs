@@ -34,7 +34,7 @@ static partial class main_package
     static Vertex v1 = new Vertex(1, 2);            // has type Vertex
     static Vertex v2 = new Vertex { X = 1 };        // Y:0 is implicit
     static Vertex v3 = new Vertex();                // X:0 and Y:0
-    static ptr<Vertex> p = ptr(new Vertex(1, 2));   // has type *Vertex
+    static ptr<Vertex> p = addr(new Vertex(1, 2));  // has type *Vertex
 
     static void Main() {
         fmt.Println(v1, p, v2, v3);

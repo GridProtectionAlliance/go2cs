@@ -182,14 +182,14 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
             40.68433, -74.39967
         ));
 
-        ref var v1 = ref p__v1.Value;
+        ref var v1 = ref p__v1.val;
 
     Note 3: Stylistically there a few ways to support dereferenced pointer
     variables in converted code, for example:
 
         /* Original: */ m["Bell Labs"].Lat = 1000
 
-        /* Option 1: */ m["Bell Labs"].Value.Lat = 1000;          // ref T Value
+        /* Option 1: */ m["Bell Labs"].val.Lat = 1000;          // ref T Value
         /* Option 2: */ ((Vertex*)m["Bell Labs"])->Lat = 1000;    // implicit conversion to T* (unsafe only)
         /* Option 3: */ (~m["Bell Labs"])->Lat = 1000;            // bitwise complement operator to T* (unsafe only)
 
@@ -291,7 +291,7 @@ When converting all projects from "A Tour of Go" tutorial, these were the big ta
         Abser a;
         var f = (MyFloat)(-math.Sqrt2);
         var _v_ptr = ptr(new Vertex(3, 4));  // Have to heap allocate v, it's pointer address is used later
-        ref var v = ref _v_ptr.Value;
+        ref var v = ref _v_ptr.val;
 
         a = Abser.As(f);      // a MyFloat implements Abser
         a = Abser.As(_v_ptr); // a *Vertex implements Abser

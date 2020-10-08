@@ -69,7 +69,7 @@ static partial class main_package
     static void Main() {
         I i;
 
-        i = I.As(ptr(new T("Hello")));
+        i = I.As(addr(new T("Hello")));
         describe(i);
         i.M();
 

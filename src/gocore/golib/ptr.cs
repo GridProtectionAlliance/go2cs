@@ -39,7 +39,7 @@ namespace go
     /// have the ability to create a safe pointer to the type, i.e., a reference.
     /// </para>
     /// <para>
-    /// If <typeparamref name="T"/> is a <see cref="System.ValueType"/>, e.g., a struct, note that value
+    /// If <typeparamref name="T"/> is a <see cref="System.valType"/>, e.g., a struct, note that value
     /// will be "boxed" for heap allocation. Since boxed value will be a new copy of original value, make
     /// sure to use ref-based <see cref="val"/> for updates instead of a local stack copy of value.
     /// See the <see cref="builtin.heap{T}(out ptr{T})"/> and notes on boxing:
@@ -110,7 +110,7 @@ namespace go
         //     public static ref T operator ref(ptr<T> value) => ref value.m_value;
         // Converted code like this:
         //     var v = 2; var vp = ptr(v);
-        //     vp.Value = 999;
+        //     vp.val = 999;
         // Could then become:
         //     var v = 2; var vp = ptr(v);
         //     ~vp = 999; // or

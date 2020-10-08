@@ -69,7 +69,7 @@ namespace go
                     m_notify.Send(Now());
 
                     if (continuous)
-                        m_pulse.DelayAndExecute(m_delay);
+                        m_pulse?.DelayAndExecute(m_delay);
                 };
             }
 
@@ -80,7 +80,7 @@ namespace go
                     if (!m_started)
                     {
                         m_started = true;
-                        m_pulse.DelayAndExecute(m_delay);
+                        m_pulse?.DelayAndExecute(m_delay);
                     }
 
                     return ref m_notify;

@@ -29,7 +29,7 @@ using static go.builtin;
 
 static class main_package
 {
-    static void fibonacci(int n, channel<int> c) {
+    static void fibonacci(long n, channel<int> c) {
         int x = 0, y = 1;
         for (int i = 0; i < n; i++) {
             c.Send(x);
@@ -42,10 +42,10 @@ static class main_package
 
     static void Main() {
         // 'c' escapes stack in goroutine below, so we need a pointer
-        ref var c = ref heap(make_channel<int>(10), out var c__ptr).Value;
+        ref var c = ref heap(make_channel<int>(10), out var c__ptr);
         go_(() =>
         {
-            ref var c = ref c__ptr.Value;
+            ref var c = ref c__ptr.val;
             fibonacci(cap(c), c);
         });
         foreach (int i in c) {

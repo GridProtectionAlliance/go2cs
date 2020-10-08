@@ -45,7 +45,7 @@ static partial class main_package
 // If this is complex, then until conversion tool becomes sophisticated enough
 // for this type of dynamic analysis, the following pattern will always work:
 //var v__ptr = @ref(new Vertex(1, 2));
-//ref var v = ref heap(new Vertex(1, 2), out var v__ptr).Value;
+//ref var v = ref heap(new Vertex(1, 2), out var v__ptr).val;
 //var p = v__ptr;
-//p.Value.X = (int)1e9;
+//p.val.X = (int)1e9;
 //fmt.Println(v);

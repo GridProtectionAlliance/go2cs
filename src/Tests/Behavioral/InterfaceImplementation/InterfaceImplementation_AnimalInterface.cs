@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using fmt = go.fmt_package;
 
+
 #pragma warning disable CS0660, CS0661
 
 namespace go

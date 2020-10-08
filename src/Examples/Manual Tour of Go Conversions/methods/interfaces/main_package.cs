@@ -59,7 +59,7 @@ static partial class main_package
     static void Main() {
         Abser a;
         var f = (MyFloat)(-math.Sqrt(2));
-        ref var v = ref heap(new Vertex(3, 4), out var _v_ptr).Value;
+        ref var v = ref heap(new Vertex(3, 4), out var _v_ptr);
 
         a = Abser.As(f);      // a MyFloat implements Abser
         a = Abser.As(_v_ptr); // a *Vertex implements Abser

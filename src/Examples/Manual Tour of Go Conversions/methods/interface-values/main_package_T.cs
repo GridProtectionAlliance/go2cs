@@ -25,5 +25,9 @@ public static partial class main_package
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, in T obj) => obj != nil;
+
+        public override bool Equals(object? obj) => base.Equals(obj);
+
+        public override int GetHashCode() => base.GetHashCode();
     }
 }

@@ -37,7 +37,7 @@ static class main_package
         while (true) {
             var (n, err) = r.Read(b);
             fmt.Printf("n = {0} err = {1:v} b = {2}\n", n, err, b);
-            fmt.Printf("b[:n] = {0}\n", new @string(b[..n]));
+            fmt.Printf("b[:n] = {0}\n", new @string(b[..(int)n]));
             if (err == io.EOF) {
                 break;
             }

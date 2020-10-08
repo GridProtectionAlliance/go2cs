@@ -53,14 +53,14 @@ static class main_package
 // which case simple local pointers can be used instead as this is optimal.
 // If this is complex, then until conversion tool becomes sophisticated enough
 // for this type of dynamic analysis, the following pattern will always work:
-//ref var i = ref heap(43, out var i__ptr).Value;
-//ref var j = ref heap(2701, out var j__ptr).Value;
+//ref var i = ref heap(43, out var i__ptr).val;
+//ref var j = ref heap(2701, out var j__ptr).val;
 
 //var p = i__ptr;         // point to i
-//fmt.Println(p.Value);   // read i through the pointer
-//p.Value = 21;           // set i through the pointer
+//fmt.Println(p.val);   // read i through the pointer
+//p.val = 21;           // set i through the pointer
 //fmt.Println(i);         // see the new value of i
 
 //p = j__ptr;             // point to j
-//p.Value = p.Value / 37; // divide j through the pointer
+//p.val = p.val / 37; // divide j through the pointer
 //fmt.Println(j);         // see the new value of j

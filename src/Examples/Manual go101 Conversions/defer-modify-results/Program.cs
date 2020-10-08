@@ -24,16 +24,16 @@ static class main_package
 {
     static int F() => func((defer, _, __) => {
         // 'r' escapes stack in defer below, so it needs heap allocation
-        ref int r = ref heap(default(int), out var r__ptr).Value;
+        ref int r = ref heap(default(int), out var r__ptr);
 
         defer(() =>{
-            ref int r = ref r__ptr.Value;
+            ref int r = ref r__ptr.val;
             r = 789;
         });
 
         r = 123;
         return r__ptr; // Named result leaves stack in defer, return pointer to named result
-    }).Value; // Defererence named result
+    }).val; // Defererence named result
 
     static void Main() {
         fmt.Println(F()); // 789
