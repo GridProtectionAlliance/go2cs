@@ -27,9 +27,9 @@ namespace go
         {
             ptr<Frog> f = @new<Frog>();
             ptr<Dog> d = @new<Dog>();
-            ref array<Animal> zoo = ref heap(new array<Animal>(new Animal[] { Animal.As(f), Animal.As(d) }), out ptr<array<Animal>> _addr_zoo);
+            ref array<Animal> zoo = ref heap(new array<Animal>(new Animal[] { Animal.As(f)!, Animal.As(d)! }), out ptr<array<Animal>> _addr_zoo);
 
-            Animal a = Animal.As(null);
+            Animal a = Animal.As(null)!;
             fmt.Printf("%T\n", a);
 
             {
@@ -60,7 +60,7 @@ namespace go
         {
             ref array<Animal> zoo = ref _addr_zoo.val;
 
-            Animal a = Animal.As(null);
+            Animal a = Animal.As(null)!;
 
             foreach (var (_, __a) in zoo)
             {
@@ -69,23 +69,31 @@ namespace go
             }
         }
 
-        private static @string Type(this ptr<Frog> f)
+        private static @string Type(this ptr<Frog> _addr_f)
         {
+            ref Frog f = ref _addr_f.val;
+
             return "Frog";
         }
 
-        private static @string Swim(this ptr<Frog> f)
+        private static @string Swim(this ptr<Frog> _addr_f)
         {
+            ref Frog f = ref _addr_f.val;
+
             return "Kick";
         }
 
-        private static @string Swim(this ptr<Dog> d)
+        private static @string Swim(this ptr<Dog> _addr_d)
         {
+            ref Dog d = ref _addr_d.val;
+
             return "Paddle";
         }
 
-        private static @string Type(this ptr<Dog> d)
+        private static @string Type(this ptr<Dog> _addr_d)
         {
+            ref Dog d = ref _addr_d.val;
+
             return "Doggie";
         }
     }

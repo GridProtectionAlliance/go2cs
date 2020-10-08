@@ -206,7 +206,7 @@ namespace go2cs
                             leftOperandType = leftOperands[i].Type;
 
                         if (assignOP == "=" && leftOperandType?.TypeClass == TypeClass.Interface)
-                            rightOperandText = $"{leftOperandType.TypeName}.As({rightOperandText})";
+                            rightOperandText = $"{leftOperandType.TypeName}.As({rightOperandText})!";
 
                         if (assignOP == "=" && !(leftOperandType is PointerTypeInfo) && rightOperandText.StartsWith(AddressPrefix, StringComparison.Ordinal))
                         {

@@ -173,7 +173,7 @@ namespace go2cs
                     if (!(expression is null))
                     {
                         if (typeInfo?.TypeClass == TypeClass.Interface)
-                            statement.Append($"{typeInfo.TypeName}.As({expression})");
+                            statement.Append($"{typeInfo.TypeName}.As({expression})!");
                         else
                             statement.Append(expression);
                     }

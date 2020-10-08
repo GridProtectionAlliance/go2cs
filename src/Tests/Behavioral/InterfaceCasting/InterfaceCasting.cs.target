@@ -18,14 +18,14 @@ namespace go
         // error is an interface - MyError is cast to error interface upon return
         private static error f()
         {
-            return error.As(new MyError("foo"));
+            return error.As(new MyError("foo"))!;
         }
 
         private static void Main()
         {
-            error err = default;
+            error err = default!;
 
-            err = error.As(new MyError("bar"));
+            err = error.As(new MyError("bar"))!;
 
             fmt.Printf("%v %v\n", f(), err); // error: foo
         }

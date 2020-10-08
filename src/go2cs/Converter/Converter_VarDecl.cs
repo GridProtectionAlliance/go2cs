@@ -155,7 +155,7 @@ namespace go2cs
                 if (!(expression is null))
                 {
                     if (typeInfo?.TypeClass == TypeClass.Interface)
-                        m_targetFile.Append($"{typeInfo.TypeName}.As({expression})");
+                        m_targetFile.Append($"{typeInfo.TypeName}.As({expression})!");
                     else
                         m_targetFile.Append(expression);
                 }
@@ -168,7 +168,7 @@ namespace go2cs
                     defaultInit = true;
 
                     if (!heapAllocated && !isPointer)
-                        m_targetFile.Append("default");
+                        m_targetFile.Append($"default{((typeInfo ?? expressions[i].Type).TypeClass == TypeClass.Interface ? "!" : "")}");
                 }
 
                 if (heapAllocated)

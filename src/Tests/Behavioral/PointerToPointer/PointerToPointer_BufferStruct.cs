@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 00:10:06 UTC
+//     Generated on 2020 October 08 00:10:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,42 +20,44 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        public partial struct Frog
+        public partial struct Buffer
         {
             // Constructors
-            public Frog(NilType _)
+            public Buffer(NilType _)
             {
-                this.Name = default;
-                this.Color = default;
+                this.buf = default;
+                this.off = default;
+                this.lastRead = default;
             }
 
-            public Frog(@string Name = default, @string Color = default)
+            public Buffer(slice<byte> buf = default, long off = default, sbyte lastRead = default)
             {
-                this.Name = Name;
-                this.Color = Color;
+                this.buf = buf;
+                this.off = off;
+                this.lastRead = lastRead;
             }
 
-            // Enable comparisons between nil and Frog struct
+            // Enable comparisons between nil and Buffer struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(Frog value, NilType nil) => value.Equals(default(Frog));
+            public static bool operator ==(Buffer value, NilType nil) => value.Equals(default(Buffer));
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(Frog value, NilType nil) => !(value == nil);
+            public static bool operator !=(Buffer value, NilType nil) => !(value == nil);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, Frog value) => value == nil;
+            public static bool operator ==(NilType nil, Buffer value) => value == nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, Frog value) => value != nil;
+            public static bool operator !=(NilType nil, Buffer value) => value != nil;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Frog(NilType nil) => default(Frog);
+            public static implicit operator Buffer(NilType nil) => default(Buffer);
         }
 
         [GeneratedCode("go2cs", "0.1.0.0")]
-        public static Frog Frog_cast(dynamic value)
+        public static Buffer Buffer_cast(dynamic value)
         {
-            return new Frog(value.Name, value.Color);
+            return new Buffer(value.buf, value.off, value.lastRead);
         }
     }
 }

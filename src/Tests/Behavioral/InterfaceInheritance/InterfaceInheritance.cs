@@ -58,15 +58,15 @@ namespace go
         private static void Main()
         {
             var m = make_map<I, long>();
-            I i1 = I.As(new T1("foo"));
-            I i2 = I.As(new T2("bar"));
+            I i1 = I.As(new T1("foo"))!;
+            I i2 = I.As(new T2("bar"))!;
             m[i1] = 1L;
             m[i2] = 2L;
             fmt.Println(m);
 
             var n = make_map<V, long>();
-            V v1 = V.As(new T1("foo"));
-            V v2 = V.As(new T2("bar"));
+            V v1 = V.As(new T1("foo"))!;
+            V v2 = V.As(new T2("bar"))!;
             v1.N();
             v2.M();
             fmt.Print(v1.String());

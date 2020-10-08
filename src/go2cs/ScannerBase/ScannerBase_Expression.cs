@@ -153,6 +153,7 @@ namespace go2cs
                 {
                     string unaryOP = context.children[0].GetText();
                     string unaryExpression = "";
+                    TypeInfo expressionType = expression.Type;
 
                     if (unaryOP.Equals("^", StringComparison.Ordinal))
                     {
@@ -167,7 +168,26 @@ namespace go2cs
                     else if (unaryOP.Equals("&", StringComparison.Ordinal))
                     {
                         unaryOP = null;
-                        unaryExpression = $"{AddressPrefix}{expression}";
+
+                        if (expression.Text.StartsWith("new ", StringComparison.Ordinal))
+                        {
+                            unaryExpression = $"addr({expression})";
+                            expressionType = new PointerTypeInfo
+                            {
+                                Name = $"ptr<{expressionType.Name}>",
+                                TypeName = $"ptr<{expressionType.Name}>",
+                                FullTypeName = $"go.ptr<{expressionType.FullTypeName}>",
+                                TypeClass = expressionType.TypeClass,
+                                IsDerefPointer = expressionType.IsDerefPointer,
+                                IsByRefPointer = expressionType.IsByRefPointer,
+                                IsConst = expressionType.IsConst,
+                                TargetTypeInfo = expressionType
+                            };
+                        }
+                        else
+                        {
+                            unaryExpression = $"{AddressPrefix}{expression}";
+                        }
                     }
                     else if (unaryOP.Equals("*", StringComparison.Ordinal))
                     {
@@ -185,7 +205,7 @@ namespace go2cs
                     UnaryExpressions[context] = new ExpressionInfo
                     {
                         Text = unaryExpression,
-                        Type = expression.Type
+                        Type = expressionType
                     };
                 }
                 else
@@ -880,7 +900,7 @@ namespace go2cs
                         for (int i = 0; i < elements.Count; i++)
                         {
                             (string key, string element) = elements[i];
-                            elements[i] = (key, $"{typeInfo.TypeName}.As({element})");
+                            elements[i] = (key, $"{typeInfo.TypeName}.As({element})!");
                         }
                     }
 
@@ -929,7 +949,7 @@ namespace go2cs
                         for (int i = 0; i < elements.Count; i++)
                         {
                             (string key, string element) = elements[i];
-                            elements[i] = (key, $"{typeInfo.TypeName}.As({element})");
+                            elements[i] = (key, $"{typeInfo.TypeName}.As({element})!");
                         }
                     }
 
