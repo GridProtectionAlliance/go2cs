@@ -305,7 +305,7 @@ namespace go2cs
 
                 if (foundIgnoreBuildDirective)
                 {
-                    Console.WriteLine($"Encountered \"+build ignore\" directive for \"{fileName}\", skipping scan...");
+                    Console.WriteLine($"Encountered \"+build ignore\" directive for \"{fileName}\", skipping scan...{Environment.NewLine}");
                     handleSkippedScan?.Invoke(options, fileName, showParseTree);
                     return;
                 }

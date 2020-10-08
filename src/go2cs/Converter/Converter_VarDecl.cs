@@ -168,7 +168,7 @@ namespace go2cs
                     defaultInit = true;
 
                     if (!heapAllocated && !isPointer)
-                        m_targetFile.Append($"default{((typeInfo ?? expressions[i].Type).TypeClass == TypeClass.Interface ? "!" : "")}");
+                        m_targetFile.Append($"default{((typeInfo ?? expressions?[i].Type)?.TypeClass == TypeClass.Interface ? "!" : "")}");
                 }
 
                 if (heapAllocated)
