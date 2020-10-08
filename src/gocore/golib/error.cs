@@ -59,7 +59,7 @@ namespace go
 
     public class error<T> : error
     {
-        private T m_target;
+        private T m_target = default!;
         private readonly ptr<T>? m_target_ptr;
         private readonly bool m_target_is_ptr;
 
